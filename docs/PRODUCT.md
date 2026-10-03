@@ -654,6 +654,13 @@ layout or on the values the browser takes, which the fast runner reports as skip
 measures what the unit tests and the fast runner reach of `src/core` and `src/editor` (`.cache/coverage/index.html`)
 and fails under the floors of `vitest.config.ts`, raised as tests are added and never lowered; what only the browser
 runner reaches counts there as unreached.
+The two are balanced (plan I.11, `tools/runner/balance.ts`): the fast runner records the runs it passed with the
+tree's fingerprint (`.cache/runner/headless.json`), and on that same tree the browser runner leaves out a run the fast
+runner passed when its scenario expects nothing only a browser reads (computed values, geometry, the editor's regions,
+a reload, the export, a hover) and its door keeps another browser run, so every door's gesture still runs in the
+browser. A run left out is reported skipped with the annotation `proven-headless` and counts as passed in the status;
+a missing or stale record, the tooth proof and `E2E_BALANCE=0` leave nothing out (174 of 2,033 runs at QA 227). A run
+left out records no coverage for `e2e:affected`; a change to its logic is caught by the fast runner in `check:fast`.
 
 **What `e2e:affected` selects.** It follows runtime imports to built feature owners. Shared keyboard, pointer, store
 and door-dispatch code reaches every browser test even when the inventory maps it to one feature (tests consume these

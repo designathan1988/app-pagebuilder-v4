@@ -29,6 +29,7 @@ import { openEditor } from '../../tests/support/editor.ts';
 import { unzip } from './unzip.ts';
 import { COMPANION_KEY, startCompanion } from './companion.ts';
 import { LAYOUT_GESTURES, driveLayout } from './layout-composer.ts';
+import { headlessProven, leftOut, PROVEN_HEADLESS, runName } from './balance.ts';
 
 type Measure = 'x' | 'y' | 'width' | 'height';
 type Relation = 'equals' | 'less-than' | 'greater-than';
@@ -1968,10 +1969,25 @@ async function setUp(page: Page, s: Scenario): Promise<unknown> {
 }
 
 // every scenario of every feature that runs, once per door of its action step
+// The browser runs the fast runner already proved on this tree (balance.ts), none while the tooth proof switches
+// handlers off (every run must then fail) or E2E_BALANCE=0 asks for every run.
+function runsLeftOut(): ReadonlySet<string> {
+  const tooth = (process.env.TOOTH_COMMANDS ?? '') !== '' || (process.env.TOOTH_MODULE ?? '') !== '';
+  if (tooth || process.env.E2E_BALANCE === '0') return new Set();
+  const proven = headlessProven();
+  return proven === null ? new Set() : leftOut(FEATURES.filter(runnable), proven);
+}
+
 export function registerScenarioTests(): void {
+  const left = runsLeftOut();
   for (const feature of FEATURES.filter(runnable)) {
     for (const s of feature.scenarios) {
       for (const door of s.doors) {
+        if (left.has(runName(feature.id, s.id, door))) {
+          // proven by the fast runner on this tree; the door's gesture runs in another browser test
+          test.skip(`${feature.id} › ${s.id} › ${door}`, { tag: FEATURE_TAG(feature.id), annotation: [{ type: 'feature', description: feature.id }, { type: PROVEN_HEADLESS, description: 'the fast runner passed this run on this tree' }] }, () => {});
+          continue;
+        }
         test(`${feature.id} › ${s.id} › ${door}`, { tag: FEATURE_TAG(feature.id), annotation: [{ type: 'feature', description: feature.id }, ...doorsRun(s, door).map((d) => ({ type: 'door', description: d }))] }, async ({ page }) => {
           // every file the editor hands out during the test, as the browser downloads it (the export terminal)
           const downloads: Download[] = [];

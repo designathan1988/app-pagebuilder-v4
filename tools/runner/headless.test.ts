@@ -11,7 +11,8 @@
 // its end terminals the fast runner cannot read are skipped, the others checked.
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
+import { runName, writeHeadlessResults } from './balance.ts';
 import type { Layout } from '../../src/core/ports/layout.ts';
 import type { CssSupport } from '../../src/core/ports/css.ts';
 import { keyContextIn } from '../../src/editor/canvas/edit-mode.ts';
@@ -250,6 +251,8 @@ function run(s: Scenario, door: string, store: EditorStore, fixture: DocumentJso
 const RUNNABLE = FEATURES.filter((f) => isFeatureBuilt(f.id as FeatureId));
 let checked = 0;
 let left = 0;
+// the runs it passed, which the browser runner may leave out on this tree (balance.ts)
+const passed: string[] = [];
 
 describe('scenarios, without a browser (the logic of each step and its end terminals)', () => {
   for (const feature of RUNNABLE) {
@@ -275,10 +278,12 @@ describe('scenarios, without a browser (the logic of each step and its end termi
             throw failed;
           }
           if (browser !== null) ctx.skip(browser);
+          passed.push(runName(feature.id, s.id, door));
         });
       }
     }
   }
+  afterAll(() => writeHeadlessResults(passed));
   it('reports how many scenario runs it checks and leaves to the browser runner', () => {
     expect(checked + left).toBeGreaterThan(0);
     console.log(`headless: ${checked} scenario runs checked, ${left} left to the browser runner`);

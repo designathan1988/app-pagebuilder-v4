@@ -4,13 +4,15 @@
 // census names why), or not built (it is not registered in the feature table, so its scenarios did not run). A
 // registered feature that fails or cannot run fails the whole run. The status holds only for a clean tree, which it
 // says. Only a complete run (every scenario test of every runnable feature) on a clean tree is recorded, by the runner
-// and never by hand, in docs/feature-results.json, from which `npm run inventory` writes docs/FEATURES.md.
+// and never by hand, in docs/feature-results.json, from which `npm run inventory` writes docs/FEATURES.md. A run the
+// browser runner left out because the fast runner passed it on this tree counts as passed (balance.ts).
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { FullResult, Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import { FEATURE_RESULTS, type FeatureResults } from '../inventory/features.ts';
 import { REPO_ROOT } from '../manifest/load.ts';
+import { PROVEN_HEADLESS } from './balance.ts';
 import { FEATURES, blockers, registered, runnable } from './scenarios.ts';
 
 export default class StatusReporter implements Reporter {
@@ -20,8 +22,10 @@ export default class StatusReporter implements Reporter {
     const feature = test.annotations.find((a) => a.type === 'feature')?.description;
     if (feature === undefined) return;
     const counts = this.results.get(feature) ?? { passed: 0, failed: 0 };
-    // a scenario test passes only by passing: a skipped one proves nothing
-    if (result.status === 'passed') counts.passed += 1;
+    // a scenario test passes only by passing: a skipped one proves nothing, but for a run the fast runner passed on
+    // this very tree, which the browser runner left out (balance.ts)
+    const proven = result.status === 'skipped' && test.annotations.some((a) => a.type === PROVEN_HEADLESS);
+    if (result.status === 'passed' || proven) counts.passed += 1;
     else counts.failed += 1;
     this.results.set(feature, counts);
   }
