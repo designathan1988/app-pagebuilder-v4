@@ -31,7 +31,7 @@ import { Icon, useDoor } from '../doors/door.tsx';
 import { doorSlots } from '../doors/placement.ts';
 import { computedValues } from '../canvas/coordinates.ts';
 import { dispatchInSession } from '../input/pointer.ts';
-import { MODEL_RULES, layeredRules, useEditorState } from '../store.ts';
+import { MODEL_RULES, layeredRules, useEditorState, useStore, type EditorStore } from '../store.ts';
 import { useOutsideLayer } from './outside-layer.ts';
 import { useT } from '../text.ts';
 import { COLOR_SWATCH, propertyWord, usePageValues, useTokenSuggestions } from './field.tsx';
@@ -47,11 +47,12 @@ const FORMATS = PARTS.filter((p) => p.door.kind === 'panel-control' && p.door.co
 const BLACK: Rgba = { r: 0, g: 0, b: 0, a: 1 };
 
 // a part's door runs through the picker's session
-function run(entry: DoorEntry, args: Readonly<Record<string, unknown>>): void {
-  dispatchInSession(entry.command.id as CommandId, { ...entry.door.args, ...args });
+function run(store: EditorStore, entry: DoorEntry, args: Readonly<Record<string, unknown>>): void {
+  dispatchInSession(store, entry.command.id as CommandId, { ...entry.door.args, ...args });
 }
 
 function PickerButton({ entry, className }: { readonly entry: DoorEntry; readonly className: string }) {
+  const store = useStore();
   const door = useDoor(entry, {}, undefined, isFeatureBuilt(entry.door.feature as FeatureId));
   return (
     <button
@@ -61,7 +62,7 @@ function PickerButton({ entry, className }: { readonly entry: DoorEntry; readonl
       title={door.title}
       aria-disabled={door.available ? undefined : true}
       aria-pressed={className === 'door--segment' ? door.current : undefined}
-      onClick={() => (door.available ? run(entry, {}) : undefined)}
+      onClick={() => (door.available ? run(store, entry, {}) : undefined)}
     >
       <span className="door__label">{door.face}</span>
     </button>
@@ -169,6 +170,7 @@ function PickerSlider({ entry, property, label, value, max, text, onValue, class
 // arguments; `act` runs it when it is not the door's own run with those arguments (the eyedropper asks the browser
 // first).
 function PickerIcon({ entry, args, ready = true, act }: { readonly entry: DoorEntry; readonly args: Readonly<Record<string, unknown>>; readonly ready?: boolean; readonly act?: () => void }) {
+  const store = useStore();
   const door = useDoor(entry, args, undefined, ready && isFeatureBuilt(entry.door.feature as FeatureId));
   return (
     <button
@@ -179,7 +181,7 @@ function PickerIcon({ entry, args, ready = true, act }: { readonly entry: DoorEn
       title={door.title}
       aria-label={door.label}
       aria-disabled={door.available ? undefined : true}
-      onClick={() => (door.available ? (act ?? (() => run(entry, args)))() : undefined)}
+      onClick={() => (door.available ? (act ?? (() => run(store, entry, args)))() : undefined)}
     >
       {entry.door.icon !== null ? <Icon name={entry.door.icon} size="sm" /> : null}
     </button>
@@ -188,6 +190,7 @@ function PickerIcon({ entry, args, ready = true, act }: { readonly entry: DoorEn
 
 // A colour of the picker's lists (a saved one, a recent one): a click uses it.
 function ColourChip({ entry, property, colour }: { readonly entry: DoorEntry; readonly property: string; readonly colour: string }) {
+  const store = useStore();
   const args = { property, value: colour };
   const door = useDoor(entry, args, undefined, isFeatureBuilt(entry.door.feature as FeatureId));
   return (
@@ -200,7 +203,7 @@ function ColourChip({ entry, property, colour }: { readonly entry: DoorEntry; re
       aria-label={`${door.label}: ${colour}`}
       aria-disabled={door.available ? undefined : true}
       style={{ '--swatch-colour': colour } as CSSProperties}
-      onClick={() => (door.available ? run(entry, args) : undefined)}
+      onClick={() => (door.available ? run(store, entry, args) : undefined)}
     />
   );
 }
@@ -208,6 +211,7 @@ function ColourChip({ entry, property, colour }: { readonly entry: DoorEntry; re
 // A variable of the project (a colour token): its chip shows its colour, its click uses var(--name) (the value follows
 // the variable when it changes)
 function VariableChip({ entry, property, name, colour }: { readonly entry: DoorEntry; readonly property: string; readonly name: string; readonly colour: string }) {
+  const store = useStore();
   const args = { property, value: `var(--${name})` };
   const door = useDoor(entry, args, undefined, isFeatureBuilt(entry.door.feature as FeatureId));
   return (
@@ -220,7 +224,7 @@ function VariableChip({ entry, property, name, colour }: { readonly entry: DoorE
       aria-label={`${door.label}: --${name}`}
       aria-disabled={door.available ? undefined : true}
       style={{ '--swatch-colour': colour } as CSSProperties}
-      onClick={() => (door.available ? run(entry, args) : undefined)}
+      onClick={() => (door.available ? run(store, entry, args) : undefined)}
     />
   );
 }
@@ -259,6 +263,7 @@ interface EyeDropperApi {
 const eyeDropper = (): (new () => EyeDropperApi) | null => (window as unknown as { EyeDropper?: new () => EyeDropperApi }).EyeDropper ?? null;
 
 function Library({ property, current }: { readonly property: string; readonly current: string }) {
+  const store = useStore();
   const t = useT();
   const saved = useEditorState((s) => swatchesOf(s.document));
   const recent = useEditorState((s) => recentColours(s.ui));
@@ -293,7 +298,7 @@ function Library({ property, current }: { readonly property: string; readonly cu
               if (Api === null) return;
               void new Api()
                 .open()
-                .then(({ sRGBHex }) => run(dropper, { property, value: sRGBHex }))
+                .then(({ sRGBHex }) => run(store, dropper, { property, value: sRGBHex }))
                 .catch(() => undefined);
             }}
           />
@@ -341,6 +346,7 @@ function useAnchor(property: string): RefObject<HTMLDivElement | null> {
 }
 
 function Picker({ property, previous }: { readonly property: string; readonly previous: string }) {
+  const store = useStore();
   const t = useT();
   const format = useEditorState((s) => s.ui.colorPicker?.format ?? 'hsb');
   const primary = useEditorState((s) => s.selection[0] ?? null);
@@ -374,7 +380,7 @@ function Picker({ property, previous }: { readonly property: string; readonly pr
   const popover = useAnchor(property);
   useOutsideLayer(popover, true, () => {
     const cancel = partFor('cancel');
-    if (cancel) run(cancel, {});
+    if (cancel) run(store, cancel, {});
   });
   useLayoutEffect(() => {
     popover.current?.focus();
@@ -382,7 +388,7 @@ function Picker({ property, previous }: { readonly property: string; readonly pr
   // The `setsAlpha` part is the one that makes the alpha itself (its slider): its write keeps what it makes. Every
   // other pick writes the colour opaque when the colour the picker shows is fully transparent (item 6.5).
   const write = (entry: DoorEntry | undefined, colour: Rgba, setsAlpha = false) => {
-    if (entry !== undefined) run(entry, { property, value: formatColor({ ...colour, a: setsAlpha ? colour.a : pickedAlpha(rgba.a, colour.a) }) });
+    if (entry !== undefined) run(store, entry, { property, value: formatColor({ ...colour, a: setsAlpha ? colour.a : pickedAlpha(rgba.a, colour.a) }) });
   };
   const previousPart = partFor('previous-swatch');
   const area = partFor('area');
@@ -412,7 +418,7 @@ function Picker({ property, previous }: { readonly property: string; readonly pr
               title={t('colorPicker.previous')}
               aria-label={t('colorPicker.previous')}
               style={{ '--swatch-colour': opened } as CSSProperties}
-              onClick={() => (previousValue !== null ? run(previousPart, { property, value: previousValue }) : undefined)}
+              onClick={() => (previousValue !== null ? run(store, previousPart, { property, value: previousValue }) : undefined)}
             />
           ) : null}
           <span className="picker__swatch" role="img" aria-label={t('colorPicker.current')} title={current} style={{ '--swatch-colour': visible } as CSSProperties} />
@@ -468,7 +474,7 @@ function Picker({ property, previous }: { readonly property: string; readonly pr
             onValue={(n) => write(alphaPart, { ...rgba, a: n / 100 }, true)}
           />
         ) : null}
-        {valuePart !== undefined ? <PickerText entry={valuePart} args={{ property }} shown={current} label={t('colorPicker.value')} className="picker__value" keep={(text) => run(valuePart, { property, value: text })} /> : null}
+        {valuePart !== undefined ? <PickerText entry={valuePart} args={{ property }} shown={current} label={t('colorPicker.value')} className="picker__value" keep={(text) => run(store, valuePart, { property, value: text })} /> : null}
         <span className="segmented segmented--wide" role="group" aria-label={t('command.colorPicker.setFormat')}>
           {FORMATS.map((entry) => (
             <PickerButton key={entry.ref} entry={entry} className="door--segment" />
@@ -485,7 +491,7 @@ function Picker({ property, previous }: { readonly property: string; readonly pr
                 label={t(CHANNEL_LABELS[channel])}
                 className="picker__channel"
                 keyText={CHANNEL_KEYS[channel]}
-                keep={(text) => run(channelPart, { property, channel, text, base: current })}
+                keep={(text) => run(store, channelPart, { property, channel, text, base: current })}
               />
             ))}
           </div>

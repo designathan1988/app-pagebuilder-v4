@@ -25,6 +25,7 @@ const entryFor = (key: string) => entries.find(entry => entry.door.labelKey === 
 const textForMasksDoor = doorSlots('inspector-settings').find(entry => entry.door.kind === 'inspector-field' && entry.door.control === 'forms-text-for-masks');
 
 function ConfigurationField({ control, entry }: { readonly control: FieldControl; readonly entry: DoorEntry }): ReactNode {
+  const store = useStore();
   const t = useT();
   const id = useId();
   const field = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
@@ -48,7 +49,7 @@ function ConfigurationField({ control, entry }: { readonly control: FieldControl
       return;
     }
     const value = choice?.value ?? input.value;
-    keepAfterGesture(() => control.onChange(value));
+    keepAfterGesture(store, () => control.onChange(value));
     markFieldKept(input, input.value);
   };
   const argsFor = (value: string) => {

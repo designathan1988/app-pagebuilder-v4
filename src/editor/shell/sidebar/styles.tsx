@@ -64,7 +64,7 @@ function ClassNameField({ entry, name }: { readonly entry: DoorEntry; readonly n
   const keep = () => {
     const nextName = field.current?.value ?? name;
     if (nextName === name) return;
-    afterGesture(() => (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(entry.command.id, { className: name, nextName }));
+    afterGesture(store, () => (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(entry.command.id, { className: name, nextName }));
   };
   return (
     <form className={`style-classes__field${door.available ? '' : ' is-unavailable'}`} data-door={entry.ref} data-args={JSON.stringify({ className: name })} title={door.title} onSubmit={(event) => { event.preventDefault();

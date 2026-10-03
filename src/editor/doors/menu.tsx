@@ -7,13 +7,12 @@
 // dismissal closes the menus open when it arrives (menus/overlays.ts), and a dismissed menu gives the focus back to its
 // button. The context menu (ContextMenu, at the end) is drawn here too, from the doors the manifest places in the
 // context-menu region; its opening is a command (menus/context-menu.ts).
-import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode, type RefObject } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { locate } from '../../core/document/model.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { CommandId, KeyContextId, MenuId, MessageId } from '../../generated/ids.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { chordCap } from '../input/keymap.ts';
-import { menuOver, pressPoint } from '../input/pointer.ts';
 import { openContextMenu } from '../menus/context-menu.ts';
 import { useEditorState, useStore } from '../store.ts';
 import { useT } from '../text.ts';
@@ -22,6 +21,7 @@ import { Icon, useDoor, isDoorBuilt } from './door.tsx';
 import { useOutsideLayer } from '../shell/outside-layer.ts';
 import { floatBelow, pointAnchor } from '../shell/float.ts';
 import { GLYPHS, doorSlots, menuOf, slotsIn, type Anchor } from './placement.ts';
+import { usePointerValue, usePointerViews } from '../input/pointer/use-views.ts';
 
 // the orders of the items a line stands before, by menu (layout.json breaks)
 const BREAKS = new Map<string, readonly number[]>(manifest.layout.menus.map((m) => [m.id, m.breaks ?? []] as const));
@@ -164,7 +164,7 @@ export function MenuGroup({ children }: { readonly children: ReactNode }) {
   // the pointer onto another menu's button while one is open opens that one (input/pointer.ts menuOver)
   // (adjusted while rendering, when the button under the pointer changes: React's own pattern for state that follows
   // another value, no effect)
-  const over = useSyncExternalStore(menuOver.subscribe, menuOver.get);
+  const over = usePointerValue('menuOver');
   const [seen, setSeen] = useState(over);
   if (over !== seen) {
     setSeen(over);
@@ -256,7 +256,8 @@ function OpenContextMenu() {
   };
   useOutsideLayer(list, true, dismiss);
   const items = useMemo(() => CONTEXT_ITEMS.filter((entry) => isDoorBuilt(entry) && store.canRun(entry.command.id, entry.door.args as never)), [store]);
-  const start = pressPoint() ?? { x: 0, y: 0 };
+  const views = usePointerViews();
+  const start = views.pressPoint() ?? { x: 0, y: 0 };
   // where the menu is drawn: at the pointer, then moved inside the window once its size is known (a layout measure)
   const [at, setAt] = useState({ left: start.x, top: start.y });
   useLayoutEffect(() => {

@@ -42,7 +42,7 @@ function OpenSnapSettings({ apply }: { readonly apply: DoorEntry }) {
     const ticked = form.getAll(TARGETS).filter((v): v is string => typeof v === 'string');
     const typed = String(form.get(DISTANCE) ?? '').trim();
     const args = { ...apply.door.args, targets: ticked, distance: typed === '' ? Number.NaN : Number(typed) };
-    afterGesture(() => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(apply.command.id as CommandId, args));
+    afterGesture(store, () => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(apply.command.id as CommandId, args));
   };
   return (
     <ModalDialog region={REGION} titleKey="snapSettings.title" className="snap-settings">

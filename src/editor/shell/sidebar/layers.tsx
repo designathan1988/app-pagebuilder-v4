@@ -1,7 +1,7 @@
 // The Layers section (spec layers-tree): the shown page's tree, one row per node, drawn as a window of the rows in
 // view, with its search, the row's name field, colour, details, empty mark and the pick targets of the interactions
 // and the motion panel.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type FormEvent, type MouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent } from 'react';
 import { walk, type DocNode } from '../../../core/document/model.ts';
 import { layerColourCss } from '../../../core/nodes/flags.ts';
 import { pageShown, openedPage } from '../../../core/project/pages.ts';
@@ -10,7 +10,7 @@ import type { CommandId } from '../../../generated/ids.ts';
 import { elementIcon, manifest, type DoorEntry } from '../../../manifest/runtime.ts';
 import { DoorControl, Icon, useDoor } from '../../doors/door.tsx';
 import { GLYPHS, doorSlots } from '../../doors/placement.ts';
-import { drag, modifierOf, pointerPressing } from '../../input/pointer.ts';
+import { modifierOf } from '../../input/pointer.ts';
 import { renamedNode } from '../../layers/rename.ts';
 import { isExpanded, rowDetailsOf, searchView, type SearchView } from '../../layers/tree.ts';
 import { useEditorState, useStore } from '../../store.ts';
@@ -27,6 +27,7 @@ import { motionPicking } from '../../motion/state.ts';
 import { findTimeline } from '../../../core/motion/document.ts';
 import { requireDoor, drawnAs } from './doors.tsx';
 import { insertDestination } from './insert.tsx';
+import { usePointerValue, usePointerViews } from '../../input/pointer/use-views.ts';
 
 const LAYERS_HEADER = requireDoor('explorer-layers', (d) => drawnAs(d) === 'disclosure');
 
@@ -235,7 +236,7 @@ function LayersRow({ node, depth, view }: { readonly node: DocNode; readonly dep
   // a drag in progress, from Layers or from the canvas (spec layers-drag): the row its drop is placed against says
   // where (before, after, inside, or refused over the dragged nodes' own subtree), and the receiving parent's row is
   // marked, except while the drop is refused (Problems in Pager 4)
-  const dropping = useSyncExternalStore(drag.subscribe, drag.get);
+  const dropping = usePointerValue('drag');
   const proposal = dropping?.proposal ?? null;
   const dropAt = proposal !== null && proposal.reference === node.id ? (proposal.refused ? 'refused' : proposal.placement) : undefined;
   const receiving = proposal !== null && !proposal.refused && proposal.placement !== 'inside' && proposal.parent === node.id;
@@ -433,6 +434,7 @@ const nodeCount = (tree: DocNode): number => [...walk(tree)].length;
 // palette and the Layers are visible together (the user's real-use audit, item 3.9; spec panel-resize).
 export function LayersSection() {
   const t = useT();
+  const views = usePointerViews();
   const layersOpen = useEditorState((s) => isPanelOpen(s.ui, 'layers'));
   const layersFloat = useEditorState((s) => floatingOf(s.ui, 'layers') !== null);
   const layersAway = useEditorState((s) => floatingOf(s.ui, 'layers') !== null || (s.ui.layout.right ?? []).includes('layers'));
@@ -475,7 +477,7 @@ export function LayersSection() {
     if (typeof node !== 'string') return;
     // a press focuses the row under the pointer, which needs no scrolling (and would move the row under it away from
     // the pointer, its own context menu landing on the next row): only the keyboard's focus moves the window
-    if (pointerPressing()) return;
+    if (views.pointerPressing()) return;
     const at = rows.findIndex((r) => r.node.id === node);
     if (el === null || at < 0) return;
     const top = at * ROW;

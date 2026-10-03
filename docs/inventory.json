@@ -5,8 +5,8 @@
     "commands": 371,
     "doors": 1350,
     "scenarios": 1820,
-    "modules": 457,
-    "lines": 80784
+    "modules": 458,
+    "lines": 80763
   },
   "features": [
     {
@@ -5031,7 +5031,7 @@
     },
     {
       "path": "src/editor/canvas/chrome.tsx",
-      "lines": 1066,
+      "lines": 1068,
       "commands": [],
       "features": []
     },
@@ -5346,7 +5346,7 @@
     },
     {
       "path": "src/editor/doors/menu.tsx",
-      "lines": 283,
+      "lines": 284,
       "commands": [],
       "features": []
     },
@@ -5435,7 +5435,7 @@
     },
     {
       "path": "src/editor/forms/inspector.tsx",
-      "lines": 137,
+      "lines": 138,
       "commands": [],
       "features": []
     },
@@ -5499,7 +5499,7 @@
     },
     {
       "path": "src/editor/input/file-drop.ts",
-      "lines": 173,
+      "lines": 176,
       "commands": [],
       "features": []
     },
@@ -5511,7 +5511,7 @@
     },
     {
       "path": "src/editor/input/keymap.ts",
-      "lines": 561,
+      "lines": 562,
       "commands": [],
       "features": []
     },
@@ -5523,7 +5523,7 @@
     },
     {
       "path": "src/editor/input/pointer.ts",
-      "lines": 2174,
+      "lines": 2192,
       "commands": [],
       "features": []
     },
@@ -5540,8 +5540,14 @@
       "features": []
     },
     {
+      "path": "src/editor/input/pointer/use-views.ts",
+      "lines": 24,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/input/pointer/views.ts",
-      "lines": 324,
+      "lines": 230,
       "commands": [],
       "features": []
     },
@@ -6035,7 +6041,7 @@
     },
     {
       "path": "src/editor/shell/color.tsx",
-      "lines": 512,
+      "lines": 518,
       "commands": [],
       "features": []
     },
@@ -6107,7 +6113,7 @@
     },
     {
       "path": "src/editor/shell/field.tsx",
-      "lines": 1722,
+      "lines": 1723,
       "commands": [],
       "features": []
     },
@@ -6179,7 +6185,7 @@
     },
     {
       "path": "src/editor/shell/outside-layer.ts",
-      "lines": 46,
+      "lines": 60,
       "commands": [],
       "features": []
     },
@@ -6269,7 +6275,7 @@
     },
     {
       "path": "src/editor/shell/sidebar/layers.tsx",
-      "lines": 560,
+      "lines": 562,
       "commands": [],
       "features": []
     },

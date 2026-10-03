@@ -408,7 +408,7 @@ commit closes it with its proof; the Status column then names the commit's QA-LO
 | AUD-36 | 1 | Undo by keys over its 35 ms per-group reference | audit; QA 44, 80 | partial (QA 190: undo 41.8 → 34.7–36.8 ms, --enforce passed once in two runs; the rest is React reconciling the subscribed controls) |
 | AUD-38 | 1 | Crash journal silently off for projects over the storage quota (probable) | audit | done (QA 189) |
 | R4 | — | `e2e:affected` selects the whole suite for 80 % of source changes | review R4; QA 221: with the coverage of `npm run e2e:coverage`, the tests that ran a changed line or used a changed rule's selector (`tools/runner/affected-coverage.ts`) | done (QA 221; the coverage is recorded by the complete run of phase Z) |
-| T7 | — | The pointer's module-level singletons matter only with two editors on a page | deferred (DEC-26) | open |
+| T7 | — | The pointer's module-level singletons matter only with two editors on a page | deferred (DEC-26); QA 231: the pointer's state is each editor's own (`pointerViews(store)`, the pan, open gesture and picker session by store; one pointer owner per window), proven by two editors in two windows that never share a hover or Alt | done (QA 231) |
 | RT1 | 1 | A class of the person's that one element lists alone, on an element without styles of its own, imports back as that element's own styles: plain HTML cannot tell it from the export's own class (`class="card"` and its rule either way) | QA 169, the round trip test on a new fixture | open (a limit of plain HTML; spec html-import-roundtrip says it) |
 | BW1 | 2 | The border fields of an element with no border of its own show the canvas’s zoomed computed width: a 1 px border reads `1.69014px` at 59 % | QA 177, the text-fits test | done (QA 178) |
 | FL1 | 1 | layout-composer’s scenario done-closes-the-composer failed once in a run of 157: its Escape reached the page while the Layout tool was still coming on (the focus moves into a panel two frames after it opens); six reruns pass | QA 179, the AUD-28 block run | open (the module’s owner told) |
@@ -482,7 +482,7 @@ Stages 13, 15, 16 and 17 stay out (DEC-08, kept by the user on 2026-10-02).
 | DEC-23 | Events and motion stay two models, drawn as two lists with one card | stage 5; migration out with stage 16 | — | PAIRING-2 item 4; QA 99 |
 | DEC-24 | S-028 stays: a whole border the parser cannot read is refused naming the part it guessed | design-system chapter | — | `docs/archive/PROJECT.md` |
 | DEC-25 | T.2 (door reach batched in one page) is not built | design-system chapter | — | `docs/archive/PROJECT.md` |
-| DEC-26 | T7 deferred | design-system chapter | — | `docs/archive/PROJECT.md` |
+| DEC-26 | T7 deferred (superseded at QA 231: the plan's G7 built the per-editor state) | design-system chapter | — | `docs/archive/PROJECT.md` |
 | DEC-27 | Global shortcuts wait while a field has the focus | dogfooding pass | modified by DEC-14 | `docs/archive/STATUS.md` |
 | DEC-28 | Flow elements are reordered (drop line); absolute and fixed ones placed freely, with smart guides | dogfooding pass | — | `docs/archive/STATUS.md` |
 | DEC-29 | A page's root takes a unique name | dogfooding pass | — | `docs/archive/STATUS.md`; QA 31 |

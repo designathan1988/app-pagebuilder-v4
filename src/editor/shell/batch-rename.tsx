@@ -50,7 +50,7 @@ function OpenBatchRename({ apply }: { readonly apply: DoorEntry }) {
     const form = new FormData(event.currentTarget);
     const typed = String(form.get('start') ?? '').trim();
     const args = { ...apply.door.args, pattern: String(form.get('pattern') ?? ''), start: typed === '' ? Number.NaN : Number(typed) };
-    afterGesture(() => {
+    afterGesture(store, () => {
       const outcome = (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(apply.command.id as CommandId, args);
       if (outcome.status === 'done' && CLOSE !== undefined) (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(CLOSE.command.id as CommandId, CLOSE.door.args);
     });

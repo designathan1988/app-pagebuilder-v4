@@ -16,7 +16,7 @@ import { panelName, stackedSections, type Panel } from '../workspace/panel-catal
 import { useNarrowWindow } from '../workspace/narrow.ts';
 import { useOutsideLayer } from './outside-layer.ts';
 import { Splitter } from './splitter.tsx';
-import { outsidePress } from '../input/pointer/views.ts';
+import { pointerViews } from '../input/pointer/views.ts';
 import { combinationAt, splitterSize } from '../workspace/layout.ts';
 import { PanelArea } from '../workspace/windows.tsx';
 import { useT } from '../text.ts';
@@ -90,7 +90,7 @@ export function Sidebar() {
   // where the focus went is known once it has moved (Escape hands it to the canvas, which leaves the page's own focus
   // on its body): read then; a focus left on the body by a press on the panel's own padding keeps it open
   const pressedInside = useRef(false);
-  useEffect(() => outsidePress.subscribe((target) => void (pressedInside.current = aside.current?.contains(target) === true)), []);
+  useEffect(() => pointerViews(store).outsidePress.subscribe((target) => void (pressedInside.current = aside.current?.contains(target) === true)), [store]);
   const leave = () => {
     if (!narrow) return;
     window.setTimeout(() => {

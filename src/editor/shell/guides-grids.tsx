@@ -63,7 +63,7 @@ const GROUPS = groups();
 // a command run with the arguments of a field, once no gesture is open
 function useRun(): (entry: DoorEntry, args: Readonly<Record<string, unknown>>) => void {
   const store = useStore();
-  return (entry, args) => afterGesture(() => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, ...args }));
+  return (entry, args) => afterGesture(store, () => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, ...args }));
 }
 
 function AddGuide({ entry, axis }: { readonly entry: DoorEntry; readonly axis: string }) {

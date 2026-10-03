@@ -535,7 +535,7 @@ function DeclarationsField({ entry, node }: { readonly entry: DoorEntry; readonl
       if (element.value === shown.current) return;
       shown.current = element.value;
       const text = element.value;
-      keepAfterGesture(() => {
+      keepAfterGesture(store, () => {
         if (locate(store.getState().document, args.target) === null) return;
         (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(command, { ...args, [filled]: text });
       });

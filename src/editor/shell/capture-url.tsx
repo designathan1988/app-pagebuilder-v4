@@ -34,7 +34,7 @@ function OpenCaptureUrl({ run }: { readonly run: DoorEntry }) {
     const form = new FormData(event.currentTarget);
     const typed = String(form.get('url') ?? '');
     const count = String(form.get('pages') ?? '').trim();
-    afterGesture(() => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(run.command.id as CommandId, { ...run.door.args, url: typed, pages: count === '' ? 1 : Number(count) }));
+    afterGesture(store, () => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(run.command.id as CommandId, { ...run.door.args, url: typed, pages: count === '' ? 1 : Number(count) }));
   };
   return (
     <ModalDialog region={REGION} titleKey="capture.title" className="capture-url">

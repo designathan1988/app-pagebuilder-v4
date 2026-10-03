@@ -2,12 +2,12 @@
 // They follow the zoom, the pan and the page's scroll, highlight the extent of the primary selected element on both
 // bands and mark the pointer while it is over the canvas; they are measured on every animation frame from the frame's
 // geometry (coordinates.ts), which is what the page shows, and they change nothing.
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { canvasPointer, guideOverRuler } from '../input/pointer.ts';
+import { useEffect, useRef, useState } from 'react';
 import { useT } from '../text.ts';
 import { useEditorState } from '../store.ts';
 import { canvasFrame, geometryOf, nodeBox } from './coordinates.ts';
 import { rulerMarks, type Band, type RulerMeasure } from './rulers.ts';
+import { usePointerValue } from '../input/pointer/use-views.ts';
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -43,9 +43,9 @@ export function Rulers() {
   const primary = useEditorState((s) => s.selection[0] ?? null);
   // hidden by View › Guides & Grids (view.toggleRulers, a preference)
   const hidden = useEditorState((s) => s.ui.preferences.rulersHidden === true);
-  const pointer = useSyncExternalStore(canvasPointer.subscribe, canvasPointer.get);
+  const pointer = usePointerValue('canvasPointer');
   // a guide dragged over its own ruler: the ruler says a release deletes it (spec guides-manual, Problems in Pager 1)
-  const dropping = useSyncExternalStore(guideOverRuler.subscribe, guideOverRuler.get);
+  const dropping = usePointerValue('guideOverRuler');
   const t = useT();
   const hint = <span className="ruler__hint">{t('canvas.guide.deleteHint')}</span>;
 

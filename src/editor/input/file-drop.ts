@@ -10,7 +10,7 @@ import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { canvasFrame, framePointOnScreen, geometryOf, nodesUnder, type Point } from '../canvas/coordinates.ts';
 import type { EditorStore } from '../store.ts';
 import { proposalAt } from './drop-proposals.ts';
-import { setDrag, setHovered, type Inserting } from './pointer/views.ts';
+import { pointerViews, type Inserting } from './pointer/views.ts';
 
 // The door an image file dropped in from the operating system runs: the same creation-drag proposal the palette draws.
 export const osImageDoor: DoorEntry | null = manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.source === 'os-image-file') ?? null;
@@ -19,8 +19,9 @@ const IMAGE_TYPE = 'image';
 
 // An image file held over the canvas: the proposal the release would commit, so the chrome draws where it lands; over
 // an image, the image the file would replace is outlined instead (the pointer's own hover mark).
-export function showFileDrag(store: EditorStore | null, inserting: Inserting, at: Point): void {
-  const proposal = store === null ? null : proposalAt(store.getState().document, [], at);
+export function showFileDrag(store: EditorStore, inserting: Inserting, at: Point): void {
+  const proposal = proposalAt(store.getState().document, [], at);
+  const { setDrag, setHovered } = pointerViews(store);
   setHovered(null);
   setDrag({ dragged: [], inserting, proposal, refusal: null, redirect: null, levels: 0, at, side: null });
 }
@@ -29,11 +30,13 @@ export function fileDropProposal(store: EditorStore | null, at: Point): { readon
   const proposal = store === null ? null : proposalAt(store.getState().document, [], at);
   return proposal === null ? null : { parent: proposal.parent, index: proposal.index };
 }
-export function showFileTarget(node: string): void {
+export function showFileTarget(store: EditorStore, node: string): void {
+  const { setDrag, setHovered } = pointerViews(store);
   setDrag(null);
   setHovered(node);
 }
-export function hideFileDrag(): void {
+export function hideFileDrag(store: EditorStore): void {
+  const { setDrag, setHovered } = pointerViews(store);
   setDrag(null);
   setHovered(null);
 }
@@ -120,20 +123,20 @@ export function installOsFileDrop(store: EditorStore, win: Window, inside: boole
     event.preventDefault();
     const at = overCanvas(event, inside);
     if (at === null) {
-      hideFileDrag();
+      hideFileDrag(store);
       return;
     }
     if (event.dataTransfer !== null) event.dataTransfer.dropEffect = 'copy';
     const target = imageUnder(store, at);
-    if (target !== null) showFileTarget(target);
+    if (target !== null) showFileTarget(store, target);
     else showFileDrag(store, inserting, at);
   };
-  const leave = (): void => hideFileDrag();
+  const leave = (): void => hideFileDrag(store);
   const drop = (event: DragEvent): void => {
     if (!carriesImage(event)) return;
     event.preventDefault();
     const at = overCanvas(event, inside);
-    hideFileDrag();
+    hideFileDrag(store);
     if (at === null) return;
     const file = event.dataTransfer?.files?.[0];
     if (file === undefined) return;

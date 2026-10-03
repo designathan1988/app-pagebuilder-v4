@@ -23,7 +23,7 @@
 //
 // Label rule (archive/DESIGN.md "Canvas"): a label never covers page content. It sits above its element when that space
 // is free, otherwise inside the element's top-left corner when that corner is free, otherwise below the element.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type Ref, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react';
 import { styleClassOf } from '../inspector/style-target.ts';
 import { useSelectionContext } from '../shell/field.tsx';
 import { activeBreakpoint } from '../view/breakpoints.ts';
@@ -39,7 +39,7 @@ import { elementIcon, manifest, numberConstant, type DoorEntry } from '../../man
 import { Icon, isDoorBuilt } from '../doors/door.tsx';
 import { GLYPHS } from '../doors/placement.ts';
 import type { DropProposal } from '../drag/drop.ts';
-import { band, drag, duplicating, ghostReturn, hover, lastDrop, measuring, resizingNow, type DragView, type GhostReturn, type Inserting, type SideView } from '../input/pointer.ts';
+import { type DragView, type GhostReturn, type Inserting, type SideView } from '../input/pointer.ts';
 import { MODEL_RULES, useEditorState, useStore } from '../store.ts';
 import { openedPage } from '../../core/project/pages.ts';
 import { useT } from '../text.ts';
@@ -60,6 +60,8 @@ import { controlBoxes, handleHitBox, overlaps as overlapsBox, placeLabel, visibl
 import { distancesOf, type Distance } from './distances.ts';
 import { altDistances, hoverSizeOf, type HoverSize } from './hover-measure.ts';
 import { breakpointName } from '../../core/document/breakpoints.ts';
+import { useDuplicating, usePointerValue } from '../input/pointer/use-views.ts';
+import type { PointerViews } from '../input/pointer/views.ts';
 
 // the entries this module published before the placement rules moved out stay published here: consumers need not change
 export { controlBoxes, handleHitBox, placeLabel, visibleCanvas } from './placement.ts';
@@ -423,7 +425,7 @@ function DropIndicator({ view }: { readonly view: DropView }) {
   const sideOffer = armed?.offer ?? null;
   // where the pointer is, for the line at the end of a line of children (shownAnchor)
   const pointerAt = view.at;
-  const copying = useSyncExternalStore(duplicating.subscribe, duplicating.get);
+  const copying = useDuplicating();
   const words = dragMessages(document, view, copying);
   const redirectFrom = view.redirect?.from ?? null;
   const receiver = proposal === null ? null : (locate(document, proposal.parent)?.node ?? null);
@@ -574,7 +576,7 @@ function MovingGhost({ dragged, at, refused, note }: { readonly dragged: readonl
 // The elements a drop has just placed flash for drop.flashDuration (spec drag-layout, row 10): an outline in the drop
 // colour that fades, drawn over each of them; at once gone when the person asks for reduced motion.
 function DropFlash() {
-  const drop = useSyncExternalStore(lastDrop.subscribe, lastDrop.get);
+  const drop = usePointerValue('lastDrop');
   const [boxes, setBoxes] = useState<{ readonly id: number; readonly boxes: readonly Box[] } | null>(null);
   const layer = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -648,7 +650,7 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
   readonly drawnBand: Box | null;
   readonly editing: boolean;
   readonly altHeld: boolean;
-  readonly resizing: ReturnType<typeof resizingNow.get>;
+  readonly resizing: ReturnType<PointerViews['resizingNow']['get']>;
   readonly documentNow: DocumentJson;
   readonly mode: EditMode;
 }): Layout {
@@ -937,9 +939,9 @@ export function CanvasChrome() {
   const targets = useMemo(() => JSON.parse(targetsText) as NodeId[], [targetsText]);
   // the drag in progress (pointer.ts): the drop indicator is drawn, the selection's label hides and its outline turns
   // into the dashed outline of the source (Problems in Pager 1)
-  const dragging = useSyncExternalStore(drag.subscribe, drag.get);
+  const dragging = usePointerValue('drag');
   // the ghost of a creation drag Escape cancelled, on its way back to its tile
-  const returning = useSyncExternalStore(ghostReturn.subscribe, ghostReturn.get);
+  const returning = usePointerValue('ghostReturn');
   // the element the keyboard's hand holds: its aim is drawn as a drag's drop (spec hand-keyboard-move, "Visual
   // feedback")
   const hand = useEditorState(heldHand);
@@ -969,15 +971,15 @@ export function CanvasChrome() {
     }
     return true;
   });
-  const hovered = useSyncExternalStore(hover.subscribe, hover.get);
+  const hovered = usePointerValue('hover');
   // Alt held: the distances from the selection to the hovered element are drawn (spec hover-measure)
-  const altHeld = useSyncExternalStore(measuring.subscribe, measuring.get);
+  const altHeld = usePointerValue('measuring');
   // an Edit on canvas mode is on (canvas/edit-mode.ts)
   const mode = useEditorState((s) => editMode(s.ui));
   const editingOnCanvas = mode !== NO_MODE;
-  const drawnBand = useSyncExternalStore(band.subscribe, band.get);
+  const drawnBand = usePointerValue('band');
   // the resize drag in progress, whose distances to the neighbours the canvas draws (item 4.5)
-  const resizing = useSyncExternalStore(resizingNow.subscribe, resizingNow.get);
+  const resizing = usePointerValue('resizingNow');
   // the text edited in place (text-edit.ts): its outline and label wear the text editing mode, so the edit never looks
   // like a plain selection (spec text-edit-inline, Problems in Pager 2; archive/DESIGN.md "Canvas", text)
   const editing = useEditorState((s) => s.ui.textEdit.node !== null && s.selection.length === 1 && s.selection[0] === s.ui.textEdit.node);

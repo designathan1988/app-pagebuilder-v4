@@ -2,7 +2,7 @@
 // Split / Code switch, the rulers, and the frame with its breakpoint tabs along the cascade from the base breakpoint,
 // and the page's iframe (src/editor/canvas/frame.tsx) at the camera's zoom (src/editor/view/camera.ts): the chosen one,
 // or in Fit mode the one that fits the frame to the stage; the frame is placed at the camera's pan.
-import { useContext, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import type { MessageId } from '../../generated/ids.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { CanvasFrame } from '../canvas/frame.tsx';
@@ -21,12 +21,12 @@ import { CodePane } from './code-pane.tsx';
 import { SideBySide } from './side-by-side.tsx';
 import { breakpointTabSlot } from './breakpoint-tabs.tsx';
 import { breakpointName } from '../../core/document/breakpoints.ts';
-import { drag, measuring, panState } from '../input/pointer.ts';
 import { isPanelOpen } from '../workspace/panels.ts';
 import { useT } from '../text.ts';
 import { ReportFitZoom, Slots, useFitZoom } from './slots.tsx';
 import { QuickPanel } from '../canvas/quick-panel.tsx';
 import { AnchorTabs } from '../canvas/anchor-tabs.tsx';
+import { usePointerValue } from '../input/pointer/use-views.ts';
 
 const PAGE_ICON = manifest.elements.elements.find((e) => e.tag === 'body')?.icon ?? null;
 const NO_CODE: readonly string[] = [];
@@ -83,7 +83,7 @@ function ZoomValue() {
 // The keys of a drag, in the canvas toolbar while one goes on (the user's real-use audit, item 3.3)
 function DragHint() {
   const t = useT();
-  const dragging = useSyncExternalStore(drag.subscribe, drag.get);
+  const dragging = usePointerValue('drag');
   return dragging === null ? null : (
     <span className="canvas-toolbar__hint" data-chrome="drag-hint">
       {t('canvas.drag.hint')}
@@ -96,10 +96,10 @@ function DragHint() {
 function ModeHint() {
   const t = useT();
   const mode = useEditorState((s) => editMode(s.ui));
-  const dragging = useSyncExternalStore(drag.subscribe, drag.get);
+  const dragging = usePointerValue('drag');
   // a text edited in place: its keys (the canonical toolbar's hint while text is edited)
   const editing = useEditorState((s) => s.ui.textEdit.node !== null);
-  const altMeasuring = useSyncExternalStore(measuring.subscribe, measuring.get);
+  const altMeasuring = usePointerValue('measuring');
   if (editing && dragging === null) return <span className="canvas-toolbar__hint" data-chrome="text-hint">{t('canvas.textEdit.hint')}</span>;
   // Alt held over the canvas: the distances are measured (the canonical toolbar's hint)
   if (altMeasuring && dragging === null) return <span className="canvas-toolbar__hint" data-chrome="measure-hint">{t('canvas.measure.hint')}</span>;
@@ -250,7 +250,7 @@ export function CanvasColumn() {
   const report = useContext(ReportFitZoom);
   useLayoutEffect(() => report(zoom), [report, zoom]);
   // Space held over the stage, or a pan in progress: the grab cursor (spec zoom-wheel-pan)
-  const panning = useSyncExternalStore(panState.subscribe, panState.get);
+  const panning = usePointerValue('panState');
   const rulersHidden = useEditorState((s) => s.ui.preferences.rulersHidden === true);
   // the view (view/editor-view.ts): the canvas, the canvas with the code pane beside it, or the code pane alone
   const view = useEditorState((s) => editorView(s.ui));

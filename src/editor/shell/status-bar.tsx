@@ -17,7 +17,6 @@ import { dragMessages } from '../canvas/chrome.tsx';
 import { DoorControl, Icon } from '../doors/door.tsx';
 import { elementIcon, type DoorEntry } from '../../manifest/runtime.ts';
 import { MenuButton } from '../doors/menu.tsx';
-import { drag, duplicating } from '../input/pointer.ts';
 import { drawnAsOf } from '../doors/placement.ts';
 import { useEditorState } from '../store.ts';
 import { activeState } from '../view/style-state.ts';
@@ -27,6 +26,7 @@ import { ZoomValue } from './canvas.tsx';
 import { Slots } from './slots.tsx';
 import { previewing } from '../view/preview.ts';
 import { breakpointName } from '../../core/document/breakpoints.ts';
+import { useDuplicating, usePointerValue } from '../input/pointer/use-views.ts';
 
 
 export function StatusBar() {
@@ -46,8 +46,8 @@ export function StatusBar() {
   // while a drag goes on (pointer.ts), an element's or a palette tile's, the message is the drop's own words, as its
   // label reads them on the canvas, or, off the page, that releasing cancels (spec palette-drag-insert, Problems in
   // Pager 1 and 2; the user's real-use audit, item 3.3)
-  const dragging = useSyncExternalStore(drag.subscribe, drag.get);
-  const copying = useSyncExternalStore(duplicating.subscribe, duplicating.get);
+  const dragging = usePointerValue('drag');
+  const copying = useDuplicating();
   const words = dragging !== null ? dragMessages(document, dragging, copying) : [];
   // a message given during the drag that did not move where it lands (a level key refused: "Already at the top level")
   // stays until the place changes; a key that moved it is read in the drop's words

@@ -190,7 +190,7 @@ function CustomAttributeRow({ node, name, value }: { readonly node: DocNode; rea
       if (element.value === shown.current) return;
       shown.current = element.value;
       const text = element.value;
-      keepAfterGesture(() => {
+      keepAfterGesture(store, () => {
         if (locate(store.getState().document, node.id) === null) return;
         (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(valueEntry.command.id, { name, value: text });
       });
@@ -249,7 +249,7 @@ function LabelTargetField({ entry, node, label }: { readonly entry: DoorEntry; r
         element.value = current;
         return;
       }
-      keepAfterGesture(() => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id, { [arg]: control.id }));
+      keepAfterGesture(store, () => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id, { [arg]: control.id }));
     };
     const submit = (event: Event) => {
       event.preventDefault();

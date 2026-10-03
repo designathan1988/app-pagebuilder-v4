@@ -9,7 +9,7 @@
 //
 // Opening the panel with its chip is not a command (PRODUCT.md §5.3: data-local): the chip's state is this component's.
 // Hidden while a drag runs and while a text is edited in place (the text toolbar replaces it).
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type DocNode } from '../../core/document/model.ts';
 import { functionArgument, functionOfControl, functionsOf, translateAxis, translateWith, withBareUnit } from '../../core/style/functions.ts';
@@ -17,7 +17,6 @@ import type { AttributeId, CommandId, FeatureId, KeyContextId } from '../../gene
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { DoorControl, Icon, appliesNow, isDoorBuilt, useDoor } from '../doors/door.tsx';
 import { GLYPHS, doorSlots } from '../doors/placement.ts';
-import { drag } from '../input/pointer.ts';
 import { attributeApplies } from '../../core/elements/inputs.ts';
 import { shownForContext, type ElementContext } from '../../core/style/applies.ts';
 import { ATTRIBUTES } from '../inspector/attributes.ts';
@@ -32,6 +31,7 @@ import type { MessageId } from '../../generated/ids.ts';
 import { useT } from '../text.ts';
 import { canvasFrame, nodeBox } from './coordinates.ts';
 import { breakpointWords, wordsOf } from '../../core/document/breakpoints.ts';
+import { usePointerValue } from '../input/pointer/use-views.ts';
 
 const REGION = 'quick-panel';
 // the panel's chip: the control of the panel that opens and closes it (a panel-control door of its own region; its
@@ -354,7 +354,7 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
   const editing = useEditorState((s) => s.ui.textEdit.node !== null);
   const offsets = useEditorState((s) => quickPanelOffsets(s.ui));
   const open = useEditorState((s) => quickPanelOpen(s.ui));
-  const dragging = useSyncExternalStore(drag.subscribe, drag.get);
+  const dragging = usePointerValue('drag');
   const [placed, setPlaced] = useState<Placed | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   const chip = useRef<HTMLButtonElement>(null);

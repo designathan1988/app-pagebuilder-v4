@@ -44,7 +44,8 @@ import { GLYPHS, doorSlots } from '../doors/placement.ts';
 import { quickPanelOpen } from '../quick-panel/quick-panel.ts';
 import { unitMenu } from '../../core/style/units.ts';
 import { cssFamily, familyOf, isFontFile } from '../../core/files/fonts.ts';
-import { afterGesture, pointerPressing, registerRepeat, registerSlider } from '../input/pointer.ts';
+import { afterGesture, registerRepeat, registerSlider } from '../input/pointer.ts';
+import { pointerViews } from '../input/pointer/views.ts';
 import { MODEL_RULES, useEditorState, useStore, type EditorStore, layeredRules } from '../store.ts';
 import { styleClassOf, styleSource } from '../inspector/style-target.ts';
 import { useMenuLayer } from '../doors/menu.tsx';
@@ -524,7 +525,7 @@ function slidValue(text: string, range: { readonly unit: string; readonly neutra
 // selection that was empty.
 function keepValue(store: EditorStore, command: CommandId, property: string, value: string, targets: readonly string[]): void {
   if (targets.length === 0) return;
-  afterGesture(() => {
+  afterGesture(store, () => {
     const now = store.getState().selection;
     const same = now.length === targets.length && now.every((id, i) => id === targets[i]);
     (store.dispatch as Dispatch)(command, same ? { property, value } : { property, value, targets: [...targets] });
@@ -920,7 +921,7 @@ export function TextStyleField({
         return;
       }
       const args = part !== null ? { ...entry.door.args, ...part.args(text, held) } : ownArgs(entry, property, text, extra);
-      afterGesture(() => {
+      afterGesture(store, () => {
         const now = store.getState().selection;
         // a command of its own writes to the selection: kept only while it is still the one the value was typed for
         if (now.length === 0 || now.length !== targets.length || now.some((id, i) => id !== targets[i])) return;
@@ -1011,7 +1012,7 @@ export function TextStyleField({
         return;
       }
       // A pointer opens the list without committing. Tab is an explicit confirmation, even onto its trigger.
-      if (inside(next) && !(next === valuesButton.current && !pointerPressing())) return;
+      if (inside(next) && !(next === valuesButton.current && !pointerViews(store).pointerPressing())) return;
       finish();
     };
     // the values menu floats on the body (FieldMenu), outside the field's scope: the focus leaving one of its items is
@@ -1416,14 +1417,14 @@ export function useSelectionContexts(): readonly ElementContext[] | null {
 
 // Runs what a field keeps as it loses the focus once no pointer gesture is open (afterGesture of the pointer owner): a
 // command recorded once per dispatch never joins a gesture.
-export function keepAfterGesture(run: () => void): void {
-  afterGesture(run);
+export function keepAfterGesture(store: EditorStore, run: () => void): void {
+  afterGesture(store, run);
 }
 
 // Keeps a text with the door's command (text.set), from a field (keepAfterGesture). Nothing is kept for a node the
 // document no longer holds.
 export function keepTextWith(store: EditorStore, command: CommandId, target: NodeId, content: string): void {
-  keepAfterGesture(() => {
+  keepAfterGesture(store, () => {
     if (locate(store.getState().document, target) === null) return;
     (store.dispatch as (id: CommandId, args: CommandArgs['text.set']) => DispatchResult)(command, { target, content });
   });
@@ -1647,7 +1648,7 @@ export function KeptTextField({ entry, node, kept, label, attribute, keepOnLeave
       // a quick panel field keeps what it holds only while the panel is open (spec quick-panel)
       if (!keepOnLeave && !quickPanelOpen(store.getState().ui)) return;
       typing.shown = text;
-      keepAfterGesture(() => {
+      keepAfterGesture(store, () => {
         // nothing is kept for a node the document no longer holds
         if (locate(store.getState().document, owner) === null) return;
         (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(command, { ...args, [filled]: text });
@@ -1679,7 +1680,7 @@ export function KeptTextField({ entry, node, kept, label, attribute, keepOnLeave
     draft.current.shown = value;
     setTyped(value);
     refused.dismiss();
-    keepAfterGesture(() => {
+    keepAfterGesture(store, () => {
       if (locate(store.getState().document, owner) !== null)
         (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(command, { ...args, [filled]: value });
     });

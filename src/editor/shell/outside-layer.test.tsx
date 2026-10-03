@@ -3,8 +3,14 @@ import { act, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createPortal } from 'react-dom';
 import { expect, it, vi } from 'vitest';
-import { publishOutsidePress } from '../input/pointer/views.ts';
+import { pointerViews } from '../input/pointer/views.ts';
+import { StoreContext, type EditorStore } from '../store.ts';
 import { useOutsideLayer } from './outside-layer.ts';
+
+// the layers are an editor's own (the plan's T7): the press is published by that editor's pointer; only the store's
+// identity is read
+const store = {} as EditorStore;
+const { publishOutsidePress } = pointerViews(store);
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -22,7 +28,7 @@ it('a portal child protects its parent; outside presses dismiss both and cleanup
   const host = document.createElement('div');
   document.body.append(host);
   const root = createRoot(host);
-  act(() => root.render(<Nested />));
+  act(() => root.render(<StoreContext.Provider value={store}><Nested /></StoreContext.Provider>));
   act(() => publishOutsidePress(document.querySelector('[data-child] button')));
   expect(parentClosed).not.toHaveBeenCalled();
   expect(childClosed).not.toHaveBeenCalled();

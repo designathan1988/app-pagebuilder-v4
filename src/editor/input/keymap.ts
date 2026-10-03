@@ -19,9 +19,9 @@ import { wiring } from '../wiring.ts';
 import { TEXT_EDITING, editArgs } from '../canvas/text-edit.ts';
 import { readClipboard } from '../clipboard.ts';
 import type { EditorStore } from '../store.ts';
-import { cancelPan, holdAlt, holdSpace, modifierOf, openGesture, pointerPressing } from './pointer.ts';
+import { cancelPan, holdSpace, modifierOf, openGesture } from './pointer.ts';
 import { holdLetter, releaseLetters } from './pointer-tools.ts';
-import { canvasChosenCount, pressCount, pressRegion } from './pointer/views.ts';
+import { pointerViews } from './pointer/views.ts';
 import { shortcutRuns } from './shortcut-rule.ts';
 import { keyContextIn } from '../canvas/edit-mode.ts';
 
@@ -303,6 +303,7 @@ function withDoorArgs(own: Readonly<Record<string, unknown>>, door: Readonly<Rec
 const SLIDER_KEYS: Readonly<Record<string, number>> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 };
 
 export function installKeymap(store: EditorStore, target: Window = window): () => void {
+  const views = pointerViews(store);
   let pointerFocused: EventTarget | null = null;
   // A group whose controls rove (the alignment matrix, a segmented group: A3.24) holds one Tab stop, so the arrows
   // move the focus among its controls, wrapping; Home and End reach the ends. It happens before the bindings.
@@ -336,13 +337,13 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
   // press on the canvas or a Layers row, by the keyboard reaching a Layers row, by F6 onto the canvas, and by Escape on
   // it; unchosen by a press anywhere else and by a focus lost to nowhere (a panel or a picker closing under it).
   let lettersChosen = true;
-  let seenPresses = pressCount();
-  let seenChoices = canvasChosenCount();
+  let seenPresses = views.pressCount();
+  let seenChoices = views.canvasChosenCount();
   const readChoice = () => {
-    if (pressCount() !== seenPresses || canvasChosenCount() !== seenChoices) {
-      seenPresses = pressCount();
-      seenChoices = canvasChosenCount();
-      lettersChosen = seenChoices > seenPresses || pressRegion() !== 'elsewhere';
+    if (views.pressCount() !== seenPresses || views.canvasChosenCount() !== seenChoices) {
+      seenPresses = views.pressCount();
+      seenChoices = views.canvasChosenCount();
+      lettersChosen = seenChoices > seenPresses || views.pressRegion() !== 'elsewhere';
     }
   };
   // The store holds the reversible sequence; the keymap never keeps document or selection snapshots.
@@ -389,9 +390,9 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
       }
     }
     // Alt held: the canvas measures distances while it is (spec hover-measure); it binds nothing alone
-    if (event.key === ALT) holdAlt(true);
+    if (event.key === ALT) views.holdAlt(true);
     // during a pointer gesture the keys are the gesture's (pointer.ts)
-    const gesture = openGesture();
+    const gesture = openGesture(store);
     const focused = contextOf(event.target);
     // the arrows of a roving group move the focus in it (A3.24); every other key is the bindings'
     if (moveInRovingGroup(event.target, event.key)) {
@@ -409,11 +410,11 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
     // Space held over the canvas arms the pan, whatever has the focus but a field, the text edited in place or a
     // control the keyboard focused that takes Space (spec zoom-wheel-pan, Problems in Pager 2); Escape during a pan
     // puts the view back (the pointer owner's)
-    if (event.code === 'Space' && !FIELDS.includes(focused) && !typesText(event.target) && !spaceIsTheControls(event.target, focused, pointerFocused) && holdSpace(true)) {
+    if (event.code === 'Space' && !FIELDS.includes(focused) && !typesText(event.target) && !spaceIsTheControls(event.target, focused, pointerFocused) && holdSpace(store, true)) {
       event.preventDefault();
       return;
     }
-    if (event.key === 'Escape' && cancelPan()) {
+    if (event.key === 'Escape' && cancelPan(store)) {
       event.preventDefault();
       return;
     }
@@ -510,23 +511,23 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
   };
   const onKeyUp = (event: KeyboardEvent) => {
     holdLetter(event.key, false);
-    if (event.code === 'Space') holdSpace(false);
+    if (event.code === 'Space') holdSpace(store, false);
     // Alt let go: the canvas stops measuring distances (spec hover-measure)
-    if (event.key === ALT) holdAlt(false);
+    if (event.key === ALT) views.holdAlt(false);
   };
   const onBlur = () => {
     endBurst();
     releaseLetters();
-    holdSpace(false);
-    holdAlt(false);
+    holdSpace(store, false);
+    views.holdAlt(false);
   };
   // the element that took the focus during a pointer press (a clicked tile: the pointer owner says a button is down),
   // for Space (spaceIsTheControls); a focus that arrives otherwise (Tab, the arrows, a script after a key) clears it
   const onFocusIn = (event: FocusEvent) => {
-    pointerFocused = pointerPressing() ? event.target : null;
+    pointerFocused = views.pointerPressing() ? event.target : null;
     if (!CHOSEN_CONTEXTS.has(contextOf(event.target))) endBurst();
     // the keyboard reached a Layers row: its keys are chosen
-    if (!pointerPressing() && contextOf(event.target) === LAYERS_CONTEXT) {
+    if (!views.pointerPressing() && contextOf(event.target) === LAYERS_CONTEXT) {
       readChoice();
       lettersChosen = true;
     }
@@ -534,7 +535,7 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
   // a focus lost to nowhere (a picker or a panel closed under it, no press, no key moving it) unchooses the canvas's
   // typed keys: the focus rests on the page body without the person choosing the canvas
   const onFocusOut = (event: FocusEvent) => {
-    if (event.relatedTarget !== null || pointerPressing()) return;
+    if (event.relatedTarget !== null || views.pointerPressing()) return;
     const from = contextOf(event.target);
     if (from === CANVAS_CONTEXT || from === LAYERS_CONTEXT) return;
     readChoice();

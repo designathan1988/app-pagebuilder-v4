@@ -8,7 +8,7 @@ import type { Panel } from '../workspace/panel-catalogue.ts';
 import { registerHandler } from '../../core/commands/registry.ts';
 import type { EditorUi } from '../state.ts';
 import type { EditorStore } from '../store.ts';
-import { chooseCanvasByKeyboard } from '../input/pointer/views.ts';
+import { pointerViews } from '../input/pointer/views.ts';
 
 export type FocusMove = `panel:${Panel}` | 'next' | 'previous' | 'first' | 'last' | 'activate' | 'parent' | 'nextRegion' | 'previousRegion' | 'canvas' | 'menuBar' | 'nextMenu' | 'previousMenu';
 
@@ -85,11 +85,11 @@ function focusRegion(region: Element): void {
 // The canvas takes the focus back (spec keyboard-panel-navigation: Escape inside a panel): the panel's control lets it
 // go, and the editor's own document holds the focus again — which is the canvas's key context (input/keymap.ts: the
 // body is the canvas), so the keys the person presses act on the page. The selection is untouched.
-export function focusTheCanvas(): void {
+export function focusTheCanvas(store: EditorStore): void {
   const held = document.activeElement;
   if (held instanceof HTMLElement && held !== document.body) held.blur();
   // the keyboard chose the canvas: its single-letter keys act again (jornada03 J2, keymap.ts lettersChosen)
-  chooseCanvasByKeyboard();
+  pointerViews(store).chooseCanvasByKeyboard();
 }
 
 export const focusNextRegion = registerHandler<'focus.nextRegion', EditorUi>('focus.nextRegion', ({ state }) => ({ kind: 'change', ui: asking(state.ui, 'nextRegion') }));
@@ -181,7 +181,7 @@ function comboboxMove(move: FocusMove, field: Element): boolean {
   return true;
 }
 
-export function carryOut(move: FocusMove, focused: Element | null): void {
+export function carryOut(store: EditorStore, move: FocusMove, focused: Element | null): void {
   if (move.startsWith('panel:')) {
     // the panel just opened is drawn on the next frame, and its rows (the Layers tree's) on the one after
     requestAnimationFrame(() =>
@@ -198,7 +198,7 @@ export function carryOut(move: FocusMove, focused: Element | null): void {
     return;
   }
   if (move === 'canvas') {
-    focusTheCanvas();
+    focusTheCanvas(store);
     return;
   }
   if (move === 'menuBar' || move === 'nextMenu' || move === 'previousMenu') {
@@ -215,7 +215,7 @@ export function carryOut(move: FocusMove, focused: Element | null): void {
     const step = move === 'nextRegion' ? 1 : -1;
     const region = regions[at < 0 ? (step > 0 ? 0 : regions.length - 1) : (at + step + regions.length) % regions.length] as Element;
     focusRegion(region);
-    if (region.matches(STAGE)) chooseCanvasByKeyboard();
+    if (region.matches(STAGE)) pointerViews(store).chooseCanvasByKeyboard();
     return;
   }
   if (comboboxMove(move, focused)) return;
@@ -250,6 +250,6 @@ export function installFocus(store: EditorStore): () => void {
     const request = store.getState().ui.focus.request;
     if (request === null || request.count === done) return;
     done = request.count;
-    carryOut(request.move, document.activeElement);
+    carryOut(store, request.move, document.activeElement);
   });
 }

@@ -85,31 +85,7 @@ import { NOT_PICKING, argsFor, clickDoor, editEndDoor, laysGrid, modifierOf, typ
 import { CONTAINERS, isInside, keepsSide, layersDrag, nearestAccepted, proposalAt, ROW_DROP, ROW_SELECT, rowUnder, sideAt } from './drop-proposals.ts';
 // what the pointer publishes for the canvas chrome and the panels (pointer/views.ts); the installer is their only
 // writer
-import {
-  altHeld,
-  guideOverRuler,
-  measuring,
-  pointerPressing,
-  setBand,
-  setCanvasPointer,
-  setDrag,
-  setDropped,
-  setGhostReturn,
-  setGuideOnRuler,
-  setHovered,
-  setPanView,
-  setPressPoint,
-  setPressRegion,
-  setPressing,
-  publishOutsidePress,
-  type PressRegion,
-  setResizing,
-  setBanding,
-  setMenuOver,
-  type Inserting,
-  type Redirect,
-  type SideView,
-} from './pointer/views.ts';
+import { pointerViews, type Inserting, type PressRegion, type Redirect, type SideView } from './pointer/views.ts';
 import { viewportWidth } from '../view/breakpoints.ts';
 
 // the entries this module published before the machine moved out stay published here: consumers need not change
@@ -117,7 +93,7 @@ export { DRAG_THRESHOLD, IDLE, step } from './pointer/machine.ts';
 export type { Effect, Machine, MachineEvent, Press } from './pointer/machine.ts';
 export { clickDoor, editEndDoor, modifierOf } from './pointer/press.ts';
 export type { Button, PressFacts } from './pointer/press.ts';
-export { band, bandingNow, canvasPointer, menuOver, drag, ghostReturn, guideOverRuler, holdAlt, hover, lastDrop, measuring, panState, pointerPressing, pressPoint, resizingNow } from './pointer/views.ts';
+export { pointerViews } from './pointer/views.ts';
 export type { Band, DragView, Dropped, GhostReturn, Inserting, PanView, Redirect, SideView } from './pointer/views.ts';
 
 
@@ -157,14 +133,14 @@ function marqueeMode(entry: DoorEntry, press: Press, modifier: string | null, no
 // Whether the box being drawn takes the leaves (spec marquee-select, Problems in Pager 3): the key the marquee
 // gestures name for it is held now.
 const LEAVES_KEY = (manifest.interactions.gestures.find((g) => g.id === 'marquee')?.modifiers ?? []).find((m) => m.meaning === 'take-leaves')?.key ?? null;
-const leavesNow = (): boolean => LEAVES_KEY === 'Alt' && altHeld();
+const leavesNow = (altHeld: () => boolean): boolean => LEAVES_KEY === 'Alt' && altHeld();
 
 // Whether the key that duplicates a drag is held, once the duplicate by dragging is built (spec drag-duplicate): the
 // drop label and the status bar say "Duplicate" then.
-export const duplicating = {
-  get: (): boolean => DUPLICATE_DRAG !== null && DUPLICATE_KEY === 'Alt' && altHeld(),
-  subscribe: measuring.subscribe,
-};
+export function duplicating(store: EditorStore): { readonly get: () => boolean; readonly subscribe: (listener: () => void) => () => void } {
+  const { altHeld, measuring } = pointerViews(store);
+  return { get: () => DUPLICATE_DRAG !== null && DUPLICATE_KEY === 'Alt' && altHeld(), subscribe: measuring.subscribe };
+}
 
 // The browser's own menu never opens where the editor's opens (spec context-menu, Problems in Pager 5): on the canvas
 // (the overlay and the stage) and over the editor's context menu and its backdrop, which a secondary press on the
@@ -345,29 +321,51 @@ function pressRegionOf(target: EventTarget | null): PressRegion {
   if (element.closest('[data-key-context="layers-tree"]') !== null) return 'layers';
   return element.closest('[data-key-context="canvas"]') !== null ? 'canvas' : 'elsewhere';
 }
-let spaceDown = false;
-let overStage = false;
-let panning: { pointer: number; last: Point; moved: Point; entry: DoorEntry } | null = null;
-let panDispatch: ((entry: DoorEntry, args: Readonly<Record<string, unknown>>) => void) | null = null;
+// The pointer state of one editor that outlives a gesture (the plan's T7: one per editor, by its store, never shared):
+// the pan (Space held, the pointer over the stage, the pan going on and the door it runs), the gesture open now, and
+// the colour picker's session with what ends it.
+interface PointerShared {
+  spaceDown: boolean;
+  overStage: boolean;
+  panning: { pointer: number; last: Point; moved: Point; entry: DoorEntry } | null;
+  panDispatch: ((entry: DoorEntry, args: Readonly<Record<string, unknown>>) => void) | null;
+  open: Gesture | null;
+  session: Gesture | null;
+  sessionDispatch: ((id: CommandId, args: unknown) => DispatchResult) | null;
+  pendingPickerEnd: (() => void) | null;
+}
+const SHARED = new WeakMap<EditorStore, PointerShared>();
+function sharedOf(store: EditorStore): PointerShared {
+  let shared = SHARED.get(store);
+  if (shared === undefined) {
+    shared = { spaceDown: false, overStage: false, panning: null, panDispatch: null, open: null, session: null, sessionDispatch: null, pendingPickerEnd: null };
+    SHARED.set(store, shared);
+  }
+  return shared;
+}
 // Space went down or up (the keymap, which owns the keys): held over the stage it arms the pan; true when it did
-export function holdSpace(down: boolean): boolean {
+export function holdSpace(store: EditorStore, down: boolean): boolean {
+  const shared = sharedOf(store);
+  const { setPanView } = pointerViews(store);
   if (!down) {
-    spaceDown = false;
-    if (panning === null) setPanView('idle');
+    shared.spaceDown = false;
+    if (shared.panning === null) setPanView('idle');
     return false;
   }
-  if (!overStage && panning === null) return false;
-  spaceDown = true;
-  if (panning === null) setPanView('armed');
+  if (!shared.overStage && shared.panning === null) return false;
+  shared.spaceDown = true;
+  if (shared.panning === null) setPanView('armed');
   return true;
 }
 // Escape during a pan puts the view back where the pan began; true when a pan was cancelled
-export function cancelPan(): boolean {
-  if (panning === null) return false;
-  const { entry, moved } = panning;
-  panning = null;
-  if (moved.x !== 0 || moved.y !== 0) panDispatch?.(entry, { dx: -moved.x, dy: -moved.y });
-  setPanView(spaceDown ? 'armed' : 'idle');
+export function cancelPan(store: EditorStore): boolean {
+  const shared = sharedOf(store);
+  const { setPanView } = pointerViews(store);
+  if (shared.panning === null) return false;
+  const { entry, moved } = shared.panning;
+  shared.panning = null;
+  if (moved.x !== 0 || moved.y !== 0) shared.panDispatch?.(entry, { dx: -moved.x, dy: -moved.y });
+  setPanView(shared.spaceDown ? 'armed' : 'idle');
   return true;
 }
 // the creation drag a tile starts: its command's drop door, while its feature is built; null for any other control
@@ -446,10 +444,10 @@ export function pressedByPointer(entry: DoorEntry): boolean {
 // {component}) and the canvas-drag door that drops it where the proposal says.
 // While a gesture is open the keys belong to it: they are read in the drag key context and their doors run through
 // the gesture's transaction (keymap.ts).
-let open: Gesture | null = null;
-export function openGesture(): { readonly context: KeyContextId; readonly gesture: Gesture } | null {
-  if (open === null) return null;
-  return { context: session !== null && open === session ? COLOR_PICKER_CONTEXT : 'drag', gesture: open };
+export function openGesture(store: EditorStore): { readonly context: KeyContextId; readonly gesture: Gesture } | null {
+  const shared = sharedOf(store);
+  if (shared.open === null) return null;
+  return { context: shared.session !== null && shared.open === shared.session ? COLOR_PICKER_CONTEXT : 'drag', gesture: shared.open };
 }
 
 // The colour picker's session (spec color-picker; its state: src/editor/inspector/color-picker.ts): one gesture opened
@@ -460,29 +458,28 @@ export function openGesture(): { readonly context: KeyContextId; readonly gestur
 const COLOR_PICKER_CONTEXT: KeyContextId = 'color-picker';
 // the picker's own cancel, run when Escape ends its session: the command of its Cancel button
 const CANCEL_PICKER = (manifest.doors.find((d) => d.door.kind === 'panel-control' && d.door.panel === 'color-picker' && d.door.control === 'cancel')?.command.id ?? '') as CommandId;
-let session: Gesture | null = null;
-let sessionDispatch: ((id: CommandId, args: unknown) => DispatchResult) | null = null;
-export function dispatchInSession(id: CommandId, args: unknown): DispatchResult | null {
-  const result = sessionDispatch === null ? null : sessionDispatch(id, args);
-  finishPickerSession();
+export function dispatchInSession(store: EditorStore, id: CommandId, args: unknown): DispatchResult | null {
+  const shared = sharedOf(store);
+  const result = shared.sessionDispatch === null ? null : shared.sessionDispatch(id, args);
+  finishPickerSession(shared);
   return result;
 }
-let pendingPickerEnd: (() => void) | null = null;
-function finishPickerSession(): void {
-  const finish = pendingPickerEnd;
-  pendingPickerEnd = null;
+function finishPickerSession(shared: PointerShared): void {
+  const finish = shared.pendingPickerEnd;
+  shared.pendingPickerEnd = null;
   finish?.();
 }
 
 // Runs a dispatch of its own once no gesture is open: at once, or, when a press opened one before a field lost the
 // focus (a click elsewhere), once that gesture ends, since a command recorded once per dispatch never joins a gesture.
 // A field keeps what was typed this way when it is left (the inspector's text field, a number field).
-export function afterGesture(run: () => void): void {
-  if (open === null) {
+export function afterGesture(store: EditorStore, run: () => void): void {
+  const shared = sharedOf(store);
+  if (shared.open === null) {
     run();
     return;
   }
-  const wait = () => (open === null ? run() : requestAnimationFrame(wait));
+  const wait = () => (shared.open === null ? run() : requestAnimationFrame(wait));
   requestAnimationFrame(wait);
 }
 
@@ -630,23 +627,44 @@ function pressAt(event: MouseEvent, isRoot: (node: string) => boolean, under: Ev
 
 // Installs the pointer owner on the editor's window; returns its removal.
 //
-// One editor per document, and this is where that is enforced: the transient state above (the band, the hovered node,
-// the drag, the press, the pan…) is per window, not per store, so a second editor installed over a live one would
-// share it. That cannot happen silently — the second installer is refused here, records an incident, and in
-// development and tests throws, so the defect shows instead of two editors writing each other's state. The first
-// installer keeps the pointer. A future feature that shows two editors side by side must first make this state
-// per store (the plan's T7); until one exists, no second instance can appear — this guard is the proof.
-let pointerOwner: EditorStore | null = null;
+// The pointer's state is the editor's own (the views by its store, pointer/views.ts; the pan, the open gesture and the
+// picker's session, sharedOf; the gesture's own state in the installer), so two editors never share it (the plan's
+// T7). The installer listens to the whole window, so one window has one pointer owner: a second installer on the same
+// window is refused, records an incident, and in development and tests throws.
+const OWNERS = new WeakMap<Window, EditorStore>();
 // what is being picked now: an interaction's target or a motion action's (pointer/press.ts Picking)
 const pickingOf = (ui: EditorUi): Picking => ({ interaction: pickingTarget(ui), motion: motionPicking(ui) });
 
 export function installPointer(store: EditorStore, target: Window = window): () => void {
-  if (pointerOwner !== null && pointerOwner !== store) {
-    reportError('a second editor tried to take the pointer owner', 'the pointer owner is installed: one editor per document');
-    if (import.meta.env.DEV) throw new Error('the pointer owner is installed: one editor per document');
+  const owner = OWNERS.get(target);
+  if (owner !== undefined && owner !== store) {
+    reportError('a second editor tried to take the pointer owner', 'the pointer owner is installed: one editor per window');
+    if (import.meta.env.DEV) throw new Error('the pointer owner is installed: one editor per window');
     return () => undefined;
   }
-  pointerOwner = store;
+  OWNERS.set(target, store);
+  const shared = sharedOf(store);
+  const views = pointerViews(store);
+  const {
+    altHeld,
+    guideOverRuler,
+    pointerPressing,
+    publishOutsidePress,
+    setBand,
+    setBanding,
+    setCanvasPointer,
+    setDrag,
+    setDropped,
+    setGhostReturn,
+    setGuideOnRuler,
+    setHovered,
+    setMenuOver,
+    setPanView,
+    setPressPoint,
+    setPressRegion,
+    setPressing,
+    setResizing,
+  } = views;
   let machine: Machine = IDLE;
   let buttons: { button: Button; count: number; modifier: string | null } | null = null;
   // an element drag, or a palette tile's creation drag: what it moves (nothing for a tile), the palette entry it
@@ -680,7 +698,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   // brightness down, written with the area's door (style.set) for its property through the session
   const pickColor = (area: HTMLElement, x: number, y: number) => {
     const box = area.getBoundingClientRect();
-    if (box.width === 0 || box.height === 0 || session === null) return;
+    if (box.width === 0 || box.height === 0 || shared.session === null) return;
     const s = Math.min(1, Math.max(0, (x - box.left) / box.width));
     const v = 1 - Math.min(1, Math.max(0, (y - box.top) / box.height));
     // a pick that keeps the alpha writes it opaque when the colour the picker shows is fully transparent (item 6.5)
@@ -688,7 +706,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     const value = formatColor(hsbToRgb({ h: Number(area.dataset.hue ?? '0'), s, v, a: pickedAlpha(shown, shown) }));
     const entry = manifest.doorByRef.get((area.getAttribute('data-door') ?? '') as DoorId);
     if (!entry) return;
-    session.dispatch(entry.command.id as CommandId, { ...entry.door.args, property: area.dataset.property ?? '', value } as never);
+    shared.session.dispatch(entry.command.id as CommandId, { ...entry.door.args, property: area.dataset.property ?? '', value } as never);
   };
   // the resize handle pressed: its door and handle, where it went down, what the element measured then and the zoom,
   // and the gesture its drag opened (none before the threshold) with the cancellations counted when it opened
@@ -768,10 +786,10 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   const moveLight = (at: Point) => {
     if (lighting === null) return;
     const { press, startX } = lighting;
-    open?.cancel();
-    open = store.gesture();
+    shared.open?.cancel();
+    shared.open = store.gesture();
     const edit = { ...(press.args.edit as Record<string, unknown>), x: `${Math.round(at.x - press.centre.x)}px`, y: `${Math.round(at.y - press.centre.y)}px` };
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, edit, distance: at.x - startX } as never);
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, edit, distance: at.x - startX } as never);
   };
   // the drag of the quick panel by its grip: its press, and where the pointer went down on the screen
   let gripping: { readonly press: Extract<Press, { on: 'grip' }>; readonly start: Point } | null = null;
@@ -787,9 +805,9 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   const moveGrip = (at: Point) => {
     if (gripping === null) return;
     const { press, start } = gripping;
-    open?.cancel();
-    open = store.gesture();
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, offset: { x: press.base.x + at.x - start.x, y: press.base.y + at.y - start.y }, distance: at.x - start.x } as never);
+    shared.open?.cancel();
+    shared.open = store.gesture();
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, offset: { x: press.base.x + at.x - start.x, y: press.base.y + at.y - start.y }, distance: at.x - start.x } as never);
   };
   // the drag of a gradient stop: its press, and where the pointer went down on the screen
   let stopping: { readonly press: Extract<Press, { on: 'stop' }>; readonly startX: number } | null = null;
@@ -826,17 +844,17 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     const shown = shownAnimation(store.getState());
     if (shown === null) return;
     const time = playheadTimeFromTrackX(shown.animation, at.x - press.track.left);
-    open?.cancel();
-    open = store.gesture();
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, time, distance: at.x - startX } as never);
+    shared.open?.cancel();
+    shared.open = store.gesture();
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, time, distance: at.x - startX } as never);
   };
   const moveKeyframe = (at: Point) => {
     if (keyframing === null) return;
     const { press, startX } = keyframing;
     const offset = offsetFromTrackX(at.x - press.track.left);
-    open?.cancel();
-    open = store.gesture();
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, offset, distance: at.x - startX } as never);
+    shared.open?.cancel();
+    shared.open = store.gesture();
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, offset, distance: at.x - startX } as never);
   };
   const folderUnder = (at: Point): HTMLElement | null => {
     const under = document.elementFromPoint(at.x, at.y);
@@ -860,10 +878,10 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     const inside = press.rows.findIndex((r) => at.y >= r.top && at.y <= r.bottom);
     const to = inside === -1 ? (at.y < (press.rows[0]?.top ?? 0) ? 0 : press.rows.length - 1) : inside;
     if (to === press.index) return;
-    open?.cancel();
-    open = store.gesture();
+    shared.open?.cancel();
+    shared.open = store.gesture();
     const edit = { ...(press.args.edit as Record<string, unknown> | undefined), move: { from: press.index, to } };
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, edit } as never);
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, edit } as never);
   };  // The splitter follows the pointer from the press on: its travel along the splitter's own axis is handed to the
   // command, which sizes the panel from the size it held at the press (spec panel-resize); the gesture is cancelled
   // back to that size first, so Escape puts it back
@@ -872,9 +890,9 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     const { press, start, from } = splitting;
     const axis = SPLITTERS[String(press.args.splitter ?? '') as SplitterId]?.axis ?? 'x';
     const distance = axis === 'x' ? Math.round(at.x - start.x) : Math.round(at.y - start.y);
-    open?.cancel();
-    open = store.gesture();
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, size: from, distance } as never);
+    shared.open?.cancel();
+    shared.open = store.gesture();
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, size: from, distance } as never);
   };
   // A dragged panel's hint follows the pointer from the press on: where the panel would land is what the hint draws
   // (workspace/panel-drag.ts), and the release runs that place's door. Nothing is dispatched while dragging.
@@ -889,10 +907,10 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     if (stopping === null) return;
     const { press, startX } = stopping;
     const position = Math.round(Math.min(100, Math.max(0, ((at.x - press.bar.left) / press.bar.width) * 100)));
-    open?.cancel();
-    open = store.gesture();
+    shared.open?.cancel();
+    shared.open = store.gesture();
     const edit = { ...(press.args.edit as Record<string, unknown>), stop: press.index, position };
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, edit, distance: at.x - startX } as never);
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, edit, distance: at.x - startX } as never);
   };
 
   // The scrub follows the pointer: every move scrubs anew from the value held before the press, so the gesture is
@@ -901,9 +919,9 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     if (scrubbing === null) return;
     const { press, startX } = scrubbing;
     const held = scrubModifier(press.entry, modifier);
-    open?.cancel();
-    open = store.gesture();
-    open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, value: press.value, distance: at.x - startX, ...(held !== null ? { modifier: held } : {}) } as never);
+    shared.open?.cancel();
+    shared.open = store.gesture();
+    shared.open.dispatch(press.entry.command.id as CommandId, { ...press.entry.door.args, ...press.args, value: press.value, distance: at.x - startX, ...(held !== null ? { modifier: held } : {}) } as never);
   };
 
   const pagePoint = (at: Point): Point | null => {
@@ -921,10 +939,10 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     const to = pagePoint(at);
     if (to === null) return;
     const from = pressedAt.page;
-    open?.cancel();
-    open = store.gesture();
+    shared.open?.cancel();
+    shared.open = store.gesture();
     const rect = { x: from.x, y: from.y, width: to.x - from.x, height: to.y - from.y };
-    open.dispatch(marquee.entry.command.id as CommandId, { ...argsFor(marquee.entry, marquee.press, NOT_PICKING), rect, mode: marquee.mode, ...(leavesNow() ? { leaves: true } : {}) } as never);
+    shared.open.dispatch(marquee.entry.command.id as CommandId, { ...argsFor(marquee.entry, marquee.press, NOT_PICKING), rect, mode: marquee.mode, ...(leavesNow(altHeld) ? { leaves: true } : {}) } as never);
     const s = pressedAt.screen;
     setBand({ x: Math.min(s.x, at.x), y: Math.min(s.y, at.y), width: Math.abs(at.x - s.x), height: Math.abs(at.y - s.y) });
   };
@@ -946,7 +964,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       const ending = editEndDoor(press, buttons.button, buttons.count, buttons.modifier, factsOf(press));
       const endArgs = ending ? editArgs(store.getState(), ending.command) : null;
       keeping = ending && endArgs ? { entry: ending, args: endArgs } : null;
-      open = store.gesture();
+      shared.open = store.gesture();
       pressed = press;
       cancelsAtOpen = store.getState().ui.drag.cancels;
       // a key only a drag gesture holds (the duplicate's Alt) is no click's: the press selects as a plain one does
@@ -966,7 +984,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       const deferred = (ofSeveral || insideSelected) && pickingDoor === null;
       deferredClick = entry && deferred ? { entry, args: argsFor(entry, press, picking) as Record<string, unknown> } : null;
       if (pickingDoor !== null) pickAfter = { entry: pickingDoor, args: argsFor(pickingDoor, press, picking) };
-      if (entry && !deferred && pickingDoor === null) open.dispatch(entry.command.id as CommandId, argsFor(entry, press, picking) as never);
+      if (entry && !deferred && pickingDoor === null) shared.open.dispatch(entry.command.id as CommandId, argsFor(entry, press, picking) as never);
       // a press that lands on the edited text leaves the focus in it
       const edited = editedNode(store.getState());
       keepFocus = edited !== null && press.on === 'node' && press.node === edited;
@@ -1020,7 +1038,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       }
       if (press.on === 'row') {
         if (ROW_SELECT === null || ROW_DROP === null) return;
-        if (!store.getState().selection.includes(press.node as NodeId)) open?.dispatch(ROW_SELECT.command.id as CommandId, { ...ROW_SELECT.door.args, target: press.node } as never);
+        if (!store.getState().selection.includes(press.node as NodeId)) shared.open?.dispatch(ROW_SELECT.command.id as CommandId, { ...ROW_SELECT.door.args, target: press.node } as never);
         const state = store.getState();
         const roots = selectionRoots(state.document, state.selection);
         // the page root's row is never dragged
@@ -1057,7 +1075,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
         }
       }
     } else if (effect === 'commit' || effect === 'cancel') {
-      const closing = open;
+      const closing = shared.open;
       const dropped = dragging?.proposal ?? null;
       const dragged = dragging !== null;
       const draggedIds = dragging?.dragged ?? [];
@@ -1071,7 +1089,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       const before = store.getState().document;
       stopDragTimers();
       const press = pressed;
-      open = null;
+      shared.open = null;
       dragging = null;
       freeing = null;
       snapShown.set(null);
@@ -1310,7 +1328,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     unfold = setTimeout(() => {
       unfold = null;
       if (dragging?.resting !== folded) return;
-      open?.dispatch(ROW_DWELL.command.id as CommandId, { ...ROW_DWELL.door.args, target: folded } as never);
+      shared.open?.dispatch(ROW_DWELL.command.id as CommandId, { ...ROW_DWELL.door.args, target: folded } as never);
     }, EXPAND_DWELL);
   };
   const stopDragTimers = () => {
@@ -1362,7 +1380,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   // and Ctrl not held, the moved box is pulled to the nearest enabled target or equal gap first (canvas/snapping.ts);
   // with smart guides on, what it aligns with and the gaps it repeats are drawn
   const moveFree = (at: Point, suspended: boolean) => {
-    if (freeing === null || open === null || FREE_DRAG === null) return;
+    if (freeing === null || shared.open === null || FREE_DRAG === null) return;
     const travel = { x: (at.x - freeing.start.x) / freeing.zoom, y: (at.y - freeing.start.y) / freeing.zoom };
     const state = store.getState();
     const mode = snapMode(state, suspended);
@@ -1373,7 +1391,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     const dy = total.y - freeing.applied.y;
     if (dx === 0 && dy === 0) return;
     freeing.applied = total;
-    open.dispatch(FREE_DRAG.command.id as CommandId, { ...FREE_DRAG.door.args, dx, dy } as never);
+    shared.open.dispatch(FREE_DRAG.command.id as CommandId, { ...FREE_DRAG.door.args, dx, dy } as never);
   };
   const over = (at: Point, onPage: boolean) => {
     if (dragging === null) return;
@@ -1402,7 +1420,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   // Chrome's pointerdown carries no click count, so each press is a single click): the double-click door of what it
   // lands on runs as a gesture of its own.
   const onDoubleClick = (event: MouseEvent) => {
-    if (machine.phase !== 'idle' || open !== null || event.button !== 0) return;
+    if (machine.phase !== 'idle' || shared.open !== null || event.button !== 0) return;
     const press = pressAt(event, isRoot);
     if (press === null || press === 'elsewhere') return;
     const entry = clickDoor(press, 'primary', 2, modifierOf(event), factsOf(press), pickingOf(store.getState().ui));
@@ -1446,45 +1464,45 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     if (tooling === null) return;
     const { session, gesture } = tooling;
     tooling = null;
-    if (open === gesture) open = null;
+    if (shared.open === gesture) shared.open = null;
     session.cancel();
     gesture.cancel();
   };
   const dropHandleGestures = () => {
     dropTool();
     const opened = [spacing?.gesture, guiding?.gesture, rotating?.gesture, resizing?.gesture].filter((g): g is Gesture => g != null);
-    const panned = panning !== null;
+    const panned = shared.panning !== null;
     spacing = null;
     setBanding(null);
     guiding = null;
     rotating = null;
     setResizing(null);
     resizing = null;
-    panning = null;
+    shared.panning = null;
     pickingColor = null;
     setGuideOnRuler(null);
     snapShown.set(null);
-    if (panned) setPanView(spaceDown ? 'armed' : 'idle');
+    if (panned) setPanView(shared.spaceDown ? 'armed' : 'idle');
     for (const gesture of opened) {
-      if (open === gesture) open = null;
+      if (shared.open === gesture) shared.open = null;
       gesture.cancel();
     }
   };
   const onDown = (event: PointerEvent) => {
     // a press or a gesture still open here lost its release: it ends before anything new begins
-    if (pointerPressing() || spacing !== null || guiding !== null || rotating !== null || resizing !== null || panning !== null || pickingColor !== null || sliding !== null || tooling !== null) onCancel();
+    if (pointerPressing() || spacing !== null || guiding !== null || rotating !== null || resizing !== null || shared.panning !== null || pickingColor !== null || sliding !== null || tooling !== null) onCancel();
     setPressing(true);
     setPressRegion(pressRegionOf(event.target));
     publishOutsidePress(event.target);
     // a pointer tool (the Layout Composer's stage, the motion Timeline's drags): a primary press on its surface, Space
     // not held (a pan)
-    const tool = event.button === 0 && machine.phase === 'idle' && open === null && !spaceDown ? toolPress(toolPoint(event), event.target, store) : null;
+    const tool = event.button === 0 && machine.phase === 'idle' && shared.open === null && !shared.spaceDown ? toolPress(toolPoint(event), event.target, store) : null;
     if (tool !== null) {
       event.preventDefault();
       leaveField();
       capture(event.pointerId);
       const gesture = store.gesture();
-      open = gesture;
+      shared.open = gesture;
       tooling = { session: tool, pointer: event.pointerId, gesture, cancels: store.getState().ui.drag.cancels };
       return;
     }
@@ -1511,7 +1529,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       return;
     }
     // the colour picker's area, during its session: the colour it points at, then at every move while held
-    const area = session !== null && event.button === 0 && event.target instanceof Element ? event.target.closest<HTMLElement>('[data-color-area]') : null;
+    const area = shared.session !== null && event.button === 0 && event.target instanceof Element ? event.target.closest<HTMLElement>('[data-color-area]') : null;
     if (area !== null) {
       event.preventDefault();
       pickingColor = { area, pointer: event.pointerId };
@@ -1620,11 +1638,11 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       return;
     }
     // a pan: the middle button, or the primary one with Space held, on the stage
-    const source = onStage(event.target) && machine.phase === 'idle' ? (event.button === 1 ? 'middle-button' : event.button === 0 && spaceDown ? 'space-held' : null) : null;
+    const source = onStage(event.target) && machine.phase === 'idle' ? (event.button === 1 ? 'middle-button' : event.button === 0 && shared.spaceDown ? 'space-held' : null) : null;
     const panEntry = source !== null ? panDrag(source) : null;
     if (panEntry !== null) {
       event.preventDefault();
-      panning = { pointer: event.pointerId, last: { x: event.clientX, y: event.clientY }, moved: { x: 0, y: 0 }, entry: panEntry };
+      shared.panning = { pointer: event.pointerId, last: { x: event.clientX, y: event.clientY }, moved: { x: 0, y: 0 }, entry: panEntry };
       setPanView('panning');
       return;
     }
@@ -1659,7 +1677,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
         // the drag runs anew from the press: the page follows the pointer, and Escape puts everything back
         tooling.gesture.cancel();
         const gesture = store.gesture();
-        open = gesture;
+        shared.open = gesture;
         tooling.gesture = gesture;
         gesture.dispatch(step.command as never, step.args as never);
       }
@@ -1686,8 +1704,8 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       if (menuUnder === null) setMenuOver(null);
       else menuDwell = setTimeout(() => setMenuOver(menuUnder), MENU_HOVER_SWITCH);
     }
-    overStage = onStage(under);
-    setCanvasPointer(overStage ? { x: event.clientX, y: event.clientY } : null);
+    shared.overStage = onStage(under);
+    setCanvasPointer(shared.overStage ? { x: event.clientX, y: event.clientY } : null);
     if (spacing !== null) {
       if (event.pointerId !== spacing.pointer) return;
       const dx = event.clientX - spacing.from.x;
@@ -1696,7 +1714,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
         if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
         spacing.gesture = store.gesture();
         spacing.cancels = store.getState().ui.drag.cancels;
-        open = spacing.gesture;
+        shared.open = spacing.gesture;
         setBanding(spacing.element.getAttribute('data-door'));
         capture(event.pointerId);
       }
@@ -1743,7 +1761,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
         if (Math.hypot(event.clientX - guiding.start.x, event.clientY - guiding.start.y) < DRAG_THRESHOLD) return;
         guiding.gesture = store.gesture();
         guiding.cancels = store.getState().ui.drag.cancels;
-        open = guiding.gesture;
+        shared.open = guiding.gesture;
         capture(event.pointerId);
       }
       // over its own ruler, or past it (the pointer carried out of the canvas beyond the ruler: the person throws the
@@ -1768,7 +1786,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
         if (Math.hypot(event.clientX - rotating.start.x, event.clientY - rotating.start.y) < DRAG_THRESHOLD) return;
         rotating.gesture = store.gesture();
         rotating.cancels = store.getState().ui.drag.cancels;
-        open = rotating.gesture;
+        shared.open = rotating.gesture;
         capture(event.pointerId);
       }
       const turned = folded(rotating.base + ((Math.atan2(event.clientY - rotating.centre.y, event.clientX - rotating.centre.x) - rotating.startAngle) * 180) / Math.PI);
@@ -1784,7 +1802,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
         if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
         resizing.gesture = store.gesture();
         resizing.cancels = store.getState().ui.drag.cancels;
-        open = resizing.gesture;
+        shared.open = resizing.gesture;
         capture(event.pointerId);
       }
       const travel = snappedResize(resizing, dx / resizing.zoom, dy / resizing.zoom, event.ctrlKey);
@@ -1797,15 +1815,15 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       resizing.gesture.dispatch(resizing.entry.command.id as CommandId, { ...resizing.entry.door.args, ...given } as never);
       return;
     }
-    if (panning !== null) {
-      if (event.pointerId !== panning.pointer) return;
-      const dx = event.clientX - panning.last.x;
-      const dy = event.clientY - panning.last.y;
-      panning.last = { x: event.clientX, y: event.clientY };
+    if (shared.panning !== null) {
+      if (event.pointerId !== shared.panning.pointer) return;
+      const dx = event.clientX - shared.panning.last.x;
+      const dy = event.clientY - shared.panning.last.y;
+      shared.panning.last = { x: event.clientX, y: event.clientY };
       if (dx === 0 && dy === 0) return;
       capture(event.pointerId);
-      panning.moved = { x: panning.moved.x + dx, y: panning.moved.y + dy };
-      dispatchPan(panning.entry, { dx, dy });
+      shared.panning.moved = { x: shared.panning.moved.x + dx, y: shared.panning.moved.y + dy };
+      dispatchPan(shared.panning.entry, { dx, dy });
       return;
     }
     const press = pressAt(event, isRoot, under);
@@ -1872,7 +1890,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       if (event.pointerId !== tooling.pointer) return;
       const { session, gesture } = tooling;
       tooling = null;
-      if (open === gesture) open = null;
+      if (shared.open === gesture) shared.open = null;
       session.release(toolPoint(event), gesture);
       gesture.commit();
       return;
@@ -1883,7 +1901,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       spacing = null;
       setBanding(null);
       if (gesture !== null) {
-        open = null;
+        shared.open = null;
         gesture.commit();
         return;
       }
@@ -1899,7 +1917,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       guiding = null;
       setGuideOnRuler(null);
       if (gesture === null) return;
-      open = null;
+      shared.open = null;
       // over its own ruler: a new guide is not made, a moved one is deleted
       if (dropped && kind === 'create') {
         gesture.cancel();
@@ -1914,7 +1932,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       const { gesture } = rotating;
       rotating = null;
       if (gesture !== null) {
-        open = null;
+        shared.open = null;
         gesture.commit();
       }
       return;
@@ -1926,7 +1944,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       resizing = null;
       snapShown.set(null);
       if (gesture !== null) {
-        open = null;
+        shared.open = null;
         gesture.commit();
         return;
       }
@@ -1947,10 +1965,10 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       run(up.effect);
       return;
     }
-    if (panning !== null) {
-      if (event.pointerId !== panning.pointer) return;
-      panning = null;
-      setPanView(spaceDown ? 'armed' : 'idle');
+    if (shared.panning !== null) {
+      if (event.pointerId !== shared.panning.pointer) return;
+      shared.panning = null;
+      setPanView(shared.spaceDown ? 'armed' : 'idle');
       return;
     }
     const next = step(machine, { type: 'up', pointer: event.pointerId });
@@ -2022,39 +2040,39 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   // the picker's session follows the picker: opened with it, committed or cancelled as it closes
   let pickerClosings = store.getState().ui.colorPickerClosed.count;
   let pickerCancels = store.getState().ui.drag.cancels;
-  sessionDispatch = (id, args) => {
-    const through = session ?? null;
+  shared.sessionDispatch = (id, args) => {
+    const through = shared.session ?? null;
     return through !== null ? through.dispatch(id as never, args as never) : (store.dispatch as (i: CommandId, a: unknown) => DispatchResult)(id, args);
   };
   const followPicker = () => {
     const ui = store.getState().ui;
-    if (ui.colorPicker !== null && session === null && open === null) {
-      session = store.gesture();
-      open = session;
+    if (ui.colorPicker !== null && shared.session === null && shared.open === null) {
+      shared.session = store.gesture();
+      shared.open = shared.session;
       pickerCancels = ui.drag.cancels;
       pickerClosings = ui.colorPickerClosed.count;
       return;
     }
-    if (session === null) return;
+    if (shared.session === null) return;
     const ended = ui.colorPickerClosed.count !== pickerClosings;
     const escaped = ui.drag.cancels !== pickerCancels;
     if (!ended && !escaped) return;
     pickerClosings = ui.colorPickerClosed.count;
-    const closing = session;
-    session = null;
-    open = null;
+    const closing = shared.session;
+    shared.session = null;
+    shared.open = null;
     const applied = ended && ui.colorPickerClosed.applied;
-    pendingPickerEnd = () => {
+    shared.pendingPickerEnd = () => {
       // Escape ended the session: the picker closes too, inside it, so that nothing opens a session again
       if (escaped && store.getState().ui.colorPicker !== null) closing.dispatch(CANCEL_PICKER as never, {} as never);
       if (applied) closing.commit();
       else closing.cancel();
     };
-    queueMicrotask(finishPickerSession);
+    queueMicrotask(() => finishPickerSession(shared));
   };
   const stopPicker = store.subscribe(followPicker);
   const stopListening = store.subscribe(() => {
-    if (session !== null) return;
+    if (shared.session !== null) return;
     // Escape during a pointer tool's press (drag.cancel): nothing it did is kept
     if (tooling !== null && store.getState().ui.drag.cancels !== tooling.cancels) {
       queueMicrotask(dropTool);
@@ -2065,7 +2083,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       const cancelled = spacing.gesture;
       spacing = null;
       setBanding(null);
-      open = null;
+      shared.open = null;
       queueMicrotask(() => cancelled.cancel());
       return;
     }
@@ -2074,7 +2092,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       const cancelled = guiding.gesture;
       guiding = null;
       setGuideOnRuler(null);
-      open = null;
+      shared.open = null;
       queueMicrotask(() => cancelled.cancel());
       return;
     }
@@ -2082,7 +2100,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
     if (rotating?.gesture != null && store.getState().ui.drag.cancels !== rotating.cancels) {
       const cancelled = rotating.gesture;
       rotating = null;
-      open = null;
+      shared.open = null;
       queueMicrotask(() => cancelled.cancel());
       return;
     }
@@ -2091,18 +2109,18 @@ export function installPointer(store: EditorStore, target: Window = window): () 
       const cancelled = resizing.gesture;
       resizing = null;
       snapShown.set(null);
-      open = null;
+      shared.open = null;
       queueMicrotask(() => cancelled.cancel());
       return;
     }
-    if (open === null) return;
+    if (shared.open === null) return;
     if (store.getState().ui.drag.cancels === cancelsAtOpen) {
       redraw(pointerAt, false);
       return;
     }
-    const cancelled = open;
+    const cancelled = shared.open;
     queueMicrotask(() => {
-      if (open === cancelled) endCancelled();
+      if (shared.open === cancelled) endCancelled();
     });
   });
 
@@ -2110,7 +2128,7 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   const dispatchPan = (entry: DoorEntry, args: Readonly<Record<string, unknown>>) => {
     (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, ...args });
   };
-  panDispatch = dispatchPan;
+  shared.panDispatch = dispatchPan;
   const onWheel = (event: WheelEvent) => {
     if (!onStage(event.target)) return;
     const modifier = event.ctrlKey || event.metaKey ? 'Ctrl' : event.shiftKey ? 'Shift' : null;
@@ -2139,21 +2157,21 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   return () => {
     stopListening();
     stopPicker();
-    sessionDispatch = null;
-    finishPickerSession();
+    shared.sessionDispatch = null;
+    finishPickerSession(shared);
     onCancel();
-    panDispatch = null;
+    shared.panDispatch = null;
     // the window's own transient state goes with the owner: a test that unmounts in the middle of a pan or with Space
     // held leaves nothing behind for the next editor installed over it
-    panning = null;
-    spaceDown = false;
-    overStage = false;
+    shared.panning = null;
+    shared.spaceDown = false;
+    shared.overStage = false;
     if (menuDwell !== null) clearTimeout(menuDwell);
     menuDwell = null;
     menuResting = null;
     setPanView('idle');
     // the document is free again: another editor (a new document, a test that unmounts and mounts) may take the pointer
-    if (pointerOwner === store) pointerOwner = null;
+    if (OWNERS.get(target) === store) OWNERS.delete(target);
     target.removeEventListener('wheel', onWheel, { capture: true });
     target.removeEventListener('pointerdown', onDown, true);
     target.removeEventListener('dblclick', onDoubleClick, true);

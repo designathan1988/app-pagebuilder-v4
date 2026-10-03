@@ -472,7 +472,7 @@ function SpacingField({ entry, box, sides, properties, where, label }: { readonl
     if (element === null || !typed.current) return;
     typed.current = false;
     const value = element.value;
-    keepAfterGesture(() => {
+    keepAfterGesture(store, () => {
       if (store.getState().selection.length === 0) return;
       (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(command, { box, sides, value });
     });

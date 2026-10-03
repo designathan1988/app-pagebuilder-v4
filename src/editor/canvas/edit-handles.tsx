@@ -35,12 +35,12 @@ import { manifest, numberConstant, type DoorEntry } from '../../manifest/runtime
 import { useDoor } from '../doors/door.tsx';
 import { useEditorState, useStore, MODEL_RULES } from '../store.ts';
 import { useSelectionContext } from '../shell/field.tsx';
-import { bandingNow } from '../input/pointer/views.ts';
 import { typedBand } from './band-typing.ts';
 import { canvasFrame, computedValues, nodeBox } from './coordinates.ts';
 import { editMode, handlesOf, type EditMode } from './edit-mode.ts';
 import { handleArgs, movesOffset, shadowLength, shadowOf, valueArg } from './handles.ts';
 import { lineStyles } from '../../core/style/set.ts';
+import { usePointerValue } from '../input/pointer/use-views.ts';
 
 interface Box {
   readonly x: number;
@@ -181,7 +181,7 @@ function Handle({ drawn, mode }: { readonly drawn: Drawn; readonly mode: EditMod
   const door = useDoor(entry, stands, undefined, isFeatureBuilt(entry.door.feature as FeatureId));
   // a band its mode pins stays shown; any other reveals itself under the pointer, and stays shown with its value while
   // a drag pulls it (the pointer leaves it as soon as it moves)
-  const dragged = useSyncExternalStore(bandingNow.subscribe, bandingNow.get) === entry.ref;
+  const dragged = usePointerValue('bandingNow') === entry.ref;
   const pinned = band === undefined || dragged || handlesOf(mode).some((d) => d.ref === entry.ref);
   const sidesStart = sides === undefined ? undefined : sides.join(',');
   const style: CSSProperties = { left: box.x, top: box.y, width: box.width, height: box.height };

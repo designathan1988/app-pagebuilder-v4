@@ -60,7 +60,7 @@ function useTyped(entry: DoorEntry | undefined, arg: string): (text: string) => 
   const store = useStore();
   return (text) => {
     if (entry === undefined) return;
-    afterGesture(() => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, [arg]: text }));
+    afterGesture(store, () => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, [arg]: text }));
   };
 }
 

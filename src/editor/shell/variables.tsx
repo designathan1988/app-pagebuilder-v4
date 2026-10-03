@@ -133,7 +133,7 @@ function VariableField({ entry, token, filled, held, label }: { readonly entry: 
   const keep = () => {
     const text = input.current?.value ?? '';
     if (text === held) return;
-    afterGesture(() => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, ...args, [filled]: text }));
+    afterGesture(store, () => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, ...args, [filled]: text }));
   };
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -190,7 +190,7 @@ function KeptField({ entry, args, filled, held, label }: { readonly entry: DoorE
   const keep = () => {
     const text = input.current?.value ?? '';
     if (text === held) return;
-    afterGesture(() => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, ...args, [filled]: text }));
+    afterGesture(store, () => (store.dispatch as (id: CommandId, a: unknown) => DispatchResult)(entry.command.id as CommandId, { ...entry.door.args, ...args, [filled]: text }));
   };
   return (
     <form className={`variables__field${door.available ? '' : ' is-unavailable'}`} data-door={entry.ref} data-args={JSON.stringify(args)} title={door.title} onSubmit={(event: FormEvent) => { event.preventDefault();
