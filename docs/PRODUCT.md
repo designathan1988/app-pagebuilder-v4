@@ -611,6 +611,10 @@ predicate hardening, the invariant probe in the gate, and the security set. Sinc
 cycle (dependency-cruiser counted 14 runtime cycles, the audit's six and their variants; `deps:check` in `check:fast`
 keeps it so). Since QA 225 the editor and the modules import nothing of `src/app` (a lint rule refuses it); since QA 226 a
 module imports only its host API (`src/editor/host.ts`).
+Since QA 228–232 the giants are split: `sidebar.tsx` one file per view, `applyStyles` four phases, `TextStyleField`
+and `CanvasChrome` their parts, `checkManifest` thirteen rule families (`src/manifest/check/`), and `installPointer`
+182 lines over one state object, its parts in `src/editor/input/pointer/` (common, panels, resize, drag, effects,
+tools, events, owner).
 
 ## 6. How to prove
 

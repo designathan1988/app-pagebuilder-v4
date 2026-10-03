@@ -5,8 +5,8 @@
     "commands": 371,
     "doors": 1350,
     "scenarios": 1820,
-    "modules": 458,
-    "lines": 80763
+    "modules": 466,
+    "lines": 81003
   },
   "features": [
     {
@@ -5523,7 +5523,31 @@
     },
     {
       "path": "src/editor/input/pointer.ts",
-      "lines": 2192,
+      "lines": 263,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/input/pointer/common.ts",
+      "lines": 560,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/input/pointer/drag.ts",
+      "lines": 228,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/input/pointer/effects.ts",
+      "lines": 297,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/input/pointer/events.ts",
+      "lines": 564,
       "commands": [],
       "features": []
     },
@@ -5534,8 +5558,32 @@
       "features": []
     },
     {
+      "path": "src/editor/input/pointer/owner.ts",
+      "lines": 220,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/input/pointer/panels.ts",
+      "lines": 141,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/input/pointer/press.ts",
       "lines": 98,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/input/pointer/resize.ts",
+      "lines": 96,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/input/pointer/tools.ts",
+      "lines": 63,
       "commands": [],
       "features": []
     },

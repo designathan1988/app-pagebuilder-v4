@@ -68,15 +68,15 @@ export default defineConfig(
     // machine and the OS file drop it owns (input/file-drop.ts, split out of it).
     files: ['src/**/*.{ts,tsx}'],
     // the motion runtime is the page's own script (spec motion-runtime): its triggers listen to the page's pointer
-    ignores: ['src/editor/input/pointer.ts', 'src/editor/input/file-drop.ts', 'src/editor/motion/runtime/**'],
+    ignores: ['src/editor/input/pointer.ts', 'src/editor/input/pointer/**', 'src/editor/input/file-drop.ts', 'src/editor/motion/runtime/**'],
     plugins: { builder },
     rules: { 'builder/pointer-owner': 'error' },
   },
   {
-    // A gesture's transaction is opened by the pointer owner's doors, never by a handler; the store's own tests open
-    // gestures to prove them.
+    // A gesture's transaction is opened by the pointer owner's doors, never by a handler (the owner is pointer.ts and
+    // its parts, pointer/*.ts); the store's own tests open gestures to prove them.
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/editor/input/pointer.ts', 'src/**/*.test.ts'],
+    ignores: ['src/editor/input/pointer.ts', 'src/editor/input/pointer/**', 'src/**/*.test.ts'],
     plugins: { builder },
     rules: { 'builder/gesture-owner': 'error' },
   },
