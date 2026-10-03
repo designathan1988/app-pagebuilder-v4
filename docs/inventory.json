@@ -6,7 +6,7 @@
     "doors": 1350,
     "scenarios": 1820,
     "modules": 442,
-    "lines": 80359
+    "lines": 80503
   },
   "features": [
     {
@@ -4014,7 +4014,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1607,
+      "lines": 1653,
       "commands": [
         "project.importHtml"
       ],
@@ -5031,7 +5031,7 @@
     },
     {
       "path": "src/editor/canvas/chrome.tsx",
-      "lines": 1011,
+      "lines": 1066,
       "commands": [],
       "features": []
     },
@@ -6107,7 +6107,7 @@
     },
     {
       "path": "src/editor/shell/field.tsx",
-      "lines": 1679,
+      "lines": 1722,
       "commands": [],
       "features": []
     },

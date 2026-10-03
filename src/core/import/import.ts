@@ -801,29 +801,30 @@ interface SheetSource {
   readonly text: string;
 }
 
-// The declarations a stylesheet gives the nodes of a page: each rule read by the matcher, its declarations read by the
-// one readers of a declarations text, and the winners by importance, inline, specificity and order — the cascade the
-// browser runs. A rule that cannot be mapped (a media query no breakpoint takes, a selector this importer does not
-// read, a pseudo-class that is no state, a descendant state rule) is reported and left alone.
-//
-// A rule whose selector is one class name alone (`.card`, `.card:hover`, `.card` inside a @media) is the class's own:
-// it becomes a definition of the project's style classes (core/design/classes.ts), not a value written on each element
-// that lists it — that is what a class is for, and it is what makes an exported page import back as it was.
-// `authors`: the classes of the person's own (authorClasses): their rules are the project's class definitions, never
-// values of the elements that list them; `definitions`, when given empty, receives those definitions (one pass).
-function applyStyles(tree: DocNode, builder: Builder, sources: readonly SheetSource[], authors: ReadonlySet<string> = new Set(), definitions: Map<string, Styles> | null = null): void {
+// One rule of a stylesheet the importer can map, with the layer (breakpoint and state) and the rank (specificity and
+// order) CSS gives it.
+interface Ready {
+  readonly rule: CssRule;
+  readonly source: string;
+  readonly media: { readonly breakpoint: string | null };
+  readonly state: string;
+  readonly bare: Selector;
+  readonly classRule: string | null;
+  readonly order: number;
+}
+
+interface ReadyRules {
+  readonly ready: readonly Ready[];
+  // the class names the sheets name: the last class of an element that one of them names is its own rule's
+  readonly classNames: ReadonlySet<string>;
+  // the last rule's order (the style attribute ranks after it)
+  readonly order: number;
+}
+
+// One pass over every source: the rules the importer cannot map are reported here (once each, with their line) and
+// the rest are kept with the layer (breakpoint and state) and the rank (specificity and order) CSS gives them.
+function readyRules(builder: Builder, sources: readonly SheetSource[]): ReadyRules {
   const { rules } = builder;
-  // One pass over every source: the rules the importer cannot map are reported here (once each, with their line) and
-  // the rest are kept with the layer (breakpoint and state) and the rank (specificity and order) CSS gives them.
-  interface Ready {
-    readonly rule: CssRule;
-    readonly source: string;
-    readonly media: { readonly breakpoint: string | null };
-    readonly state: string;
-    readonly bare: Selector;
-    readonly classRule: string | null;
-    readonly order: number;
-  }
   const ready: Ready[] = [];
   // the class names the sheets name: the last class of an element that one of them names is its own rule's
   const classNames = new Set<string>();
@@ -877,19 +878,37 @@ function applyStyles(tree: DocNode, builder: Builder, sources: readonly SheetSou
       ready.push({ rule, source: source.file, media, state, bare, classRule, order });
     }
   }
-  // The elements: the winner of each property, in each layer (a breakpoint and a state), by importance, inline,
-  // specificity and order — the cascade the browser runs, a rule of one breakpoint never beating one of another. The
-  // class of the element's own rule (the last of its classes the sheet names) reads as a value of the element's own,
-  // and that class does not stand among its classes: the export makes it again from the name.
-  interface Layer {
-    readonly breakpoint: string;
-    readonly state: string;
-    readonly own: Map<string, Candidate>;
-  }
+  return { ready, classNames, order };
+}
+
+// A property's winning declarations in one layer of an element (a breakpoint and a state).
+interface Layer {
+  readonly breakpoint: string;
+  readonly state: string;
+  readonly own: Map<string, Candidate>;
+}
+
+type Animated = Map<string, Map<string, { readonly value: string; readonly rank: readonly number[] }>>;
+
+// The elements: the winner of each property, in each layer (a breakpoint and a state), by importance, inline,
+// specificity and order — the cascade the browser runs, a rule of one breakpoint never beating one of another. The
+// class of the element's own rule (the last of its classes the sheet names) reads as a value of the element's own,
+// and that class does not stand among its classes: the export makes it again from the name.
+interface Cascaded {
+  // each element's winning declarations, by layer
+  readonly winners: ReadonlyMap<string, ReadonlyMap<string, Layer>>;
+  // the classes each element keeps (its own rule's class left the list)
+  readonly kept: ReadonlyMap<string, readonly string[]>;
+  // the animation properties each element's rules give it at the base layer
+  readonly animated: Animated;
+}
+
+function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: ReadyRules, authors: ReadonlySet<string>): Cascaded {
+  const { rules } = builder;
   const winners = new Map<string, Map<string, Layer>>();
   const kept = new Map<string, readonly string[]>();
   // the animation properties each element's rules give it at the base layer (AN2: read back as its animations)
-  const animated = new Map<string, Map<string, { readonly value: string; readonly rank: readonly number[] }>>();
+  const animated: Animated = new Map();
   const walk = (node: DocNode, ancestors: readonly Facts[]): void => {
     // the last of the element's classes a rule of the sheet is written for: the export's own class, which does not
     // stand among the element's (the export makes it again from the name); the others the element keeps as its own
@@ -964,35 +983,45 @@ function applyStyles(tree: DocNode, builder: Builder, sources: readonly SheetSou
     for (const child of node.children) walk(child, [facts, ...ancestors]);
   };
   walk(tree, []);
-  // the definitions of the person's own classes: each class's rules, by breakpoint and state, the later or !important
-  // declaration winning as CSS has it (the audit's B-04: they were copied onto every element and the class was lost)
-  if (definitions !== null && definitions.size === 0) {
-    const ranked = new Map<string, Map<string, Map<string, Candidate>>>();
-    for (const one of ready) {
-      if (one.classRule === null || !authors.has(one.classRule)) continue;
-      const layerKey = `${one.media.breakpoint ?? rules.baseLayer.breakpoint}\u0000${one.state}`;
-      const byLayer = ranked.get(one.classRule) ?? new Map<string, Map<string, Candidate>>();
-      ranked.set(one.classRule, byLayer);
-      const own = byLayer.get(layerKey) ?? new Map<string, Candidate>();
-      byLayer.set(layerKey, own);
-      for (const declaration of one.rule.declarations) {
-        for (const [property, value] of storedDeclarations(builder, declaration.text, declaration.line, one.source)) {
-          const rank = [declaration.important ? 1 : 0, 0, 0, 0, 0, one.order];
-          const held = own.get(property);
-          if (held === undefined || higher(rank, held.rank)) own.set(property, { value, rank });
-        }
+  return { winners, kept, animated };
+}
+
+// the definitions of the person's own classes: each class's rules, by breakpoint and state, the later or !important
+// declaration winning as CSS has it (the audit's B-04: they were copied onto every element and the class was lost)
+function classDefinitions(builder: Builder, ready: readonly Ready[], authors: ReadonlySet<string>): ReadonlyMap<string, Styles> {
+  const { rules } = builder;
+  const definitions = new Map<string, Styles>();
+  const ranked = new Map<string, Map<string, Map<string, Candidate>>>();
+  for (const one of ready) {
+    if (one.classRule === null || !authors.has(one.classRule)) continue;
+    const layerKey = `${one.media.breakpoint ?? rules.baseLayer.breakpoint}\u0000${one.state}`;
+    const byLayer = ranked.get(one.classRule) ?? new Map<string, Map<string, Candidate>>();
+    ranked.set(one.classRule, byLayer);
+    const own = byLayer.get(layerKey) ?? new Map<string, Candidate>();
+    byLayer.set(layerKey, own);
+    for (const declaration of one.rule.declarations) {
+      for (const [property, value] of storedDeclarations(builder, declaration.text, declaration.line, one.source)) {
+        const rank = [declaration.important ? 1 : 0, 0, 0, 0, 0, one.order];
+        const held = own.get(property);
+        if (held === undefined || higher(rank, held.rank)) own.set(property, { value, rank });
       }
-    }
-    for (const [name, byLayer] of ranked) {
-      const styles: Record<string, Record<string, Record<string, StoredValue>>> = {};
-      for (const [layerKey, own] of byLayer) {
-        const [breakpoint = '', state = ''] = layerKey.split('\u0000');
-        const declarations = ((styles[breakpoint] ??= {})[state] ??= {});
-        for (const [property, candidate] of own) declarations[property] = candidate.value;
-      }
-      definitions.set(name, styles as Styles);
     }
   }
+  for (const [name, byLayer] of ranked) {
+    const styles: Record<string, Record<string, Record<string, StoredValue>>> = {};
+    for (const [layerKey, own] of byLayer) {
+      const [breakpoint = '', state = ''] = layerKey.split('\u0000');
+      const declarations = ((styles[breakpoint] ??= {})[state] ??= {});
+      for (const [property, candidate] of own) declarations[property] = candidate.value;
+    }
+    definitions.set(name, styles as Styles);
+  }
+  return definitions;
+}
+
+// The winners written on the elements: their styles by breakpoint and state, the classes they keep, and the
+// animations their animation properties and the sheets' @keyframes make.
+function writeStyles(tree: DocNode, builder: Builder, sources: readonly SheetSource[], { winners, kept, animated }: Cascaded): void {
   const frames = keyframesIn(builder, sources);
   const write = (node: DocNode): void => {
     const playing = animated.get(node.id);
@@ -1015,6 +1044,23 @@ function applyStyles(tree: DocNode, builder: Builder, sources: readonly SheetSou
     for (const child of node.children) write(child);
   };
   write(tree);
+}
+
+// The declarations a stylesheet gives the nodes of a page: each rule read by the matcher, its declarations read by the
+// one readers of a declarations text, and the winners by importance, inline, specificity and order — the cascade the
+// browser runs. A rule that cannot be mapped (a media query no breakpoint takes, a selector this importer does not
+// read, a pseudo-class that is no state, a descendant state rule) is reported and left alone.
+//
+// A rule whose selector is one class name alone (`.card`, `.card:hover`, `.card` inside a @media) is the class's own:
+// it becomes a definition of the project's style classes (core/design/classes.ts), not a value written on each element
+// that lists it — that is what a class is for, and it is what makes an exported page import back as it was.
+// `authors`: the classes of the person's own (authorClasses): their rules are the project's class definitions, never
+// values of the elements that list them; `definitions`, when given empty, receives those definitions (one pass).
+function applyStyles(tree: DocNode, builder: Builder, sources: readonly SheetSource[], authors: ReadonlySet<string> = new Set(), definitions: Map<string, Styles> | null = null): void {
+  const ready = readyRules(builder, sources);
+  const cascaded = cascade(tree, builder, ready, authors);
+  if (definitions !== null && definitions.size === 0) for (const [name, styles] of classDefinitions(builder, ready.ready, authors)) definitions.set(name, styles);
+  writeStyles(tree, builder, sources, cascaded);
 }
 
 // An element's animations read back from its animation properties and the sheets' @keyframes (AN2: the export writes

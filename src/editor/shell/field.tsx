@@ -701,6 +701,157 @@ export function NumberField({ entry, door, property, label, bare = false, labell
 // context as a number field, so Enter keeps what it holds with style.set and Escape puts the document's value back
 // (field.cancel); leaving it with typing not kept yet keeps it. It shows the value the primary selected element holds
 // (a composite's longhands, one value when they are the same), else the value the page computes.
+// What a style field shows (TextStyleField): the value the primary selected element holds for the property (a
+// composite's longhands composed, a part's own piece), the value the page computes as its placeholder, Mixed when the
+// selected elements differ, and whether the element, or another selected one, holds a value of its own.
+function useStyleFieldValue(property: string, parts: readonly string[], part: FieldPart | null) {
+  const storedText = useEditorState((s) => {
+    const node = styleSource(s);
+    if (!node) return undefined;
+    const values = parts.map((p) => storedValue(node, p, layeredRules(s)));
+    if (values.every((v) => v === undefined)) return undefined;
+    return composedText(property, values.map((v) => v ?? ''), MODEL_RULES);
+  });
+  const effective = useEffectiveText(property, parts, storedText !== undefined);
+  const held = useEditorState((s) => {
+    const node = styleSource(s);
+    return node ? storedValue(node, property, layeredRules(s)) : undefined;
+  });
+  // the layers of a structured value it holds (a shadow), counted
+  const storedLayersOf = useEditorState((s) => {
+    const node = styleSource(s);
+    return node ? storedLayers(node, property, layeredRules(s)).length : 0;
+  });
+  // several elements with different values: no value, and Mixed as the field's placeholder (spec multi-select-edit)
+  const mixed = useMixed(parts);
+  const appearance = useFieldAppearance(parts, mixed);
+  const t = useT();
+  // the document's value, else nothing: the effective value is the placeholder (spec inspector-provenance-reset, P4)
+  const shown = mixed ? '' : part !== null ? part.show(held) : (storedText ?? '');
+  // a part of a function (a filter's Blur, a translate's axis) shows the property's effective value too: with no
+  // function set, "none" is what a browser applies, and a row that showed nothing said less than its siblings did
+  const placeholder = mixed ? t('inspector.mixedValue') : effective !== '' ? effective : undefined;
+  // the element holds a value of its own for what the field edits (the row shows it; Reset this value takes it away)
+  const set = part !== null ? held !== undefined || storedLayersOf !== 0 : storedText !== undefined || storedLayersOf !== 0;
+  // another selected element holds one: Reset takes it away from them all (A3.35)
+  const anyStored = useAnyStored(parts);
+  return { effective, held, mixed, appearance, shown, placeholder, set, anyStored };
+}
+
+// the range a field's slider covers (the manifest's inspector-field slider)
+type SliderRange = NonNullable<Extract<DoorEntry['door'], { kind: 'inspector-field' }>['slider']>;
+
+// The slider a style field's door declares beside it (A3.30): it follows the value and writes what the pointer releases
+// on (a drag writes once, on release), through the same command the text field uses, with the unit the shown value
+// carries, so a value written in another unit of the property keeps it.
+function FieldSlider({ range, value, available, label, said, keep }: {
+  readonly range: SliderRange;
+  readonly value: string;
+  readonly available: boolean;
+  readonly label: string;
+  // the status bar's message: a write that comes back moves the thumb
+  readonly said: unknown;
+  readonly keep: (text: string) => void;
+}) {
+  const t = useT();
+  const sliderInput = useRef<HTMLInputElement>(null);
+  // the unit the release writes with: the one the value carries, read with the value and kept for the release
+  const slidUnit = useRef('');
+  const slid = slidValue(value, range);
+  useEffect(() => {
+    const element = sliderInput.current;
+    if (element === null) return;
+    slidUnit.current = slid === null ? range.unit : slid.unit;
+    // the thumb holds still while the pointer drags it; on release the write comes back as the value and moves it
+    if (document.activeElement === element) return;
+    element.value = slid === null ? String(range.min) : String(slid.value);
+  }, [slid, range, said]);
+  const keepSlide = () => {
+    const element = sliderInput.current;
+    // nothing is written when the value holds no number to slide (the thumb sits at the range's start without a value
+    // behind it) or when the thumb never left the value the field shows
+    if (element === null || !available || slid === null || element.value === String(slid.value)) return;
+    keep(`${element.value}${slidUnit.current}`);
+  };
+  useEffect(() => {
+    const element = sliderInput.current;
+    if (element === null) return undefined;
+    return registerSlider(element, () => keepSlide());
+  });
+  return (
+    <input
+      ref={sliderInput}
+      type="range"
+      className="field__slider"
+      min={range.min}
+      max={range.max}
+      step={range.step}
+      disabled={!available || slid === null}
+      title={slid === null ? t('field.slider.none') : undefined}
+      // the field's own name: a filter's eight functions share their property, never their slider's name
+      aria-label={t('field.slider.of', { property: label })}
+      onBlur={keepSlide}
+    />
+  );
+}
+
+// The list of every value a style field offers (A3.33), opened by its own button: the door's essentials first (the only
+// ones in Essentials only), the rest behind More values; the project's own fonts lead the first list, never behind
+// More values, Essentials only too (the audit's AUD-12: an uploaded font showed only in the longer list; Webflow
+// groups uploaded fonts as their own source); a font menu draws every family in its own face (the plan's stage 3).
+function FieldValues({ entry, property, label, anchor, list, suggestions, projectFonts, checked, choose }: {
+  readonly entry: DoorEntry;
+  readonly property: string;
+  readonly label: string;
+  readonly anchor: RefObject<HTMLElement | null>;
+  readonly list: RefObject<HTMLDivElement | null>;
+  readonly suggestions: readonly string[];
+  readonly projectFonts: readonly string[];
+  // the item checked: the value the element holds, else the one the page computes
+  readonly checked: string;
+  readonly choose: (value: string) => void;
+}) {
+  const t = useT();
+  const valueLabel = useValueLabel();
+  const faces = codecOf(MODEL_RULES.propertyFacts.get(property)?.codec ?? '')?.id === FAMILY_CODEC;
+  const essentials = essentialsOf(entry);
+  const essentialsMode = useEditorState((s) => inspectorMode(s.ui) === 'essentials');
+  const [moreValues, setMoreValues] = useState(false);
+  const first = essentials === null ? null : [...projectFonts, ...essentials.filter((v) => !projectFonts.includes(v))];
+  const menuValues = first === null ? suggestions : [...first.filter((v) => suggestions.includes(v)), ...(moreValues && !essentialsMode ? suggestions.filter((v) => !first.includes(v)) : [])];
+  const hasMoreValues = first !== null && !essentialsMode && suggestions.some((v) => !first.includes(v));
+  return (
+    <FieldMenu anchor={anchor} list={list} label={label}>
+      {menuValues.map((value) => (
+        <button
+          key={value}
+          type="button"
+          role="menuitemradio"
+          aria-checked={value === checked}
+          tabIndex={-1}
+          className="menu__item"
+          data-door={entry.ref}
+          data-args={JSON.stringify({ property, value })}
+          onClick={() => choose(value)}
+        >
+          <span className="menu__icon">{value === checked ? <Icon name={GLYPHS.checked} size="sm" /> : null}</span>
+          {/* a font's item is drawn in its own face: a project font (the manifest's custom-fonts) by its
+              family, a stack of the font menu as it is written */}
+          <span className={faces ? 'menu__label menu__label--face' : 'menu__label'} style={faces ? ({ '--font-face': projectFonts.includes(value) ? cssFamily(value) : value } as CSSProperties) : undefined}>
+            {valueLabel(property, value)}
+          </span>
+        </button>
+      ))}
+      {hasMoreValues ? (
+        <button type="button" role="menuitem" tabIndex={-1} className="menu__item" data-menu-more="" aria-label={t(moreValues ? 'field.values.fewer' : 'field.values.more')} onClick={() => setMoreValues(!moreValues)}>
+          <span className="menu__icon">{moreValues ? <Icon name={GLYPHS.collapsed} size="sm" /> : null}</span>
+          <span className="menu__label">{t(moreValues ? 'field.values.fewer' : 'field.values.more')}</span>
+        </button>
+      ) : null}
+    </FieldMenu>
+  );
+}
+
 // A part of a value a field edits alone (a translate axis, one function of a filter or a transform): what the field
 // shows of the value the element holds, and the arguments of its door's command for a text typed.
 const NO_EXTRA: Readonly<Record<string, unknown>> = {};
@@ -756,36 +907,8 @@ export function TextStyleField({
   const store = useStore();
   const primary = useEditorState((s) => s.selection[0] ?? null);
   const parts = useMemo(() => longhands ?? [property], [longhands, property]);
-  const storedText = useEditorState((s) => {
-    const node = styleSource(s);
-    if (!node) return undefined;
-    const values = parts.map((p) => storedValue(node, p, layeredRules(s)));
-    if (values.every((v) => v === undefined)) return undefined;
-    return composedText(property, values.map((v) => v ?? ''), MODEL_RULES);
-  });
-  const effective = useEffectiveText(property, parts, storedText !== undefined);
-  const held = useEditorState((s) => {
-    const node = styleSource(s);
-    return node ? storedValue(node, property, layeredRules(s)) : undefined;
-  });
-  // the layers of a structured value it holds (a shadow), counted
-  const storedLayersOf = useEditorState((s) => {
-    const node = styleSource(s);
-    return node ? storedLayers(node, property, layeredRules(s)).length : 0;
-  });
-  // several elements with different values: no value, and Mixed as the field's placeholder (spec multi-select-edit)
-  const mixed = useMixed(parts);
-  const appearance = useFieldAppearance(parts, mixed);
   const t = useT();
-  // the document's value, else nothing: the effective value is the placeholder (spec inspector-provenance-reset, P4)
-  const shown = mixed ? '' : part !== null ? part.show(held) : (storedText ?? '');
-  // a part of a function (a filter's Blur, a translate's axis) shows the property's effective value too: with no
-  // function set, "none" is what a browser applies, and a row that showed nothing said less than its siblings did
-  const placeholder = mixed ? t('inspector.mixedValue') : effective !== '' ? effective : undefined;
-  // the element holds a value of its own for what the field edits (the row shows it; Reset this value takes it away)
-  const set = part !== null ? held !== undefined || storedLayersOf !== 0 : storedText !== undefined || storedLayersOf !== 0;
-  // another selected element holds one: Reset takes it away from them all (A3.35)
-  const anyStored = useAnyStored(parts);
+  const { effective, held, mixed, appearance, shown, placeholder, set, anyStored } = useStyleFieldValue(property, parts, part);
   const said = useEditorState((s) => s.message);
   // Enter in a field of its own form (a command of its own, or a part) and leaving any field keep the text the same way
   const own = ownCommand || part !== null;
@@ -808,13 +931,8 @@ export function TextStyleField({
   const available = door.available && primary !== null;
   const input = useRef<HTMLInputElement>(null);
   useRevealed(property, input);
-  // the slider the door declares beside the field (A3.30): it follows the value and writes what the pointer releases
-  // on, through the same command the text field uses
+  // the slider the door declares beside the field (A3.30; FieldSlider)
   const sliderRange = entry.door.kind === 'inspector-field' ? entry.door.slider : undefined;
-  const sliderInput = useRef<HTMLInputElement>(null);
-  // the unit the release writes with: the one the value carries, read with the value and kept for the release
-  const slidUnit = useRef('');
-  const slid = sliderRange === undefined ? null : slidValue(shown !== '' ? shown : (effective ?? ''), sliderRange);
   const draft = useRef({ typed: false });
   // the list of every value the field offers, opened by its own button (A3.33): all of them, whatever the field holds
   // the layer contract of the field values menu: the same owner the menu buttons stand on (doors/menu.tsx)
@@ -843,17 +961,6 @@ export function TextStyleField({
   // the browser's own list offers the keywords and presets; the variables come in the field's suggestions list, which a
   // name typed opens (variable-suggestions.tsx), never twice
   const listed = useMemo(() => suggestions.filter((value) => !tokenSuggestions.includes(value)), [suggestions, tokenSuggestions]);
-  // a font menu draws every family in its own face (the plan's stage 3: each family previewed in itself)
-  const faces = codecOf(MODEL_RULES.propertyFacts.get(property)?.codec ?? '')?.id === FAMILY_CODEC;
-  // the values menu: the door's essentials first (the only ones in Essentials only), the rest behind More values
-  const essentials = essentialsOf(entry);
-  const essentialsMode = useEditorState((s) => inspectorMode(s.ui) === 'essentials');
-  const [moreValues, setMoreValues] = useState(false);
-  // the project's own fonts lead the first list, never behind More values, Essentials only too (the audit's AUD-12: an
-  // uploaded font showed only in the longer list; Webflow groups uploaded fonts as their own source)
-  const first = essentials === null ? null : [...projectFonts, ...essentials.filter((v) => !projectFonts.includes(v))];
-  const menuValues = first === null ? suggestions : [...first.filter((v) => suggestions.includes(v)), ...(moreValues && !essentialsMode ? suggestions.filter((v) => !first.includes(v)) : [])];
-  const hasMoreValues = first !== null && !essentialsMode && suggestions.some((v) => !first.includes(v));
   // the item checked: the value the element holds, else the one the page computes (the audit's S-027: no mark at all)
   const checkedValue = shown !== '' ? shown : mixed ? '' : effective.trim();
   useEffect(() => {
@@ -868,14 +975,6 @@ export function TextStyleField({
       draft.current.typed = recordFieldInput(element, new Event('input'));
     });
   }, [shown, said, t]);
-  useEffect(() => {
-    const element = sliderInput.current;
-    if (element === null) return;
-    slidUnit.current = slid === null ? (sliderRange?.unit ?? '') : slid.unit;
-    // the thumb holds still while the pointer drags it; on release the write comes back as the value and moves it
-    if (document.activeElement === element) return;
-    element.value = slid === null ? String(sliderRange?.min ?? 0) : String(slid.value);
-  }, [slid, sliderRange, said]);
   useEffect(() => {
     const element = input.current;
     const typing = draft.current;
@@ -932,20 +1031,6 @@ export function TextStyleField({
     };
   }, [store, command, property, keepOnLeave]);
   const refused = useFieldRefusal(entry.command.id, property);
-  // what the pointer left the slider on, written when it is released (a drag writes once, on release); the unit is the
-  // one the shown value carries, so a value written in another unit of the property keeps it
-  const keepSlide = () => {
-    const element = sliderInput.current;
-    // nothing is written when the value holds no number to slide (the thumb sits at the range's start without a value
-    // behind it) or when the thumb never left the value the field shows
-    if (element === null || !available || slid === null || element.value === String(slid.value)) return;
-    keepText.current(`${element.value}${slidUnit.current}`, store.getState().selection);
-  };
-  useEffect(() => {
-    const element = sliderInput.current;
-    if (element === null) return undefined;
-    return registerSlider(element, () => keepSlide());
-  });
   // a field whose door is a command of its own (the background image: style.setBackgroundImage), not style.set: Enter
   // submits its form and keeps what it holds with that command, since the number field's Enter is style.set's
   const submit = (event: FormEvent) => {
@@ -1014,58 +1099,16 @@ export function TextStyleField({
               <Icon name={GLYPHS.dropdown} size="xs" />
             </button>
             {valuesLayer.open ? (
-              <FieldMenu anchor={valueScope} list={valuesList} label={door.label}>
-                {menuValues.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={value === checkedValue}
-                    tabIndex={-1}
-                    className="menu__item"
-                    data-door={entry.ref}
-                    data-args={JSON.stringify({ property, value })}
-                    onClick={() => {
-                      draft.current.typed = false;
-                      if (input.current) input.current.dataset.draft = DRAFT_KEPT;
-                      valuesLayer.close();
-                      keepText.current(value, store.getState().selection);
-                    }}
-                  >
-                    <span className="menu__icon">{value === checkedValue ? <Icon name={GLYPHS.checked} size="sm" /> : null}</span>
-                    {/* a font's item is drawn in its own face: a project font (the manifest's custom-fonts) by its
-                        family, a stack of the font menu as it is written */}
-                    <span className={faces ? 'menu__label menu__label--face' : 'menu__label'} style={faces ? ({ '--font-face': projectFonts.includes(value) ? cssFamily(value) : value } as CSSProperties) : undefined}>
-                      {valueLabel(property, value)}
-                    </span>
-                  </button>
-                ))}
-                {hasMoreValues ? (
-                  <button type="button" role="menuitem" tabIndex={-1} className="menu__item" data-menu-more="" aria-label={t(moreValues ? 'field.values.fewer' : 'field.values.more')} onClick={() => setMoreValues(!moreValues)}>
-                    <span className="menu__icon">{moreValues ? <Icon name={GLYPHS.collapsed} size="sm" /> : null}</span>
-                    <span className="menu__label">{t(moreValues ? 'field.values.fewer' : 'field.values.more')}</span>
-                  </button>
-                ) : null}
-              </FieldMenu>
+              <FieldValues entry={entry} property={property} label={door.label} anchor={valueScope} list={valuesList} suggestions={suggestions} projectFonts={projectFonts} checked={checkedValue} choose={(value) => {
+                draft.current.typed = false;
+                if (input.current) input.current.dataset.draft = DRAFT_KEPT;
+                valuesLayer.close();
+                keepText.current(value, store.getState().selection);
+              }} />
             ) : null}
           </span>
         ) : null}
-        {sliderRange !== undefined ? (
-          <input
-            key="slider"
-            ref={sliderInput}
-            type="range"
-            className="field__slider"
-            min={sliderRange.min}
-            max={sliderRange.max}
-            step={sliderRange.step}
-            disabled={!available || slid === null}
-            title={slid === null ? t('field.slider.none') : undefined}
-            // the field's own name: a filter's eight functions share their property, never their slider's name
-            aria-label={t('field.slider.of', { property: label })}
-            onBlur={keepSlide}
-          />
-        ) : null}
+        {sliderRange !== undefined ? <FieldSlider key="slider" range={sliderRange} value={shown !== '' ? shown : effective} available={available} label={label} said={said} keep={(text) => keepText.current(text, store.getState().selection)} /> : null}
     </span>
   );
   // Reset this value at the row's end, as a number field's (jornada02 A.0, J6): never inside the value cell

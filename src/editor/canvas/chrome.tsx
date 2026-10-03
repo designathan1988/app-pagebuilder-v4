@@ -23,7 +23,7 @@
 //
 // Label rule (archive/DESIGN.md "Canvas"): a label never covers page content. It sits above its element when that space
 // is free, otherwise inside the element's top-left corner when that corner is free, otherwise below the element.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type Ref } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type Ref, type RefObject } from 'react';
 import { styleClassOf } from '../inspector/style-target.ts';
 import { useSelectionContext } from '../shell/field.tsx';
 import { activeBreakpoint } from '../view/breakpoints.ts';
@@ -35,7 +35,7 @@ import { lineExtent, linesOf, sameLine } from '../../core/geometry/lines.ts';
 import { layerColourCss } from '../../core/nodes/flags.ts';
 import { heldHand, type HandState } from '../../core/structure/hand.ts';
 import type { MessageId } from '../../generated/ids.ts';
-import { elementIcon, manifest, numberConstant } from '../../manifest/runtime.ts';
+import { elementIcon, manifest, numberConstant, type DoorEntry } from '../../manifest/runtime.ts';
 import { Icon, isDoorBuilt } from '../doors/door.tsx';
 import { GLYPHS } from '../doors/placement.ts';
 import type { DropProposal } from '../drag/drop.ts';
@@ -43,12 +43,12 @@ import { band, drag, duplicating, ghostReturn, hover, lastDrop, measuring, resiz
 import { MODEL_RULES, useEditorState, useStore } from '../store.ts';
 import { openedPage } from '../../core/project/pages.ts';
 import { useT } from '../text.ts';
-import { canvasFrame, contentBoxes, flowAxis, flowReversed, holdsNode, innerBox, nodeBox, nodeSize, pageAnimating, resizeBasis, elementRotation } from './coordinates.ts';
+import { canvasFrame, contentBoxes, flowAxis, flowReversed, holdsNode, innerBox, nodeBox, nodeSize, pageAnimating, resizeBasis, elementRotation, type Point } from './coordinates.ts';
 import { onPageChange } from './page-clock.ts';
 import { TextToolbar } from './text-toolbar.tsx';
 import { GridEditor } from './grid-editor.tsx';
 import { EditHandles } from './edit-handles.tsx';
-import { editMode, modeApplies, NO_MODE } from './edit-mode.ts';
+import { editMode, modeApplies, NO_MODE, type EditMode } from './edit-mode.ts';
 
 // the manifest's own door that leaves the edit mode (the Escape shortcut of canvas.setEditMode, which carries the
 // leaving value): the chrome runs it where a mode has to be let go of, so no command id is written by hand
@@ -634,80 +634,25 @@ function drawnTargets(document: DocumentJson, selection: readonly NodeId[]): str
   return JSON.stringify(selection.filter((id) => !lineage(document, id).some((n: DocNode) => n.hidden === true)));
 }
 
-export function CanvasChrome() {
-  const selection = useEditorState((s) => s.selection);
-  const state = useEditorState((s) => activeState(s.ui));
-  // the class the style target names (null for the element itself) and the breakpoint in view (A3.8)
-  const styleClass = useEditorState((s) => styleClassOf(s));
-  const breakpoint = useEditorState((s) => activeBreakpoint(s));
-  const targetsText = useEditorState((s) => drawnTargets(s.document, s.selection));
-  const targets = useMemo(() => JSON.parse(targetsText) as NodeId[], [targetsText]);
-  // the drag in progress (pointer.ts): the drop indicator is drawn, the selection's label hides and its outline turns
-  // into the dashed outline of the source (Problems in Pager 1)
-  const dragging = useSyncExternalStore(drag.subscribe, drag.get);
-  // the ghost of a creation drag Escape cancelled, on its way back to its tile
-  const returning = useSyncExternalStore(ghostReturn.subscribe, ghostReturn.get);
-  // the element the keyboard's hand holds: its aim is drawn as a drag's drop (spec hand-keyboard-move, "Visual
-  // feedback")
-  const hand = useEditorState(heldHand);
-  const aiming = useMemo(() => (hand === null ? null : handDrop(hand)), [hand]);
-  const dropping: DropView | null = dragging ?? aiming;
-  // what the ghost says under its chip about a side drop
-  const documentNow = useEditorState((s) => s.document);
-  // the label colour of the selection (spec layers-row-colours): the first selected element that has one paints the
-  // selection outline, so the canvas and the Layers row say the same thing about the element; none keeps the token
-  const layerColour = useEditorState((s) => {
-    const root = openedPage(s) === undefined ? undefined : s.document.pages[openedPage(s)]?.tree;
-    for (const id of s.selection) {
-      const colour = root?.layerColors?.find((one) => one.node === id)?.colour;
-      if (typeof colour === 'string' && colour !== '') return colour;
-    }
-    return null;
-  });
-  const note = dragging === null ? null : ghostNote(documentNow, dragging);
-  // the primary selected node, read as the store holds it (a node object is replaced only when it changes)
-  const node = useEditorState((s) => (s.selection[0] === undefined ? null : (locate(s.document, s.selection[0])?.node ?? null)));
-  // the one selected element can be resized: not the page, not locked (itself or an ancestor), shown
-  const resizable = useEditorState((s) => {
-    if (s.selection.length !== 1 || s.selection[0] === undefined) return false;
-    for (let at = locate(s.document, s.selection[0]), first = true; at !== null; at = at.parent === null ? null : locate(s.document, at.parent.id), first = false) {
-      if (first && at.parent === null) return false;
-      if (at.node.locked === true || at.node.hidden === true) return false;
-    }
-    return true;
-  });
-  const hovered = useSyncExternalStore(hover.subscribe, hover.get);
-  // Alt held: the distances from the selection to the hovered element are drawn (spec hover-measure)
-  const altHeld = useSyncExternalStore(measuring.subscribe, measuring.get);
-  // an Edit on canvas mode is on (canvas/edit-mode.ts)
-  const mode = useEditorState((s) => editMode(s.ui));
-  const editingOnCanvas = mode !== NO_MODE;
-  const drawnBand = useSyncExternalStore(band.subscribe, band.get);
-  // the resize drag in progress, whose distances to the neighbours the canvas draws (item 4.5)
-  const resizing = useSyncExternalStore(resizingNow.subscribe, resizingNow.get);
-  // the text edited in place (text-edit.ts): its outline and label wear the text editing mode, so the edit never looks
-  // like a plain selection (spec text-edit-inline, Problems in Pager 2; archive/DESIGN.md "Canvas", text)
-  const editing = useEditorState((s) => s.ui.textEdit.node !== null && s.selection.length === 1 && s.selection[0] === s.ui.textEdit.node);
-  const t = useT();
-  const store = useStore();
-  // the layout the page computes for the one selected element: where a mode's values apply (A3.15)
-  const context = useSelectionContext();
-  const layer = useRef<HTMLDivElement>(null);
-  const label = useRef<HTMLDivElement>(null);
-  // the text toolbar while a text is edited in place (text-toolbar.tsx)
-  const bar = useRef<HTMLDivElement>(null);
+// Where the chrome draws what it draws (CanvasChrome): the boxes of the selection, the hovered element, the band, the
+// label and the text toolbar, the rotation zones, the sizes and distances, measured from the page when it may have
+// changed and then every frame while the chrome still moves.
+function useChromeLayout({ layer, label, bar, selection, targets, hovered, node, drawnBand, editing, altHeld, resizing, documentNow, mode }: {
+  readonly layer: RefObject<HTMLDivElement | null>;
+  readonly label: RefObject<HTMLDivElement | null>;
+  readonly bar: RefObject<HTMLDivElement | null>;
+  readonly selection: readonly NodeId[];
+  readonly targets: readonly NodeId[];
+  readonly hovered: string | null;
+  readonly node: DocNode | null;
+  readonly drawnBand: Box | null;
+  readonly editing: boolean;
+  readonly altHeld: boolean;
+  readonly resizing: ReturnType<typeof resizingNow.get>;
+  readonly documentNow: DocumentJson;
+  readonly mode: EditMode;
+}): Layout {
   const [layout, setLayout] = useState<Layout>(EMPTY);
-
-  // An Edit on canvas mode never stays over a selection it cannot edit (A3.15): it is let go the moment the element
-  // under it takes none of its values (the gap on a container that is not flex or grid, a shadow mode on an element
-  // with no shadow), the selection is not one resizable element, or a project was opened or created (the selection
-  // becomes empty). The resize handles a mode hides come back with it.
-  useEffect(() => {
-    if (!editingOnCanvas || LEAVE_MODE === null) return;
-    if (node !== null && resizable && modeApplies(mode, node, MODEL_RULES, context)) return;
-    store.dispatch(LEAVE_MODE.command.id, LEAVE_MODE.door.args as never);
-  }, [editingOnCanvas, mode, node, resizable, context, store]);
-
   useEffect(() => {
     let request = 0;
     // nothing selected, hovered or banded: nothing to measure, and the last layout is dropped
@@ -845,7 +790,217 @@ export function CanvasChrome() {
       cancelAnimationFrame(request);
       stop();
     };
-  }, [selection, targets, hovered, node, drawnBand, editing, altHeld, resizing, documentNow, mode]);
+  }, [selection, targets, hovered, node, drawnBand, editing, altHeld, resizing, documentNow, mode, layer, label, bar]);
+  return layout;
+}
+
+// The resize handles of the one selected element (item 4.2), but while an Edit on canvas mode draws its own: a handle
+// carrying a start edge the element's own declarations cannot move (its parent lays it out) is drawn disabled, with
+// the reason, and a press on it is no resize.
+function ResizeHandles({ box, shown }: { readonly box: Box; readonly shown: Layout }) {
+  const t = useT();
+  return RESIZE_HANDLES.filter(isDoorBuilt).filter((entry) => roomFor(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', box)).map((entry) => {
+    const handle = entry.door.kind === 'canvas-handle' ? entry.door.handle : '';
+    const held = startHeld(handle, shown.starts);
+    // the hit area never covers a neighbouring element (handleHitBox); with the element turned it stays where
+    // the stylesheet draws it — turning slides it along the neighbours' boxes with the element
+    const hit = shown.rotation === 0 ? handleHitBox(handleSide(handle), box, shown.handleSize, shown.neighbours) : null;
+    const spot = handlePoint(handle, box);
+    const where: CSSProperties =
+      hit === null
+        ? { ...spot, ...spun(shown.rotation, box, spot) }
+        : ({ left: hit.box.x, top: hit.box.y, translate: 'none', '--handle-x': `${hit.at.x * 100}%`, '--handle-y': `${hit.at.y * 100}%` } as CSSProperties);
+    return (
+      <div
+        key={entry.ref}
+        className={`chrome__handle${held ? ' is-unavailable' : ''}`}
+        data-door={entry.ref}
+        data-resize-handle={handle}
+        data-chrome="handle"
+        aria-disabled={held ? true : undefined}
+        title={held ? t('common.disabledTitle', { label: t(entry.door.labelKey as MessageId), reason: { key: 'canvas.resize.parentPlaces' } }) : undefined}
+        style={where}
+      />
+    );
+  });
+}
+
+// Each side's whole length takes a resize too (resize.edgeGrip), over the padding band along the border; a start edge
+// the parent places has none.
+function EdgeGrips({ box, shown }: { readonly box: Box; readonly shown: Layout }) {
+  const t = useT();
+  return EDGE_GRIPS.filter(isDoorBuilt).filter((entry) => roomFor(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', box)).filter((entry) => !startHeld(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', shown.starts)).map((entry) => {
+    const handle = entry.door.kind === 'canvas-handle' ? entry.door.handle : '';
+    return <div key={entry.ref} className="chrome__edge" data-door={entry.ref} data-resize-handle={handle} data-chrome="edge" title={t(entry.door.labelKey as MessageId)} style={edgeGripBox(handleSide(handle), box)} />;
+  });
+}
+
+// The rotation zones, one outside each corner (item 4.4): the same door, drawn four times, each turned with the
+// element when it holds a rotation.
+function RotateZones({ door, spots }: { readonly door: DoorEntry; readonly spots: readonly Point[] }) {
+  const t = useT();
+  return spots.map((spot, i) => (
+    <div
+      key={ROTATE_ZONES[i] ?? i}
+      className="chrome__rotate"
+      data-door={door.ref}
+      data-rotate-handle=""
+      data-rotate-zone={ROTATE_ZONES[i] ?? ''}
+      data-chrome="handle"
+      title={t(door.door.labelKey as MessageId)}
+      style={{ left: spot.x, top: spot.y }}
+    >
+      {ROTATE_ZONES[i] === 'ne' ? <Icon name={manifest.layout.glyphs.rotate} size="sm" /> : null}
+    </div>
+  ));
+}
+
+// The selection's label: the count of several selected elements with their union's size, or the one element's name,
+// tag, the class the writes land in, its angle and size, the state and the breakpoint in view (A3.8, A3.36).
+function SelectionLabel({ labelRef, selection, node, targets, shown, dropping, editing, styleClass, state, breakpoint }: {
+  readonly labelRef: RefObject<HTMLDivElement | null>;
+  readonly selection: readonly NodeId[];
+  readonly node: DocNode | null;
+  readonly targets: readonly NodeId[];
+  readonly shown: Layout;
+  readonly dropping: DropView | null;
+  readonly editing: boolean;
+  readonly styleClass: string | null;
+  readonly state: ReturnType<typeof activeState>;
+  readonly breakpoint: ReturnType<typeof activeBreakpoint>;
+}) {
+  const t = useT();
+  return selection.length > 1 ? (
+    <div
+      ref={labelRef}
+      className={`chrome__label${shown.label ? '' : ' is-measuring'}`}
+      data-chrome="label"
+      data-placement={shown.label?.placement}
+      style={shown.label ? { left: shown.label.box.x, top: shown.label.box.y } : undefined}
+    >
+      <span className="chrome__name">{t('canvas.selectedCount', { count: selection.length })}</span>
+      {shown.size !== null ? (
+        <small className="chrome__label-size" data-chrome="label-size">
+          {t('canvas.measure.size', { width: shown.size.width, height: shown.size.height })}
+        </small>
+      ) : null}
+    </div>
+  ) : node !== null && targets.includes(node.id) ? (
+    <div
+      ref={labelRef}
+      className={`chrome__label is-target${shown.label ? '' : ' is-measuring'}${shown.label?.covers === true ? ' is-covering' : ''}${dropping ? ' is-hidden' : ''}${editing ? ' is-editing' : ''}`}
+      data-chrome="label"
+      data-label-for={node.id}
+      data-placement={shown.label?.placement}
+      style={shown.label ? { left: shown.label.box.x, top: shown.label.box.y } : undefined}
+    >
+      {editing ? (
+        <span className="chrome__name">{t('canvas.editingText', { name: node.name })}</span>
+      ) : (
+        <>
+          <span className="chrome__name">{node.name}</span>
+          <small className="chrome__tag">{node.tag ?? ''}</small>
+          {/* the context the writes land in is named on the label (A3.8, A3.36): "Heading 2 · .card2 · Hover ·
+             Tablet" */}
+          {styleClass !== null ? <small className="chrome__target">{'.' + styleClass}</small> : null}
+          {/* the angle the element holds, live while a rotate drag goes on (item 4.4) */}
+          {shown.rotation !== 0 ? (
+            <small className="chrome__spin" data-chrome="label-angle">
+              {t('canvas.rotate.angle', { angle: Math.round(shown.rotation * 10) / 10 })}
+            </small>
+          ) : null}
+          {/* the element's own size, live while a resize drag goes on (item 4.2) */}
+          {shown.size !== null ? (
+            // a part of the label, after the name (the audit's U-004: the hover's absolutely placed size chip
+            // covered the name)
+            <small className="chrome__label-size" data-chrome="label-size">
+              {t('canvas.measure.size', { width: shown.size.width, height: shown.size.height })}
+            </small>
+          ) : null}
+          {/* the state as its selector writes it (the canonical "Assinar agora · :hover"), its name in the
+             tooltip */}
+          {state.id !== BASE_STATE.id ? <small className="chrome__state" title={t(state.labelKey as MessageId)}>{state.pseudo}</small> : null}
+          {breakpoint.base !== true ? <small className="chrome__breakpoint">{breakpointName(breakpoint, t)}</small> : null}
+        </>
+      )}
+    </div>
+  ) : null;
+}
+
+export function CanvasChrome() {
+  const selection = useEditorState((s) => s.selection);
+  const state = useEditorState((s) => activeState(s.ui));
+  // the class the style target names (null for the element itself) and the breakpoint in view (A3.8)
+  const styleClass = useEditorState((s) => styleClassOf(s));
+  const breakpoint = useEditorState((s) => activeBreakpoint(s));
+  const targetsText = useEditorState((s) => drawnTargets(s.document, s.selection));
+  const targets = useMemo(() => JSON.parse(targetsText) as NodeId[], [targetsText]);
+  // the drag in progress (pointer.ts): the drop indicator is drawn, the selection's label hides and its outline turns
+  // into the dashed outline of the source (Problems in Pager 1)
+  const dragging = useSyncExternalStore(drag.subscribe, drag.get);
+  // the ghost of a creation drag Escape cancelled, on its way back to its tile
+  const returning = useSyncExternalStore(ghostReturn.subscribe, ghostReturn.get);
+  // the element the keyboard's hand holds: its aim is drawn as a drag's drop (spec hand-keyboard-move, "Visual
+  // feedback")
+  const hand = useEditorState(heldHand);
+  const aiming = useMemo(() => (hand === null ? null : handDrop(hand)), [hand]);
+  const dropping: DropView | null = dragging ?? aiming;
+  // what the ghost says under its chip about a side drop
+  const documentNow = useEditorState((s) => s.document);
+  // the label colour of the selection (spec layers-row-colours): the first selected element that has one paints the
+  // selection outline, so the canvas and the Layers row say the same thing about the element; none keeps the token
+  const layerColour = useEditorState((s) => {
+    const root = openedPage(s) === undefined ? undefined : s.document.pages[openedPage(s)]?.tree;
+    for (const id of s.selection) {
+      const colour = root?.layerColors?.find((one) => one.node === id)?.colour;
+      if (typeof colour === 'string' && colour !== '') return colour;
+    }
+    return null;
+  });
+  const note = dragging === null ? null : ghostNote(documentNow, dragging);
+  // the primary selected node, read as the store holds it (a node object is replaced only when it changes)
+  const node = useEditorState((s) => (s.selection[0] === undefined ? null : (locate(s.document, s.selection[0])?.node ?? null)));
+  // the one selected element can be resized: not the page, not locked (itself or an ancestor), shown
+  const resizable = useEditorState((s) => {
+    if (s.selection.length !== 1 || s.selection[0] === undefined) return false;
+    for (let at = locate(s.document, s.selection[0]), first = true; at !== null; at = at.parent === null ? null : locate(s.document, at.parent.id), first = false) {
+      if (first && at.parent === null) return false;
+      if (at.node.locked === true || at.node.hidden === true) return false;
+    }
+    return true;
+  });
+  const hovered = useSyncExternalStore(hover.subscribe, hover.get);
+  // Alt held: the distances from the selection to the hovered element are drawn (spec hover-measure)
+  const altHeld = useSyncExternalStore(measuring.subscribe, measuring.get);
+  // an Edit on canvas mode is on (canvas/edit-mode.ts)
+  const mode = useEditorState((s) => editMode(s.ui));
+  const editingOnCanvas = mode !== NO_MODE;
+  const drawnBand = useSyncExternalStore(band.subscribe, band.get);
+  // the resize drag in progress, whose distances to the neighbours the canvas draws (item 4.5)
+  const resizing = useSyncExternalStore(resizingNow.subscribe, resizingNow.get);
+  // the text edited in place (text-edit.ts): its outline and label wear the text editing mode, so the edit never looks
+  // like a plain selection (spec text-edit-inline, Problems in Pager 2; archive/DESIGN.md "Canvas", text)
+  const editing = useEditorState((s) => s.ui.textEdit.node !== null && s.selection.length === 1 && s.selection[0] === s.ui.textEdit.node);
+  const t = useT();
+  const store = useStore();
+  // the layout the page computes for the one selected element: where a mode's values apply (A3.15)
+  const context = useSelectionContext();
+  const layer = useRef<HTMLDivElement>(null);
+  const label = useRef<HTMLDivElement>(null);
+  // the text toolbar while a text is edited in place (text-toolbar.tsx)
+  const bar = useRef<HTMLDivElement>(null);
+
+  // An Edit on canvas mode never stays over a selection it cannot edit (A3.15): it is let go the moment the element
+  // under it takes none of its values (the gap on a container that is not flex or grid, a shadow mode on an element
+  // with no shadow), the selection is not one resizable element, or a project was opened or created (the selection
+  // becomes empty). The resize handles a mode hides come back with it.
+  useEffect(() => {
+    if (!editingOnCanvas || LEAVE_MODE === null) return;
+    if (node !== null && resizable && modeApplies(mode, node, MODEL_RULES, context)) return;
+    store.dispatch(LEAVE_MODE.command.id, LEAVE_MODE.door.args as never);
+  }, [editingOnCanvas, mode, node, resizable, context, store]);
+
+  const layout = useChromeLayout({ layer, label, bar, selection, targets, hovered, node, drawnBand, editing, altHeld, resizing, documentNow, mode });
 
   const at = (b: Box): CSSProperties => ({ left: b.x, top: b.y, width: b.width, height: b.height });
   const shown = selection.length === 0 && hovered === null && drawnBand === null ? EMPTY : layout;
@@ -896,114 +1051,14 @@ export function CanvasChrome() {
       {/* the resize handles, but while an Edit on canvas mode draws its own (edit-handles.tsx). A handle carrying a
           start edge the element's own declarations cannot move (its parent lays it out: a flex or a grid, an inline
           element) is drawn disabled, with the reason, and a press on it is no resize (item 4.2) */}
-      {resizable && shown.selected[0] && !dropping && !editing && !editingOnCanvas
-        ? RESIZE_HANDLES.filter(isDoorBuilt).filter((entry) => roomFor(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', shown.selected[0] as Box)).map((entry) => {
-            const handle = entry.door.kind === 'canvas-handle' ? entry.door.handle : '';
-            const box = shown.selected[0] as Box;
-            const held = startHeld(handle, shown.starts);
-            // the hit area never covers a neighbouring element (handleHitBox); with the element turned it stays where
-            // the stylesheet draws it — turning slides it along the neighbours' boxes with the element
-            const hit = shown.rotation === 0 ? handleHitBox(handleSide(handle), box, shown.handleSize, shown.neighbours) : null;
-            const spot = handlePoint(handle, box);
-            const where: CSSProperties =
-              hit === null
-                ? { ...spot, ...spun(shown.rotation, box, spot) }
-                : ({ left: hit.box.x, top: hit.box.y, translate: 'none', '--handle-x': `${hit.at.x * 100}%`, '--handle-y': `${hit.at.y * 100}%` } as CSSProperties);
-            return (
-              <div
-                key={entry.ref}
-                className={`chrome__handle${held ? ' is-unavailable' : ''}`}
-                data-door={entry.ref}
-                data-resize-handle={handle}
-                data-chrome="handle"
-                aria-disabled={held ? true : undefined}
-                title={held ? t('common.disabledTitle', { label: t(entry.door.labelKey as MessageId), reason: { key: 'canvas.resize.parentPlaces' } }) : undefined}
-                style={where}
-              />
-            );
-          })
-        : null}
+      {resizable && shown.selected[0] && !dropping && !editing && !editingOnCanvas ? <ResizeHandles box={shown.selected[0]} shown={shown} /> : null}
       {/* each side's whole length takes a resize too (resize.edgeGrip), over the padding band that lies along the
           border; a start edge the parent places has none (its handle is drawn disabled above) */}
-      {resizable && shown.selected[0] && !dropping && !editing && !editingOnCanvas && shown.rotation === 0
-        ? EDGE_GRIPS.filter(isDoorBuilt).filter((entry) => roomFor(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', shown.selected[0] as Box)).filter((entry) => !startHeld(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', shown.starts)).map((entry) => {
-            const handle = entry.door.kind === 'canvas-handle' ? entry.door.handle : '';
-            return <div key={entry.ref} className="chrome__edge" data-door={entry.ref} data-resize-handle={handle} data-chrome="edge" title={t(entry.door.labelKey as MessageId)} style={edgeGripBox(handleSide(handle), shown.selected[0] as Box)} />;
-          })
-        : null}
+      {resizable && shown.selected[0] && !dropping && !editing && !editingOnCanvas && shown.rotation === 0 ? <EdgeGrips box={shown.selected[0]} shown={shown} /> : null}
       {/* the rotation zones, one outside each corner (item 4.4): the same door, drawn four times, each turned with the
           element when it holds a rotation */}
-      {resizable && shown.selected[0] && !dropping && !editing && !editingOnCanvas && ROTATE_HANDLE !== null && isDoorBuilt(ROTATE_HANDLE) && shown.rotate !== null
-        ? shown.rotate.map((spot, i) => (
-            <div
-              key={ROTATE_ZONES[i] ?? i}
-              className="chrome__rotate"
-              data-door={ROTATE_HANDLE.ref}
-              data-rotate-handle=""
-              data-rotate-zone={ROTATE_ZONES[i] ?? ''}
-              data-chrome="handle"
-              title={t(ROTATE_HANDLE.door.labelKey as MessageId)}
-              style={{ left: spot.x, top: spot.y }}
-            >
-              {ROTATE_ZONES[i] === 'ne' ? <Icon name={manifest.layout.glyphs.rotate} size="sm" /> : null}
-            </div>
-          ))
-        : null}
-      {selection.length > 1 ? (
-        <div
-          ref={label}
-          className={`chrome__label${shown.label ? '' : ' is-measuring'}`}
-          data-chrome="label"
-          data-placement={shown.label?.placement}
-          style={shown.label ? { left: shown.label.box.x, top: shown.label.box.y } : undefined}
-        >
-          <span className="chrome__name">{t('canvas.selectedCount', { count: selection.length })}</span>
-          {shown.size !== null ? (
-            <small className="chrome__label-size" data-chrome="label-size">
-              {t('canvas.measure.size', { width: shown.size.width, height: shown.size.height })}
-            </small>
-          ) : null}
-        </div>
-      ) : node !== null && targets.includes(node.id) ? (
-        <div
-          ref={label}
-          className={`chrome__label is-target${shown.label ? '' : ' is-measuring'}${shown.label?.covers === true ? ' is-covering' : ''}${dropping ? ' is-hidden' : ''}${editing ? ' is-editing' : ''}`}
-          data-chrome="label"
-          data-label-for={node.id}
-          data-placement={shown.label?.placement}
-          style={shown.label ? { left: shown.label.box.x, top: shown.label.box.y } : undefined}
-        >
-          {editing ? (
-            <span className="chrome__name">{t('canvas.editingText', { name: node.name })}</span>
-          ) : (
-            <>
-              <span className="chrome__name">{node.name}</span>
-              <small className="chrome__tag">{node.tag ?? ''}</small>
-              {/* the context the writes land in is named on the label (A3.8, A3.36): "Heading 2 · .card2 · Hover ·
-                 Tablet" */}
-              {styleClass !== null ? <small className="chrome__target">{'.' + styleClass}</small> : null}
-              {/* the angle the element holds, live while a rotate drag goes on (item 4.4) */}
-              {shown.rotation !== 0 ? (
-                <small className="chrome__spin" data-chrome="label-angle">
-                  {t('canvas.rotate.angle', { angle: Math.round(shown.rotation * 10) / 10 })}
-                </small>
-              ) : null}
-              {/* the element's own size, live while a resize drag goes on (item 4.2) */}
-              {shown.size !== null ? (
-                // a part of the label, after the name (the audit's U-004: the hover's absolutely placed size chip
-                // covered the name)
-                <small className="chrome__label-size" data-chrome="label-size">
-                  {t('canvas.measure.size', { width: shown.size.width, height: shown.size.height })}
-                </small>
-              ) : null}
-              {/* the state as its selector writes it (the canonical "Assinar agora · :hover"), its name in the
-                 tooltip */}
-              {state.id !== BASE_STATE.id ? <small className="chrome__state" title={t(state.labelKey as MessageId)}>{state.pseudo}</small> : null}
-              {breakpoint.base !== true ? <small className="chrome__breakpoint">{breakpointName(breakpoint, t)}</small> : null}
-            </>
-          )}
-        </div>
-      ) : null}
+      {resizable && shown.selected[0] && !dropping && !editing && !editingOnCanvas && ROTATE_HANDLE !== null && isDoorBuilt(ROTATE_HANDLE) && shown.rotate !== null ? <RotateZones door={ROTATE_HANDLE} spots={shown.rotate} /> : null}
+      <SelectionLabel labelRef={label} selection={selection} node={node} targets={targets} shown={shown} dropping={dropping} editing={editing} styleClass={styleClass} state={state} breakpoint={breakpoint} />
       {editing && node !== null ? <TextToolbar bar={bar} className={shown.toolbar ? '' : 'is-measuring'} style={shown.toolbar ? { left: shown.toolbar.x, top: shown.toolbar.y } : undefined} /> : null}
     </div>
   );
