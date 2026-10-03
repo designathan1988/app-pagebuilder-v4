@@ -5,8 +5,8 @@
     "commands": 371,
     "doors": 1350,
     "scenarios": 1820,
-    "modules": 442,
-    "lines": 80503
+    "modules": 457,
+    "lines": 80784
   },
   "features": [
     {
@@ -6693,7 +6693,97 @@
     },
     {
       "path": "src/manifest/check.ts",
-      "lines": 2385,
+      "lines": 106,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/base.ts",
+      "lines": 516,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/browser-support.ts",
+      "lines": 108,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/catalogues.ts",
+      "lines": 131,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/command-links.ts",
+      "lines": 86,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/context.ts",
+      "lines": 135,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/css-syntax.ts",
+      "lines": 98,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/data-rules.ts",
+      "lines": 154,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/identity.ts",
+      "lines": 141,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/interactions.ts",
+      "lines": 89,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/placement.ts",
+      "lines": 250,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/scenario-terminals.ts",
+      "lines": 21,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/scenarios.ts",
+      "lines": 258,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/style-doors.ts",
+      "lines": 187,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/value-shapes.ts",
+      "lines": 294,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/manifest/check/values.ts",
+      "lines": 92,
       "commands": [],
       "features": []
     },
