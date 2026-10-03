@@ -460,7 +460,7 @@
           "refusals": []
         }
       ],
-      "toothProof": "src/core/render/render.ts"
+      "toothProof": "src/editor/canvas/render/render.ts"
     }
   ]
 }

@@ -3,7 +3,7 @@
 // CSS pixels from its visible top-left) and the screen (the editor window's client pixels). The iframe is scaled with
 // the standard CSS zoom, so one page pixel is `zoom` screen pixels; its layout keeps the breakpoint's width.
 import type { ResizeRoom } from '../../core/geometry/resize.ts';
-import { NODE_ATTRIBUTE, nodeSelector } from '../../core/render/render.ts';
+import { NODE_ATTRIBUTE, nodeSelector } from './render/render.ts';
 import type { Layout } from '../../core/ports/layout.ts';
 import type { NodeId } from '../../generated/commands.ts';
 import { compareSpecificity, specificityOf, splitSelectorList, type Specificity } from '../../core/import/selectors.ts';

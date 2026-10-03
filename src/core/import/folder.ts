@@ -19,7 +19,8 @@ import type { ModelRules } from '../document/validate.ts';
 import { folderOf, nameOfPath, pathGenerated, resolveHref, typeOfFile, type UploadedFile } from '../files/files.ts';
 import { nodeMaker } from '../structure/insert.ts';
 import { placeSheet, readSheet } from './css.ts';
-import { nodesFromMarkup, pageHead } from './import.ts';
+import { nodesFromMarkup } from './import.ts';
+import { pageHead } from './markup.ts';
 
 // A file of the folder the person picked: what the one reader of a file a door hands over gives (core/files/files.ts
 // readUploadFile), with the path it holds inside the folder.

@@ -3,10 +3,10 @@
 // page a fresh mount of the resulting document builds, and every element whose node the patches did not replace
 // is the same object as before (updated in place, never built again).
 import { describe, expect, it } from 'vitest';
-import type { NodeId } from '../../generated/commands.ts';
-import { manifest } from '../../manifest/runtime.ts';
-import type { DocNode, DocumentJson } from '../document/model.ts';
-import { applyPatches, type Patch } from '../history/transaction.ts';
+import type { NodeId } from '../../../generated/commands.ts';
+import { manifest } from '../../../manifest/runtime.ts';
+import type { DocNode, DocumentJson } from '../../../core/document/model.ts';
+import { applyPatches, type Patch } from '../../../core/history/transaction.ts';
 import { EMPTY_TEXT_ATTRIBUTE, HIDDEN_ATTRIBUTE, NODE_ATTRIBUTE, NODE_STYLE_ATTRIBUTE, PageRenderer, editorCss, nodeCss, renderModelFromManifest, type RenderModel } from './render.ts';
 
 const model = renderModelFromManifest(manifest.elements, manifest.properties, manifest.interactions);
@@ -98,7 +98,7 @@ function check(before: DocumentJson, patches: readonly Patch[], rebuilt: readonl
   return { target, renderer, after, was, now };
 }
 
-describe('the renderer (src/core/render/render.ts)', () => {
+describe('the renderer (src/editor/canvas/render/render.ts)', () => {
   it('builds the page: the root on body, each node its element, text with line breaks, attributes, classes, SVG in its namespace', () => {
     const { target } = mounted();
     expect(target.body.getAttribute('data-node')).toBe('root');

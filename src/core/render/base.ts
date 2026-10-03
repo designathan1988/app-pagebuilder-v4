@@ -2,8 +2,9 @@
 // the heading ladder (h1 32 px down to h6 14 px, the browser's own top two steps and a step between each below them),
 // border-box sizing, so a height or a width the person sets is the size the element takes on screen, padding and
 // border included, and a hero at 100vh measures the screen. One owner: the editor's canvas writes it into the page's
-// document before every other rule (core/render/render.ts) and every exported stylesheet carries it at its head
-// (core/export/export.ts), so what the canvas shows is what the site does. A list keeps the browser's own indent (its
+// document before every other rule (editor/canvas/render/render.ts) and every exported stylesheet carries it at its
+// head (core/export/export.ts), so what the canvas shows is what the site does. A list keeps the browser's own indent
+// (its
 // rule once narrowed it to 1.5rem, and a list nested in an item then indented 24 px where the browser indents 40:
 // spec elements-lists, Problems in Pager 6, "no style of the editor's own").
 //

@@ -3,6 +3,6 @@
 // it used to load them from the dev server's source URLs. It carries no behaviour of its own: every name below is
 // the app's. Built only for the e2e run (`npm run build:proofs`), never part of the app's entry.
 export * from '../../src/editor/canvas/coordinates.ts';
-export { PageRenderer, renderModelFromManifest } from '../../src/core/render/render.ts';
+export { PageRenderer, renderModelFromManifest } from '../../src/editor/canvas/render/render.ts';
 export { applyPatches } from '../../src/core/history/transaction.ts';
 export { translate } from '../../src/i18n/index.ts';

@@ -1,5 +1,6 @@
 // A side frame (spec side-by-side-view; drawn by shell/side-by-side.tsx): one of the project's other breakpoints, a
-// live page at its width scaled to its column. Its own renderer (core/render/render.ts) is mounted in its own frame and
+// live page at its width scaled to its column. Its own renderer (editor/canvas/render/render.ts) is mounted in its own
+// frame and
 // follows every change of the document, so it shows the page through its own media queries; the renderer outlines
 // the selection in it. Nothing in it is edited in place: a click on it, or on its head, makes its breakpoint the one
 // the canvas edits (view.setBreakpoint). Like the canvas frame, it reaches its page only to hand it to the renderer.
@@ -7,7 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { breakpointName, type ProjectBreakpoint } from '../../core/document/breakpoints.ts';
 import { canvasValue } from '../../core/files/values.ts';
 import { openedPage } from '../../core/project/pages.ts';
-import { PageRenderer, renderModelFromManifest } from '../../core/render/render.ts';
+import { PageRenderer, renderModelFromManifest } from './render/render.ts';
 import type { NodeId } from '../../generated/commands.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { Icon, useDoor } from '../doors/door.tsx';

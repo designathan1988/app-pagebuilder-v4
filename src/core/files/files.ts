@@ -21,6 +21,7 @@ import { familyOf, fontFiles } from './fonts.ts';
 import { followPaths, movedPath } from './references.ts';
 import { argumentRefused } from '../store/args.ts';
 import { GENERATED_PATHS } from '../export/paths.ts';
+import { browserPorts } from '../ports/browser.ts';
 
 export type { ProjectFile };
 
@@ -163,7 +164,7 @@ export async function readUploadFile(file: File): Promise<UploadedFile> {
   const bytes = btoa(binary);
   const named = file.type !== '' ? file.type : typeOfFile(file.name);
   if (!named.startsWith('image/')) return { name: file.name, type: named, bytes };
-  const size = await sizeOfImage(bytes, named);
+  const size = await browserPorts().imageSize(bytes, named);
   return size === null ? { name: file.name, type: named, bytes } : { name: file.name, type: named, bytes, width: size.width, height: size.height };
 }
 
@@ -195,16 +196,6 @@ export function typeOfFile(name: string, fallback = 'application/octet-stream'):
   const extension = name.slice(name.lastIndexOf('.') + 1).toLowerCase();
   return FILE_TYPES.find((row) => row.extensions.includes(extension))?.type ?? fallback;
 }
-// the intrinsic size of an uploaded image, read in the browser where the door hands the file over
-export function sizeOfImage(bytes: string, type: string): Promise<{ width: number; height: number } | null> {
-  return new Promise((resolve) => {
-    const image = new Image();
-    image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
-    image.onerror = () => resolve(null);
-    image.src = `data:${type};base64,${bytes}`;
-  });
-}
-
 // Every path a page's elements point at: so a file in use is known (spec explorer-assets: deleting one in use asks
 // first) and a renamed file's users can follow.
 export function usedPaths(document: DocumentJson): ReadonlySet<string> {

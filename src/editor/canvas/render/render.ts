@@ -39,24 +39,24 @@
 // range of its characters, and is drawn again with the runs and the range a change of its marks produced (spec
 // text-inline-formatting). The marks go when the edit ends, and the element shows again the text the document holds.
 // They are the renderer's state, never the document's, and the page still gets no event handler.
-import type { NodeId } from '../../generated/commands.ts';
-import { baseCss } from './base.ts';
-import { formNodes } from '../export/authoring.ts';
-import { classesCss, elementAttributes, fileUrlsIn, nodeCss, outputModelFromManifest, type OutputModel } from './output.ts';
-export { elementAttributes, nodeCss, outputModelFromManifest, type OutputModel } from './output.ts';
-import type { ElementsFile, InteractionsFile, PropertiesFile } from '../../manifest/schema.ts';
-import { locate, walk, type DocNode, type DocumentJson } from '../document/model.ts';
-import { applyPatches, deepEqual, type Patch } from '../history/transaction.ts';
-import { canonical, type InlineRun, type TextRange } from '../text/inline.ts';
-// what a contenteditable's DOM says about the runs (core/render/inline.ts), moved out of this file
+import type { NodeId } from '../../../generated/commands.ts';
+import { baseCss } from '../../../core/render/base.ts';
+import { formNodes } from '../../../core/export/authoring.ts';
+import { classesCss, elementAttributes, fileUrlsIn, nodeCss, outputModelFromManifest, type OutputModel } from '../../../core/render/output.ts';
+export { elementAttributes, nodeCss, outputModelFromManifest, type OutputModel } from '../../../core/render/output.ts';
+import type { ElementsFile, InteractionsFile, PropertiesFile } from '../../../manifest/schema.ts';
+import { locate, walk, type DocNode, type DocumentJson } from '../../../core/document/model.ts';
+import { applyPatches, deepEqual, type Patch } from '../../../core/history/transaction.ts';
+import { canonical, type InlineRun, type TextRange } from '../../../core/text/inline.ts';
+// what a contenteditable's DOM says about the runs (editor/canvas/render/inline.ts), moved out of this file
 import { ELEMENT_NODE, TEXT_NODE, browserBreak, leavesOf, lastContent, precedes, runsOfLeaves, type Leaf } from './inline.ts';
-import { svgMarkupOf } from '../elements/svg.ts';
-import { rootCss } from '../design/tokens.ts';
-import { filesOf, objectUrl, resolvedSource } from '../files/files.ts';
-import { fontFaceCss } from '../files/fonts.ts';
-import { animationsOf, keyframesCss, previewDeclarations } from '../animation/animation.ts';
-import { outputForTable } from '../document/breakpoint-rules.ts';
-import { captureAssetPath, capturedPageCss } from '../import/capture-styles.ts';
+import { svgMarkupOf } from '../../../core/elements/svg.ts';
+import { rootCss } from '../../../core/design/tokens.ts';
+import { filesOf, objectUrl, resolvedSource } from '../../../core/files/files.ts';
+import { fontFaceCss } from '../../../core/files/fonts.ts';
+import { animationsOf, keyframesCss, previewDeclarations } from '../../../core/animation/animation.ts';
+import { outputForTable } from '../../../core/document/breakpoint-rules.ts';
+import { captureAssetPath, capturedPageCss } from '../../../core/import/capture-styles.ts';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 export const NODE_ATTRIBUTE = 'data-node';

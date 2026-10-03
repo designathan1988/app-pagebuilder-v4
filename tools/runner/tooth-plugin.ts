@@ -4,7 +4,8 @@
 //   handler that returns without changing anything, and the availability predicate each names in the manifest holds
 //   always, so the doors stay enabled and do nothing: a refusal the predicate makes (Escape with nothing selected) is
 //   the feature's too, and goes with it.
-// - TOOTH_MODULE (a module path, such as src/core/render/render.ts): every exported class of the module becomes a class
+// - TOOTH_MODULE (a module path, such as src/editor/canvas/render/render.ts): every exported class of the module
+// becomes a class
 //   whose methods do nothing, and every exported function one that returns nothing.
 import fs from 'node:fs';
 import path from 'node:path';

@@ -426,7 +426,8 @@ const gestureOwner: TsRuleDefinition<'gesture'> = {
   },
 };
 
-// builder/frame-owner: only the renderer (src/core/render/render.ts, which the configuration exempts) writes the
+// builder/frame-owner: only the renderer (src/editor/canvas/render/render.ts, which the configuration exempts) writes
+// the
 // canvas iframe's DOM and CSS. The frame's document is reached (contentDocument, contentWindow, frames) only by the
 // frame's readers, the canvas frame, a side frame (side-frame.tsx, spec side-by-side-view) and the coordinates module,
 // which never write to a DOM or a stylesheet; every other module learns nodes and boxes from coordinates' nodeAt and
@@ -473,7 +474,7 @@ const frameOwner: TsRuleDefinition<'reach' | 'write' | 'element'> = {
     docs: { description: 'Only the renderer writes the canvas iframe' },
     messages: {
       reach: '{{what}} reaches the canvas iframe\'s page: only the renderer writes it and only the canvas frame and the coordinates module read it.',
-      write: '{{what}} writes a DOM or a stylesheet in a reader of the canvas iframe: only the renderer (src/core/render/render.ts) writes the page.',
+      write: '{{what}} writes a DOM or a stylesheet in a reader of the canvas iframe: only the renderer (src/editor/canvas/render/render.ts) writes the page.',
       element: '{{what}} hands out the canvas page\'s elements: take a node from nodeAt or a box from nodeBox instead.',
     },
     schema: [],

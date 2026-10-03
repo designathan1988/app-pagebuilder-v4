@@ -134,7 +134,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | STG-4.1 | Memoised selectors and rows | done (by measurement) | H16 holds (p95 44.8 ms at 641 nodes) |
 | STG-4.2 | One measuring clock instead of per-frame loops | done | QA 80 |
 | STG-4.3 | Autosave in idle time, one record, selection apart | done | QA 80 |
-| STG-4.4 | The renderer patches the iframe per document patch | done | `src/core/render/render.ts` header |
+| STG-4.4 | The renderer patches the iframe per document patch | done | `src/editor/canvas/render/render.ts` header |
 | STG-5.1 | Top bar, file tabs, page selector, Saved left of Preview | done | QA 106, 131 |
 | STG-5.2 | Activity bar labels and tooltips (J26), active icon keeps its panel (J8b) | done | QA 171 (Insert first and named Insert, AUD-21) |
 | STG-5.3 | Explorer: names without overlap, badges, duplicate page opens and focuses its name (J20) | done | QA 108; C2 |
@@ -376,7 +376,7 @@ commit closes it with its proof; the Status column then names the commit's QA-LO
 | AUD-04 | 3 | Unwrap, move out of parent and nest on component instances produce invalid documents | audit | done (QA 152) |
 | AUD-05 | 3 | Export then import loses design tokens and unused classes | audit | done (QA 154) |
 | AUD-06 | 3 | Canvas 41–46 % of the window at 1280 × 720 (H17, J25); the fix measured width | audit | done (QA 155) |
-| AUD-07 | 2 | The document core executes DOM | audit | open |
+| AUD-07 | 2 | The document core executes DOM | audit; QA 222: `tsconfig.core.json` compiles `src/core` without the DOM library, lint forbids its globals there | done (QA 222) |
 | AUD-08 | 2 | Store robustness: undeclared predicate refusals throw, gesture patches recorded before validation, `refusal()` does not catch | audit | done (QA 157) |
 | AUD-09 | 2 | Handlers throw instead of refusing on stale or malformed references | audit | done (QA 158 the bad-argument probe; QA 159 the random sequences' tail) |
 | AUD-10 | 2 | Unbounded ZIP inflation; the preview's key relay trusts any opaque-origin frame; the test port in production | audit; open since the module handoff (`docs/archive/history/coordination.md`) | done (QA 160) |

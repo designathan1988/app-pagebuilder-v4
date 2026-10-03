@@ -18,7 +18,7 @@ import { startOn } from './runtime/compose.ts';
 import type { MotionController } from './runtime/start.ts';
 import { rulesForDocument } from '../../core/document/breakpoints.ts';
 
-// the canvas's own mark of a rendered node (core/render/render.ts writes data-node on every element it draws)
+// the canvas's own mark of a rendered node (editor/canvas/render/render.ts writes data-node on every element it draws)
 export const canvasSelector = (node: NodeId): string => `[data-node="${node.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"]`;
 
 export function canvasMotionConfig(document: DocumentJson, rules: ModelRules, everyTimeline = false): RuntimeConfig | null {

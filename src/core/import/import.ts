@@ -56,6 +56,7 @@ import { baseCss } from '../render/base.ts';
 import { underClassesHeading } from '../export/sheet-headings.ts';
 // reading markup (core/import/markup.ts): the DOM walk and the source lines, moved out of this file
 import { lineOf, lineOfNode, parseMarkup, parsePage, textOf, type MarkupChild, type MarkupNode } from './markup.ts';
+import { browserPorts } from '../ports/browser.ts';
 import { orphanReferences } from '../elements/references.ts';
 import { generate as generateCssTree, parse as parseCssTree, walk as walkCssTree, type CssNode as CssTreeNode } from 'css-tree';
 import { capturedPageStylePath } from './capture-styles.ts';
@@ -101,20 +102,10 @@ async function fileOf(name: string, bytes: Uint8Array, declared: string): Promis
   const held = base64(bytes);
   // an image's own size, as an upload reads it: the document keeps it beside the bytes
   if (type.startsWith('image/') && type !== 'image/svg+xml') {
-    const size = await sizeOfImage(held, type);
+    const size = await browserPorts().imageSize(held, type);
     if (size !== null) return { name, type, bytes: held, width: size.width, height: size.height };
   }
   return { name, type, bytes: held };
-}
-
-// an image's intrinsic size in the browser, where the door hands the files over
-function sizeOfImage(bytes: string, type: string): Promise<{ width: number; height: number } | null> {
-  return new Promise((resolve) => {
-    const image = new Image();
-    image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
-    image.onerror = () => resolve(null);
-    image.src = `data:${type};base64,${bytes}`;
-  });
 }
 
 const isHtmlFile = (name: string): boolean => /\.html?$/i.test(name);
@@ -1512,29 +1503,6 @@ function countOf(node: DocNode): number {
 // What a page's own head holds (the manifest's explorer-open-folder): its language and direction, its title, and the
 // stylesheets and scripts it links, as the source wrote them. The same reader parses the markup (the browser's own
 // parser), so a page imported with its markup keeps what its head said about the page itself.
-export interface PageHead {
-  readonly lang: string | null;
-  readonly dir: string | null;
-  readonly title: string | null;
-  readonly stylesheets: readonly string[];
-  readonly scripts: readonly string[];
-}
-export function pageHead(markup: string, parse: (text: string) => Document = (text) => new DOMParser().parseFromString(text, 'text/html')): PageHead {
-  const document = parse(markup);
-  const attribute = (name: string): string | null => {
-    const value = document.documentElement.getAttribute(name)?.trim() ?? '';
-    return value === '' ? null : value;
-  };
-  const written = (element: Element, name: string): string => (element.getAttribute(name) ?? '').trim();
-  return {
-    lang: attribute('lang'),
-    dir: attribute('dir'),
-    title: document.title.trim() === '' ? null : document.title.trim(),
-    stylesheets: [...document.querySelectorAll('link[href]')].filter((link) => (link.getAttribute('rel') ?? '').split(/\s+/).includes('stylesheet')).map((link) => written(link, 'href')).filter((href) => href !== ''),
-    scripts: [...document.querySelectorAll('script[src]')].map((script) => written(script, 'src')).filter((src) => src !== ''),
-  };
-}
-
 // ---------------------------------------------------------------- what a captured page keeps of its sheets
 
 // A captured page (the Builder Companion marks it: <meta name="builder-capture">; spec capture-url) keeps, beside the

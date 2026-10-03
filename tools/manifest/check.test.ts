@@ -323,7 +323,7 @@ describe('manifest:check', () => {
     const empty = (locale: string, root: string) =>
       valid((m) => {
         const f = plantRenderScenario(m);
-        f.toothProof = 'src/core/render/render.ts';
+        f.toothProof = 'src/editor/canvas/render/render.ts';
         const s = (f.scenarios as Record<string, Record<string, unknown>>[])[0] as Record<string, Record<string, unknown>>;
         Object.assign(s.setup as object, { fixture: 'empty', locale, selection: [root] });
         Object.assign(s.expect as object, { selection: [root], render: { computed: [{ node: root, property: 'display', value: 'block' }], geometry: [], feedback: [] } });

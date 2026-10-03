@@ -489,7 +489,7 @@ Not applicable.
 ### Our rule (the user's real-use audit, item 2.4)
 
 - The base is one text, `baseCss()` in `src/core/render/base.ts`: the canvas writes it as the page's first style element
-  (`src/core/render/render.ts`, `data-base-style`) and every exported `css/styles.css` carries it at its head
+  (`src/editor/canvas/render/render.ts`, `data-base-style`) and every exported `css/styles.css` carries it at its head
   (`src/core/export/export.ts`). What the canvas shows is what the site does, for a rule of the base as for every other.
 - It holds `box-sizing: border-box` for every element and its pseudo-elements. Its neutral presentation defaults cover
   the body font and margin, heading hierarchy, text spacing, links, lists, quotes, code, tables, form controls and media.

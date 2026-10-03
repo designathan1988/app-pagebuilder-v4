@@ -25,6 +25,11 @@ import { MODEL_RULES, createEditorStore } from './editor/store.ts';
 import { installTestPort } from './editor/test-port.ts';
 import { installErrorFeed } from './editor/errors.ts';
 import { reportError } from './core/incidents.ts';
+import { installBrowserPorts } from './core/ports/browser.ts';
+import { browserPorts } from './editor/browser-ports.ts';
+
+// the browser's readers behind the core's ports (src/core/ports/browser.ts), before anything reads markup or images
+installBrowserPorts(browserPorts);
 
 const container = document.getElementById('root');
 if (!container) {

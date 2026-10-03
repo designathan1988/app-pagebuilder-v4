@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "WebWorker"],
+    "types": []
+  },
+  "files": ["node_modules/vite/types/importMeta.d.ts"],
+  "include": ["src/core/**/*.ts"],
+  "exclude": ["src/core/**/*.test.ts", "src/core/testing/**"]
+}

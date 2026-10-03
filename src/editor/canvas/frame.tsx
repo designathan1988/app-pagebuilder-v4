@@ -1,6 +1,7 @@
 // The canvas iframe (PRODUCT.md §5): a same-origin iframe that only renders. It is sandboxed without scripts, has
 // no event handler of its own and takes no pointer event: every pointer input arrives on the overlay above it
-// (src/editor/input/pointer.ts). The renderer (src/core/render/render.ts) builds the page into its document once and
+// (src/editor/input/pointer.ts). The renderer (src/editor/canvas/render/render.ts) builds the page into its document
+// once and
 // then applies each change of the document to it. One exception while a text is edited in place: the keymap listens
 // for keys on the frame's window (the page itself still carries no event handler or event attribute), and the frame
 // is not aria-hidden, as it holds the focus. The frame is scaled with the standard CSS zoom (Chrome 128+), so
@@ -8,7 +9,7 @@
 import { MODULE_CANVAS_LAYERS } from '../../app/modules-view.ts';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useCanvasMotion } from '../motion/use-canvas-motion.ts';
-import { PageRenderer, renderModelFromManifest } from '../../core/render/render.ts';
+import { PageRenderer, renderModelFromManifest } from './render/render.ts';
 import { applyInlineChange, plainText, type TextRange } from '../../core/text/inline.ts';
 import { canvasValue } from '../../core/files/values.ts';
 import { openedPage } from '../../core/project/pages.ts';

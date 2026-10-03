@@ -1,4 +1,4 @@
-// The renderer (src/core/render/render.ts) in the installed Chrome: the app's own modules, loaded from the served
+// The renderer (src/editor/canvas/render/render.ts) in the installed Chrome: the app's own modules, loaded from the served
 // build (/proofs.js, tests/support/proofs.ts), build a small document into a fresh same-origin iframe and then apply
 // a change's patches to it. The end artifacts are what Chrome lays out in the frame: the computed style of the
 // changed nodes (also at a breakpoint other than the base, with the frame at that width), their geometry and their

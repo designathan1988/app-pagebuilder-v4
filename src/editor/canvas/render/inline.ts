@@ -1,10 +1,11 @@
 // The pieces of a text element's text on the page, in order: its text nodes and its <br>s ("\n"), each with the marks
 // of the elements around it inside the element (<strong> and <b> bold, <em> and <i> italic, <a href> a link; any other
 // element only holds its text).
-// What a contenteditable's DOM says about the runs of an inline text (split out of core/render/render.ts, which
+// What a contenteditable's DOM says about the runs of an inline text (split out of editor/canvas/render/render.ts,
+// which
 // patches the page): the pieces of a text element's text in page order with the marks around them, the trailing line
 // break a browser keeps that the text read back leaves out, and whether a leaf lies before a boundary point.
-import { runsOf, type InlineRun, type Segment } from '../text/inline.ts';
+import { runsOf, type InlineRun, type Segment } from '../../../core/text/inline.ts';
 
 export const ELEMENT_NODE = 1;
 export const TEXT_NODE = 3;

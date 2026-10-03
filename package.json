@@ -13,7 +13,7 @@
     "build:proofs": "vite build --config vite.proofs.config.ts",
     "build:e2e": "vite build --mode e2e",
     "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.core.json --noEmit",
     "lint": "eslint . --max-warnings 0",
     "unit": "vitest run --coverage",
     "e2e": "playwright test",

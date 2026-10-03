@@ -100,7 +100,7 @@ export default defineConfig(
   {
     // Only the renderer writes the canvas iframe's page (PRODUCT.md §5, Renderer); its tests build pages of their own.
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/core/render/render.ts', 'src/**/*.test.ts'],
+    ignores: ['src/editor/canvas/render/render.ts', 'src/**/*.test.ts'],
     plugins: { builder },
     rules: { 'builder/frame-owner': 'error' },
   },
@@ -137,6 +137,20 @@ export default defineConfig(
           ],
         },
       ],
+      // no DOM in the core (plan I.6; tsconfig.core.json compiles it without the DOM library): what it needs of the
+      // browser comes through its ports (src/core/ports/browser.ts, the layout and CSS ports)
+      'no-restricted-globals': [
+        'error',
+        ...['document', 'window', 'DOMParser', 'Image', 'Node', 'Element', 'HTMLElement', 'getComputedStyle', 'localStorage', 'sessionStorage', 'navigator', 'requestAnimationFrame'].map((name) => ({
+          name,
+          message: 'src/core holds no DOM: ask the browser through a port (src/core/ports).',
+        })),
+      ],
     },
+  },
+  {
+    // the core's test helpers run in happy-dom with the tests
+    files: ['src/core/testing/**/*.ts', 'src/core/**/*.test.ts'],
+    rules: { 'no-restricted-globals': 'off' },
   },
 );

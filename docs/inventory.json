@@ -5,8 +5,8 @@
     "commands": 371,
     "doors": 1350,
     "scenarios": 1819,
-    "modules": 424,
-    "lines": 80038
+    "modules": 426,
+    "lines": 80088
   },
   "features": [
     {
@@ -3818,7 +3818,7 @@
     },
     {
       "path": "src/core/files/files.ts",
-      "lines": 559,
+      "lines": 550,
       "commands": [
         "files.upload",
         "files.createFolder",
@@ -3992,7 +3992,7 @@
     },
     {
       "path": "src/core/import/folder.ts",
-      "lines": 255,
+      "lines": 256,
       "commands": [
         "project.openFolder"
       ],
@@ -4002,7 +4002,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1639,
+      "lines": 1607,
       "commands": [
         "project.importHtml"
       ],
@@ -4017,7 +4017,7 @@
     },
     {
       "path": "src/core/import/markup.ts",
-      "lines": 81,
+      "lines": 56,
       "commands": [],
       "features": []
     },
@@ -4223,6 +4223,12 @@
       ]
     },
     {
+      "path": "src/core/ports/browser.ts",
+      "lines": 28,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/core/ports/clipboard.ts",
       "lines": 22,
       "commands": [],
@@ -4345,7 +4351,7 @@
     },
     {
       "path": "src/core/render/base.ts",
-      "lines": 45,
+      "lines": 46,
       "commands": [],
       "features": []
     },
@@ -4356,20 +4362,8 @@
       "features": []
     },
     {
-      "path": "src/core/render/inline.ts",
-      "lines": 61,
-      "commands": [],
-      "features": []
-    },
-    {
       "path": "src/core/render/output.ts",
       "lines": 230,
-      "commands": [],
-      "features": []
-    },
-    {
-      "path": "src/core/render/render.ts",
-      "lines": 838,
       "commands": [],
       "features": []
     },
@@ -4976,6 +4970,12 @@
       "features": []
     },
     {
+      "path": "src/editor/browser-ports.ts",
+      "lines": 77,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/canvas/anchor-tabs.tsx",
       "lines": 97,
       "commands": [],
@@ -5029,7 +5029,7 @@
     },
     {
       "path": "src/editor/canvas/frame.tsx",
-      "lines": 274,
+      "lines": 275,
       "commands": [],
       "features": []
     },
@@ -5102,6 +5102,18 @@
       "features": []
     },
     {
+      "path": "src/editor/canvas/render/inline.ts",
+      "lines": 62,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/canvas/render/render.ts",
+      "lines": 838,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/canvas/rulers.ts",
       "lines": 73,
       "commands": [],
@@ -5121,7 +5133,7 @@
     },
     {
       "path": "src/editor/canvas/side-frame.tsx",
-      "lines": 86,
+      "lines": 87,
       "commands": [],
       "features": []
     },
@@ -6179,7 +6191,7 @@
     },
     {
       "path": "src/editor/shell/side-by-side.tsx",
-      "lines": 41,
+      "lines": 42,
       "commands": [],
       "features": []
     },
@@ -6579,7 +6591,7 @@
     },
     {
       "path": "src/main.tsx",
-      "lines": 67,
+      "lines": 72,
       "commands": [],
       "features": []
     },
