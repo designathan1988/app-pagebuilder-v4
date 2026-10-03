@@ -1,13 +1,9 @@
 // The Layout Composer's rules, suggestions, templates and reference image through the editor's real store (spec
 // layout-composer): each change one undo step, each refusal a change of nothing.
 import { describe, expect, it } from 'vitest';
-import type { DocNode, DocumentJson, NodeId } from '../../../core/document/model.ts';
-import { anyCss } from '../../../core/ports/css.ts';
-import { noLayout, type Layout } from '../../../core/ports/layout.ts';
-import { manualClock } from '../../../core/ports/clock.ts';
-import { sequentialIds } from '../../../core/ports/ids.ts';
-import { createEditorStore, type EditorStore } from '../../../editor/store.ts';
-import type { PreferenceStorage } from '../../../editor/preferences/preferences.ts';
+import type { DocNode, DocumentJson, NodeId } from '../../../editor/host.ts';
+import { anyCss, createEditorStore, manualClock, noLayout, sequentialIds } from '../../../editor/host-testing.ts';
+import type { EditorStore, Layout, PreferenceStorage } from '../../../editor/host-testing.ts';
 import type { Luminance } from '../adapters/reference.ts';
 import { recordOf } from './record.ts';
 

@@ -5,13 +5,8 @@
 // opened, so the page follows the pointer and the release keeps one undo step; the region's box in the layout moves or
 // resizes, snapped as the Layout tool snaps, and the grid is laid out again from it. A press and release in place on a
 // region selects it as a click does. Any other press is the Select tool's own.
-import { locate, type NodeId } from '../../../core/document/model.ts';
-import { pageShown } from '../../../core/project/pages.ts';
-import type { CommandId } from '../../../generated/ids.ts';
-import { manifest, numberConstant } from '../../../manifest/runtime.ts';
-import { canvasFrame, geometryOf, nodeAt } from '../../../editor/canvas/coordinates.ts';
-import type { PointerTool, ToolPoint, ToolSession } from '../../../editor/input/pointer-tools.ts';
-import { activeBreakpoint } from '../../../editor/view/breakpoints.ts';
+import { activeBreakpoint, canvasFrame, geometryOf, locate, manifest, nodeAt, numberConstant, pageShown } from '../../../editor/host.ts';
+import type { CommandId, NodeId, PointerTool, ToolPoint, ToolSession } from '../../../editor/host.ts';
 import type { PlaceEdges } from '../gestures/recognize.ts';
 import { HEIGHT, WIDTH } from '../geometry/keys.ts';
 import { regionOf } from '../host/handlers.ts';

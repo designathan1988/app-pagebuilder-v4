@@ -1,8 +1,8 @@
 // The reference image's luminance, read where the editor can decode an image (spec, bet F): drawn on a canvas at most
 // TRACE_WIDTH px wide, one value from 0 (black) to 1 (white) per pixel, rounded to the thousandth so the command's
 // argument stays small and exact. The tracing itself is the engine's (adapters/reference.ts traceBlocks).
-import type { ProjectFile } from '../../../core/document/model.ts';
-import { objectUrl } from '../../../core/files/files.ts';
+import { objectUrl } from '../../../editor/host.ts';
+import type { ProjectFile } from '../../../editor/host.ts';
 import type { Luminance } from '../adapters/reference.ts';
 
 // the widest the image is read at: enough for the blocks a layout is made of, small enough for one command

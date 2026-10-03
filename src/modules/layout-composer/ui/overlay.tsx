@@ -4,14 +4,8 @@
 // stroke held now with what its release would do. Measured from the page on every animation frame, like the rest of
 // the canvas chrome; drawn in the chrome, never in the page.
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
-import { locate, type DocNode, type NodeId } from '../../../core/document/model.ts';
-import type { MessageId } from '../../../generated/ids.ts';
-import { manifest, type DoorEntry } from '../../../manifest/runtime.ts';
-import { canvasFrame, geometryOf, nodeBox } from '../../../editor/canvas/coordinates.ts';
-import { useEditorState } from '../../../editor/store.ts';
-import { useT } from '../../../editor/text.ts';
-import { imageFiles, objectUrl } from '../../../core/files/files.ts';
-import { activeBreakpoint } from '../../../editor/view/breakpoints.ts';
+import { activeBreakpoint, canvasFrame, geometryOf, imageFiles, locate, manifest, nodeBox, objectUrl, useEditorState, useT } from '../../../editor/host.ts';
+import type { DocNode, DoorEntry, MessageId, NodeId } from '../../../editor/host.ts';
 import type { HandleKind } from '../gestures/recognize.ts';
 import { markerOf, recordOf } from '../host/record.ts';
 import { composerOf } from '../host/state.ts';

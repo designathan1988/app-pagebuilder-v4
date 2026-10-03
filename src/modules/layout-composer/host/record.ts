@@ -6,8 +6,7 @@
 //    back exactly what it wrote and never touches the person's own styles (spec "Integração com estilos").
 // No node id is stored: an element is found by its marker inside the container, so duplicating or copying the
 // container copies a record that still holds together.
-import type { JsonValue } from '../../../generated/commands.ts';
-import type { DocNode } from '../../../core/document/model.ts';
+import type { DocNode, JsonValue } from '../../../editor/host.ts';
 import type { LayoutIntent } from '../intent/model.ts';
 import { validateIntent } from '../topology/topology.ts';
 

@@ -5,7 +5,7 @@ the last complete browser run on a clean tree (`docs/feature-results.json`, writ
 hand. `npm run inventory:check` fails while this file is out of step. The requirements these features answer, and the
 open problems, are in `docs/PRODUCT.md`.
 
-214 features (214 built), 371 commands, 1350 doors, 1819 scenarios.
+214 features (214 built), 371 commands, 1350 doors, 1820 scenarios.
 
 No complete browser run on a clean tree has been recorded yet: the next one writes `docs/feature-results.json`.
 
@@ -23,7 +23,7 @@ No complete browser run on a clean tree has been recorded yet: the next one writ
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
 | `palette-click-insert` | Insert Section, Container, Heading and Paragraph by clicking the Insert panel | yes | 7 | 3 | [palette-click-insert](../spec/BEHAVIOUR.md#palette-click-insert) | 5 | — |
-| `select-click` | Select an element by clicking it on the canvas | yes | 6 | 5 | [select-click](../spec/BEHAVIOUR.md#select-click) | 6 | — |
+| `select-click` | Select an element by clicking it on the canvas | yes | 7 | 5 | [select-click](../spec/BEHAVIOUR.md#select-click) | 6 | — |
 | `layers-tree` | Layers panel shows the document tree and selects in sync with the canvas | yes | 5 | 5 | [layers-tree](../spec/BEHAVIOUR.md#layers-tree) | 5 | — |
 | `undo-redo` | Undo and redo every document change | yes | 5 | 5 | [undo-redo](../spec/BEHAVIOUR.md#undo-redo) | 3 | — |
 | `delete-element` | Delete the selected element with Delete or Backspace | yes | 6 | 3 | [delete-element](../spec/BEHAVIOUR.md#delete-element) | 2 | — |

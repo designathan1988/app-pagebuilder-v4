@@ -3,17 +3,8 @@
 // with (gestures/recognize.ts readStroke), so what is committed is what the person saw; the new intent is compiled and
 // written into the container at once (host/materialize.ts), so the page is always the ordinary structure the layout
 // means — there is no separate "apply" that could leave the two apart.
-import { message, registerHandler, registerPredicate, type HandlerContext, type Message, type Outcome } from '../../../core/commands/registry.ts';
-import { locate, type DocNode, type NodeId } from '../../../core/document/model.ts';
-import { firstLockRefusal } from '../../../core/nodes/flags.ts';
-import { pageShown } from '../../../core/project/pages.ts';
-import { tracksToValue } from '../../../core/style/tracks.ts';
-import { nodeMaker } from '../../../core/structure/node-maker.ts';
-import type { MessageId } from '../../../generated/ids.ts';
-import { manifest, numberConstant } from '../../../manifest/runtime.ts';
-import type { EditorUi } from '../../../editor/state.ts';
-import { BASE_BREAKPOINT, activeBreakpoint, type Shown } from '../../../editor/view/breakpoints.ts';
-import { zoomOf } from '../../../editor/view/camera.ts';
+import { activeBreakpoint, BASE_BREAKPOINT, breakpointWords, firstLockRefusal, hidePanel, imageFiles, isPanelOpen, locate, manifest, message, nodeMaker, numberConstant, pageShown, registerHandler, registerPredicate, showPanel, tracksToValue, zoomOf } from '../../../editor/host.ts';
+import type { DocNode, EditorUi, HandlerContext, Message, MessageId, NodeId, Outcome, Shown } from '../../../editor/host.ts';
 import { propertyVocabulary } from '../adapters/properties.ts';
 import { compile, type CompilerPorts } from '../compiler/compile.ts';
 import { execute, type Naming, type Operation, type RegionValues } from '../gestures/operations.ts';
@@ -22,7 +13,6 @@ import { acceptSuggestion, nextSelection, paintConstraint, type SelectionMode } 
 import { suggestions, type Suggestion } from '../intent/analysis.ts';
 import { builtInTemplate, placeTemplate, type BuiltInTemplate } from '../intent/templates.ts';
 import { traceBlocks, traceRegions, type Luminance } from '../adapters/reference.ts';
-import { imageFiles } from '../../../core/files/files.ts';
 import { nextRegionId } from '../intent/ids.ts';
 import { ALIGNMENTS, DISTRIBUTIONS, SEMANTICS, SIZINGS, childrenOf, emptyIntent, findRegion, region as newRegion, type LayoutIntent, type LayoutStrategy, type Point, type Region } from '../intent/model.ts';
 import { LayoutRefusal, problemKey, type LayoutProblem } from '../intent/problems.ts';
@@ -33,8 +23,6 @@ import { HEIGHT, WIDTH } from '../geometry/keys.ts';
 import { materialize } from './materialize.ts';
 import { NAMESPACE, markerOf, recordOf, withAuthoring, type ContainerRecord } from './record.ts';
 import { composerOf, withComposer, type ComposerState } from './state.ts';
-import { breakpointWords } from '../../../core/document/breakpoints.ts';
-import { hidePanel, isPanelOpen, showPanel } from '../../../editor/workspace/panels.ts';
 
 // the sidebar view the tool's options are drawn in while it is the canvas tool, and the one it gives back
 const PANEL = 'layout-composer';

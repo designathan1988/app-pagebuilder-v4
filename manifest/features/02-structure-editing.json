@@ -1464,6 +1464,81 @@
             "export": null
           },
           "refusals": []
+        },
+        {
+          "id": "the-select-tool-puts-the-grid-editor-away",
+          "setup": {
+            "fixture": "grid-page",
+            "selection": [
+              "/Page/Grid"
+            ],
+            "context": "global",
+            "breakpoint": "desktop",
+            "state": "base",
+            "locale": "en",
+            "viewport": "desktop-1440",
+            "zoom": "fit"
+          },
+          "steps": [
+            {
+              "door": "grid.enterEdit#canvas-double-click-grid-container",
+              "args": {},
+              "target": "/Page/Grid",
+              "drop": null,
+              "action": false,
+              "hold": false,
+              "type": null
+            },
+            {
+              "door": "view.selectTool#toolbar-canvas-toolbar-select",
+              "args": {},
+              "target": null,
+              "drop": null,
+              "action": true,
+              "hold": false,
+              "type": null
+            },
+            {
+              "door": "grid.addTrack#key-equals-in-grid-edit",
+              "args": {
+                "property": "grid-template-columns"
+              },
+              "target": null,
+              "drop": null,
+              "action": false,
+              "hold": false,
+              "type": null
+            }
+          ],
+          "doors": [
+            "view.selectTool#toolbar-canvas-toolbar-select",
+            "view.selectTool#key-v-in-global"
+          ],
+          "expect": {
+            "document": [],
+            "selection": [
+              "/Page/Grid"
+            ],
+            "history": {
+              "undoSteps": 0,
+              "undoRestores": true,
+              "redoRestores": true
+            },
+            "render": {
+              "computed": [],
+              "geometry": [],
+              "feedback": [
+                {
+                  "key": "status.tool.select",
+                  "params": {}
+                }
+              ]
+            },
+            "editor": null,
+            "persistence": null,
+            "export": null
+          },
+          "refusals": []
         }
       ]
     },

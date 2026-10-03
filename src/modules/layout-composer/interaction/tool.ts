@@ -10,13 +10,8 @@
 //  - any other drag: layout.stroke (layout-stage) with the tool's mode, or the mode the key held gives (Ctrl moves the
 //    region dragged, Shift selects the regions boxed, S held splits, M held merges, Alt subtracts: interactions.json
 //    layout-stroke).
-import { locate } from '../../../core/document/model.ts';
-import type { Gesture } from '../../../core/store/store.ts';
-import type { CommandId, KeyContextId, MessageId } from '../../../generated/ids.ts';
-import { manifest, numberConstant } from '../../../manifest/runtime.ts';
-import { canvasFrame, geometryOf } from '../../../editor/canvas/coordinates.ts';
-import { textOf } from '../../../editor/text.ts';
-import type { PointerTool, ToolPoint, ToolSession } from '../../../editor/input/pointer-tools.ts';
+import { canvasFrame, geometryOf, locate, manifest, numberConstant, textOf } from '../../../editor/host.ts';
+import type { CommandId, Gesture, KeyContextId, MessageId, PointerTool, ToolPoint, ToolSession } from '../../../editor/host.ts';
 import { hitRegions } from '../geometry/geometry.ts';
 import { handleOf, readStroke, type StrokeMode } from '../gestures/recognize.ts';
 import { cycleSelection } from '../gestures/structural.ts';

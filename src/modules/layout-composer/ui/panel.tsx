@@ -4,18 +4,8 @@
 // arranged (layout.interpret), what changes at the screen size the canvas shows (layout.respond), delete and Done.
 // Every control is the door the manifest declares; nothing here changes state but through them.
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { locate } from '../../../core/document/model.ts';
-import type { DispatchResult } from '../../../core/store/store.ts';
-import type { CommandId, MessageId } from '../../../generated/ids.ts';
-import { manifest, type DoorEntry } from '../../../manifest/runtime.ts';
-import { DoorControl, Icon, useDoor } from '../../../editor/doors/door.tsx';
-import { markFieldKept, recordFieldInput } from '../../../editor/input/drafts.ts';
-import { useEditorState, useStore } from '../../../editor/store.ts';
-import { useT } from '../../../editor/text.ts';
-import { BASE_BREAKPOINT, activeBreakpoint } from '../../../editor/view/breakpoints.ts';
-import { breakpointName, breakpointsOf } from '../../../core/document/breakpoints.ts';
-import { imageFiles } from '../../../core/files/files.ts';
-import type { DocumentJson, ProjectFile } from '../../../core/document/model.ts';
+import { activeBreakpoint, BASE_BREAKPOINT, breakpointName, breakpointsOf, DoorControl, Icon, imageFiles, locate, manifest, markFieldKept, recordFieldInput, useDoor, useEditorState, useStore, useT } from '../../../editor/host.ts';
+import type { CommandId, DispatchResult, DocumentJson, DoorEntry, MessageId, ProjectFile } from '../../../editor/host.ts';
 import { predict, stress, stressWidths, type Suggestion } from '../intent/analysis.ts';
 import { BUILT_IN_TEMPLATES } from '../intent/templates.ts';
 import { luminanceOf } from '../interaction/luminance.ts';

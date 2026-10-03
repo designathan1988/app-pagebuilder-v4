@@ -1,7 +1,6 @@
 // The compiler's ports as the app gives them, for the module's tests: the track list owner and the manifest's own
 // property vocabulary.
-import { manifest } from '../../../manifest/runtime.ts';
-import { tracksToValue } from '../../../core/style/tracks.ts';
+import { manifest, tracksToValue } from '../../../editor/host.ts';
 import type { CompilerPorts } from '../compiler/compile.ts';
 import { propertyVocabulary } from '../adapters/properties.ts';
 import type { Box, LayoutIntent, Region } from '../intent/model.ts';

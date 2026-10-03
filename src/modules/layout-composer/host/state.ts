@@ -1,8 +1,7 @@
 // The composer's editor state, kept in the editor's own store under the module's namespace (EditorUi.modules): which
 // container is composed, which regions are selected, the lens and the tool. It is never document state: leaving the
 // composer, or removing the module, leaves nothing behind but the document the composer wrote.
-import type { NodeId } from '../../../core/document/model.ts';
-import type { EditorUi } from '../../../editor/state.ts';
+import type { EditorUi, NodeId } from '../../../editor/host.ts';
 import type { StrokeMode } from '../gestures/recognize.ts';
 import type { Lens } from '../ui/scene.ts';
 import { NAMESPACE } from './record.ts';

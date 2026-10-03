@@ -6,10 +6,8 @@
 // (core/style/set.ts readValue, declarationsOf), so a composite is written as its longhands and a value the browser
 // would not take is refused, never stored; what the compiler wrote last time is taken back first, and nothing the
 // person declared is touched.
-import type { HandlerContext } from '../../../core/commands/registry.ts';
-import type { DocNode, Styles } from '../../../core/document/model.ts';
-import { declarationsOf, readValue } from '../../../core/style/set.ts';
-import { freshName, newElement, type NodeMaker } from '../../../core/structure/node-maker.ts';
+import { declarationsOf, freshName, newElement, readValue } from '../../../editor/host.ts';
+import type { DocNode, HandlerContext, NodeMaker, Styles } from '../../../editor/host.ts';
 import type { CompiledNode, Compilation } from '../compiler/compile.ts';
 import { ROOT_NODE } from '../compiler/compile.ts';
 import { refuse } from '../intent/problems.ts';

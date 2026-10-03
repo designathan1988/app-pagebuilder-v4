@@ -13,7 +13,7 @@ const root = process.cwd();
 const copy = path.join(root, '.cache', `removal-${id}`);
 fs.rmSync(copy, { recursive: true, force: true });
 fs.mkdirSync(copy, { recursive: true });
-for (const entry of ['src', 'manifest', 'tools', 'tests', 'spec', 'companion', 'playwright.config.ts', 'index.html', 'package.json', 'tsconfig.json', 'tsconfig.app.json', 'tsconfig.node.json', 'vite.config.ts', 'vitest.config.ts', 'eslint.config.js']) {
+for (const entry of ['src', 'manifest', 'tools', 'tests', 'spec', 'companion', 'playwright.config.ts', 'index.html', 'package.json', 'tsconfig.json', 'tsconfig.app.json', 'tsconfig.node.json', 'tsconfig.core.json', 'vite.config.ts', 'vitest.config.ts', 'eslint.config.js']) {
   if (fs.existsSync(path.join(root, entry))) fs.cpSync(path.join(root, entry), path.join(copy, entry), { recursive: true });
 }
 // the dependencies are the project's own, linked, never copied
@@ -51,7 +51,22 @@ for (const command of workspace.commands) {
   for (const arg of Object.values(command.args)) arg.values = arg.values.filter((v) => v !== id);
 }
 write('manifest/commands/workspace.json', workspace);
-// the scenarios of other features that name the module's panel (none expected; checked by manifest:check)
+// The scenarios of other features that go through one of the module's doors (select-click's "the Select tool puts any
+// other tool away" takes the Layout tool as the other tool): they prove how the module meets the rest, and leave
+// with it.
+const moduleDoor = (door: unknown): boolean => typeof door === 'string' && commands.includes(door.split('#')[0] ?? '');
+for (const file of fs.readdirSync(at('manifest/features')).filter((f) => f.endsWith('.json'))) {
+  const features = json(`manifest/features/${file}`) as { features: { scenarios: { steps: { door: unknown }[]; doors: unknown[] }[] }[] };
+  let changed = false;
+  for (const feature of features.features) {
+    const kept = feature.scenarios.filter((scenario) => !scenario.steps.some((step) => moduleDoor(step.door)) && !scenario.doors.some(moduleDoor));
+    if (kept.length !== feature.scenarios.length) {
+      feature.scenarios = kept;
+      changed = true;
+    }
+  }
+  if (changed) write(`manifest/features/${file}`, features);
+}
 
 // its registration lines
 const drop = (file: string, pattern: RegExp) => fs.writeFileSync(at(file), fs.readFileSync(at(file), 'utf8').split('\n').filter((line) => !pattern.test(line)).join('\n'));

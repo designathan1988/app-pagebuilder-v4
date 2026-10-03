@@ -1,14 +1,10 @@
 // The Layout Composer through the editor's real store (spec layout-composer): entering a container, strokes as one
 // undo step each, the compiled structure written as ordinary elements, refusals that change nothing.
 import { describe, expect, it } from 'vitest';
-import { locate, type DocNode, type NodeId } from '../../../core/document/model.ts';
-import { anyCss } from '../../../core/ports/css.ts';
-import { noLayout, type Layout } from '../../../core/ports/layout.ts';
-import { manualClock } from '../../../core/ports/clock.ts';
-import { sequentialIds } from '../../../core/ports/ids.ts';
-import type { Rect } from '../../../generated/commands.ts';
-import { createEditorStore, type EditorStore } from '../../../editor/store.ts';
-import type { PreferenceStorage } from '../../../editor/preferences/preferences.ts';
+import { locate } from '../../../editor/host.ts';
+import type { DocNode, NodeId } from '../../../editor/host.ts';
+import { anyCss, createEditorStore, manualClock, noLayout, sequentialIds } from '../../../editor/host-testing.ts';
+import type { EditorStore, Layout, PreferenceStorage, Rect } from '../../../editor/host-testing.ts';
 import { markerOf, recordOf } from './record.ts';
 import { composerOf } from './state.ts';
 

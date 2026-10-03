@@ -6,7 +6,7 @@ import { findRegion } from './model.ts';
 import { refuse } from './problems.ts';
 import { resolveValue } from '../constraints/solve.ts';
 import type { Operation } from '../gestures/operations.ts';
-import { isIdentifier } from '../../../core/text/identifier.ts';
+import { isIdentifier } from '../../../editor/host.ts';
 
 // A place that holds a length: a constraint's value (a gap, a fixed size) or a region's padding.
 export type ValueRef = { readonly kind: 'constraint'; readonly id: string } | { readonly kind: 'padding'; readonly region: string };

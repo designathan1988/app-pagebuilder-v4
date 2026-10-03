@@ -4,9 +4,9 @@
     "built": 214,
     "commands": 371,
     "doors": 1350,
-    "scenarios": 1819,
-    "modules": 435,
-    "lines": 80239
+    "scenarios": 1820,
+    "modules": 437,
+    "lines": 80252
   },
   "features": [
     {
@@ -52,7 +52,7 @@
         "view.selectTool"
       ],
       "doors": 13,
-      "scenarios": 6,
+      "scenarios": 7,
       "modules": [
         "src/core/selection/selection.ts",
         "src/editor/view/select-tool.ts"
@@ -5458,6 +5458,18 @@
       "features": []
     },
     {
+      "path": "src/editor/host-testing.ts",
+      "lines": 12,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/host.ts",
+      "lines": 44,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/import/capture.ts",
       "lines": 103,
       "commands": [
@@ -6771,7 +6783,7 @@
     },
     {
       "path": "src/modules/layout-composer/host/handlers.ts",
-      "lines": 871,
+      "lines": 859,
       "commands": [
         "layout.enter",
         "layout.leave",
@@ -6795,19 +6807,19 @@
     },
     {
       "path": "src/modules/layout-composer/host/materialize.ts",
-      "lines": 125,
+      "lines": 123,
       "commands": [],
       "features": []
     },
     {
       "path": "src/modules/layout-composer/host/record.ts",
-      "lines": 77,
+      "lines": 76,
       "commands": [],
       "features": []
     },
     {
       "path": "src/modules/layout-composer/host/state.ts",
-      "lines": 32,
+      "lines": 31,
       "commands": [],
       "features": []
     },
@@ -6861,7 +6873,7 @@
     },
     {
       "path": "src/modules/layout-composer/interaction/place-tool.ts",
-      "lines": 83,
+      "lines": 78,
       "commands": [],
       "features": []
     },
@@ -6873,7 +6885,7 @@
     },
     {
       "path": "src/modules/layout-composer/interaction/tool.ts",
-      "lines": 115,
+      "lines": 110,
       "commands": [],
       "features": []
     },
@@ -6891,7 +6903,7 @@
     },
     {
       "path": "src/modules/layout-composer/testing/ports.ts",
-      "lines": 27,
+      "lines": 26,
       "commands": [],
       "features": []
     },
@@ -6903,13 +6915,13 @@
     },
     {
       "path": "src/modules/layout-composer/ui/overlay.tsx",
-      "lines": 216,
+      "lines": 210,
       "commands": [],
       "features": []
     },
     {
       "path": "src/modules/layout-composer/ui/panel.tsx",
-      "lines": 321,
+      "lines": 311,
       "commands": [],
       "features": []
     },

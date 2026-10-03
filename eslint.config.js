@@ -159,6 +159,42 @@ export default defineConfig(
     },
   },
   {
+    // A removable module reaches the editor, the core, the manifest and the generated lists through its host API only
+    // (plan I.10: src/editor/host.ts; its tests also src/editor/host-testing.ts), never by a deep import.
+    files: ['src/modules/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/core/**', '**/editor/**', '**/manifest/**', '**/generated/**', '**/app/**', '!**/editor/host.ts', '!**/editor/host-testing.ts'],
+              message: 'A module imports src/editor/host.ts (its tests src/editor/host-testing.ts), never a deeper file.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // only a module's tests use the test doubles
+    files: ['src/modules/**/*.{ts,tsx}'],
+    ignores: ['src/modules/**/*.test.ts', 'src/modules/**/*.test.tsx'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/core/**', '**/editor/**', '**/manifest/**', '**/generated/**', '**/app/**', '!**/editor/host.ts'],
+              message: 'A module imports src/editor/host.ts, never a deeper file; the test doubles are for its tests.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // the core's test helpers run in happy-dom with the tests
     files: ['src/core/testing/**/*.ts', 'src/core/**/*.test.ts'],
     rules: { 'no-restricted-globals': 'off' },
