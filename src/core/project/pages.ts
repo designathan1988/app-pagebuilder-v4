@@ -149,7 +149,8 @@ export function duplicatePageCommandFor<Ui extends WithPage>() {
     const copyOfBase = (name: string): boolean => name.startsWith(`${base} `) && /^\d+$/.test(name.slice(base.length + 1));
     let place = at + 1;
     while (place < document.pages.length && copyOfBase(document.pages[place]?.name ?? '')) place += 1;
-    // the copy opens (the selection goes with the page left), and its name field takes the focus (sidebar.tsx)
+    // the copy opens (the selection goes with the page left), and its name field takes the focus
+    // (shell/sidebar/explorer.tsx)
     return { kind: 'change' as const, patches: [{ op: 'add', path: ['pages', place], value: made }], ui: { ...state.ui, page: made.id }, selection: [], message: message('status.pages.duplicated', { name: source.name, copy: made.name, file: made.file }) };
   });
 }

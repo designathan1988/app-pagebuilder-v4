@@ -5,8 +5,8 @@
     "commands": 371,
     "doors": 1350,
     "scenarios": 1820,
-    "modules": 437,
-    "lines": 80252
+    "modules": 442,
+    "lines": 80359
   },
   "features": [
     {
@@ -4308,7 +4308,7 @@
     },
     {
       "path": "src/core/project/pages.ts",
-      "lines": 210,
+      "lines": 211,
       "commands": [
         "pages.add",
         "pages.rename",
@@ -5529,7 +5529,7 @@
     },
     {
       "path": "src/editor/input/pointer/machine.ts",
-      "lines": 89,
+      "lines": 90,
       "commands": [],
       "features": []
     },
@@ -5698,7 +5698,7 @@
     },
     {
       "path": "src/editor/layers/rename.ts",
-      "lines": 64,
+      "lines": 65,
       "commands": [
         "layers.cancelRename",
         "layers.startRename"
@@ -6245,7 +6245,37 @@
     },
     {
       "path": "src/editor/shell/sidebar.tsx",
-      "lines": 1177,
+      "lines": 127,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/shell/sidebar/doors.tsx",
+      "lines": 39,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/shell/sidebar/explorer.tsx",
+      "lines": 313,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/shell/sidebar/insert.tsx",
+      "lines": 165,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/shell/sidebar/layers.tsx",
+      "lines": 560,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/shell/sidebar/styles.tsx",
+      "lines": 77,
       "commands": [],
       "features": []
     },

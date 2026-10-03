@@ -23,7 +23,8 @@ export type Press =
   | { readonly on: 'node'; readonly node: string; readonly root: boolean; readonly label?: boolean }
   | { readonly on: 'stage' }
   | { readonly on: 'tile'; readonly entry: DoorEntry; readonly args: Readonly<Record<string, unknown>> }
-  // a press on a Layers row: it selects on its click (sidebar.tsx) and arms the row's drag (spec layers-drag)
+  // a press on a Layers row: it selects on its click (shell/sidebar/layers.tsx) and arms the row's drag (spec
+  // layers-drag)
   | { readonly on: 'row'; readonly node: string }
   | { readonly on: 'scrub'; readonly entry: DoorEntry; readonly args: Readonly<Record<string, unknown>>; readonly value: string }
   // a press on a stop of the gradient bar: the stop drag's door, the arguments the stop stands for, its index and the

@@ -1647,7 +1647,7 @@ async function runStep(page: Page, step: Step, ref: string, held: { current: Hel
     // clicks: a panel control's door with a key held (a Layers row's Shift+click) or pressed with the secondary button
     // (its secondary click) is its plain control clicked that way (modifiedControl). A Layers row's part whose step
     // names no argument for it (a row's name, whose double-click renames the selection the first click made) is the
-    // part of the row of the step's target: sidebar.tsx writes each part's row node as `target`.
+    // part of the row of the step's target: shell/sidebar/layers.tsx writes each part's row node as `target`.
     const clicked = modifiedControl(ref)?.drawn ?? ref;
     // (a Layers row's control is drawn on every row: it stands for the row's node too, whatever else it stands for)
     const plain = d.kind === 'panel-control' && d.panel === 'layers' && target !== null ? { ...withoutGestureArgs(own), target: target.id } : withoutGestureArgs(own);

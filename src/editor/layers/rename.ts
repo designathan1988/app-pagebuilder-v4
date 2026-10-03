@@ -1,7 +1,8 @@
 // Renaming in Layers (PRODUCT.md §5, "Renaming in Layers"; spec rename-element): layers.startRename and the editor
 // state of a rename (`ui.rename`). F2 on the canvas, a double-click on a Layers row's name, the context menu's Rename
 // and Arrange › Rename start the one inline edit (spec, Problems in Pager 2: no dialog): the selected node's Layers row
-// draws its name as a field holding that name, selected, with the focus (src/editor/shell/sidebar.tsx). The Layers
+// draws its name as a field holding that name, selected, with the focus (src/editor/shell/sidebar/layers.tsx). The
+// Layers
 // section is shown first when it is hidden, and the branches that hide the row unfold (layers/tree.ts). What the field
 // holds is kept by element.rename (src/core/nodes/names.ts) when it is submitted with Enter or loses the focus.
 //

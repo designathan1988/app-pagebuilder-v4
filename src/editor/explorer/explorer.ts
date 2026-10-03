@@ -156,7 +156,7 @@ export const openFile = registerHandler<'files.open', EditorUi>(
 
 // files.startRename (the Explorer's row, a double-click on its name — the Layers row's own pattern): which row is
 // renamed, in the editor's state, never in the document. The field that takes the name is files.rename's
-// (shell/sidebar.tsx draws it in the name's place while this names the row).
+// (shell/sidebar/explorer.tsx draws it in the name's place while this names the row).
 export const startRenameFile = registerHandler<'files.startRename', EditorUi>(
   'files.startRename',
   ({ state }, { path }) => {
