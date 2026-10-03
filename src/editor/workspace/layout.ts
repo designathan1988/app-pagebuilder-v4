@@ -7,7 +7,7 @@ import { message, registerHandler, type Message } from '../../core/commands/regi
 import type { MessageId } from '../../generated/ids.ts';
 import { commandOf, doorsIn, manifest } from '../../manifest/runtime.ts';
 import type { EditorUi } from '../state.ts';
-import { INITIAL_PANELS, PANELS, panelName, panelsAt, type Panel } from './panels.ts';
+import { INITIAL_PANELS, PANELS, panelName, panelsAt, type Panel } from './panel-catalogue.ts';
 import { registerReferenceKind } from '../../core/store/references.ts';
 import { argumentRefused } from '../../core/store/args.ts';
 

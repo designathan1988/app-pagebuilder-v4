@@ -5,7 +5,7 @@
 // the shell's own frame (the inspector column, the canvas tools, the workbench) are drawn by the shell itself.
 // shell.tsx hands the answer to every door through PanelBodies, so the doors never import the views, which draw doors.
 import { createContext, type ComponentType } from 'react';
-import { PANELS, type Panel } from '../workspace/panels.ts';
+import { PANELS, type Panel } from '../workspace/panel-catalogue.ts';
 
 export type BodyTable = Readonly<Partial<Record<Panel, ComponentType>>>;
 

@@ -28,7 +28,8 @@ import { placementRefusal } from '../elements/content-model.ts';
 import { applyPatches, type Patch } from '../history/transaction.ts';
 import { firstLockRefusal, lockRefusal } from '../nodes/flags.ts';
 import { selectionRoots } from './remove.ts';
-import { storedValue, writeDeclarations } from '../style/set.ts';
+import { writeDeclarations } from '../style/set.ts';
+import { storedValue } from '../style/stored.ts';
 import { valuePredicateHolds } from '../style/couplings.ts';
 
 export const moveToCommand = registerHandler('element.moveTo', ({ state, rules, layout }, { parent, index }): Outcome<never> => moveSelectionTo(state, rules, layout, parent, index));

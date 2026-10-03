@@ -6,7 +6,7 @@
 import { message, registerHandler, type Outcome } from '../commands/registry.ts';
 import { locate, type DocNode, type DocumentJson } from '../document/model.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { newElement, nodeMaker } from '../structure/insert.ts';
+import { newElement, nodeMaker } from '../structure/node-maker.ts';
 import { newRow } from './table.ts';
 import { geometryAttributes, shapeGeometry, sizeForShapes, svgMarkupOf } from './svg.ts';
 import { resizeCommand } from '../geometry/resize.ts';

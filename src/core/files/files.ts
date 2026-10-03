@@ -16,7 +16,7 @@ import type { Message } from '../commands/registry.ts';
 import type { MessageId } from '../../generated/ids.ts';
 import type { Patch } from '../history/transaction.ts';
 import type { ModelRules } from '../document/validate.ts';
-import { walk } from '../document/model.ts';
+import { filesOf, walk } from '../document/model.ts';
 import { familyOf, fontFiles } from './fonts.ts';
 import { followPaths, movedPath } from './references.ts';
 import { argumentRefused } from '../store/args.ts';
@@ -32,9 +32,6 @@ const FOLDERS: readonly { readonly folder: string; readonly types: readonly stri
 ];
 export const FILE_FOLDER = 'files/';
 
-export function filesOf(document: DocumentJson): readonly ProjectFile[] {
-  return document.files ?? [];
-}
 export function fileAt(document: DocumentJson, path: string): ProjectFile | null {
   return filesOf(document).find((f) => f.path === path) ?? null;
 }

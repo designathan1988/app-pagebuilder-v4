@@ -13,7 +13,8 @@ import type { ModelRules } from '../document/validate.ts';
 import type { Patch } from '../history/transaction.ts';
 import { commandOf, numberConstant } from '../../manifest/runtime.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
-import { storedValue, writeDeclarations } from './set.ts';
+import { writeDeclarations } from './set.ts';
+import { storedValue } from './stored.ts';
 
 // the arguments a command's own doors carry, as text (the manifest's data)
 const doorArgs = (command: CommandId): Readonly<Record<string, string>> => {

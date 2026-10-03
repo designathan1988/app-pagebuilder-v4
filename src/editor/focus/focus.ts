@@ -4,7 +4,7 @@
 // its items are its own focusable controls, in document order, not those of a region nested in it (a submenu).
 // A handler never touches the page: it records the request in the editor state, and the focus owner's installer
 // carries it out on the DOM focus when the state changes.
-import type { Panel } from '../workspace/panels.ts';
+import type { Panel } from '../workspace/panel-catalogue.ts';
 import { registerHandler } from '../../core/commands/registry.ts';
 import type { EditorUi } from '../state.ts';
 import type { EditorStore } from '../store.ts';

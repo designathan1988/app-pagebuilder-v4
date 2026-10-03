@@ -6,7 +6,8 @@
 import { message, registerHandler } from '../commands/registry.ts';
 import { locate, type DocNode } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
-import { longhandValues, propertyName, readValue, storedValue, writeStyle } from './set.ts';
+import { longhandValues, propertyName, readValue, writeStyle } from './set.ts';
+import { storedValue } from './stored.ts';
 import { argumentRefused } from '../store/args.ts';
 
 // the start and the span a composite's text holds ("2 / span 3", "span 3", "auto / b"): a start that is a whole

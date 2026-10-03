@@ -12,7 +12,8 @@ import { anyCss } from '../ports/css.ts';
 import { sequentialIds } from '../ports/ids.ts';
 import { noLayout } from '../ports/layout.ts';
 import { setStyleCommand } from '../style/set.ts';
-import { componentHolders, createComponentCommand, detachInstanceCommand, insertInstanceCommand } from './components.ts';
+import { createComponentCommand, detachInstanceCommand, insertInstanceCommand } from './components.ts';
+import { componentHolders } from './instances.ts';
 
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });

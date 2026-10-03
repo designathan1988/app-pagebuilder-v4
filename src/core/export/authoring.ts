@@ -1,6 +1,6 @@
 import type {DocumentJson,NodeId} from '../document/model.ts';
 import {locate,walk} from '../document/model.ts';
-import {languageTagAllowed} from '../document/validate.ts';
+import { languageTagAllowed } from '../text/language-tag.ts';
 import type {Patch} from '../history/transaction.ts';
 import type {HandlerContext,Outcome} from '../commands/registry.ts';
 import {renameCommand} from '../nodes/names.ts';

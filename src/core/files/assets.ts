@@ -8,7 +8,8 @@ import type { DocNode, NodeId } from '../document/model.ts';
 import { locate } from '../document/model.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { newElement, nodeMaker, placement } from '../structure/insert.ts';
+import { placement } from '../structure/insert.ts';
+import { newElement, nodeMaker } from '../structure/node-maker.ts';
 import { addRecords, fileList, recordsFor, unsupported } from './files.ts';
 
 // the element type a dropped file is placed as, and the element a drop replaces the source of

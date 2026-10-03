@@ -52,7 +52,8 @@ import { canonical, type InlineRun, type TextRange } from '../../../core/text/in
 import { ELEMENT_NODE, TEXT_NODE, browserBreak, leavesOf, lastContent, precedes, runsOfLeaves, type Leaf } from './inline.ts';
 import { svgMarkupOf } from '../../../core/elements/svg.ts';
 import { rootCss } from '../../../core/design/tokens.ts';
-import { filesOf, objectUrl, resolvedSource } from '../../../core/files/files.ts';
+import { objectUrl, resolvedSource } from '../../../core/files/files.ts';
+import { filesOf } from '../../../core/document/model.ts';
 import { fontFaceCss } from '../../../core/files/fonts.ts';
 import { animationsOf, keyframesCss, previewDeclarations } from '../../../core/animation/animation.ts';
 import { outputForTable } from '../../../core/document/breakpoint-rules.ts';

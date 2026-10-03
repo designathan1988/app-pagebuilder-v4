@@ -5,7 +5,8 @@
 // writes the file's path relative to the stylesheet, the canvas and the editor draw the fence with the file's object
 // URL (core/files/files.ts).
 import type { DocumentJson } from '../document/model.ts';
-import { filesOf, type ProjectFile } from './files.ts';
+import type { ProjectFile } from './files.ts';
+import { filesOf } from '../document/model.ts';
 
 
 // The font kinds the project serves, by the file's type or, when it has none, its extension (fonts.upload stores a

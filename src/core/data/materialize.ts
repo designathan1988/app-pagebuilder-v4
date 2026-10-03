@@ -15,7 +15,7 @@ import { copied, marked } from '../design/components.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import { applyPatches, deepEqual } from '../history/transaction.ts';
 import { copyName } from '../structure/duplicate.ts';
-import { nodeMaker, type NodeMaker } from '../structure/insert.ts';
+import { nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
 import { collectionNamed, queryItems, refuse, DataRefusal } from './collections.ts';
 import { fillTree, itemPagesOf, type DataContext, type ItemPages } from './bindings.ts';
 import type { Collection, DataList } from './model.ts';

@@ -16,7 +16,7 @@ import { useEditorState } from '../store.ts';
 import { useLocale, useT } from '../text.ts';
 import { pluralForm } from '../../i18n/index.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';
-import { PANELS, panelName, type Panel } from '../workspace/panels.ts';
+import { PANELS, panelName, type Panel } from '../workspace/panel-catalogue.ts';
 import type { BodyTable } from './bodies.ts';
 import { Slots } from './slots.tsx';
 import { Shortcuts } from './shortcuts.tsx';

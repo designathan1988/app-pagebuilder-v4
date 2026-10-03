@@ -6,7 +6,7 @@
 import type { EditorUi } from '../state.ts';
 import { DOCK_STATES, INITIAL_LAYOUT, type LayoutState } from './layout.ts';
 
-import { INITIAL_PANELS, PANELS, type Panel, type PanelsState } from './panels.ts';
+import { INITIAL_PANELS, PANELS, type Panel, type PanelsState } from './panel-catalogue.ts';
 
 // Where the workspace is kept between sessions; the browser's localStorage by default, a map in tests
 export interface WorkspaceStorage {

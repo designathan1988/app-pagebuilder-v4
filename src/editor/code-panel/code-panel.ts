@@ -12,14 +12,7 @@ import type { NodeId } from '../../generated/commands.ts';
 import type { ModelRules } from '../../core/document/validate.ts';
 import type { EditorUi } from '../state.ts';
 import { activeFile } from '../explorer/file-tabs.ts';
-import { SCRIPT_PATHS, generatedScripts, kindOf, type FileKind } from '../explorer/explorer.ts';
-
-// Whether the path is one the document generates (a page's file, the stylesheet, a script the export writes and no
-// stored file holds): its text is rendered now, and its path is fixed — the export writes it there (archive/DESIGN.md,
-// "Files, tabs and code").
-export function isGenerated(path: string, document: DocumentJson): boolean {
-  return document.pages.some((page) => page.file === path) || path === STYLESHEET || (SCRIPT_PATHS.includes(path) && fileAt(document, path) === null);
-}
+import { generatedScripts, isGenerated, kindOf, type FileKind } from '../explorer/explorer.ts';
 
 // The text the pane shows for a path: a generated file rendered from the document, a project file's own bytes as
 // text, and null for a file that is neither (an image, a font): the pane shows its name and type instead.

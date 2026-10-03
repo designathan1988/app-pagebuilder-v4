@@ -207,6 +207,11 @@ export interface ProjectFile {
   readonly height?: number;
 }
 
+// the project's files, in the tree's order
+export function filesOf(document: DocumentJson): readonly ProjectFile[] {
+  return document.files ?? [];
+}
+
 export interface ComponentDefinition {
   readonly name: string;
   readonly tree: DocNode;

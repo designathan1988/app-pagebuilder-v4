@@ -607,13 +607,15 @@ dependencies **needs to change** (6 runtime import cycles), owners **acceptable*
 **acceptable** (a feature costs 16–22 files), tests **good**, performance **acceptable** (one 3.5 MB chunk), security
 **needs to change**, extensibility **acceptable**. The ordered plan of twelve changes, with effort and risk, is in the
 audit; its first five: error containment, cascade-safe CSS merging with a canvas-versus-export test, store and
-predicate hardening, the invariant probe in the gate, and the security set.
+predicate hardening, the invariant probe in the gate, and the security set. Since QA 224 the import graph has no
+cycle (dependency-cruiser counted 14 runtime cycles, the audit's six and their variants; `deps:check` in `check:fast`
+keeps it so).
 
 ## 6. How to prove
 
 | Command | What it verifies | Time |
 |---|---|---|
-| `npm run check:fast` | `gen:check` (generated files untouched), `manifest:check` (the contract's schema and rules, every scenario's data), `inventory:check` (inventory, features table and owners in step with the source), both typechecks, lint (tokens, catalogue texts, pointer and key owners, no React in the core), the unit suite with coverage floors — among them the headless scenario runner (`tools/runner/headless.test.ts`), the documents the sources cite resolving (`tools/inventory/citations.test.ts`, AUD-30) and the silent-failure fuzz | ~1–2 min |
+| `npm run check:fast` | `gen:check` (generated files untouched), `manifest:check` (the contract's schema and rules, every scenario's data), `inventory:check` (inventory, features table and owners in step with the source), both typechecks, `deps:check` (dependency-cruiser: no import cycle in `src`, `tools` and `tests`; `.dependency-cruiser.cjs`), lint (tokens, catalogue texts, pointer and key owners, no React in the core), the unit suite with coverage floors — among them the headless scenario runner (`tools/runner/headless.test.ts`), the documents the sources cite resolving (`tools/inventory/citations.test.ts`, AUD-30) and the silent-failure fuzz | ~1–2 min |
 | `npm run ui -- <flow>` | One of the 57 flows of `tools/ui/flows.ts` (played by `tools/ui/play.ts`; the browser suite plays every one as a test of its own, `tests/e2e/flows.spec.ts`): real gestures in the installed Chrome, a photo per step into `.cache/logs/ui-<flow>-<time>/`, failing on a console error, an incident or an unmet expectation (`PORT` names the app's port) | ≤ 30 s each |
 | `npm run e2e:coverage` | The complete browser suite with each test's coverage recorded (`tests/support/coverage.ts`: the source lines it ran, read through the e2e build's source maps, and the selectors it used) into `.cache/coverage`, on a clean tree; `e2e:affected` then runs only the tests a change reaches | as the complete suite |
 | `npm run e2e:affected` | The browser tests of the features a change reaches (shared runtimes and unmapped sources select everything; R4) | varies |

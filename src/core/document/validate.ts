@@ -8,6 +8,8 @@ import { formAttributeIssue } from '../forms/config.ts';
 import { dataProblems } from '../data/validate.ts';
 import { hasIncompatibleMask } from '../elements/inputs.ts';
 import { IDENTIFIER_SOURCE, isIdentifier } from '../text/identifier.ts';
+import { languageTagAllowed } from '../text/language-tag.ts';
+import { stateStandsOn } from '../style/state-elements.ts';
 import type { ElementType, MessageId } from '../../generated/ids.ts';
 import { boxSizeOf, outputModelFromManifest, type OutputModel } from '../render/output.ts';
 import type { Attribute, Coupling, ElementsFile, GeneratedHtml, PropertiesFile, TemplateNode } from '../../manifest/schema.ts';
@@ -233,21 +235,6 @@ const PAGE_FILE = /^([^/\\]+\/)*[^/\\]+\.html$/;
 // A3.1 and A3.44). One owner: the validator refuses an impossible document whatever path wrote it (a field, File ›
 // Open, a paste), and the fields only ask it. A number where the attribute is a number, a type of the closed list the
 // input offers, a pattern that compiles, a language tag, ranges that make sense, a control that measures something.
-const LANGUAGE_TAG = /^[A-Za-z]{1,8}(?:-[A-Za-z0-9]{1,8})*$/;
-const LANGUAGE_NAMES = new Intl.DisplayNames(['en'], { type: 'language', fallback: 'none' });
-
-// Whether a text is a language tag (the audit's A3.1): a private-use tag (x-…), or one ICU knows, so "banana" is no
-// language. page.setSetting asks this same rule — the language's one owner is here, and the field only asks it (A3.44).
-export function languageTagAllowed(value: string): boolean {
-  if (!LANGUAGE_TAG.test(value)) return false;
-  if (/^x-(?:[A-Za-z0-9]{1,8})(?:-[A-Za-z0-9]{1,8})*$/i.test(value)) return true;
-  try {
-    const canonical = Intl.getCanonicalLocales(value)[0];
-    return canonical !== undefined && LANGUAGE_NAMES.of(canonical) !== undefined;
-  } catch {
-    return false;
-  }
-}
 
 // Why one attribute's value breaks the model, or null: the attribute's own name and value only, so the reason is
 // reported once, at that attribute's path. The fields ask it (core/import/import.ts reads an imported attribute through
@@ -334,14 +321,6 @@ function validateStyles(styles: unknown, at: string, rules: ModelRules, bad: (pa
       }
     }
   }
-}
-
-// Whether a style state stands on an element of this type (properties.json states[].elements; null for every one): the
-// one owner of the rule, read by the validator, by the style writers' refusals (nodes/flags.ts) and by the editor's
-// style state, which goes back to Base when the selection holds an element it does not stand on (the audit's AUD-03)
-export function stateStandsOn(state: string, type: string, rules: Pick<ModelRules, 'stateElements'>): boolean {
-  const elements = rules.stateElements.get(state);
-  return elements === undefined || elements === null || elements.includes(type);
 }
 
 // the default breakpoints' ids: only those go without a name of the person's

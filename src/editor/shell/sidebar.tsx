@@ -24,7 +24,8 @@ import { renamedNode } from '../layers/rename.ts';
 import { paletteDensity, paletteMatches, paletteRank } from '../palette/palette.ts';
 import { isExpanded, rowDetailsOf, searchView, type SearchView } from '../layers/tree.ts';
 import { MODEL_RULES, useEditorState, useStore, type EditorState } from '../store.ts';
-import { atPlace, isPanelOpen, panelName, stackedSections, toggleLeftDock, type Panel } from '../workspace/panels.ts';
+import { atPlace, isPanelOpen, toggleLeftDock } from '../workspace/panels.ts';
+import { panelName, stackedSections, type Panel } from '../workspace/panel-catalogue.ts';
 import { useNarrowWindow } from '../workspace/narrow.ts';
 import { useOutsideLayer } from './outside-layer.ts';
 import { Splitter } from './splitter.tsx';
@@ -32,13 +33,14 @@ import { outsidePress } from '../input/pointer/views.ts';
 import { combinationAt, splitterSize } from '../workspace/layout.ts';
 import { PanelArea, PanelGrip } from '../workspace/windows.tsx';
 import { floatingOf } from '../workspace/layout.ts';
+import { DOCK_BACK, ViewTitle } from './view-title.tsx';
 import { useLocale, useT } from '../text.ts';
 import { hasText, translate, type Locale } from '../../i18n/index.ts';
 import type { BodyTable } from './bodies.ts';
 import { Slots } from './slots.tsx';
 import { SiteColours, Suggestions, Variables } from './variables.tsx';
 import { classesOf, usesOfClass } from '../../core/design/classes.ts';
-import { componentsOf } from '../../core/design/components.ts';
+import { componentsOf } from '../../core/design/instances.ts';
 import { LAYERS_PICK } from './interactions.tsx';
 import { pickingTarget } from '../inspector/pick-target.ts';
 import { motionPicking } from '../motion/state.ts';
@@ -101,28 +103,6 @@ const INSERT_TILE = requireDoor('insert', (d) => drawnAs(d) === 'item' && Object
 const INSERT_GROUP = requireDoor('insert', (d) => drawnAs(d) === 'disclosure');
 // a component's tile (components.insertInstance): the project's components, after the element groups
 const COMPONENT_TILE = requireDoor('insert', (d) => drawnAs(d) === 'item' && 'component' in d.command.args);
-// the panel header's doors (PRODUCT.md §5.3 `panel-header`: put the panel back in its place, close it), drawn in the
-// title of each sidebar view; the first only while the panel is away from its place (floating, or docked right)
-const PANEL_HEADER = doorSlots('panel-header');
-// (the door that names a place to move the panel to)
-const DOCK_BACK = PANEL_HEADER.find((entry) => 'to' in entry.door.args);
-
-// A sidebar view's title: its name, and the panel header's doors, each standing for the view it acts on. It is the
-// view's drag source too (spec floating-panels: a press on a panel's header moves the panel).
-export function ViewTitle({ panel, title }: { readonly panel: Panel; readonly title: string }) {
-  // a view drawn inside a floating window carries the window's own drag too (spec floating-panels)
-  const floating = useEditorState((state) => floatingOf(state.ui, panel) !== null);
-  const away = useEditorState((state) => floatingOf(state.ui, panel) !== null || (state.ui.layout.right ?? []).includes(panel));
-  return (
-    <div className="view__title" data-region="panel-header" data-panel-header={panel}>
-      <span className="view__name">{title}</span>
-      <PanelGrip panel={panel} floating={floating === true} />
-      {PANEL_HEADER.filter((entry) => entry !== DOCK_BACK || away).map((entry) => (
-        <DoorControl key={entry.ref} entry={entry} args={{ panel }} />
-      ))}
-    </div>
-  );
-}
 
 export function ActivityBar() {
   const t = useT();

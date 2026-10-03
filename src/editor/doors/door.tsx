@@ -19,7 +19,7 @@ import type { EditorUi } from '../state.ts';
 import { layeredRules, useEditorState, useStore, type EditorStore } from '../store.ts';
 import { PanelBodies } from '../shell/bodies.ts';
 import { useT } from '../text.ts';
-import { opensEmptyPanel } from '../workspace/panels.ts';
+import { opensEmptyPanel } from '../workspace/panel-catalogue.ts';
 import { readClipboard } from '../clipboard.ts';
 import { isCurrent, labelParamsOf } from './current.ts';
 import { GLYPHS } from './placement.ts';

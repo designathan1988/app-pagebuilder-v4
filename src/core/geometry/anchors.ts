@@ -15,7 +15,8 @@ import { message, registerHandler, type Message, type MessageParam } from '../co
 import { locate, type DocNode } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
-import { storedValue, writeDeclarations } from '../style/set.ts';
+import { writeDeclarations } from '../style/set.ts';
+import { storedValue } from '../style/stored.ts';
 
 type Side = 'start' | 'end';
 type Anchors = { readonly kind: 'edges'; readonly sides: ReadonlySet<Side> } | { readonly kind: 'center' };

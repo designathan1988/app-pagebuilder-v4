@@ -13,7 +13,7 @@ import type { CommandId, DoorId } from '../../generated/ids.ts';
 import type { StructuredLayer } from '../../core/document/model.ts';
 import { styleSource } from '../inspector/style-target.ts';
 import { shadowCss } from '../../core/style/shadows.ts';
-import { storedLayers } from '../../core/style/set.ts';
+import { storedLayers } from '../../core/style/stored.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { Icon, type DoorState } from '../doors/door.tsx';

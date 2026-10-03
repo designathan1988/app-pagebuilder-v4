@@ -7,7 +7,8 @@
 import { message, registerHandler, registerPredicate } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
 import { coupled, valuePredicateHolds } from './couplings.ts';
-import { storedValue, writeStyle } from './set.ts';
+import { writeStyle } from './set.ts';
+import { storedValue } from './stored.ts';
 
 // the composite the matrix writes
 const MATRIX = 'alignment-matrix';

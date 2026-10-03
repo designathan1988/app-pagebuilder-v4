@@ -11,7 +11,7 @@ import { registerAction, registerCondition, type CouplingScene, type RegisteredA
 import type { DocNode, StyleClass } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { INITIAL_VALUES } from '../../generated/value-lists.ts';
-import { storedStyleValue, storedValue } from './set.ts';
+import { storedStyleValue, storedValue } from './stored.ts';
 
 export const valueIn = registerCondition('valueIn', (own, _parent, values) => own !== undefined && values.includes(own));
 export const alwaysHolds = registerCondition('always', () => true);

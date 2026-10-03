@@ -12,7 +12,7 @@ import { useSyncExternalStore, type CSSProperties, type MouseEvent } from 'react
 import type { CommandId, MessageId } from '../../generated/ids.ts';
 import { styleSource } from '../inspector/style-target.ts';
 import { MIN_STOPS, gradientLayer, parseGradient, writeGradient, type Gradient, type GradientType } from '../../core/style/gradient.ts';
-import { storedValue } from '../../core/style/set.ts';
+import { storedValue } from '../../core/style/stored.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { Icon, type DoorState } from '../doors/door.tsx';

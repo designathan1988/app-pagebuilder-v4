@@ -34,7 +34,7 @@ import { deepEqual, type Patch } from '../history/transaction.ts';
 import { nodesFromExternal, reportNotes } from '../import/import.ts';
 import { firstLockRefusal, lockRefusal } from '../nodes/flags.ts';
 import { openedPage, pageShown } from '../project/pages.ts';
-import { freshName, nodeMaker, type NodeMaker } from '../structure/insert.ts';
+import { freshName, nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
 import type { IdGenerator } from '../ports/ids.ts';
 import { styleHolders } from '../style/set.ts';
 import { deleteCommand, selectionRoots } from '../structure/remove.ts';

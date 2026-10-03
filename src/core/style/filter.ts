@@ -7,7 +7,8 @@ import { message, registerHandler } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
 import { withFunction } from './functions.ts';
 import { removeStyle } from './reset.ts';
-import { propertyName, readValue, storedValue, typedText, writeStyle } from './set.ts';
+import { propertyName, readValue, typedText, writeStyle } from './set.ts';
+import { storedValue } from './stored.ts';
 
 // the functions to set (name → argument), each one added or replaced in the value
 export function applyFunctions(held: string | undefined, functions: unknown): string | null {

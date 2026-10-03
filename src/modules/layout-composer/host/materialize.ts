@@ -9,7 +9,7 @@
 import type { HandlerContext } from '../../../core/commands/registry.ts';
 import type { DocNode, Styles } from '../../../core/document/model.ts';
 import { declarationsOf, readValue } from '../../../core/style/set.ts';
-import { freshName, newElement, type NodeMaker } from '../../../core/structure/insert.ts';
+import { freshName, newElement, type NodeMaker } from '../../../core/structure/node-maker.ts';
 import type { CompiledNode, Compilation } from '../compiler/compile.ts';
 import { ROOT_NODE } from '../compiler/compile.ts';
 import { refuse } from '../intent/problems.ts';

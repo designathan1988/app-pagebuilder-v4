@@ -22,7 +22,8 @@ import type { Patch } from '../history/transaction.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
 import { selectionRoots } from '../structure/remove.ts';
 import { valuePredicateHolds } from '../style/couplings.ts';
-import { propertyName, readValue, storedValue, writeDeclarations, writeStyle } from '../style/set.ts';
+import { propertyName, readValue, writeDeclarations, writeStyle } from '../style/set.ts';
+import { storedValue } from '../style/stored.ts';
 
 export const setPositionModeCommand = registerHandler('position.setMode', (context, { property, mode }) => {
   const read = readValue(context, property, mode);

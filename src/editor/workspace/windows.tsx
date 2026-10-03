@@ -10,7 +10,7 @@ import { manifest } from '../../manifest/runtime.ts';
 import { DoorControl, Icon } from '../doors/door.tsx';
 import { useEditorState } from '../store.ts';
 import { useT } from '../text.ts';
-import { PANELS, panelName, type Panel } from './panels.ts';
+import { PANELS, panelName, type Panel } from './panel-catalogue.ts';
 import { combinationAt, type FloatingPanel } from './layout.ts';
 import { keptInside, panelDrop, panelHint } from './panel-drag.ts';
 

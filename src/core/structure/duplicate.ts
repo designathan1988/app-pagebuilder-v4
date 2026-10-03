@@ -9,7 +9,8 @@ import { message, registerHandler, type Outcome } from '../commands/registry.ts'
 import { numberConstant } from '../../manifest/runtime.ts';
 import type { ModelRules } from '../document/validate.ts';
 import type { StoredValue, Styles } from '../document/model.ts';
-import { storedValue, writeDeclarations } from '../style/set.ts';
+import { writeDeclarations } from '../style/set.ts';
+import { storedValue } from '../style/stored.ts';
 import { valuePredicateHolds } from '../style/couplings.ts';
 import { allNodes, walk, type DocNode, type Location } from '../document/model.ts';
 import { refreshCopiedIdentities } from '../document/clone.ts';

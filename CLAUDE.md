@@ -40,7 +40,7 @@ never for code. Never write inside it.
 ## The loop
 
 ```
-npm run check:fast     # gen:check, manifest:check, inventory:check, typecheck, lint, unit (~1 minute)
+npm run check:fast     # gen:check, manifest:check, inventory:check, typecheck, deps:check, lint, unit (~1 minute)
 npm run ui -- <flow>   # drive the real app in Chrome with real gestures, a photo per step
 npm run e2e:affected   # the browser tests of what changed (the features a change reaches)
 npm run e2e -- <spec>  # the tests of what the block built (at the end of a block)

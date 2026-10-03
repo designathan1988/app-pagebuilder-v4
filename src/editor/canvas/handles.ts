@@ -15,10 +15,11 @@
 import { registerHandler, type Outcome } from '../../core/commands/registry.ts';
 import { locate } from '../../core/document/model.ts';
 import { setBorderCommand, setRadiusCommand } from '../../core/style/border.ts';
-import { setStyleCommand, storedValue } from '../../core/style/set.ts';
+import { setStyleCommand } from '../../core/style/set.ts';
+import { storedValue } from '../../core/style/stored.ts';
 import { setSpacingCommand } from '../../core/style/spacing.ts';
 import { setShadowsCommand } from '../../core/style/shadows.ts';
-import { storedLayers } from '../../core/style/set.ts';
+import { storedLayers } from '../../core/style/stored.ts';
 import type { DocNode } from '../../core/document/model.ts';
 import type { ModelRules } from '../../core/document/validate.ts';
 import type { DoorId } from '../../generated/ids.ts';

@@ -18,7 +18,8 @@ import type { ModelRules } from '../document/validate.ts';
 import type { Patch } from '../history/transaction.ts';
 import { commandOf } from '../../manifest/runtime.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
-import { storedValue, styleHolders, writeDeclarations, writeStyle } from './set.ts';
+import { styleHolders, writeDeclarations, writeStyle } from './set.ts';
+import { storedValue } from './stored.ts';
 import { tracksForChildren } from './tracks.ts';
 import { breakpointWords, type ProjectBreakpoint } from '../document/breakpoints.ts';
 

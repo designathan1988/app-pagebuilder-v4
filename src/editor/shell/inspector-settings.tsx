@@ -21,7 +21,8 @@ import { ID_REF, KeptTextField, TextField, keepAfterGesture, keptTextOf } from '
 import './settings.css';
 import { FormsInspector } from '../forms/inspector.tsx';
 import { PanelField } from './panel-field.tsx';
-import { instanceRootOf, variantBase, variantsOf } from '../../core/design/components.ts';
+import { variantBase, variantsOf } from '../../core/design/components.ts';
+import { instanceRootOf } from '../../core/design/instances.ts';
 
 const SETTINGS_FIELDS = doorSlots('inspector-settings').filter((d) => d.door.kind === 'inspector-field' && d.door.attribute !== null && !d.door.control.startsWith('forms-'));
 // the toggles of a table's parts (caption, head, foot; core/elements/parts.ts), drawn while the selection is in a table

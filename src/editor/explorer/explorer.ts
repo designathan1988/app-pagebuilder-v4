@@ -6,8 +6,8 @@
 // files.open. Folders, renaming, moving and deleting are explorer-file-system's own work (not built yet).
 import { message, registerHandler } from '../../core/commands/registry.ts';
 import type { DocumentJson, Page, ProjectFile } from '../../core/document/model.ts';
-import { filesOf, folderOf, folderPaths } from '../../core/files/files.ts';
-import { isGenerated } from '../code-panel/code-panel.ts';
+import { fileAt, folderOf, folderPaths } from '../../core/files/files.ts';
+import { filesOf } from '../../core/document/model.ts';
 import { FORMS_SCRIPT, INTERACTIONS_SCRIPT, LOTTIE_SCRIPT, MOTION_SCRIPT, STYLESHEET, siteFiles, siteScriptsWritten } from '../../core/export/export.ts';
 import { siteScripts } from '../forms/script.ts';
 import type { ModelRules } from '../../core/document/validate.ts';
@@ -52,6 +52,13 @@ const SCRIPTS = [
 ] as const;
 // the paths the export may write a script at
 export const SCRIPT_PATHS: readonly string[] = SCRIPTS.map(([path]) => path);
+
+// Whether the path is one the document generates (a page's file, the stylesheet, a script the export writes and no
+// stored file holds): its text is rendered now, and its path is fixed — the export writes it there (archive/DESIGN.md,
+// "Files, tabs and code").
+export function isGenerated(path: string, document: DocumentJson): boolean {
+  return document.pages.some((page) => page.file === path) || path === STYLESHEET || (SCRIPT_PATHS.includes(path) && fileAt(document, path) === null);
+}
 // the paths of the scripts the export writes now, read without writing the site (export.ts siteScriptsWritten): what
 // the rows list at every change of the document, the text being written only when the code pane shows one
 export function generatedScriptPaths(document: DocumentJson, rules: ModelRules): readonly string[] {

@@ -17,7 +17,7 @@ import { message, registerHandler, registerPredicate, type Outcome } from '../co
 import { locate, type DocNode, type DocumentJson, type Location } from '../document/model.ts';
 import type { Patch } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { newElement, nodeMaker, type NodeMaker } from '../structure/insert.ts';
+import { newElement, nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
 
 const TABLE = 'table';
 const HEAD = 'tableHead';

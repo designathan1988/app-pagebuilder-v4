@@ -47,7 +47,7 @@ import { sanitizedSvgMarkup } from '../elements/svg.ts';
 import { fileBytes, pickedFilePath, resolveHref, typeOfFile } from '../files/files.ts';
 import { ArchiveError, archiveReason, isZip, unzip } from '../project/zip.ts';
 import { canonical, hasMarks } from '../text/inline.ts';
-import { freshName, type NodeMaker } from '../structure/insert.ts';
+import { freshName, type NodeMaker } from '../structure/node-maker.ts';
 import { parseDeclarations } from '../style/custom.ts';
 import { shadowLayersFromCss } from '../style/shadows.ts';
 import { matches, readSelector, type Compound, type Facts, type Selector } from './selectors.ts';

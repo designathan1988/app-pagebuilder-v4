@@ -8,7 +8,7 @@ import { locate, type DocNode, type NodeId } from '../../../core/document/model.
 import { firstLockRefusal } from '../../../core/nodes/flags.ts';
 import { pageShown } from '../../../core/project/pages.ts';
 import { tracksToValue } from '../../../core/style/tracks.ts';
-import { nodeMaker } from '../../../core/structure/insert.ts';
+import { nodeMaker } from '../../../core/structure/node-maker.ts';
 import type { MessageId } from '../../../generated/ids.ts';
 import { manifest, numberConstant } from '../../../manifest/runtime.ts';
 import type { EditorUi } from '../../../editor/state.ts';

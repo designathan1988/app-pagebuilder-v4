@@ -4,7 +4,7 @@
 // language tags kept with the project (core/export/authoring.ts projectLanguagePatches, which validates them); a tag
 // that is no language tag is refused before any change. One undo step each.
 import { message, registerHandler } from '../commands/registry.ts';
-import { languageTagAllowed } from '../document/validate.ts';
+import { languageTagAllowed } from '../text/language-tag.ts';
 import { projectLanguagePatches, type ExportDocument } from '../export/authoring.ts';
 
 // the language the project's code is named in when none is set (core/export/names.ts)

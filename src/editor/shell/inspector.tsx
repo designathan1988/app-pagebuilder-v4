@@ -18,7 +18,7 @@ import { Splitter } from './splitter.tsx';
 import { Fragment, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import type { CommandId, FeatureId, MessageId, SectionId } from '../../generated/ids.ts';
 import { isFeatureBuilt } from '../../app/features.ts';
-import { componentHolders, instanceRootOf } from '../../core/design/components.ts';
+import { componentHolders, instanceRootOf } from '../../core/design/instances.ts';
 import { locate, type DocNode, type StoredValue } from '../../core/document/model.ts';
 import { structuredCss } from '../../core/render/output.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
@@ -36,7 +36,8 @@ import { MODEL_RULES, useEditorState, useStore, layeredRules } from '../store.ts
 import { FieldOrigin } from './field-origin.tsx';
 import './settings.css';
 import { inspectorTab } from '../workspace/layout.ts';
-import { isPanelOpen, panelName } from '../workspace/panels.ts';
+import { isPanelOpen } from '../workspace/panels.ts';
+import { panelName } from '../workspace/panel-catalogue.ts';
 import { messageText, useLocale, useT } from '../text.ts';
 import { firstLockRefusal } from '../../core/nodes/flags.ts';
 import { activeBreakpoint } from '../view/breakpoints.ts';

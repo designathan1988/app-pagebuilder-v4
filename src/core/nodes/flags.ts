@@ -21,7 +21,8 @@ import type { MessageId } from '../../generated/ids.ts';
 import { message, registerHandler, registerPredicate, type Message, type Outcome } from '../commands/registry.ts';
 import type { Patch } from '../history/transaction.ts';
 import { lineage, locate, type DocNode, type DocumentJson, type Location, type Selection } from '../document/model.ts';
-import { stateStandsOn, type ModelRules } from '../document/validate.ts';
+import type { ModelRules } from '../document/validate.ts';
+import { stateStandsOn } from '../style/state-elements.ts';
 
 // The keys a command refuses a node it would change with, when the node carries the lock itself (en.json
 // status.locked.*): "Unlock {name} before deleting it", "… before moving it", and so on.

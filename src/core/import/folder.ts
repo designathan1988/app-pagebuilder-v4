@@ -17,7 +17,7 @@ import { projectLanguages } from './import.ts';
 import { DOCUMENT_VERSION, isEmptyProject, type DocNode, type DocumentJson, type Page, type ProjectFile } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { folderOf, nameOfPath, pathGenerated, resolveHref, typeOfFile, type UploadedFile } from '../files/files.ts';
-import { nodeMaker } from '../structure/insert.ts';
+import { nodeMaker } from '../structure/node-maker.ts';
 import { placeSheet, readSheet } from './css.ts';
 import { nodesFromMarkup } from './import.ts';
 import { pageHead } from './markup.ts';

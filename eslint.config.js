@@ -45,7 +45,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['*.config.{js,ts}', 'tests/**/*.ts', 'tools/**/*.ts', 'companion/**/*.mjs'],
+    files: ['*.config.{js,ts}', '.dependency-cruiser.cjs', 'tests/**/*.ts', 'tools/**/*.ts', 'companion/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },
   {

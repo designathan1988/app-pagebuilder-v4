@@ -3,7 +3,7 @@
 // and what its details hold — and, while open, its details in a group under it. The disclosure is the door
 // inspector.toggleRow#inspector-row-disclosure; a native button, so Enter and Space open and close it.
 import { useId, useMemo, type ReactNode } from 'react';
-import { storedLayers, storedValue } from '../../core/style/set.ts';
+import { storedLayers, storedValue } from '../../core/style/stored.ts';
 import { shadowCss } from '../../core/style/shadows.ts';
 import { doorSlots } from '../doors/placement.ts';
 import { DoorControl } from '../doors/door.tsx';

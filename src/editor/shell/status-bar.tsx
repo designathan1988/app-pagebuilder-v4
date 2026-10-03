@@ -21,7 +21,7 @@ import { drag, duplicating } from '../input/pointer.ts';
 import { drawnAsOf } from '../doors/placement.ts';
 import { useEditorState } from '../store.ts';
 import { activeState } from '../view/style-state.ts';
-import { panelName } from '../workspace/panels.ts';
+import { panelName } from '../workspace/panel-catalogue.ts';
 import { messageText, useLocale, useT } from '../text.ts';
 import { ZoomValue } from './canvas.tsx';
 import { Slots } from './slots.tsx';

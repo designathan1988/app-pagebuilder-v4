@@ -11,7 +11,8 @@ import { message, registerHandler } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { commandOf, manifest, numberConstantAt } from '../../manifest/runtime.ts';
-import { propertyName, readValue, shownText, storedValue, writeStyle } from './set.ts';
+import { propertyName, readValue, shownText, writeStyle } from './set.ts';
+import { storedValue } from './stored.ts';
 import { argumentRefused } from '../store/args.ts';
 
 // the tracks a value holds, in order; none for none or an unreadable value

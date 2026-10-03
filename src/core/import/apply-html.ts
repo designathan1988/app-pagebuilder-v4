@@ -12,7 +12,7 @@ import { placementRefusal } from '../elements/content-model.ts';
 import { locate, walk, type DocNode } from '../document/model.ts';
 import { releaseReferencesPatch, withoutReferencesTo } from '../document/tree.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { nodeMaker } from '../structure/insert.ts';
+import { nodeMaker } from '../structure/node-maker.ts';
 import { nodesFromMarkup } from './import.ts';
 
 // the node the document holds, as the markup writes it: the markup's tag, attributes, classes and text; the document's

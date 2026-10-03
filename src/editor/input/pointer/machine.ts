@@ -4,7 +4,7 @@
 // be read (and tested) on its own.
 import type { DoorEntry } from '../../../manifest/runtime.ts';
 import type { Point } from '../../canvas/coordinates.ts';
-import type { Panel } from '../../workspace/panels.ts';
+import type { Panel } from '../../workspace/panel-catalogue.ts';
 import { manifest } from '../../../manifest/runtime.ts';
 
 const threshold = manifest.interactions.constants.find((c) => c.id === 'drag.threshold')?.value;

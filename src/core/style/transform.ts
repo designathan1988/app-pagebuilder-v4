@@ -5,7 +5,8 @@
 import { message, registerHandler } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
 import { applyFunctions } from './filter.ts';
-import { propertyName, readValue, storedValue, writeStyle } from './set.ts';
+import { propertyName, readValue, writeStyle } from './set.ts';
+import { storedValue } from './stored.ts';
 
 export const setTransformCommand = registerHandler('style.setTransform', (context, { property, parts }) => {
   const { state, rules } = context;

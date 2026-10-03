@@ -18,7 +18,7 @@ import type { EditorUi } from '../state.ts';
 import type { DocNode } from '../../core/document/model.ts';
 import type { ModelRules } from '../../core/document/validate.ts';
 import { appliesToOf, contextPredicate, elementPredicate, type ElementContext } from '../../core/style/applies.ts';
-import { storedLayers } from '../../core/style/set.ts';
+import { storedLayers } from '../../core/style/stored.ts';
 import { GRID_EDIT_CONTEXT, gridEditOf } from './grid-edit.ts';
 
 export type EditMode = CommandArgs['canvas.setEditMode']['mode'];

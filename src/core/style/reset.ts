@@ -12,7 +12,8 @@ import { message, registerHandler, type HandlerContext, type Outcome } from '../
 import { locate, type NodeId } from '../document/model.ts';
 import type { Patch } from '../history/transaction.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
-import { propertyName, storedValue, styleHolders, writeDeclarations } from './set.ts';
+import { propertyName, styleHolders, writeDeclarations } from './set.ts';
+import { storedValue } from './stored.ts';
 
 export function removeStyle<Ui>(context: HandlerContext<Ui>, property: string): Outcome<Ui> {
   const { state, rules } = context;

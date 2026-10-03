@@ -19,7 +19,8 @@ import { firstLockRefusal, lockRefusal } from '../nodes/flags.ts';
 import { childrenRefusal, placementRefusal } from '../elements/content-model.ts';
 import { valuePredicateHolds } from '../style/couplings.ts';
 import { tracksForChildren } from '../style/tracks.ts';
-import { freshName, nodeMaker, paletteNode, uniqueName } from './insert.ts';
+import { paletteNode, uniqueName } from './insert.ts';
+import { freshName, nodeMaker } from './node-maker.ts';
 import { selectionRoots } from './remove.ts';
 
 // the styles as the status names them: "display: flex; flex-direction: row"

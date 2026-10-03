@@ -5,7 +5,7 @@
 // since the page would otherwise draw the recipe's value over it.
 import type { DocNode } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
-import { storedValue } from './set.ts';
+import { storedValue } from './stored.ts';
 
 // The declarations a write of one element makes (property → CSS text, or null to take a property away), once the
 // recipes it overrides are taken away.

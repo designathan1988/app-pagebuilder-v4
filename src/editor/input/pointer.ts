@@ -55,10 +55,10 @@ import { canvasFrame, geometryOf, nodeAt, nodeBox, nodesUnder, pageLayout, resiz
 import { snapMode, snapMove, snapResize, snapShown } from '../canvas/snapping.ts';
 import type { Box } from '../../core/geometry/snap.ts';
 import { resizedBox, type ResizeFrom } from '../../core/geometry/resize.ts';
-import { storedValue } from '../../core/style/set.ts';
+import { storedValue } from '../../core/style/stored.ts';
 import { guidesOf } from '../../core/page/guides.ts';
 import { panelDrop, panelHintAt, showPanelHint } from '../workspace/panel-drag.ts';
-import { PANELS, type Panel } from '../workspace/panels.ts';
+import { PANELS, type Panel } from '../workspace/panel-catalogue.ts';
 import { formatColor, hsbToRgb, pickedAlpha } from '../../core/style/color.ts';
 import { gradientView } from '../inspector/gradient-view.ts';
 import { drawnProposal, liveDrag } from '../drag/drag-session.ts';

@@ -16,7 +16,8 @@
 //    (core/elements/address.ts), and one the address rule refuses says that rule's reason (status.url.unsafe,
 //    status.url.malformed). The remaining value type (the linked scripts) arrives with code-panel-edit-js, whose door
 //    is not available yet: no door hands one here.
-import { languageTagAllowed, type AttributeRules } from '../document/validate.ts';
+import type { AttributeRules } from '../document/validate.ts';
+import { languageTagAllowed } from '../text/language-tag.ts';
 import { message, registerHandler, type Message } from '../commands/registry.ts';
 import { readAddress } from '../elements/address.ts';
 import { openedPage } from '../project/pages.ts';

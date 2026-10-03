@@ -16,7 +16,7 @@ import { setActiveOption } from '../focus/focus.ts';
 import { chordCap, chordHint } from '../input/keymap.ts';
 import { useEditorState, useStore } from '../store.ts';
 import { useT } from '../text.ts';
-import { PANELS, panelName, type Panel } from '../workspace/panels.ts';
+import { PANELS, panelName, type Panel } from '../workspace/panel-catalogue.ts';
 import { PanelBodies } from './bodies.ts';
 import { walk } from '../../core/document/model.ts';
 import { openedPage } from '../../core/project/pages.ts';

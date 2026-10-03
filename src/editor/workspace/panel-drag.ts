@@ -7,7 +7,7 @@
 // it floats at the drop point. Each place is a door of the manifest, its own arguments naming the place it stands
 // for; this module only reads them.
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
-import { PANELS, type Panel } from './panels.ts';
+import { PANELS, type Panel } from './panel-catalogue.ts';
 
 const zoneDoor = (zone: string): DoorEntry | null => manifest.doors.find((d) => d.door.kind === 'panel-drag' && (d.door.zone ?? null) === zone && d.door.source === 'panel-header') ?? null;
 export const ZONE_DOORS: Readonly<Record<string, DoorEntry | null>> = {

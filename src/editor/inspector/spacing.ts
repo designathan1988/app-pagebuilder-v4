@@ -8,7 +8,7 @@
 import { message, registerHandler } from '../../core/commands/registry.ts';
 import type { ModelRules } from '../../core/document/validate.ts';
 import type { StoreState } from '../../core/store/store.ts';
-import { storedValue } from '../../core/style/set.ts';
+import { storedValue } from '../../core/style/stored.ts';
 import type { EditorUi } from '../state.ts';
 import { styleSource } from './style-target.ts';
 

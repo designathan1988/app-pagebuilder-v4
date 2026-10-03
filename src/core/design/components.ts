@@ -20,31 +20,25 @@
 //    instances of its component in its parent, in order) take the rows of a project data file (core/design/data.ts),
 //    one row each: a field of an item (an element that holds text, an image's source) takes the value named like its
 //    definition element, else the value at its place; rows beyond the items add new items after the last one.
-//  - componentHolders: where a style write on an element of an instance goes (core/style/set.ts styleHolders): the
-//    definition's element and the same element of every instance of the component, in every page.
+// Where a style write on an element of an instance goes, and the root of an instance, are read by
+// core/design/instances.ts.
 import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler, registerPredicate, type Message, type Outcome } from '../commands/registry.ts';
-import { lineage, locate, walk, type ComponentDefinition, type DocNode, type DocumentJson } from '../document/model.ts';
+import { locate, walk, type ComponentDefinition, type DocNode, type DocumentJson } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { refreshCopiedIdentities } from '../document/clone.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import type { Patch } from '../history/transaction.ts';
 import { deepEqual } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { nodeMaker, placement, type NodeMaker } from '../structure/insert.ts';
+import { placement } from '../structure/insert.ts';
+import { nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
 import { copyName } from '../structure/duplicate.ts';
 import { fileAt, imageFiles, isProjectPath } from '../files/files.ts';
 import { readAddress } from '../elements/address.ts';
 import { dataRows, type DataRow } from './data.ts';
 import { registerReferenceKind } from '../store/references.ts';
-
-const NONE: readonly ComponentDefinition[] = [];
-export const componentsOf = (document: DocumentJson): readonly ComponentDefinition[] => document.components ?? NONE;
-
-// the root of the instance a node lies in (the node itself or an ancestor naming a component), or null
-export function instanceRootOf(document: DocumentJson, id: NodeId): DocNode | null {
-  return lineage(document, id).findLast((node) => node.component !== undefined) ?? null;
-}
+import { componentsOf, instanceRootOf } from './instances.ts';
 
 // Why these elements may not go into this receiver, by the instances' own rules, or null (the audit's AUD-04: Remove
 // wrapper, Move out of parent and Make child of previous layer left parts outside their instance or an instance
@@ -352,38 +346,6 @@ export const detachInstanceCommand = registerHandler('components.detach', ({ sta
   if (found === null || found.node.component === undefined) return { kind: 'change' };
   return { kind: 'change', patches: [{ op: 'replace', path: found.path, value: unmarked(found.node) }], message: message('status.components.detached', { name: found.node.name }) };
 });
-
-// What a style write on an element goes to, when the element belongs to an instance: the definition's element (its
-// path in the project's components, its parent there) and the element of the same part of every instance of the
-// component in every page; null for an element of no instance, or one added to its instance alone.
-export function componentHolders(document: DocumentJson, id: NodeId): { readonly node: DocNode; readonly path: readonly (string | number)[]; readonly parent: DocNode | null }[] | null {
-  const found = locate(document, id);
-  const part = found?.node.componentPart;
-  const root = found === null ? null : instanceRootOf(document, found.node.id as NodeId);
-  if (found === null || part === undefined || root === null || root.component === undefined) return null;
-  const index = componentsOf(document).findIndex((c) => c.name === root.component);
-  const definition = componentsOf(document)[index];
-  if (definition === undefined) return null;
-  // the definition's element of that part, and its parent
-  let node: DocNode | undefined = definition.tree;
-  let parent: DocNode | null = null;
-  const path: (string | number)[] = ['components', index, 'tree'];
-  for (const i of part) {
-    parent = node ?? null;
-    node = node?.children[i];
-    path.push('children', i);
-  }
-  if (node === undefined) return null;
-  const holders = [{ node, path, parent }];
-  // the same part of every instance of the component
-  const visit = (at: DocNode, atPath: (string | number)[], atParent: DocNode | null, instanceOf: string | null) => {
-    const within = at.component ?? instanceOf;
-    if (within === root.component && at.componentPart !== undefined && deepEqual(at.componentPart, part)) holders.push({ node: at, path: atPath, parent: atParent });
-    at.children.forEach((child, i) => visit(child, [...atPath, 'children', i], at, within));
-  };
-  document.pages.forEach((page, i) => visit(page.tree, ['pages', i, 'tree'], null, null));
-  return holders;
-}
 
 // components.updateFromInstance (the plan's stage 7, "modo de edição do mestre"; journey D2): an instance edited in
 // place — elements added, removed or moved, styles of its own — becomes its component's definition, and every other

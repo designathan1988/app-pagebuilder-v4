@@ -12,7 +12,7 @@ import { componentName, copied, createRefusal, marked, unmarked } from '../desig
 import { placementRefusal } from '../elements/content-model.ts';
 import { deepEqual } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { freshName, nodeMaker, type NodeMaker } from '../structure/insert.ts';
+import { freshName, nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
 import { DataRefusal, refuse } from './collections.ts';
 import type { DataContext } from './bindings.ts';
 import { newInstance } from './materialize.ts';

@@ -12,7 +12,8 @@
 import { message, registerHandler } from '../../core/commands/registry.ts';
 import { locate } from '../../core/document/model.ts';
 import { editedColour, type ColorChannel } from '../../core/style/color.ts';
-import { storedValue, writePropertyText } from '../../core/style/set.ts';
+import { writePropertyText } from '../../core/style/set.ts';
+import { storedValue } from '../../core/style/stored.ts';
 import type { MessageId } from '../../generated/ids.ts';
 import type { CommandArgs } from '../../generated/commands.ts';
 import type { EditorUi } from '../state.ts';

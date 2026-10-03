@@ -11,7 +11,8 @@ import { anyCss, type CssSupport } from '../ports/css.ts';
 import { sequentialIds } from '../ports/ids.ts';
 import { noLayout } from '../ports/layout.ts';
 import { convertLength, lengthPercentage, workOut, writeNumber } from './codecs.ts';
-import { setStyleCommand, storedValue } from './set.ts';
+import { setStyleCommand } from './set.ts';
+import { storedValue } from './stored.ts';
 
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });

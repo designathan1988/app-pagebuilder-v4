@@ -1,7 +1,7 @@
 // What the inspector's tabs ask about the selection, and the hint list they both draw with nothing selected.
 import { locate } from '../../core/document/model.ts';
 import { useEditorState } from '../store.ts';
-import { panelName } from '../workspace/panels.ts';
+import { panelName } from '../workspace/panel-catalogue.ts';
 import { useT } from '../text.ts';
 
 // the one selected element, or null with none or several selected

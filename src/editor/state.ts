@@ -19,7 +19,8 @@ import { INITIAL_CONTEXT_MENU, type ContextMenuState } from './menus/context-men
 import { INITIAL_OVERLAYS, type OverlaysState } from './menus/overlays.ts';
 import { INITIAL_LAYOUT, type LayoutState } from './workspace/layout.ts';
 import type { WorkspacePrefs } from './workspace/persist.ts';
-import { panelsFor, type PanelsState } from './workspace/panels.ts';
+import { panelsFor } from './workspace/panels.ts';
+import type { PanelsState } from './workspace/panel-catalogue.ts';
 import { INITIAL_CAMERA, type CameraState } from './view/camera.ts';
 import type { EditorView } from './view/editor-view.ts';
 import type { CodeTabsState } from './explorer/file-tabs.ts';

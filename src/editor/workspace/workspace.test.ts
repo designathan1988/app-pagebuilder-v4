@@ -4,7 +4,8 @@ import { manualClock } from '../../core/ports/clock.ts';
 import type { PreferenceStorage } from '../preferences/preferences.ts';
 import { manifest } from '../../manifest/runtime.ts';
 import { createEditorStore } from '../store.ts';
-import { PANELS, isPanelOpen, type Panel } from './panels.ts';
+import { isPanelOpen } from './panels.ts';
+import { PANELS, type Panel } from './panel-catalogue.ts';
 
 function memory(text: string | null = null): PreferenceStorage & { text: string | null } {
   const box = {

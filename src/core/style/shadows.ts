@@ -10,7 +10,8 @@ import { message, registerHandler } from '../commands/registry.ts';
 import { locate, type StructuredLayer } from '../document/model.ts';
 import type { ModelRules, StructureField } from '../document/validate.ts';
 import { structuredCss } from '../render/output.ts';
-import { propertyName, storedLayers, typedText, writeStyle } from './set.ts';
+import { propertyName, typedText, writeStyle } from './set.ts';
+import { storedLayers } from './stored.ts';
 
 // the layer Add a shadow appends (spec, "Trigger"): its colour, its lengths, its flags off
 const DEFAULT_COLOUR = 'rgba(15, 23, 42, 0.24)';
