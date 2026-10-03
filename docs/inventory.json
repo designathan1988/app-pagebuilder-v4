@@ -6,7 +6,7 @@
     "doors": 1350,
     "scenarios": 1820,
     "modules": 466,
-    "lines": 81003
+    "lines": 81058
   },
   "features": [
     {
@@ -4014,7 +4014,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1653,
+      "lines": 1708,
       "commands": [
         "project.importHtml"
       ],

@@ -384,7 +384,7 @@ commit closes it with its proof; the Status column then names the commit's QA-LO
 | AUD-12 | 2 | The uploaded font only behind "More values" | audit; J15 | done (QA 161) |
 | AUD-13 | 2 | F6 never focuses the canvas page | audit; J12 | done (QA 162) |
 | AUD-14 | 2 | Export class names partly Portuguese and numbered | audit; J14 | done (QA 163) |
-| AUD-15 | 2 | Capture: 98 % corpus never measured, login capture absent, MDN logo missing | audit; QA 117, 119 | open |
+| AUD-15 | 2 | Capture: 98 % corpus never measured, login capture absent, MDN logo missing | audit; QA 117, 119; QA 233: the logo (an imported svg keeps its size and viewBox) | open (the corpus and the login capture remain) |
 | AUD-16 | 2 | Plan items dropped without a user decision (steppers, auto-fix) | audit | done (QA 164 the steppers, QA 166 the Checks fixes) |
 | AUD-17 | 2 | `hover-measure` not available in the contract while its code runs | audit | done (QA 167) |
 | AUD-18 | 2 | 39 features without a behaviour section | audit | done (QA 168) |

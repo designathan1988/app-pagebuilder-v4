@@ -257,6 +257,50 @@ interface Sheet {
 
 // What builds one page: the names no node has, the picked files (a script's src resolves among them), the report, the
 // cells the cascade reads (the style attributes, by node) and what the page keeps.
+// An <svg>'s size and coordinate system as its attributes write them (the audit's AUD-15: the MDN logo came in as an
+// empty box, its width, height and viewBox dropped). Its width and height are presentation attributes (SVG 2,
+// "Presentation attributes": CSS properties of specificity zero, written before every rule of the author), so they
+// become its size unless a rule of the sheets sets one (the cascade: applyStyles). Its viewBox is the coordinate system
+// of its drawing: the model writes an svg's viewBox from its size (core/elements/svg.ts viewBoxOf), so a viewBox other
+// than its own size keeps the drawing in an svg of its own inside, filling it (svgDrawing).
+const SVG_TYPE = 'svg';
+interface SvgSize {
+  declarations: string;
+  viewBox: string | null;
+  aspect: string | null;
+}
+// takes the attribute when it is one of the svg's size or coordinates (the parser gives the names in lower case): its
+// width and height are named as the properties of a box's size (the model's boxSize)
+function svgSizeAttribute(size: SvgSize, html: string, value: string, boxSize: readonly string[]): boolean {
+  const text = value.trim();
+  if (boxSize.includes(html)) {
+    // a bare number is a length in px, as SVG reads it
+    size.declarations += `${html}: ${/^\d+(?:\.\d+)?$/.test(text) ? `${text}px` : text};`;
+    return true;
+  }
+  if (html === 'viewbox') {
+    size.viewBox = text.split(/[\s,]+/).join(' ');
+    return true;
+  }
+  if (html === 'preserveaspectratio') {
+    size.aspect = text;
+    return true;
+  }
+  return false;
+}
+// the svg's own size in px when its width and height attributes give both, else null
+function svgOwnBox(size: SvgSize): string | null {
+  const width = /width: (\d+(?:\.\d+)?)px;/.exec(size.declarations)?.[1];
+  const height = /height: (\d+(?:\.\d+)?)px;/.exec(size.declarations)?.[1];
+  return width === undefined || height === undefined ? null : `0 0 ${width} ${height}`;
+}
+// the drawing an svg keeps: its own markup, inside an svg of its own when its viewBox is not its own size
+function svgDrawing(markup: string, size: SvgSize): string {
+  if (markup === '' || size.viewBox === null || size.viewBox === svgOwnBox(size)) return markup;
+  const aspect = size.aspect === null ? '' : ` preserveAspectRatio="${size.aspect.replaceAll('"', '&quot;')}"`;
+  return `<svg viewBox="${size.viewBox.replaceAll('"', '&quot;')}" width="100%" height="100%"${aspect}>${markup}</svg>`;
+}
+
 interface Builder {
   readonly make: NodeMaker;
   readonly rules: ModelRules;
@@ -271,6 +315,9 @@ interface Builder {
   readonly held: ProjectFile[];
   // the declarations a style attribute holds, by node id, and the line each node was written on
   readonly inline: Map<string, readonly (readonly [string, StoredValue])[]>;
+  // the declarations an <svg>'s width and height attributes give it, by node id: presentation attributes, below every
+  // rule of the sheets (applySvgSize)
+  readonly presentational: Map<string, readonly (readonly [string, StoredValue])[]>;
   readonly lines: Map<string, number>;
   // 'import': an unknown element is unwrapped and a forbidden nesting repaired or dropped, each reported; 'strict':
   // the code pane's own reader (element.applyHtml) refuses a nesting the model forbids and drops what it cannot read
@@ -523,8 +570,11 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   // the HTML hidden attribute is the editor's own Hide (spec hide-element): the element stays in the document and in
   // Layers, the canvas does not draw it, and the export writes it hidden again (a captured page's closed dropdown)
   let hiddenFlag = false;
+  // an <svg>'s size and its drawing's coordinate system (svgSizeAttribute)
+  const svgSize: SvgSize = { declarations: '', viewBox: null, aspect: null };
   for (const [html, value] of child.attributes) {
     if (html === 'class') continue;
+    if (type === SVG_TYPE && svgSizeAttribute(svgSize, html, value, rules.boxSize)) continue;
     if (html === 'hidden') {
       hiddenFlag = true;
       continue;
@@ -565,6 +615,7 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   };
   builder.lines.set(made.id, line);
   if (inlineStyle !== null) builder.inline.set(made.id, styleDeclarations(builder, inlineStyle, line));
+  if (svgSize.declarations !== '') builder.presentational.set(made.id, styleDeclarations(builder, svgSize.declarations, line));
   const content = element?.content ?? 'children';
   if (content === 'text') {
     const runs = canonical(runsOf(child.children, builder));
@@ -576,7 +627,8 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   if (type === 'svg') {
     const parsed = sanitizedSvgMarkup(nodeMarkup(child));
     if ('refusal' in parsed) return { nothing: true };
-    return { node: { ...made, attributes: { ...attributes, ...(parsed.markup === '' ? {} : { svgMarkup: parsed.markup }) } as DocNode['attributes'] } };
+    const drawn = svgDrawing(parsed.markup, svgSize);
+    return { node: { ...made, attributes: { ...attributes, ...(drawn === '' ? {} : { svgMarkup: drawn }) } as DocNode['attributes'] } };
   }
   const below = [...ancestors, child.tag];
   return { node: { ...made, children: buildChildren(child.children, child.tag, below, builder, line) } };
@@ -977,6 +1029,8 @@ function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: 
       const held = base.own.get(property);
       if (held === undefined || higher(rank, held.rank)) base.own.set(property, { value, rank });
     }
+    // an <svg>'s width and height attributes: below every rule of the sheets, which all rank above them
+    for (const [property, value] of builder.presentational.get(node.id) ?? []) if (!base.own.has(property)) base.own.set(property, { value, rank: [0, 0, 0, 0, 0, 0] });
     const own = new Map<string, Layer>();
     for (const [key, layer] of layers) if (layer.own.size > 0) own.set(key, layer);
     if (own.size > 0) winners.set(node.id, own);
@@ -1293,6 +1347,7 @@ function newBuilder(make: NodeMaker, context: HandlerContext<never>, markup: str
     sheets: [],
     held,
     inline: new Map(),
+    presentational: new Map(),
     lines: new Map(),
     mode,
     dropped: { elements: 0, attributes: 0 },
