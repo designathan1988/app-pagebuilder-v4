@@ -4,12 +4,11 @@
 // the Layers row under the pointer. Pure measurement: the document it reads comes as an argument, and nothing here
 // changes anything.
 import { locate, type DocumentJson, type NodeId } from '../../core/document/model.ts';
-import { manifest } from '../../manifest/runtime.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { manifest, numberConstant } from '../../manifest/runtime.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { FeatureId } from '../../generated/ids.ts';
 import { canvasFrame, flowAxis, flowReversed, geometryOf, laysOut, nodeBox, nodesUnder, sideFlow, type Point } from '../canvas/coordinates.ts';
 import { offerSide, proposeDrop, sideBand, SIDE_ZONES, type DropProposal, type SideOffer } from '../drag/drop.ts';
-import { numberConstant } from '../../manifest/runtime.ts';
 
 // how near the middle of a refusing element still counts as its near side (interactions.json)
 const MIDDLE_TIE = numberConstant('drop.middleTie');

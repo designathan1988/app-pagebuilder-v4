@@ -512,7 +512,7 @@ Stages 13, 15, 16 and 17 stay out (DEC-08, kept by the user on 2026-10-02).
 | The contract | `manifest/` | The single declaration: elements, properties, commands with their doors (entry points), interactions, layout, features with their scenarios. `npm run manifest:check` validates it; nothing is re-listed in code. |
 | The document core | `src/core/` | Plain TypeScript, no React, no DOM (its ports are injected): the model, its validation, the structure, styles, the importer, the renderer, the export. (Today it holds a DOM renderer and a DOM parser default: AUD-07.) |
 | The editor | `src/editor/` | React, and only drawing and input: panels, canvas, drag, the keymap, the pointer owner. |
-| The wiring | `src/app/` | The one command table and the one feature table; a missing or extra entry is a type error. |
+| The wiring | `src/app/` | The one command table and the one feature table; a missing or extra entry is a type error. The editor never imports it (lint): the feature table installs itself in the core's registry when it loads, first in `src/main.tsx`, and the command table, the predicates and the modules' editor side reach the editor through its port (`src/editor/wiring.ts`, composed in `src/app/wiring.ts`). |
 | The manifest at runtime | `src/manifest/` | Loading, checking and looking up the contract. |
 | Removable modules | `src/modules/<name>/` | A module joins through one line in `src/app/modules.ts` (handlers, predicates, authoring validator) and one in `src/app/modules-view.ts` (sidebar views, canvas layers, canvas tools); `npm run modules:removal <name>` proves the app builds without it. |
 | Generated files | `src/generated/`, `src/ui/tokens.css`, `src/ui/icons.svg`, `manifest/generated/` | Written by `npm run gen` alone; `gen:check` fails on a hand edit. |
@@ -609,7 +609,7 @@ dependencies **needs to change** (6 runtime import cycles), owners **acceptable*
 audit; its first five: error containment, cascade-safe CSS merging with a canvas-versus-export test, store and
 predicate hardening, the invariant probe in the gate, and the security set. Since QA 224 the import graph has no
 cycle (dependency-cruiser counted 14 runtime cycles, the audit's six and their variants; `deps:check` in `check:fast`
-keeps it so).
+keeps it so). Since QA 225 the editor and the modules import nothing of `src/app` (a lint rule refuses it).
 
 ## 6. How to prove
 

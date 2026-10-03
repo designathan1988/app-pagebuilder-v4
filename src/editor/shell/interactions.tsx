@@ -7,13 +7,12 @@
 // data-local) and the next press on the canvas or on a Layers row gives it. The tab holds two lists, each under its
 // title: these events (spec events-actions), then the element's motion (spec motion-interactions); one note at its end
 // says which runs where (interactions.runNote).
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { useState } from 'react';
 import { locate, type DocNode, type Interaction } from '../../core/document/model.ts';
 import { actionLabel, applicableActions, applicableTriggers, firesOnce, interactionsOf, needsAddress, needsAnimation, needsClassName, needsTarget, primaryNodeOf, readOptions, triggerLabel } from '../../core/events/interactions.ts';
 import { animationsOf } from '../../core/animation/animation.ts';
-import { elementIcon, type DoorEntry } from '../../manifest/runtime.ts';
-import { manifest } from '../../manifest/runtime.ts';
+import { elementIcon, type DoorEntry, manifest } from '../../manifest/runtime.ts';
 import { Icon } from '../doors/door.tsx';
 import { PanelButton, PanelField } from './panel-field.tsx';
 import { useEditorState, useStore } from '../store.ts';

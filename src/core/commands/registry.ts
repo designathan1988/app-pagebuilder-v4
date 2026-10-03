@@ -149,6 +149,24 @@ export function isRegistered<Id extends FeatureId>(entry: FeatureEntry<Id>): ent
   return entry !== NOT_AVAILABLE_YET;
 }
 
+// The feature table, installed by the table itself when it loads (src/app/features.ts), so it is in place before any
+// module of the editor reads it (src/main.tsx loads it first; the unit tests' setup does too). The editor asks it here
+// and never imports the wiring (plan I.9). A reader asked before it is installed is a defect of the wiring.
+let featureTable: FeatureTable | null = null;
+
+export function installFeatureTable(table: FeatureTable): void {
+  featureTable = table;
+}
+
+// Whether a feature is registered as built.
+export function isFeatureBuilt(feature: FeatureId): boolean {
+  if (featureTable === null) throw new Error('the feature table is not installed (src/app/features.ts)');
+  // an id the table does not hold is no feature built (a door's data names only the manifest's, which manifest:check
+  // proves; a stand-in names none)
+  const entry = (featureTable as Partial<FeatureTable>)[feature];
+  return entry !== undefined && isRegistered(entry);
+}
+
 // An availability predicate (a command's availability.predicate in the manifest). When it fails, the status bar says
 // the command's refusalKey; a predicate that knows the words of its refusal ("{name} has no text to edit.") or which
 // of the command's declared refusals applies says so with `refusal` (the store accepts only the command's

@@ -4,8 +4,7 @@
 // brings (a palette entry), are usable only while it is registered (archive/DESIGN.md "Build order"); the census fails
 // a registered feature with no scenario, or one of whose scenarios cannot run or fails. Plain data: the runner and the
 // census read it in Node.
-import { isRegistered, registerFeature, type FeatureTable } from '../core/commands/registry.ts';
-import type { FeatureId } from '../generated/ids.ts';
+import { installFeatureTable, registerFeature, type FeatureTable } from '../core/commands/registry.ts';
 
 export const FEATURES = {
   'assistant-chat': registerFeature('assistant-chat'),
@@ -248,10 +247,7 @@ export const FEATURES = {
   'capture-url': registerFeature('capture-url'),
 } as const satisfies FeatureTable;
 
-// Whether a feature is registered as built.
-export function isFeatureBuilt(feature: FeatureId): boolean {
-  // an id the table does not hold is no feature built (a door's data names only the manifest's, which manifest:check
-  // proves; a stand-in names none)
-  const entry = (FEATURES as Partial<typeof FEATURES>)[feature];
-  return entry !== undefined && isRegistered<FeatureId>(entry);
-}
+installFeatureTable(FEATURES);
+
+// the table's reader (core/commands/registry.ts), for the tools and tests that load the table to read it
+export { isFeatureBuilt } from '../core/commands/registry.ts';

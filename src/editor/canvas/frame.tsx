@@ -6,7 +6,6 @@
 // for keys on the frame's window (the page itself still carries no event handler or event attribute), and the frame
 // is not aria-hidden, as it holds the focus. The frame is scaled with the standard CSS zoom (Chrome 128+), so
 // the page lays out at its breakpoint's width and the stage shows it at the canvas zoom.
-import { MODULE_CANVAS_LAYERS } from '../../app/modules-view.ts';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useCanvasMotion } from '../motion/use-canvas-motion.ts';
 import { PageRenderer, renderModelFromManifest } from './render/render.ts';
@@ -26,6 +25,7 @@ import { SnapLines } from './snap-lines.tsx';
 import { keepPagePoint, registerFrame, scrollPageBy } from './coordinates.ts';
 import { TEXT_EDITING, openLinkPrompt, registerEditReader } from './text-edit.ts';
 import { pageChanged } from './page-clock.ts';
+import { wiring } from '../wiring.ts';
 
 const MODEL = renderModelFromManifest(manifest.elements, manifest.properties, manifest.interactions);
 // an empty page the renderer fills: no script, no style of the editor
@@ -265,7 +265,7 @@ export function CanvasFrame({ width, screen, zoom }: { readonly width: number; r
         <Guides overlay={overlay} />
         <SnapLines overlay={overlay} />
         {/* the layers the installed modules draw over the page (app/modules-view.ts) */}
-        {MODULE_CANVAS_LAYERS.map((Layer, i) => (
+        {wiring().canvasLayers.map((Layer, i) => (
           <Layer key={i} />
         ))}
       </div>

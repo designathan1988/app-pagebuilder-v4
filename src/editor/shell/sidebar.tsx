@@ -1,4 +1,3 @@
-import { MODULE_SIDEBAR_VIEWS } from '../../app/modules-view.ts';
 import { AssistantPanel } from '../assistant/panel.tsx';
 import { DataPanel } from '../data/panel.tsx';
 // The activity bar and the sidebar (archive/DESIGN.md "Regions"): Explorer (Pages, Files, Layers), Insert (the element
@@ -6,15 +5,15 @@ import { DataPanel } from '../data/panel.tsx';
 // one per page, node or palette entry; a section's actions are the region's controls before its first item.
 import { isDataFile } from '../../core/design/data.ts';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type FormEvent, type MouseEvent, type ReactNode } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { onFirstUse, wiring } from '../wiring.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { walk, type DocNode, type Location, type Page } from '../../core/document/model.ts';
 import { placement } from '../../core/structure/insert.ts';
 import { layerColourCss } from '../../core/nodes/flags.ts';
-import { pageShown } from '../../core/project/pages.ts';
+import { pageShown, openedPage } from '../../core/project/pages.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { CommandId, FeatureId, MessageId, RegionId } from '../../generated/ids.ts';
 import { elementIcon, manifest, type DoorEntry } from '../../manifest/runtime.ts';
-import { openedPage } from '../../core/project/pages.ts';
 import { DoorControl, Icon, useDoor } from '../doors/door.tsx';
 import { GLYPHS, doorSlots } from '../doors/placement.ts';
 import { fileAt, folderOf, folderPaths, nameOfPath, objectUrl, pathGenerated, sizeLabel } from '../../core/files/files.ts';
@@ -30,9 +29,8 @@ import { useNarrowWindow } from '../workspace/narrow.ts';
 import { useOutsideLayer } from './outside-layer.ts';
 import { Splitter } from './splitter.tsx';
 import { outsidePress } from '../input/pointer/views.ts';
-import { combinationAt, splitterSize } from '../workspace/layout.ts';
+import { combinationAt, splitterSize, floatingOf } from '../workspace/layout.ts';
 import { PanelArea, PanelGrip } from '../workspace/windows.tsx';
-import { floatingOf } from '../workspace/layout.ts';
 import { DOCK_BACK, ViewTitle } from './view-title.tsx';
 import { useLocale, useT } from '../text.ts';
 import { hasText, translate, type Locale } from '../../i18n/index.ts';
@@ -1096,7 +1094,7 @@ function ClassNameField({ entry, name }: { readonly entry: DoorEntry; readonly n
 // The body of each sidebar view the editor draws; a view without one says "not available yet" and the doors that
 // only open it are not available yet (bodies.ts).
 // (the views of the installed modules join them: app/modules-view.ts)
-export const SIDEBAR_VIEWS: BodyTable = { assistant: AssistantPanel, data: DataPanel, explorer: Explorer, elements: Insert, variables: Styles, ...MODULE_SIDEBAR_VIEWS };
+export const SIDEBAR_VIEWS = onFirstUse((): BodyTable => ({ assistant: AssistantPanel, data: DataPanel, explorer: Explorer, elements: Insert, variables: Styles, ...wiring().sidebarViews }));
 
 // The body of each section that belongs to no view, drawn in the sidebar's stack below the view (bodies.ts)
 export const SIDEBAR_SECTIONS: BodyTable = { layers: LayersSection };
@@ -1113,7 +1111,7 @@ function EmptyView({ panel }: { readonly panel: Panel }) {
 
 export function Sidebar() {
   const view = useEditorState((s) => s.ui.panels.sidebarView);
-  const View = SIDEBAR_VIEWS[view];
+  const View = SIDEBAR_VIEWS()[view];
   // every stacked section, in the manifest's order, and which of them show (each one's header stays drawn while it is
   // folded, so the header that opens it is there to press); both as one text (the hook's values stay stable)
   // the sections that are still the sidebar's: one that left its place (a window, the right dock, a combined area) is

@@ -5,7 +5,7 @@
 // nothing of the recovery: the status bar keeps reading Recovery required until a version is restored or another
 // project replaces the document.
 import { useSyncExternalStore } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { FeatureId } from '../../generated/ids.ts';
 import { DoorControl } from '../doors/door.tsx';
 import { doorSlots } from '../doors/placement.ts';

@@ -5,7 +5,7 @@
 // listens to the pointer or the keys: presses and drags belong to the pointer owner (input/pointer.ts), keys to the
 // keymap.
 import { useEffect, useRef, type FormEvent, type ReactNode } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { CommandId, FeatureId, RegionId } from '../../generated/ids.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';

@@ -4,7 +4,7 @@
 // arrives later), the parts of a table or a select, the person's own attributes, and the page's own settings.
 import { useEffect, useId, useMemo, useRef, type FormEvent } from 'react';
 import type { AttributeId, CommandId, FeatureId, MessageId } from '../../generated/ids.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type DocNode } from '../../core/document/model.ts';
 import { attributeApplies, formControls } from '../../core/elements/inputs.ts';
 import { partTypesOf, selectionInTable } from '../../core/elements/parts.ts';

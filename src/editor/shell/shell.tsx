@@ -1,4 +1,3 @@
-import { installModuleTools } from '../../app/modules-view.ts';
 import { registerPointerTool } from '../input/pointer-tools.ts';
 import { motionDragTool } from '../motion/drag-tool.ts';
 import { HtmlImportDialog } from './html-import.tsx';
@@ -11,8 +10,7 @@ import { ContextMenu } from '../doors/menu.tsx';
 import { CommandBar } from './command-bar.tsx';
 import { Confirmation } from './confirmation.tsx';
 import { installKeymap } from '../input/keymap.ts';
-import { installOsFileDrop } from '../input/pointer.ts';
-import { installPointer } from '../input/pointer.ts';
+import { installOsFileDrop, installPointer } from '../input/pointer.ts';
 import { installFocus } from '../focus/focus.ts';
 import { useEditorState, useStore } from '../store.ts';
 import { objectUrl } from '../../core/files/files.ts';
@@ -47,11 +45,12 @@ import { FloatingWindows, PanelBodyTable, PanelDragLayer, RightDock } from '../w
 import { RegionBoundary } from './region-boundary.tsx';
 import { NarrowWindow, useWindowNarrow } from '../workspace/narrow.ts';
 import { splitterSize } from '../workspace/layout.ts';
+import { onFirstUse, wiring } from '../wiring.ts';
 
 // which panels the shell draws a body for, from the tables it draws them from (bodies.ts), and the component that
 // draws each body: a floating window and the right dock draw a panel of any place from the same table
-const ALL_BODIES = { ...SIDEBAR_VIEWS, ...SIDEBAR_SECTIONS, ...DOCK_TABS };
-const drawsBody = bodiesDrawn(SIDEBAR_VIEWS, DOCK_TABS, SIDEBAR_SECTIONS);
+const ALL_BODIES = onFirstUse(() => ({ ...SIDEBAR_VIEWS(), ...SIDEBAR_SECTIONS, ...DOCK_TABS }));
+const drawsBody = onFirstUse(() => bodiesDrawn(SIDEBAR_VIEWS(), DOCK_TABS, SIDEBAR_SECTIONS));
 
 function usePreferencesOnDocument(): void {
   const theme = useEditorState((s) => s.ui.preferences.theme);
@@ -126,7 +125,7 @@ export function Shell() {
   useEffect(() => () => uninstallAssistant(store), [store]);
   // the canvas tools of the installed modules (app/modules-view.ts) and the motion Timeline's drags, asked first by the
   // pointer owner (input/pointer-tools.ts)
-  useEffect(() => installModuleTools(), []);
+  useEffect(() => wiring().installTools(), []);
   useEffect(() => registerPointerTool(motionDragTool), []);
   // an image file dragged in from the operating system: here for the editor's window (the canvas and the Explorer's
   // folder drop), in canvas/frame.tsx for the frame's own
@@ -151,8 +150,8 @@ export function Shell() {
   const root = usePreviewModal(inPreview);
   return (
     <NarrowWindow.Provider value={narrow}>
-    <PanelBodyTable.Provider value={ALL_BODIES}>
-    <PanelBodies.Provider value={drawsBody}>
+    <PanelBodyTable.Provider value={ALL_BODIES()}>
+    <PanelBodies.Provider value={drawsBody()}>
       <FitZoom.Provider value={zoom}>
         <ReportFitZoom.Provider value={setZoom}>
           <div ref={root} className={classes} style={widths} aria-label={t('editor.label')} data-key-context="global">

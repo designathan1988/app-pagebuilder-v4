@@ -27,7 +27,7 @@ import { composedText, lineStyles, propertyName, shownText } from '../../core/st
 import { storedLayers, storedValue } from '../../core/style/stored.ts';
 import type { AttributeId, CommandId, FeatureId, KeyContextId, MessageId, StyleTargetId } from '../../generated/ids.ts';
 import type { CommandArgs } from '../../generated/commands.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { droppedInputAttributes } from '../../core/elements/inputs.ts';
 import { imageFiles } from '../../core/files/files.ts';
 import { holdsExecutableCode } from '../../core/elements/embed.ts';

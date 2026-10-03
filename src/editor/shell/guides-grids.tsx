@@ -13,7 +13,7 @@
 // the control that opened it, or the button of the menu whose item did. Opening a field or the list is not a command
 // (archive/DESIGN.md "What is not a command").
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { gridSetting } from '../../core/page/grid.ts';
 import { settingsOf, type GridName } from '../../core/page/grid-settings.ts';
 import { guidesOf } from '../../core/page/guides.ts';

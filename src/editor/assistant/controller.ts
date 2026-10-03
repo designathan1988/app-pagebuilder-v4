@@ -1,4 +1,3 @@
-import { COMMANDS } from '../../app/commands.ts';
 import { isBuilt, message } from '../../core/commands/registry.ts';
 import { credentialNonce, randomIds } from '../../core/ports/ids.ts';
 import type { CommandArgs, JsonValue } from '../../generated/commands.ts';
@@ -14,6 +13,7 @@ import { editorTools, readTools } from './editor.ts';
 import { companionFetch } from './proxy-client.ts';
 import { createAssistantSession } from './session.ts';
 import { assistantOf, DEFAULT_ASSISTANT_MODEL, reportAssistant, type AssistantState } from './state.ts';
+import { wiring } from '../wiring.ts';
 
 interface Pairing { url: string; token: string }
 export interface AssistantController {
@@ -51,7 +51,7 @@ export function installAssistant(store: EditorStore): () => void {
     address.pathname = '/';
     return address.href;
   };
-  const commands = manifest.commands.filter(command => isBuilt(COMMANDS[command.id as CommandId]));
+  const commands = manifest.commands.filter(command => isBuilt(wiring().commands[command.id as CommandId]));
   const words = (key: string) => describeText(store.getState().ui.preferences.locale, key as MessageId);
   const tools = editorTools(commands, {
     read: () => ({ document: store.getState().document, selection: store.getState().selection, revision }),

@@ -24,7 +24,7 @@
 // The sides are the box composite's longhands in CSS order (properties.json: top, right, bottom, left): a side's
 // opposite is two places on, and the side's band lies across the element for the first and the third.
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type FormEvent } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type NodeId } from '../../core/document/model.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import { gapBands, lineExtent, linesOf } from '../../core/geometry/lines.ts';
@@ -33,14 +33,13 @@ import { mayBeNegative } from '../../core/style/spacing.ts';
 import type { CommandId, FeatureId } from '../../generated/ids.ts';
 import { manifest, numberConstant, type DoorEntry } from '../../manifest/runtime.ts';
 import { useDoor } from '../doors/door.tsx';
-import { useEditorState, useStore } from '../store.ts';
+import { useEditorState, useStore, MODEL_RULES } from '../store.ts';
 import { useSelectionContext } from '../shell/field.tsx';
 import { bandingNow } from '../input/pointer/views.ts';
 import { typedBand } from './band-typing.ts';
 import { canvasFrame, computedValues, nodeBox } from './coordinates.ts';
 import { editMode, handlesOf, type EditMode } from './edit-mode.ts';
 import { handleArgs, movesOffset, shadowLength, shadowOf, valueArg } from './handles.ts';
-import { MODEL_RULES } from '../store.ts';
 import { lineStyles } from '../../core/style/set.ts';
 
 interface Box {

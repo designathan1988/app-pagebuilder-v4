@@ -7,7 +7,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, 'reference/**', '.cache/**', '.playwright-mcp/**'],
     environment: 'node',
     // the language the tests run in, pinned (tools/test/setup-language.ts)
-    setupFiles: ['tools/test/setup-language.ts', 'tools/test/setup-browser.ts'],
+    setupFiles: ['tools/test/setup-language.ts', 'tools/test/setup-browser.ts', 'tools/test/setup-wiring.ts'],
     // the transformed modules are kept between runs: a run re-transforms only what changed
     fsModuleCache: true,
     // half the cores at most: the machine stays usable while the tests run

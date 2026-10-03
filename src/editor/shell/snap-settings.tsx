@@ -4,7 +4,7 @@
 // and typed is the dialog's own until Apply (the door of its region) keeps it; the close button and Escape (Cancel)
 // close it and drop it. Ticking a box or typing is not a command (archive/DESIGN.md "What is not a command").
 import type { FormEvent } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { CommandId, FeatureId, MessageId } from '../../generated/ids.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';

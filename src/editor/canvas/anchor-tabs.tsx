@@ -5,7 +5,7 @@
 // element moves with a scroll or a zoom, and never covered by other canvas chrome (Problems in Pager 3): the top tab
 // moves right, past the selection's label, the quick panel's chip and the rotation handle, when it would meet them.
 import { useEffect, useState, type RefObject } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type NodeId } from '../../core/document/model.ts';
 import { valuePredicateHolds } from '../../core/style/couplings.ts';
 import type { FeatureId } from '../../generated/ids.ts';

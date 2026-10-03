@@ -17,7 +17,7 @@
 import { Splitter } from './splitter.tsx';
 import { Fragment, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import type { CommandId, FeatureId, MessageId, SectionId } from '../../generated/ids.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { componentHolders, instanceRootOf } from '../../core/design/instances.ts';
 import { locate, type DocNode, type StoredValue } from '../../core/document/model.ts';
 import { structuredCss } from '../../core/render/output.ts';

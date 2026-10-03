@@ -4,7 +4,7 @@
 // opacity — and a click writes the value (style.set, or a shadow's own command), one undo step, on every selected
 // element, as typing it would.
 import type { CSSProperties } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { FeatureId, MessageId } from '../../generated/ids.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { useDoor } from '../doors/door.tsx';

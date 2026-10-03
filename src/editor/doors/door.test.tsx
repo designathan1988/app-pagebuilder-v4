@@ -10,7 +10,7 @@ import { createEditorStore, StoreContext } from '../store.ts';
 import { manualClock } from '../../core/ports/clock.ts';
 import { sequentialIds } from '../../core/ports/ids.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { FeatureId } from '../../generated/ids.ts';
 import { DoorControl, isDoorBuilt } from './door.tsx';
 

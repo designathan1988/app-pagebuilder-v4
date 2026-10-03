@@ -4,7 +4,7 @@
 // Rename them (element.renameMany, the door of its region), which closes the dialog once it renamed. Typing is the
 // dialog's own until then (archive/DESIGN.md "What is not a command").
 import { useState, type FormEvent } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate } from '../../core/document/model.ts';
 import { batchNames } from '../../core/export/names.ts';
 import type { DispatchResult } from '../../core/store/store.ts';

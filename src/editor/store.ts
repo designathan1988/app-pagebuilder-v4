@@ -2,7 +2,6 @@
 // and rules, the ports and the editor state, and exposes it to React. Components read state through
 // useEditorState and change it only through dispatch; no document, selection or editor state lives in useState.
 import { createContext, useContext, useSyncExternalStore } from 'react';
-import { COMMANDS, PREDICATES } from '../app/commands.ts';
 import { message } from '../core/commands/registry.ts';
 import { isEditing, takeOver } from './persistence/tab-guard.ts';
 import { activeLayer, styleStateFollows } from './view/style-state.ts';
@@ -35,6 +34,7 @@ import { browserWorkspace, persistWorkspace, readWorkspace, type WorkspaceStorag
 import { initialEditorUi, type EditorUi } from './state.ts';
 import { siteScripts } from './forms/script.ts';
 import { deriveData } from '../core/data/derive.ts';
+import { wiring } from './wiring.ts';
 
 export type EditorStore = Store<EditorUi>;
 export type EditorState = StoreState<EditorUi>;
@@ -104,8 +104,8 @@ export function createEditorStore(options: EditorStoreOptions = {}): EditorStore
   const document =
     options.restored?.document ?? createEmptyDocument(ids, { language: preferences.locale, page: translate(preferences.locale, 'pages.defaultHome'), root: translate(preferences.locale, rootLabel as 'element.page.label') }, rules.root);
   const store = createStore<EditorUi>({
-    table: COMMANDS,
-    predicates: PREDICATES,
+    table: wiring().commands,
+    predicates: wiring().predicates,
     commands: new Map(manifest.commands.map((c) => [c.id as CommandId, c])),
     constants: new Map(manifest.interactions.constants.map((c) => [c.id as ConstantId, c.value])),
     rules,

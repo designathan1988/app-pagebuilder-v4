@@ -19,7 +19,7 @@
 // Apply keeps it as one undo step, Cancel and Escape put the opening value back.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type RefObject } from 'react';
 import type { CommandId, FeatureId } from '../../generated/ids.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { styleSource } from '../inspector/style-target.ts';
 import { FORMAT_CHANNELS, alphaBackground, areaBackground, channelText, formatColor, hsbToRgb, hueBackground, inSrgbGamut, parseColor, parseSrgb, pickedAlpha, rgbToHsb, type Hsba, type Rgba } from '../../core/style/color.ts';
 import { CHANNEL_KEYS, CHANNEL_LABELS, recentColours } from '../inspector/color-picker.ts';

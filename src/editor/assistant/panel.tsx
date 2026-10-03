@@ -1,8 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { message } from '../../core/commands/registry.ts';
+import { message, isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { CommandId, FeatureId, MessageId } from '../../generated/ids.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
 import { doorSlots } from '../doors/placement.ts';
 import { DoorControl, useDoor } from '../doors/door.tsx';
 import type { DoorEntry } from '../../manifest/runtime.ts';

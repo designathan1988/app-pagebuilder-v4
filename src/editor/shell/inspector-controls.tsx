@@ -2,7 +2,7 @@ import { styleSections, type StyleDoor } from '../../manifest/style-places.ts';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { CommandId, FeatureId, KeyContextId, MessageId, StyleTargetId } from '../../generated/ids.ts';
 import { GENERATED_VALUES } from '../../generated/value-lists.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate } from '../../core/document/model.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';

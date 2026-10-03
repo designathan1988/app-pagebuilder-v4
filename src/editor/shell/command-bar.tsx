@@ -4,7 +4,7 @@
 // a combobox), Escape and a press on the backdrop close it (ui.dismiss). An entry pressed runs its command, then the
 // bar closes (the close waits for the entry's own click: closing first took the entry away before it ran).
 import { Fragment, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { CommandId, FeatureId, MessageId } from '../../generated/ids.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import { elementIcon, manifest } from '../../manifest/runtime.ts';

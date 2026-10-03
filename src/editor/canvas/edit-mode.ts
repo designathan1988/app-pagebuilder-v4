@@ -9,8 +9,7 @@
 // "Build order"); a mode whose handles edit a structured value (a shadow's layers) applies to an element that holds one
 // (modeApplies: spec shadow-handles, Problems in Pager 2), and is disabled with its reason on any other.
 import { toolKeyContext } from '../input/pointer-tools.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
-import { registerHandler } from '../../core/commands/registry.ts';
+import { isFeatureBuilt, registerHandler } from '../../core/commands/registry.ts';
 import type { CommandArgs } from '../../generated/commands.ts';
 import type { FeatureId, KeyContextId } from '../../generated/ids.ts';
 import { commandOf, manifest } from '../../manifest/runtime.ts';

@@ -5,7 +5,7 @@
 // trash removes the breakpoint (breakpoints.remove; the base has none); Add makes one at the width the canvas shows
 // (breakpoints.add). A refused value goes back to what the table holds, and the status bar says why.
 import { useEffect, useRef } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { breakpointName, breakpointsOf, type ProjectBreakpoint } from '../../core/document/breakpoints.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { CommandId, FeatureId } from '../../generated/ids.ts';

@@ -10,7 +10,7 @@
 // The lists and fields are the doors' own popups: opening one is not a command (archive/DESIGN.md "What is not a
 // command").
 import { useRef, type FormEvent, type ReactNode } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { classesOf, usesOfClass } from '../../core/design/classes.ts';
 import { locate } from '../../core/document/model.ts';
 import type { DispatchResult } from '../../core/store/store.ts';

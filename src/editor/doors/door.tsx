@@ -3,9 +3,8 @@
 // while its command's entry in the command table is NOT_AVAILABLE_YET. Every icon comes from the sprite by a name
 // the manifest gives (a door's icon, a glyph, a panel, an element); no component chooses one.
 import { useContext, type MouseEvent, type ReactNode } from 'react';
-import { COMMANDS, PREDICATES } from '../../app/commands.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
-import { isBuilt, type Message, type PredicateTable } from '../../core/commands/registry.ts';
+import { wiring } from '../wiring.ts';
+import { isFeatureBuilt, isBuilt, type Message } from '../../core/commands/registry.ts';
 import { projectFileText } from '../../core/project/archive.ts';
 import { pickedFilePath, readUploadFile } from '../../core/files/files.ts';
 import type { FolderFile } from '../../core/import/folder.ts';
@@ -15,7 +14,6 @@ import type { CommandId, FeatureId, KeyContextId, MessageId, PredicateId } from 
 import type { DoorEntry } from '../../manifest/runtime.ts';
 import { chordHint } from '../input/keymap.ts';
 import { pressedByPointer } from '../input/pointer.ts';
-import type { EditorUi } from '../state.ts';
 import { layeredRules, useEditorState, useStore, type EditorStore } from '../store.ts';
 import { PanelBodies } from '../shell/bodies.ts';
 import { useT } from '../text.ts';
@@ -38,7 +36,7 @@ export function Icon({ name, size = 'md' }: { readonly name: string; readonly si
 // feature still to come is drawn "not available yet", or left out of the context menu, even when another feature built
 // its command.
 export function isDoorBuilt(entry: DoorEntry): boolean {
-  return isBuilt(COMMANDS[entry.command.id]) && isFeatureBuilt(entry.door.feature as FeatureId);
+  return isBuilt(wiring().commands[entry.command.id]) && isFeatureBuilt(entry.door.feature as FeatureId);
 }
 
 export interface DoorState {
@@ -73,7 +71,7 @@ export function useDoor(entry: DoorEntry, args: Readonly<Record<string, unknown>
   const drawsBody = useContext(PanelBodies);
   const built = ready && isDoorBuilt(entry) && !opensEmptyPanel({ ...entry.door.args, ...args }, drawsBody);
   const current = useEditorState((s) => built && isCurrent(entry, s, args));
-  const predicate = (PREDICATES as PredicateTable<EditorUi>)[entry.command.availability.predicate as PredicateId];
+  const predicate = wiring().predicates[entry.command.availability.predicate as PredicateId];
   // the predicate reads the layer the editor shows, as the store does when the command runs
   // the door's own arguments with the ones its place adds (the row it stands for): what the command would run with
   const runArgs = { ...entry.door.args, ...args };
@@ -163,7 +161,7 @@ export function appliesNow(entry: DoorEntry, args: Readonly<Record<string, unkno
   const given = { ...entry.door.args, ...args };
   const readsAtRun = Object.entries(entry.command.args).some(([name, arg]) => (arg.type === 'file' || arg.type === 'files' || arg.type === 'clipboard') && !arg.optional && !(name in given));
   if (!readsAtRun) return store.canRun(entry.command.id, given as never);
-  return (PREDICATES as PredicateTable<EditorUi>)[entry.command.availability.predicate as PredicateId]?.test(store.getState(), layeredRules(store.getState())) ?? true;
+  return wiring().predicates[entry.command.availability.predicate as PredicateId]?.test(store.getState(), layeredRules(store.getState())) ?? true;
 }
 
 function chooseFile(): Promise<Uint8Array | null> {

@@ -5,8 +5,8 @@
     "commands": 371,
     "doors": 1350,
     "scenarios": 1819,
-    "modules": 433,
-    "lines": 80175
+    "modules": 435,
+    "lines": 80239
   },
   "features": [
     {
@@ -3291,7 +3291,7 @@
     },
     {
       "path": "src/app/features.ts",
-      "lines": 258,
+      "lines": 254,
       "commands": [],
       "features": []
     },
@@ -3304,6 +3304,12 @@
     {
       "path": "src/app/modules.ts",
       "lines": 26,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/app/wiring.ts",
+      "lines": 17,
       "commands": [],
       "features": []
     },
@@ -3360,7 +3366,7 @@
     },
     {
       "path": "src/core/commands/registry.ts",
-      "lines": 207,
+      "lines": 225,
       "commands": [
         "<id>"
       ],
@@ -4942,7 +4948,7 @@
     },
     {
       "path": "src/editor/assistant/panel.tsx",
-      "lines": 94,
+      "lines": 93,
       "commands": [],
       "features": []
     },
@@ -5043,13 +5049,13 @@
     },
     {
       "path": "src/editor/canvas/edit-handles.tsx",
-      "lines": 403,
+      "lines": 402,
       "commands": [],
       "features": []
     },
     {
       "path": "src/editor/canvas/edit-mode.ts",
-      "lines": 92,
+      "lines": 91,
       "commands": [
         "canvas.setEditMode"
       ],
@@ -5127,7 +5133,7 @@
     },
     {
       "path": "src/editor/canvas/quick-panel.tsx",
-      "lines": 499,
+      "lines": 497,
       "commands": [],
       "features": []
     },
@@ -5334,7 +5340,7 @@
     },
     {
       "path": "src/editor/doors/door.tsx",
-      "lines": 331,
+      "lines": 329,
       "commands": [],
       "features": []
     },
@@ -5475,7 +5481,7 @@
     },
     {
       "path": "src/editor/input/drop-proposals.ts",
-      "lines": 109,
+      "lines": 108,
       "commands": [],
       "features": []
     },
@@ -5493,7 +5499,7 @@
     },
     {
       "path": "src/editor/input/keymap.ts",
-      "lines": 562,
+      "lines": 561,
       "commands": [],
       "features": []
     },
@@ -6137,7 +6143,7 @@
     },
     {
       "path": "src/editor/shell/interactions.tsx",
-      "lines": 241,
+      "lines": 240,
       "commands": [],
       "features": []
     },
@@ -6209,7 +6215,7 @@
     },
     {
       "path": "src/editor/shell/shell.tsx",
-      "lines": 211,
+      "lines": 210,
       "commands": [],
       "features": []
     },
@@ -6227,7 +6233,7 @@
     },
     {
       "path": "src/editor/shell/sidebar.tsx",
-      "lines": 1179,
+      "lines": 1177,
       "commands": [],
       "features": []
     },
@@ -6501,6 +6507,12 @@
       ]
     },
     {
+      "path": "src/editor/wiring.ts",
+      "lines": 40,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/workspace/dialogs.ts",
       "lines": 24,
       "commands": [
@@ -6633,7 +6645,7 @@
     },
     {
       "path": "src/main.tsx",
-      "lines": 72,
+      "lines": 78,
       "commands": [],
       "features": []
     },

@@ -5,7 +5,7 @@
 // first value. A field keeps its text on Enter or when it is left, as the inspector's text fields do, for the variable
 // it was drawn for.
 import { useEffect, useRef, type CSSProperties, type FormEvent } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { tokensOf, type Token } from '../../core/design/tokens.ts';
 import { siteColoursOf } from '../../core/design/site-colours.ts';
 import { suggestedName, suggestionsOf } from '../../core/design/suggest.ts';

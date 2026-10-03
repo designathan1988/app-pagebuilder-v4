@@ -1,5 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+// the feature table first: it installs itself in the core's registry, which modules of the editor read as they load
+import './app/features.ts';
 import './ui/tokens.css';
 import './editor/shell/shell.css';
 import './editor/shell/window.css';
@@ -27,9 +29,13 @@ import { installErrorFeed } from './editor/errors.ts';
 import { reportError } from './core/incidents.ts';
 import { installBrowserPorts } from './core/ports/browser.ts';
 import { browserPorts } from './editor/browser-ports.ts';
+import { installWiring } from './editor/wiring.ts';
+import { EDITOR_WIRING } from './app/wiring.ts';
 
 // the browser's readers behind the core's ports (src/core/ports/browser.ts), before anything reads markup or images
 installBrowserPorts(browserPorts);
+// the command table and the installed modules' editor side, handed to the editor (src/editor/wiring.ts)
+installWiring(EDITOR_WIRING);
 
 const container = document.getElementById('root');
 if (!container) {

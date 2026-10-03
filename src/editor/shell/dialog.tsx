@@ -4,7 +4,7 @@
 // key context (Escape closes it: ui.dismiss) and, when it closes, gives the focus back to what opened it: the control,
 // or the button of the menu whose item did.
 import { useEffect, useRef, useState, type FocusEvent, type ReactNode } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { FeatureId, MessageId, RegionId } from '../../generated/ids.ts';
 import { DoorControl } from '../doors/door.tsx';
 import { doorSlots } from '../doors/placement.ts';

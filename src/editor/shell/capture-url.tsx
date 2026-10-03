@@ -2,7 +2,7 @@
 // the address, a reminder that what is captured belongs to its authors, how the Companion is started, and Capture
 // (project.captureUrl, the door of its region), which closes the dialog and sends the request (import/capture.ts).
 import { useState, type FormEvent } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { CommandId, FeatureId } from '../../generated/ids.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';

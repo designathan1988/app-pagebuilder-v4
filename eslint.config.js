@@ -149,6 +149,16 @@ export default defineConfig(
     },
   },
   {
+    // The editor and the modules never import the wiring (plan I.9): the command table and the installed modules'
+    // editor side come through the editor's port (src/editor/wiring.ts), the feature table through the core's registry.
+    // Their tests build stores from the app's own tables.
+    files: ['src/editor/**/*.{ts,tsx}', 'src/modules/**/*.{ts,tsx}'],
+    ignores: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [{ group: ['**/app/*'], message: 'The editor receives the wiring through src/editor/wiring.ts; it never imports src/app.' }] }],
+    },
+  },
+  {
     // the core's test helpers run in happy-dom with the tests
     files: ['src/core/testing/**/*.ts', 'src/core/**/*.test.ts'],
     rules: { 'no-restricted-globals': 'off' },

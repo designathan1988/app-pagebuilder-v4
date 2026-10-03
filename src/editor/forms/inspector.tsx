@@ -6,7 +6,7 @@ import { readFieldConfig, readFormConfig } from '../../core/forms/config.ts';
 import type { FieldConfig, FormConfig } from '../../core/forms/types.ts';
 import type { CommandId, MessageId } from '../../generated/ids.ts';
 import type { FeatureId } from '../../generated/ids.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { LOCALES } from '../../generated/ids.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';

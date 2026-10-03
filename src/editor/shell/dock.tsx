@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import { checksOf, type CheckIssue } from '../../core/a11y/checks.ts';
 import { manifest } from '../../manifest/runtime.ts';
 import type { DoorId, FeatureId, MessageId } from '../../generated/ids.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate } from '../../core/document/model.ts';
 import { TimelinePanel } from '../timeline/panel.tsx';
 import { MotionTimelinePanel } from '../motion/ui/timeline.tsx';

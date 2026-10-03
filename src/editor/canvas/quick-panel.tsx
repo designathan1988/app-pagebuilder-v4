@@ -10,7 +10,7 @@
 // Opening the panel with its chip is not a command (PRODUCT.md §5.3: data-local): the chip's state is this component's.
 // Hidden while a drag runs and while a text is edited in place (the text toolbar replaces it).
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type RefObject } from 'react';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type DocNode } from '../../core/document/model.ts';
 import { functionArgument, functionOfControl, functionsOf, translateAxis, translateWith, withBareUnit } from '../../core/style/functions.ts';
 import type { AttributeId, CommandId, FeatureId, KeyContextId } from '../../generated/ids.ts';
@@ -25,12 +25,10 @@ import { styleClassOf } from '../inspector/style-target.ts';
 import { BASE_STATE, activeState } from '../view/style-state.ts';
 import { activeBreakpoint } from '../view/breakpoints.ts';
 import { appliesTo, offsetOf, placeChip, placeQuickPanel, quickPanelOffsets, quickPanelOpen, type Box, type Offset } from '../quick-panel/quick-panel.ts';
-import { TextStyleField, keptByFieldEnter, type FieldPart } from '../shell/field.tsx';
+import { TextStyleField, keptByFieldEnter, type FieldPart, KeptTextField, TextField, keptTextOf, useSelectionContext } from '../shell/field.tsx';
 import { EDIT_MODES, modeBuilt, modeRefusal, type EditMode } from './edit-mode.ts';
-import { MODEL_RULES } from '../store.ts';
+import { MODEL_RULES, useEditorState, useStore } from '../store.ts';
 import type { MessageId } from '../../generated/ids.ts';
-import { KeptTextField, TextField, keptTextOf, useSelectionContext } from '../shell/field.tsx';
-import { useEditorState, useStore } from '../store.ts';
 import { useT } from '../text.ts';
 import { canvasFrame, nodeBox } from './coordinates.ts';
 import { breakpointWords, wordsOf } from '../../core/document/breakpoints.ts';

@@ -43,7 +43,7 @@
 // with the text the field held at the press, the pointer's horizontal travel since the press in screen pixels and the
 // key held now (the gesture number-scrub: Shift, Alt), so the field and the canvas follow the pointer live and the
 // release commits the last value: one undo step. Escape (drag.cancel) cancels it back to the value before the press.
-import { isFeatureBuilt } from '../../app/features.ts';
+import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { Message } from '../../core/commands/registry.ts';
 import { reportError } from '../../core/incidents.ts';
 import { locate, type NodeId } from '../../core/document/model.ts';

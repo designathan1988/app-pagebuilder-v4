@@ -11,12 +11,11 @@ import type { CommandId, DoorId, FeatureId, KeyContextId, MessageId } from '../.
 import { normaliseChord } from '../../manifest/chord.ts';
 import { keyContextChain, manifest, numberConstant, type DoorEntry } from '../../manifest/runtime.ts';
 import type { CommandSequence, DispatchResult } from '../../core/store/store.ts';
-import { COMMANDS } from '../../app/commands.ts';
-import { isBuilt, message } from '../../core/commands/registry.ts';
+import { isBuilt, message, isFeatureBuilt } from '../../core/commands/registry.ts';
 import { redoCommand, undoCommand } from '../../core/history/history.ts';
 import { DRAFT_KEPT, hasDraftRedo, type DraftField } from './drafts.ts';
 import { aimArgs, heldHand } from '../../core/structure/hand.ts';
-import { isFeatureBuilt } from '../../app/features.ts';
+import { wiring } from '../wiring.ts';
 import { TEXT_EDITING, editArgs } from '../canvas/text-edit.ts';
 import { readClipboard } from '../clipboard.ts';
 import type { EditorStore } from '../store.ts';
@@ -70,7 +69,7 @@ export function bindingGroups(doors: readonly DoorEntry[] = shortcuts): readonly
       .filter((entry) => entry.door.kind === 'shortcut' && entry.door.context === context.id)
       .map((entry): BindingRow => {
         const door = entry.door as { readonly chord: string; readonly labelKey: string };
-        return { ref: entry.ref, chord: door.chord, labelKey: door.labelKey as MessageId, ready: isBuilt(COMMANDS[entry.command.id]) };
+        return { ref: entry.ref, chord: door.chord, labelKey: door.labelKey as MessageId, ready: isBuilt(wiring().commands[entry.command.id]) };
       });
     return bindings.length === 0 ? [] : [{ context: context.id as KeyContextId, labelKey: context.labelKey as MessageId, bindings }];
   });
@@ -156,7 +155,7 @@ export function focusChain(target: EventTarget | null, context: KeyContextId): r
 // Whether a shortcut door runs now (shortcut-rule.ts, the rule the door census reads too): its command is built and
 // its feature introduces the command or has all its commands built.
 export function shortcutRunsNow(entry: DoorEntry): boolean {
-  return shortcutRuns({ command: entry.command.id, introducedBy: entry.command.introducedBy, feature: entry.door.feature }, (command) => isBuilt(COMMANDS[command as CommandId]), (feature) => isFeatureBuilt(feature as FeatureId));
+  return shortcutRuns({ command: entry.command.id, introducedBy: entry.command.introducedBy, feature: entry.door.feature }, (command) => isBuilt(wiring().commands[command as CommandId]), (feature) => isFeatureBuilt(feature as FeatureId));
 }
 
 // What a shortcut acts on when the focus is on a control of the same command drawn once per item (a palette tile):
