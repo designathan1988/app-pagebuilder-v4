@@ -367,6 +367,10 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
     burstKeys = '';
   };
   const onKeyDown = (event: KeyboardEvent) => {
+    // a key of an input method's composition (Japanese, Chinese, Korean: the Enter that picks a candidate) is the
+    // composition's, never a shortcut's (UI Events, KeyboardEvent.isComposing; keyCode 229 while it lasts: the audit's
+    // KB1)
+    if (event.isComposing || event.keyCode === 229) return;
     const letter = event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey;
     // a letter held outside a field: a pointer tool may read it through a drag (pointer-tools.ts)
     if (letter && !typesText(event.target)) holdLetter(event.key, true);
