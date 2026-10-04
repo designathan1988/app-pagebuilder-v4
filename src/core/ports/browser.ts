@@ -3,6 +3,8 @@
 // browser's own readers (src/editor/browser-ports.ts) before the editor starts; the unit tests install the same over
 // happy-dom (tools/test/setup-browser.ts). A reader asked for before one is installed is a defect of the wiring.
 import type { MarkupChild, MarkupPage, PageHead } from '../import/markup.ts';
+import type { CapturedElement } from '../document/captured.ts';
+import type { IdGenerator } from './ids.ts';
 
 export interface BrowserPorts {
   // the markup's own elements and texts, as a browser parses a fragment
@@ -11,6 +13,8 @@ export interface BrowserPorts {
   readonly page: (markup: string) => MarkupPage;
   // what a page's head says of it (its language, direction, title, stylesheets and scripts)
   readonly head: (markup: string) => PageHead;
+  // a full parsed DOM snapshot for a captured page, retaining text order and namespaces
+  readonly capturedTree: (markup: string, ids: IdGenerator) => CapturedElement;
   // an image's intrinsic size, or null when the browser cannot draw it
   readonly imageSize: (bytes: string, type: string) => Promise<{ readonly width: number; readonly height: number } | null>;
 }

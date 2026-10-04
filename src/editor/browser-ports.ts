@@ -3,9 +3,12 @@
 // before the editor starts (src/main.tsx) and by the unit tests over happy-dom (tools/test/setup-browser.ts).
 import type { MarkupChild, MarkupNode, MarkupPage, PageHead } from '../core/import/markup.ts';
 import type { BrowserPorts } from '../core/ports/browser.ts';
+import { unsafeCapturedAttribute, type CapturedNode, type CapturedElement } from '../core/document/captured.ts';
+import type { IdGenerator } from '../core/ports/ids.ts';
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
+const COMMENT_NODE = 8;
 
 const parse = (text: string): Document => new DOMParser().parseFromString(text, 'text/html');
 
@@ -63,6 +66,31 @@ function head(markup: string): PageHead {
   };
 }
 
+// DOMParser is inert while parsing, but event attributes can run once copied into the canvas. Keep the source
+// structure and visible attributes while excluding executable markup before it enters a project document.
+function capturedTree(markup: string, ids: IdGenerator): CapturedElement {
+  const document = parse(markup);
+  const safeAttribute = (tag: string, attribute: Attr): boolean =>
+    attribute.name !== 'data-capture-runtime' && !unsafeCapturedAttribute(tag, attribute);
+  const visit = (node: Node): CapturedNode | null => {
+    if (node.nodeType === TEXT_NODE) return { kind: 'text', id: ids.next(), value: node.nodeValue ?? '' };
+    if (node.nodeType === COMMENT_NODE) return { kind: 'comment', id: ids.next(), value: node.nodeValue ?? '' };
+    if (node.nodeType !== ELEMENT_NODE) return null;
+    const element = node as Element;
+    if (element.localName === 'script') return null;
+    const parent = element.localName === 'template' ? (element as HTMLTemplateElement).content : element;
+    return {
+      kind: 'element', id: ids.next(), namespace: element.namespaceURI ?? 'http://www.w3.org/1999/xhtml',
+      tag: element.localName,
+      attributes: [...element.attributes].filter((attribute) => safeAttribute(element.localName, attribute)).map((attribute) => ({ name: attribute.name, namespace: attribute.namespaceURI, value: attribute.value })),
+      children: [...parent.childNodes].map(visit).filter((child): child is CapturedNode => child !== null),
+    };
+  };
+  const root = visit(document.documentElement);
+  if (root?.kind !== 'element') throw new Error('captured page has no document element');
+  return root;
+}
+
 // an image's intrinsic size, drawn by an image element from its bytes
 function imageSize(bytes: string, type: string): Promise<{ width: number; height: number } | null> {
   return new Promise((resolve) => {
@@ -73,4 +101,4 @@ function imageSize(bytes: string, type: string): Promise<{ width: number; height
   });
 }
 
-export const browserPorts: BrowserPorts = { fragment, page, head, imageSize };
+export const browserPorts: BrowserPorts = { fragment, page, head, capturedTree, imageSize };

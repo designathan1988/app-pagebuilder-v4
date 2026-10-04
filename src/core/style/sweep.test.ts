@@ -23,7 +23,7 @@ const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const doc = (): DocumentJson =>
   ({
-    version: 2,
+    version: 3,
     tokens: [
       { name: 'line', kind: 'color', value: '#e6d8c6' },
       { name: 'space', kind: 'size', value: '24px' },

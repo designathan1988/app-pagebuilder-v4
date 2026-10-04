@@ -3508,6 +3508,8 @@
       "titleKey": "feature.captureUrl",
       "commands": [
         "project.captureUrl",
+        "capture.edit",
+        "capture.select",
         "workspace.openDialog"
       ],
       "dependsOn": [
@@ -3520,13 +3522,12 @@
           "File › Open a web address…, type the address, Capture (the Builder Companion running)."
         ],
         "expected": [
-          "The page as its scripts left it arrives through Import HTML: its destinations, then a page with its classes, images and fonts.",
-          "Classes from the source HTML root remain on the HTML root so its inherited CSS variables and fonts keep their effect.",
-          "Inline layout values produced at the reference viewport widths remain responsive on the canvas and in the exported page.",
-          "Picture sources chosen at the reference viewport widths use captured local assets on the canvas and in the exported page.",
-          "The captured page keeps the site's own resets and browser defaults while authored pages keep Builder defaults.",
-          "Custom properties written inline by the site, including on the root element, keep their effect in the exported page without inline styles.",
-          "A stylesheet linked only for print remains inactive on the screen after capture and export."
+          "The page as its scripts left it arrives through Import HTML with an ordered DOM snapshot at each observed width, including mixed text and media, custom elements, SVG and root classes.",
+          "Stylesheets remain in source order with their media conditions, layers and inline author declarations; the site's own resets and browser defaults remain effective.",
+          "Images, picture candidates, fonts, CSS resources and published JavaScript files are localized when available, with missing resources reported instead of silently replaced remotely.",
+          "Canvas and export render the same captured JSON tree at the observed width; unobserved widths are approximate. Captured scripts do not rerun over the snapshot.",
+          "A person can select a captured node, edit text or safe attributes, insert, move or remove content, undo it, save the project and export/re-import the snapshots.",
+          "Opaque canvas, video and frame paint uses an explicit image fallback whose inner DOM is not called editable."
         ]
       },
       "scenarios": [
@@ -3729,6 +3730,459 @@
               "regions": [
                 {
                   "region": "capture-url-dialog",
+                  "measure": "width",
+                  "relation": "greater-than",
+                  "value": 200,
+                  "reference": null
+                }
+              ],
+              "computed": []
+            },
+            "persistence": null,
+            "export": null
+          }
+        },
+        {
+          "id": "a-captured-node-is-selected-without-entering-authored-selection",
+          "setup": {
+            "fixture": "captured-mixed",
+            "selection": [],
+            "context": "global",
+            "breakpoint": "desktop",
+            "state": "base",
+            "locale": "en",
+            "viewport": "desktop-1440",
+            "zoom": 100
+          },
+          "steps": [
+            {
+              "door": "capture.select#captured-inspector-node",
+              "args": {
+                "target": "captured-before"
+              },
+              "target": null,
+              "drop": null,
+              "action": true,
+              "hold": false,
+              "type": null
+            }
+          ],
+          "doors": [
+            "capture.select#captured-inspector-node"
+          ],
+          "refusals": [],
+          "expect": {
+            "document": [],
+            "selection": [],
+            "history": {
+              "undoSteps": 0,
+              "undoRestores": true,
+              "redoRestores": true
+            },
+            "render": {
+              "computed": [],
+              "geometry": [],
+              "feedback": [
+                {
+                  "key": "status.selected",
+                  "params": {
+                    "name": "text"
+                  }
+                }
+              ]
+            },
+            "editor": {
+              "regions": [
+                {
+                  "region": "captured-inspector",
+                  "measure": "width",
+                  "relation": "greater-than",
+                  "value": 200,
+                  "reference": null
+                }
+              ],
+              "computed": []
+            },
+            "persistence": null,
+            "export": null
+          }
+        },
+        {
+          "id": "captured-text-field-keeps-a-real-json-edit",
+          "setup": {
+            "fixture": "captured-mixed",
+            "selection": [],
+            "context": "global",
+            "breakpoint": "desktop",
+            "state": "base",
+            "locale": "en",
+            "viewport": "desktop-1440",
+            "zoom": 100
+          },
+          "steps": [
+            {
+              "door": "capture.select#captured-inspector-node",
+              "args": {
+                "target": "captured-before"
+              },
+              "target": null,
+              "drop": null,
+              "action": false,
+              "hold": false,
+              "type": null
+            },
+            {
+              "door": "capture.edit#captured-value",
+              "args": {
+                "target": "captured-before",
+                "operation": "text",
+                "name": "style",
+                "value": "Changed ",
+                "parent": "captured-before",
+                "index": 0
+              },
+              "target": null,
+              "drop": null,
+              "action": true,
+              "hold": false,
+              "type": null
+            },
+            {
+              "door": "capture.edit#key-enter-in-captured-value",
+              "args": { "target": "captured-before", "operation": "text", "value": "Changed " },
+              "target": null,
+              "drop": null,
+              "action": false,
+              "hold": false,
+              "type": null
+            }
+          ],
+          "doors": [
+            "capture.edit#captured-value"
+          ],
+          "refusals": [],
+          "expect": {
+            "document": [
+              {
+                "op": "set",
+                "path": "/@pages",
+                "value": [
+                  {
+                    "id": "capture-page",
+                    "name": "Captured",
+                    "file": "index.html",
+                    "tree": {
+                      "id": "capture-settings",
+                      "type": "page",
+                      "name": "Page",
+                      "tag": "body",
+                      "attributes": {},
+                      "classes": [],
+                      "styles": {},
+                      "text": null,
+                      "children": []
+                    },
+                    "capture": {
+                      "viewports": [
+                        {
+                          "width": 1440,
+                          "root": {
+                            "kind": "element",
+                            "id": "captured-html",
+                            "namespace": "http://www.w3.org/1999/xhtml",
+                            "tag": "html",
+                            "attributes": [],
+                            "children": [
+                              {
+                                "kind": "element",
+                                "id": "captured-head",
+                                "namespace": "http://www.w3.org/1999/xhtml",
+                                "tag": "head",
+                                "attributes": [],
+                                "children": []
+                              },
+                              {
+                                "kind": "element",
+                                "id": "captured-body",
+                                "namespace": "http://www.w3.org/1999/xhtml",
+                                "tag": "body",
+                                "attributes": [],
+                                "children": [
+                                  {
+                                    "kind": "element",
+                                    "id": "captured-story",
+                                    "namespace": "http://www.w3.org/1999/xhtml",
+                                    "tag": "p",
+                                    "attributes": [
+                                      {
+                                        "name": "id",
+                                        "namespace": null,
+                                        "value": "story"
+                                      }
+                                    ],
+                                    "children": [
+                                      {
+                                        "kind": "text",
+                                        "id": "captured-before",
+                                        "value": "Changed "
+                                      },
+                                      {
+                                        "kind": "element",
+                                        "id": "captured-image",
+                                        "namespace": "http://www.w3.org/1999/xhtml",
+                                        "tag": "img",
+                                        "attributes": [
+                                          {
+                                            "name": "alt",
+                                            "namespace": null,
+                                            "value": "Artwork"
+                                          },
+                                          {
+                                            "name": "src",
+                                            "namespace": null,
+                                            "value": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='48'%3E%3Crect width='96' height='48' fill='%23cc5533'/%3E%3C/svg%3E"
+                                          }
+                                        ],
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": "text",
+                                        "id": "captured-after",
+                                        "value": " after"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "selection": [],
+            "history": {
+              "undoSteps": 1,
+              "undoRestores": true,
+              "redoRestores": true
+            },
+            "render": {
+              "computed": [],
+              "geometry": [],
+              "feedback": [
+                {
+                  "key": "status.capture.edited",
+                  "params": {}
+                }
+              ]
+            },
+            "editor": {
+              "regions": [
+                {
+                  "region": "captured-inspector",
+                  "measure": "width",
+                  "relation": "greater-than",
+                  "value": 200,
+                  "reference": null
+                }
+              ],
+              "computed": []
+            },
+            "persistence": null,
+            "export": null
+          }
+        },
+        {
+          "id": "captured-attribute-apply-keeps-a-real-json-edit",
+          "setup": {
+            "fixture": "captured-mixed",
+            "selection": [],
+            "context": "global",
+            "breakpoint": "desktop",
+            "state": "base",
+            "locale": "en",
+            "viewport": "desktop-1440",
+            "zoom": 100
+          },
+          "steps": [
+            {
+              "door": "capture.select#captured-inspector-node",
+              "args": {
+                "target": "captured-story"
+              },
+              "target": null,
+              "drop": null,
+              "action": false,
+              "hold": false,
+              "type": null
+            },
+            {
+              "door": "capture.edit#captured-value",
+              "args": {
+                "target": "captured-story",
+                "operation": "attribute",
+                "name": "style",
+                "value": "color:red",
+                "parent": "captured-story",
+                "index": 0
+              },
+              "target": null,
+              "drop": null,
+              "action": false,
+              "hold": false,
+              "type": null
+            },
+            {
+              "door": "capture.edit#captured-apply",
+              "args": {
+                "target": "captured-story",
+                "operation": "attribute",
+                "name": "style",
+                "value": "color:red",
+                "parent": "captured-story",
+                "index": 0
+              },
+              "target": null,
+              "drop": null,
+              "action": true,
+              "hold": false,
+              "type": null
+            }
+          ],
+          "doors": [
+            "capture.edit#captured-apply"
+          ],
+          "refusals": [],
+          "expect": {
+            "document": [
+              {
+                "op": "set",
+                "path": "/@pages",
+                "value": [
+                  {
+                    "id": "capture-page",
+                    "name": "Captured",
+                    "file": "index.html",
+                    "tree": {
+                      "id": "capture-settings",
+                      "type": "page",
+                      "name": "Page",
+                      "tag": "body",
+                      "attributes": {},
+                      "classes": [],
+                      "styles": {},
+                      "text": null,
+                      "children": []
+                    },
+                    "capture": {
+                      "viewports": [
+                        {
+                          "width": 1440,
+                          "root": {
+                            "kind": "element",
+                            "id": "captured-html",
+                            "namespace": "http://www.w3.org/1999/xhtml",
+                            "tag": "html",
+                            "attributes": [],
+                            "children": [
+                              {
+                                "kind": "element",
+                                "id": "captured-head",
+                                "namespace": "http://www.w3.org/1999/xhtml",
+                                "tag": "head",
+                                "attributes": [],
+                                "children": []
+                              },
+                              {
+                                "kind": "element",
+                                "id": "captured-body",
+                                "namespace": "http://www.w3.org/1999/xhtml",
+                                "tag": "body",
+                                "attributes": [],
+                                "children": [
+                                  {
+                                    "kind": "element",
+                                    "id": "captured-story",
+                                    "namespace": "http://www.w3.org/1999/xhtml",
+                                    "tag": "p",
+                                    "attributes": [
+                                      {
+                                        "name": "id",
+                                        "namespace": null,
+                                        "value": "story"
+                                      },
+                                      {
+                                        "name": "style",
+                                        "namespace": null,
+                                        "value": "color:red"
+                                      }
+                                    ],
+                                    "children": [
+                                      {
+                                        "kind": "text",
+                                        "id": "captured-before",
+                                        "value": "Before "
+                                      },
+                                      {
+                                        "kind": "element",
+                                        "id": "captured-image",
+                                        "namespace": "http://www.w3.org/1999/xhtml",
+                                        "tag": "img",
+                                        "attributes": [
+                                          {
+                                            "name": "alt",
+                                            "namespace": null,
+                                            "value": "Artwork"
+                                          },
+                                          {
+                                            "name": "src",
+                                            "namespace": null,
+                                            "value": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='48'%3E%3Crect width='96' height='48' fill='%23cc5533'/%3E%3C/svg%3E"
+                                          }
+                                        ],
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": "text",
+                                        "id": "captured-after",
+                                        "value": " after"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "selection": [],
+            "history": {
+              "undoSteps": 1,
+              "undoRestores": true,
+              "redoRestores": true
+            },
+            "render": {
+              "computed": [],
+              "geometry": [],
+              "feedback": [
+                {
+                  "key": "status.capture.edited",
+                  "params": {}
+                }
+              ]
+            },
+            "editor": {
+              "regions": [
+                {
+                  "region": "captured-inspector",
                   "measure": "width",
                   "relation": "greater-than",
                   "value": 200,

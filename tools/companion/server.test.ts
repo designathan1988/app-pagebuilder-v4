@@ -16,7 +16,7 @@ afterAll(async () => {
 
 const snapshot = {
   url: 'https://intranet.example/account',
-  read: { title: 'Account', html: '<!doctype html>\n<html><head></head><body><h1>Welcome back</h1><img src="__capture_image_0__"></body></html>', sheets: [{ href: 'https://intranet.example/site.css', text: null, scope: null }], images: [{ index: 0, src: 'https://intranet.example/me.png' }], links: [], custom: [] },
+  read: { title: 'Account', html: '<!doctype html>\n<html><head></head><body><h1>Welcome back</h1><img src="__capture_image_0__"></body></html>', sheets: [{ href: 'https://intranet.example/site.css', text: null, scope: null }], images: [{ index: 0, src: 'https://intranet.example/me.png' }], links: [] },
   resources: {
     'https://intranet.example/site.css': { status: 200, type: 'text/css', base64: Buffer.from('h1{color:green}').toString('base64') },
     'https://intranet.example/me.png': { status: 200, type: 'image/png', base64: Buffer.from('png').toString('base64') },
@@ -38,6 +38,10 @@ describe('the snapshot route', () => {
     expect(captured.title).toBe('Account');
     const page = captured.files.find((file) => file.path === 'account.html');
     expect(Buffer.from(page?.base64 ?? '', 'base64').toString('utf8')).toContain('<h1>Welcome back</h1>');
-    expect(captured.files.map((file) => file.path).sort()).toEqual(['account.html', 'css/style-1.css', 'img/img-1.png']);
+    // the page's DOM snapshot travels beside it (DEC-53), the observed width with the captured markup
+    expect(captured.files.map((file) => file.path).sort()).toEqual(['account.html', 'account.html.capture.json', 'css/style-1.css', 'img/img-1.png']);
+    const sidecar = JSON.parse(Buffer.from(captured.files.find((file) => file.path === 'account.html.capture.json')?.base64 ?? '', 'base64').toString('utf8')) as { format: number; viewports: { html: string }[] };
+    expect(sidecar.format).toBe(1);
+    expect(sidecar.viewports.some((viewport) => viewport.html.includes('Welcome back'))).toBe(true);
   });
 });

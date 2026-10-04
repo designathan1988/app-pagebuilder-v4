@@ -36,7 +36,7 @@ const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = 
 
 // a page holding a box: a label pointing at the heading beside it
 const DOC: DocumentJson = {
-  version: 2,
+  version: 3,
   pages: [
     {
       id: 'p',

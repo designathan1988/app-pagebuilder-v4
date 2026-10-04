@@ -17,7 +17,7 @@ import { storedValue } from './stored.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const doc = (actions: Partial<DocNode> = {}, locked: Partial<DocNode> = {}): DocumentJson => ({
-  version: 2,
+  version: 3,
   pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: [node('Hero', 'section', 'section', { ...locked, children: [node('Actions', 'div', 'div', actions), node('Other', 'div', 'div')] })] }) }],
 });
 // a browser that refuses a negative width or height, as Chrome does

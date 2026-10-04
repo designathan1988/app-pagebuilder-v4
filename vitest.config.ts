@@ -1,6 +1,17 @@
 import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  plugins: [
+    {
+      name: 'builder:glob-modules-uncached',
+      // The persistent module cache hashes a file's own source, so a module that reads a folder through
+      // import.meta.glob (the manifest's command files) would keep its old file list when a file is added there.
+      // Such modules are transformed on every run (Vitest's cache key generator: false disables the cache).
+      configureVitest(context) {
+        context.defineCacheKeyGenerator(({ sourceCode }) => (sourceCode.includes('import.meta.glob') ? false : undefined));
+      },
+    },
+  ],
   test: {
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'tools/**/*.test.ts'],
     // Never collect tests from the reference projects, the Pager copy or the browser tool's scratch files.

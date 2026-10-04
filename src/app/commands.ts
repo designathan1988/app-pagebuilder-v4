@@ -71,6 +71,8 @@ import { applyHtmlCommand } from '../core/import/apply-html.ts';
 import { openFolderCommand } from '../core/import/folder.ts';
 import { choosingImport } from '../editor/import/html-import.ts';
 import { importHtmlCommand } from '../core/import/import.ts';
+import { editCaptureCommand } from '../core/capture/edits.ts';
+import { selectCapturedCommand } from '../editor/capture/selection.ts';
 import { setSpacingCommand } from '../core/style/spacing.ts';
 import { exportProject } from '../core/export/export.ts';
 import { setBackgroundImageCommand } from '../core/style/background-image.ts';
@@ -212,6 +214,8 @@ export const COMMANDS = {
   'tokens.update': updateToken,
   'design.replaceColour': replaceColourCommand,
   'project.captureUrl': captureUrlCommand,
+  'capture.edit': editCaptureCommand,
+  'capture.select': selectCapturedCommand,
   'components.updateFromInstance': updateFromInstanceCommand,
   'components.setVariant': setVariantCommand,
   'design.applySuggestion': applySuggestionCommand,

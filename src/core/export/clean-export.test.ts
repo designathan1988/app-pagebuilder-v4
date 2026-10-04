@@ -12,7 +12,7 @@ const node=(id:string,name:string,tag:string,children:DocNode[]=[],styles:DocNod
 const declaration={desktop:{base:{'padding-top':'80px','padding-right':'64px','padding-bottom':'80px','padding-left':'64px'}}} as DocNode['styles'];
 const page=(id:string,file:string)=>({id,name:'Home',file,tree:node(`${id}-root`,'Page','body',[node(`${id}-hero`,'Hero','section',[node(`${id}-title`,'Título 3','h1',[],declaration)],declaration),node(`${id}-btn`,'Button','button'),node(`${id}-form`,'Form','form',[node(`${id}-submit`,'Button','button')])])});
 test('actual export owner shares semantic classes across pages and preserves language/button semantics',async()=>{
- const document={version:2,language:'pt-BR',codeLanguage:'en',pages:[page('one','index.html'),page('two','about.html')]} as DocumentJson;
+ const document={version:3,language:'pt-BR',codeLanguage:'en',pages:[page('one','index.html'),page('two','about.html')]} as DocumentJson;
  const files=siteFiles(document,rules);
  assert.ok(files.pages.every(p=>p.html.includes('<html lang="pt-BR">')));
  assert.ok(files.pages.every(p=>p.html.includes('class="hero__title"')));
@@ -34,7 +34,7 @@ test('new project metadata does not make a fresh project nonempty',()=>{
   assert.equal((document as DocumentJson&{language?:string}).language,'pt-BR');
 });
 test('captured residual stylesheet keeps its cascade and resolves assets in preview',()=>{
- const document={version:2,pages:[page('one','folder/index.html')],files:[{path:'folder/index.capture.css',type:'text/css',bytes:btoa('.hero::before { content: "test"; background-image: url("../img/a.png"); }')},{path:'img/a.png',type:'image/png',bytes:btoa('image')}]} as DocumentJson;
+ const document={version:3,pages:[page('one','folder/index.html')],files:[{path:'folder/index.capture.css',type:'text/css',bytes:btoa('.hero::before { content: "test"; background-image: url("../img/a.png"); }')},{path:'img/a.png',type:'image/png',bytes:btoa('image')}]} as DocumentJson;
  const html=siteFiles(document,rules).pages[0]?.html??'';
  assert.ok(html.indexOf('href="index.capture.css"')<html.indexOf('href="../css/styles.css"'));
  const preview=previewPage(document,rules);

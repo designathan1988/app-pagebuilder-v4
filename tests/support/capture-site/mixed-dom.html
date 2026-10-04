@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en" class="source-root">
+<head>
+  <meta charset="utf-8">
+  <title>Mixed source document</title>
+  <style>
+    @layer base, theme;
+    @layer base { :root { --ink: #224466; } }
+    @layer theme { .story { color: var(--ink); } }
+    body { margin: 0; }
+    .story { font: 24px/1.4 Georgia, serif; }
+    .story img { display: inline-block; width: 96px; height: 48px; vertical-align: middle; }
+    brand-card { display: block; padding: 12px; background: #e8d5bb; }
+  </style>
+</head>
+<body>
+  <p class="story" id="story">Before <a href="/about"><img alt="Artwork" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='48'%3E%3Crect width='96' height='48' fill='%23cc5533'/%3E%3C/svg%3E"></a> after</p>
+  <brand-card id="custom">Custom element content</brand-card>
+</body>
+</html>

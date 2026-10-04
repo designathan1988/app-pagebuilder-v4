@@ -38,7 +38,9 @@
     "journey:offline": "node tools/journey/cli.mjs",
     "fidelity": "node tools/journey/fidelity.ts",
     "extension:build": "node tools/companion/build-extension.ts",
-    "capture:corpus": "playwright test -c tools/capture/corpus.config.ts && node tools/capture/report.ts",
+    "capture:corpus": "playwright test -c tools/capture/corpus.config.ts && node tools/capture/report.ts && node tools/capture/audit-cli.ts",
+    "capture:diagnose": "node tools/capture/diagnose-cli.ts",
+    "capture:audit": "node tools/capture/audit-cli.ts",
     "parity": "playwright test -c tools/parity/parity.config.ts && node tools/parity/report.ts"
   },
   "dependencies": {

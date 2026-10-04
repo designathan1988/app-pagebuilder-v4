@@ -50,7 +50,7 @@ export function SideFrame({ entry, breakpoint }: { readonly entry: DoorEntry; re
       const target = frame.contentDocument;
       if (target === null) return;
       stop();
-      const made = new PageRenderer(target, MODEL, page, { height: breakpoint.height }, (attribute, value) => canvasValue(store.getState().document, attribute, value));
+      const made = new PageRenderer(target, MODEL, page, { height: breakpoint.height, width: breakpoint.width }, (attribute, value) => canvasValue(store.getState().document, attribute, value));
       made.mount(store.getState().document);
       renderer.current = made;
       setMounted((n) => n + 1);
@@ -63,7 +63,7 @@ export function SideFrame({ entry, breakpoint }: { readonly entry: DoorEntry; re
       stop();
       renderer.current = null;
     };
-  }, [page, breakpoint.height, store]);
+  }, [page, breakpoint.height, breakpoint.width, store]);
   // the selection, outlined in the canvas's selection colour of the editor's theme (the renderer writes it)
   useEffect(() => {
     const colour = getComputedStyle(document.documentElement).getPropertyValue('--color-canvas-selection').trim();

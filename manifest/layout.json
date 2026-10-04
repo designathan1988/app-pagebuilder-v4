@@ -101,6 +101,10 @@
       "area": "right"
     },
     {
+      "id": "captured-inspector",
+      "area": "right"
+    },
+    {
       "id": "inspector-interactions",
       "area": "right"
     },

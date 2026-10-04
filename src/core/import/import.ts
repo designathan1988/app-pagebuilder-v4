@@ -61,6 +61,7 @@ import { browserPorts } from '../ports/browser.ts';
 import { orphanReferences } from '../elements/references.ts';
 import { generate as generateCssTree, parse as parseCssTree, walk as walkCssTree, type CssNode as CssTreeNode } from 'css-tree';
 import { capturedPageStylePath } from './capture-styles.ts';
+import { captureSnapshotPath, captureTree, type CapturedNode, type CapturedSnapshotPackage } from '../document/captured.ts';
 
 // the entries this module published before the markup reading moved out stay published here: consumers need not change
 export { parseMarkup, parsePage, lineOf } from './markup.ts';
@@ -1521,6 +1522,24 @@ function pageFrom(file: PickedFile, builder: Builder): Page {
     children: [],
   };
   builder.lines.set(body.id, lineOf(builder.markup, '<body'));
+  if (builder.captured) {
+    const title = parsed.title.trim();
+    const snapshot = builder.picked.find((one) => one.name === captureSnapshotPath(file.name));
+    let viewports: { width: number; root: ReturnType<typeof captureTree> }[];
+    let resourceProblems: CapturedSnapshotPackage['resourceProblems'];
+    if (snapshot === undefined) viewports = [{ width: 1440, root: captureTree(builder.markup, ids) }];
+    else {
+      const packageData = JSON.parse(textOfFile(snapshot)) as CapturedSnapshotPackage;
+      if (packageData.format !== 1 || !Array.isArray(packageData.viewports) || packageData.viewports.length === 0) throw new Error(`Invalid captured snapshots for ${file.name}`);
+      viewports = packageData.viewports.map((one) => ({ width: one.width, root: captureTree(one.html, ids) }));
+      resourceProblems = packageData.resourceProblems;
+    }
+    return {
+      id: ids.next(), name: title !== '' ? title : baseName(file.name), file: file.name,
+      tree: body,
+      capture: { viewports, ...(resourceProblems === undefined ? {} : { resourceProblems }) },
+    };
+  }
   // the head first: the stylesheets it links and the settings it holds come before the body's own (a <style> block in
   // the body is later in the document, and later rules win)
   const settings: [string, string][] = [];
@@ -1660,7 +1679,13 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   for (const file of markup) {
     const builder = newBuilder(make, context as HandlerContext<never>, textOfFile(file), picked, file.name, 'import', report, held, nameBlocks);
     const page = pageFrom(file, builder);
-    elements += countOf(page.tree) - 1;
+    if (page.capture === undefined) elements += countOf(page.tree) - 1;
+    else {
+      const root = page.capture.viewports[0]?.root;
+      const body = root?.children.find((one) => one.kind === 'element' && one.tag === 'body');
+      const count = (node: CapturedNode): number => node.kind === 'element' ? 1 + node.children.reduce((sum, child) => sum + count(child), 0) : 0;
+      elements += body === undefined ? 0 : Math.max(0, count(body) - 1);
+    }
     pages.push(page);
     built.push({ page, builder });
     for (const sheet of builder.sheets) sources.push(sheet);
@@ -1669,7 +1694,7 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   const definitions = new Map<string, Styles>();
   const captured = markup.some((file) => isCapturedPage(textOfFile(file)));
   const deferred = captured ? capturedWidthProperties(sources, context as HandlerContext<never>, rules) : new Set<string>();
-  for (const one of built) applyStyles(one.page.tree, one.builder, sources, authors, definitions, one.builder.captured ? deferred : new Set());
+  for (const one of built) if (one.page.capture === undefined) applyStyles(one.page.tree, one.builder, sources, authors, definitions, one.builder.captured ? deferred : new Set());
   const tokens = rootTokens(context, sources, report, markup.some((file) => isCapturedPage(textOfFile(file))));
   report.tokens.push(...tokens.map((token) => token.name));
   report.unusedClasses.push(...unusedClasses(pages, authors).filter((name) => definitions.has(name)));
@@ -1705,7 +1730,7 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
     }
   }
   for (const file of picked) {
-    if (isHtmlFile(file.name) || isCssFile(file.name)) continue;
+    if (isHtmlFile(file.name) || markup.some((one) => captureSnapshotPath(one.name) === file.name) || (isCssFile(file.name) && !captured)) continue;
     if (held.some((one) => one.path === file.name)) continue;
     const referenced = [...wanted].find(([, name]) => name === file.name);
     if (referenced !== undefined && held.some((one) => one.path === referenced[0])) continue;
@@ -1713,7 +1738,7 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   }
   // a captured page keeps what the model does not hold of its sheets, in its residual stylesheet (spec capture-url)
   for (const one of built) {
-    if (!one.builder.captured) continue;
+    if (!one.builder.captured || one.page.capture !== undefined) continue;
     const at = capturedPageStylePath(one.page);
     const fromSheets = one.builder.sheets.map((sheet) => residualCss(sheet.text, sheet.file, at, context as HandlerContext<never>, rules, deferred));
     const hints = [...walkNodes(one.page.tree)].flatMap((node) => {

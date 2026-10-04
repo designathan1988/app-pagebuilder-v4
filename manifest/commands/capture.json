@@ -1,0 +1,179 @@
+{
+  "domain": "capture",
+  "commands": [
+    {
+      "id": "capture.edit",
+      "labelKey": "command.capture.edit",
+      "owner": "src/core/capture/edits.ts",
+      "introducedBy": "capture-url",
+      "args": {
+        "target": {
+          "type": "string",
+          "values": [],
+          "optional": false
+        },
+        "operation": {
+          "type": "enum",
+          "values": [
+            "text",
+            "attribute",
+            "insert",
+            "remove",
+            "move"
+          ],
+          "optional": false
+        },
+        "name": {
+          "type": "string",
+          "values": [],
+          "optional": true
+        },
+        "value": {
+          "type": "string",
+          "values": [],
+          "optional": true
+        },
+        "parent": {
+          "type": "string",
+          "values": [],
+          "optional": true
+        },
+        "index": {
+          "type": "integer",
+          "values": [],
+          "optional": true
+        }
+      },
+      "availability": {
+        "predicate": "always",
+        "refusalKey": null
+      },
+      "refusals": [
+        "status.capture.nodeMissing",
+        "status.capture.invalidEdit",
+        "status.capture.unsafeEdit"
+      ],
+      "confirmation": null,
+      "history": {
+        "undoable": true,
+        "coalesce": "none",
+        "undoRestoresSelection": "before-command",
+        "transaction": "per-dispatch",
+        "noChange": "no-entry"
+      },
+      "entryPoints": [
+        {
+          "id": "captured-value",
+          "kind": "panel-control",
+          "drawnAs": "field",
+          "pressed": false,
+          "feature": "capture-url",
+          "panel": "captured-inspector",
+          "control": "value",
+          "modifier": null,
+          "gesture": null,
+          "labelKey": "capture.editor.value",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": { "region": "captured-inspector", "order": 7 },
+          "adapter": { "selection": "none", "offers": null, "writes": [], "fields": [] },
+          "args": {}
+        },
+        {
+          "id": "captured-apply",
+          "kind": "panel-control",
+          "drawnAs": "button",
+          "pressed": false,
+          "feature": "capture-url",
+          "panel": "captured-inspector",
+          "control": "apply",
+          "modifier": null,
+          "gesture": null,
+          "labelKey": "command.capture.edit",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "captured-inspector",
+            "order": 8
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {}
+        },
+        {
+          "id": "key-enter-in-captured-value",
+          "kind": "shortcut",
+          "feature": "capture-url",
+          "chord": "Enter",
+          "context": "captured-value",
+          "gesture": null,
+          "labelKey": "command.capture.edit",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": "none",
+          "adapter": { "selection": "none", "offers": null, "writes": [], "fields": [] },
+          "args": {}
+        }
+      ]
+    },
+    {
+      "id": "capture.select",
+      "labelKey": "command.capture.select",
+      "owner": "src/editor/capture/selection.ts",
+      "introducedBy": "capture-url",
+      "args": {
+        "target": {
+          "type": "string",
+          "values": [],
+          "optional": false
+        }
+      },
+      "availability": {
+        "predicate": "always",
+        "refusalKey": null
+      },
+      "refusals": [
+        "status.capture.nodeMissing"
+      ],
+      "confirmation": null,
+      "history": {
+        "undoable": false
+      },
+      "entryPoints": [
+        {
+          "id": "captured-inspector-node",
+          "kind": "panel-control",
+          "drawnAs": "item",
+          "pressed": false,
+          "feature": "capture-url",
+          "panel": "captured-inspector",
+          "control": "node",
+          "modifier": null,
+          "gesture": null,
+          "labelKey": "command.capture.select",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "captured-inspector",
+            "order": 1
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {}
+        }
+      ]
+    }
+  ]
+}

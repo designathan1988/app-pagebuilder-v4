@@ -9,11 +9,12 @@ import type { Bound, Collection, DataItem, DataList, SharedRegion } from '../dat
 import type { Behaviour, MotionInteraction, MotionTimeline } from '../motion/model.ts';
 import type { Authoring } from './authoring.ts';
 import type { ProjectBreakpoint } from './breakpoint-rules.ts';
+import type { CapturedPage } from './captured.ts';
 
 export type { NodeId };
 
 // The version of the saved format; it is carried from the first save (autosave-restore).
-export const DOCUMENT_VERSION = 2;
+export const DOCUMENT_VERSION = 3;
 
 // One layer of a structured value (a shadow): its typed fields, by the ids of its structure (properties.json
 // structures: a length or a colour as CSS text, a flag as a boolean).
@@ -160,6 +161,9 @@ export interface Page {
   // the page's file in the project tree ("index.html", "about/index.html")
   readonly file: string;
   readonly tree: DocNode;
+  // A captured page's source DOM snapshots. Its tree is the empty page-settings root only: captured content
+  // appears here once, never as a lossy projection duplicated under tree.children.
+  readonly capture?: CapturedPage;
 }
 
 export interface DocumentJson {
@@ -257,7 +261,7 @@ export function createEmptyDocument(ids: IdGenerator, names: EmptyProjectNames, 
 // carries no attribute, class or style. Replacing it loses nothing (File › Open asks no confirmation over it).
 export function isEmptyProject(doc: DocumentJson): boolean {
   const [page, ...others] = doc.pages;
-  if (page === undefined || others.length > 0) return false;
+  if (page === undefined || others.length > 0 || page.capture !== undefined) return false;
   const root = page.tree;
   return root.children.length === 0 && Object.keys(root.attributes).length === 0 && root.classes.length === 0 && Object.keys(root.styles).length === 0;
 }

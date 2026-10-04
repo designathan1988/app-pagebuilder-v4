@@ -151,6 +151,12 @@
       "absorbsFields": false
     },
     {
+      "id": "captured-value",
+      "labelKey": "keyContext.capturedValue",
+      "inherits": "field",
+      "absorbsFields": false
+    },
+    {
       "id": "guide",
       "labelKey": "keyContext.guide",
       "inherits": null,

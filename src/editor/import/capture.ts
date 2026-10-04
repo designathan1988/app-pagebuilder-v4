@@ -58,6 +58,7 @@ interface Answer {
   readonly title?: string;
   readonly files?: readonly { readonly path: string; readonly type: string; readonly base64: string }[];
   readonly error?: string;
+  readonly errorCode?: string;
 }
 
 const fileOf = (one: { readonly path: string; readonly type: string; readonly base64: string }): File => {
@@ -82,6 +83,10 @@ export function installCapture(store: EditorStore, companion = COMPANION): () =>
     }
     if (!alive) return;
     if (answer.files === undefined || answer.files.length === 0) {
+      if (answer.errorCode === 'challenge') {
+        store.notice(message('status.capture.challenge'));
+        return;
+      }
       store.notice(message('status.capture.failed', { url: request.url, reason: answer.error ?? '' }));
       return;
     }

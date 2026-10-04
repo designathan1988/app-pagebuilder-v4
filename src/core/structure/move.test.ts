@@ -18,7 +18,7 @@ import { deepFreeze } from '../store/store.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const DOC: DocumentJson = {
-  version: 2,
+  version: 3,
   pages: [
     {
       id: 'p',
@@ -161,7 +161,7 @@ describe('element.moveUp and element.moveDown (src/core/structure/move.ts)', () 
 describe('element.moveTo into a Link Block (spec elements-structure, Problems in Pager 5)', () => {
   // a Link Block holding a container; beside it another Link Block, and a section holding a Link Block
   const LINKED: DocumentJson = {
-    version: 2,
+    version: 3,
     pages: [
       {
         id: 'p',

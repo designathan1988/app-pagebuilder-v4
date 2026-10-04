@@ -85,6 +85,8 @@ export interface EditorUi {
   readonly dialog?: 'guides-grids' | 'snap-settings' | 'breakpoints' | 'batch-rename' | 'capture-url' | 'recovery' | 'html-import' | undefined;
   // the last web address asked to be captured, counted (import/capture.ts); absent until one is
   readonly capture?: { readonly url: string; readonly count: number; readonly pages?: number } | undefined;
+  // Captured DOM selection is an editor view id. Authored-node commands keep their own selection invariant.
+  readonly capturedNode?: string | undefined;
   readonly htmlImport?: { readonly files: readonly PickedFile[] } | undefined;
   // the saved versions the recovery dialog offers, the newest first, with their times (spec
   // autosave-corruption-recovery); absent when the saved work was read

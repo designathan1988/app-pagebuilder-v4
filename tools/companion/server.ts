@@ -11,7 +11,7 @@
 // The editor's page may call it from its own origin (CORS allows any origin: the server answers this machine only).
 import { randomBytes } from 'node:crypto';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
-import { capture, captureSnapshot, closeBrowser, type Capture, type Snapshot } from './capture.ts';
+import { CaptureChallengeError, capture, captureSnapshot, closeBrowser, type Capture, type Snapshot } from './capture.ts';
 
 const json = (res: ServerResponse, status: number, body: unknown) => {
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, x-builder-token' });
@@ -79,6 +79,7 @@ export function startCompanion(port = Number(process.env.COMPANION_PORT ?? '5410
       try {
         return json(res, 200, await capture(url, { pages }));
       } catch (error) {
+        if (error instanceof CaptureChallengeError) return json(res, 403, { errorCode: 'challenge', error: error.message });
         return json(res, 502, { error: (error as Error).message.split('\n')[0] });
       }
     })();

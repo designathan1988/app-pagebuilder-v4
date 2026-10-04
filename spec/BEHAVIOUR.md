@@ -9039,119 +9039,18 @@ instance (`status.locked.edit`).
 
 ### Our rule
 
-- A browser page cannot read another site (CORS), so a capture goes through the **Builder Companion**, a local Node
-  process started beside the editor (`npm run companion`; `tools/companion/server.ts`, on 127.0.0.1 only, port
-  `COMPANION_PORT`, 5410 by default). It opens the address in the installed Chrome, waits for the network to rest,
-  scrolls to the end so lazy content loads, stops animations and transitions, and reads the page as its scripts left
-  it: the markup (scripts left out: their effect is already in it), every stylesheet in order (a linked one fetched
-  whole, from any origin, its `@import`s laid in place (parsed as CSS rules, so a semicolon inside a quoted address
-  does not cut the rule); a `<style>` as written), and the images, backgrounds and fonts
-  they name, downloaded to `img/` and `fonts/` with every reference rewritten.
-- **File › Open a web address…** (`workspace.openDialog`, dialog `capture-url`) asks for the address (a bare host is read
-  as https), reminds that a captured site belongs to its authors, and says how the Companion is started. **Capture**
-  (`project.captureUrl`) closes the dialog and sends the request; the status bar says it is capturing.
-- The captured files go through **Import HTML** as if they had been picked (`project.importHtml`): its destinations
-  dialog, then the page with its classes, its media queries as the project's breakpoints, its images and fonts.
-- The Companion opens the site separately at 1440, 1180, 834 and 390 px. It keeps the desktop DOM as the editable
-  page and compares the inline declarations its scripts wrote to the same surviving elements at each width. Only
-  properties that differ are moved from the desktop style attributes into a captured stylesheet with width-specific
-  media rules. Stable body paths tie an element's observations together; a changed or missing element is not guessed.
-  The original site's scripts do not run in the exported page, but their measured layout values do at those widths.
-- For an image inside `<picture>`, the Companion also records the image the browser selected at each reference width.
-  It replaces source candidates that still point to the original site with local assets and width conditions, so the
-  canvas and export use the captured artwork when the original page's scripts and network are absent.
-- A standalone `<img>` keeps its `srcset` candidates and `sizes` expression as HTML defines them. The Companion
-  localizes every available candidate without changing its width or density descriptor; the canvas resolves each
-  candidate to its project file, and export writes each path relative to the page. A malformed candidate does not
-  prevent the other images or the page from being captured. This rule also applies when a person edits the image's
-  Source set or Source sizes field; it is not limited to a particular site or screenshot width.
-- The Companion marks the captured page (`<meta name="builder-capture">`), and the import keeps, beside the classes and
-  values it maps, what the model does not hold of its sheets: a rule whose selector it does not read (a descendant with
-  a state, `:has()`, an attribute), an at-rule other than a media query a breakpoint takes (`@font-face`, `@keyframes`,
-  `@layer`, `@supports`, a colour-scheme query), and a declaration the editor does not store (a custom property, a vendor
-  prefix), in the page's residual stylesheet (`<page>.capture.css`). The canvas draws it and the export links it before
-  the project's own stylesheet, so the page looks as it did and what the person edits in the inspector wins over it. A
-  page that is no capture keeps none.
-- The `<html>` element's source classes belong to `pageHtmlClasses` on the page root and render back on `<html>`, not
-  on `<body>`. This keeps root selectors and inherited CSS variables effective in both the canvas and export.
-- A linked or embedded stylesheet's `media` condition remains attached to its rules when the Companion localizes it;
-  the same address under different media conditions gets separate local sheets. A print-only sheet therefore stays
-  inactive on screen, including through the import and export, instead of adding print-only link text or hiding page
-  sections in the editing canvas.
-- The residual sheet declares `__builder_base` before the site's own layers for captured presentation hints. Builder
-  neutral base rules are scoped away from captured pages; the site's own universal resets stay in the residual sheet.
-  Author CSS therefore keeps its original priority and browser defaults apply where the site declares nothing.
-- When a captured sheet uses a width condition the project's breakpoints cannot represent (such as `min-width`, a
-  non-pixel threshold or a width range), the properties used by that condition remain in the captured stylesheet at
-  every width. The importer does not write competing base values for those properties into the project's later sheet;
-  the original responsive cascade remains effective. A class with CSS escapes, such as `md\:block`, matches the
-  unescaped name in the captured element's `data-capture-class` attribute.
-- A width condition nested inside a stylesheet's own media condition is read with both conditions. It remains in the
-  captured stylesheet, and its properties are not copied into later base styles that would override the condition.
-- A link or a label that names no element of the captured page (one a script removed) is released, and the report
-  says so (`status.import.released`), so the import is always a valid document.
-- Shadow DOM is flattened: a host's open shadow root stands in its place, a slot holds the nodes assigned to it, and
-  what the page does not draw there (a closed dropdown) comes hidden. A custom element (a tag with a dash) becomes a
-  `div` wearing the class `ce-<tag>`; the page's rules for the tag and a shadow root's own rules are rewritten to that
-  class, a shadow root's rules kept within their host (`:host` is the host, another selector a descendant of it).
-- The import keeps the content of an element it does not know (it was dropped), takes the HTML `hidden` attribute as
-  the element hidden (spec hide-element), ranks a rule by ids, then classes, then types (a class outweighs any number of
-  types), and matches a descendant rule on every class the markup gave an element.
-- **Pages of the site** (1 by default, at most 30): with more than one, the Companion follows the links of the page to
-  other pages of the same site, breadth first, until it holds that many; each page lands at a path like its address
-  (`/` index.html, `/plans/` plans/index.html), a stylesheet or an asset shared by several is downloaded once, and a
-  link between two captured pages names the other page of the project. A count out of range is refused
-  (`status.capture.badPages`).
-- The capture's details that keep a page as it was drawn: an `<svg>`'s width and height become its size (presentation
-  attributes, below every rule of the sheets), its viewBox supplies the intrinsic aspect ratio, and a viewBox other
-  than its size keeps the drawing's coordinates; text inside its markup is escaped before it is parsed so visible
-  angle brackets do not discard the drawing. An image's HTML width and height become low-priority size hints and its
-  intrinsic ratio; a stylesheet can override either dimension. Rules aimed at the shapes and text inside an SVG stay
-  in the residual stylesheet because those parts are markup of one editable SVG node, not separate model nodes. A
-  piece of a text the page does not draw (a hidden short label) is no part of the text; the theme a page sets on its
-  `<html>` (its classes and `data-` attributes) reaches its body; a page's Content Security Policy does not stop the
-  capture. An anchor with an image, SVG or video becomes a Link Block, retaining its editable visual child. Ordinary
-  HTML whitespace in text runs collapses to spaces, while an actual `<br>` remains a line break and preformatted text
-  keeps its whitespace. An empty `<span style="display:block">` between two pieces of text creates a visible line
-  break in the browser and becomes a text line break on import.
-- A standalone `<time>` among a container's element children keeps its text, author classes and `datetime` attribute
-  as an editable Paragraph using a `span` tag, so its layout class still applies without an invented paragraph margin.
-  An inline `<time>` within surrounding text stays in that text run. This representation preserves the visual date
-  and its machine-readable value as an attribute, while exact `<time>` semantics require a model tag extension.
-- A captured element's inline custom properties remain effective when the site's stylesheet declares the same name
-  through a more specific normal selector. The export keeps those values in the residual CSS under an element-specific
-  selector with ID-level specificity; asset URLs inside them follow the residual file's path. This preserves the
-  inline value without putting a `style` attribute in the clean export.
-- A custom property written by the site's script on `<html>` remains in the captured sheet instead of becoming an
-  earlier `:root` default in the project's generated variables. Its residual `html:root` rule outranks the site's
-  `:root` default so a captured banner height or similar root layout value remains visible in canvas and export.
-- A plain, attribute-free `<span>` containing only visual media or a visual link releases its wrapper and keeps each
-  child, including the link and its image, editable. Image width and height attributes remain lower-priority hints:
-  when a captured responsive stylesheet controls
-  either dimension, the hint does not become a later generated rule that overrides it.
-- A visual-only `<span>` with classes or other attributes remains a children-bearing editable wrapper. Because the
-  model's `span` is text-only, the wrapper uses the Div element's tag while retaining its author classes and attributes;
-  its images and responsive class rules remain visible in the canvas and export.
-- On a captured page, an SVG or image's HTML size hints live in the residual sheet's first `__builder_base` layer,
-  keyed to that element. They remain in force at widths where the site's CSS sets no dimension; an author rule for
-  that element, including one inside a width query, outranks the hints. The exported project CSS does not write those
-  hints again after the site's stylesheet. A page that is not a capture still stores its size hints in the model.
-- A runtime style on the page's `<html>` is kept as a last sheet when the capture reads it, since the project model has
-  no root style attribute. A declaration of an author class still competes in the imported cascade (including its
-  `!important` priority); if it wins, a lower-priority rule is not copied onto the element as its own style.
-- **A page behind a login** (STG-12.4): the **Builder Capture** browser extension (`companion/extension`, built with
-  `npm run extension:build`, loaded unpacked) reads the page of the person's own tab, logged in, with the same reading
-  the Companion runs, and every file the copy needs with the person's credentials, and hands them to the Companion with
-  the Companion's token (printed when it starts; the extension's options hold it). For ten minutes, **File › Open a web
-  address…** with the tab's address is answered from that capture. A page without the token is refused.
-- Not captured: pages beyond the count asked (their links stay absolute), what a script draws live (canvas, WebGL), the
-  content of a frame from another origin.
-- **The corpus** (`npm run capture:corpus`, the report `docs/CAPTURE-CORPUS.md`): twenty public sites recorded once
-  into HAR files and replayed, captured, imported, exported and compared with the original at every breakpoint. A
-  request recorded without a response is aborted during both original and capture replay; a pending stylesheet must
-  not hold the page's `DOMContentLoaded` event open indefinitely. The
-  plan's target, 98 % of pixels alike at every breakpoint, is not met (open: AUD-15, STG-12.6).
-
+- **File › Open a web address…** uses the Builder Companion on 127.0.0.1 (port `COMPANION_PORT`, 5410 by default). It opens the address in installed Chrome, lets lazy content and fonts settle, and observes what the browser drew. The extension may supply the same observation from the person's logged-in tab; credentials remain in that tab and are never typed into the Builder.
+- A fresh navigation at each observed width (1440, 1180, 834 and 390 px for the Companion) contributes a complete ordered DOM snapshot, rather than trying to derive phone markup from a desktop tree. The local capture package contains one HTML snapshot per width and the exact available bytes of stylesheets, images, fonts and other resources. A single extension snapshot records its actual tab width. Unobserved widths use the nearest snapshot and are explicitly approximate.
+- Published external and inline JavaScript files are imported as project assets with their bytes and a stable local path. They are not rerun over the already observed DOM on the editing canvas or static export; this avoids applying site initialization twice. Resource requests that cannot be localized are recorded in the capture package, the project and the inspector. A remote substitute never silently counts as a complete local capture.
+- If the requested navigation returns `cf-mitigated: challenge`, the Companion refuses it as a verification page instead of importing that page as the website. The status tells the person to complete verification in their own Chrome tab and then use Builder Capture there. This uses Cloudflare's [documented response header](https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/), not a site-name rule or an attempt to bypass access control.
+- `project.importHtml` recognizes the capture marker and its snapshot package. It stores HTML, SVG and MathML element, text and comment nodes, namespace, ordered attributes and children under `Page.capture`. The page's authored `Page.tree` is an empty settings root; it does not contain a second lossy projection. Mixed text and visual descendants, custom tags, `<picture>`, inline declarations, root attributes and exact HTML semantics remain in the captured tree. Existing authored projects migrate from document format 2 to 3 without changing their trees or output.
+- The Companion localizes a linked or inline stylesheet at its original document position. Its `@import` content, `@media`, `@supports`, `@layer`, `!important`, selectors, custom properties and inline author declarations keep their browser cascade order. The canvas resolves localized file addresses from the project bytes; export writes the same source sheets beside the HTML. Authored pages retain their separate BEM stylesheet and no-inline-style export. Captured external pages retain source `style` attributes because moving them into generated selectors would change CSS priority ([CSS Cascade Level 5](https://www.w3.org/TR/css-cascade-5/)).
+- Canvas and ZIP export read `Page.capture`, not the authored element vocabulary. The canvas uses the observed snapshot at its selected width, keeps captured scripts inert, and leaves cross-origin frames/plugins inert. The exported page chooses the nearest saved width before rendering its content, without inserting a wrapper into the captured DOM. The generated width and link bootstrap is Builder-owned, not a captured site script. Links to other captured pages become local; an uncaptured same-origin root path keeps its source spelling and delegates a click to the source host.
+- The captured inspector lists visible DOM nodes, lets a person search the rest, and shows formatted HTML and source CSS without changing stored bytes. `capture.select` keeps only the captured node id in editor UI, so authored-node commands are not offered an arbitrary captured element. `capture.edit` changes text, safe attributes (including style), insertion, removal or movement through one validated document patch; undo/redo and project save use the existing store. Unsafe executable attributes, script elements and unsafe URLs are refused before rendering or reopening a saved project. A displayed code format is a view, never a guessed correction to the site's layout.
+- A captured ZIP includes the width-snapshot package so re-import can recover the same captured tree. Required: the exported page and its snapshots complete only what the source lacks and a valid HTML page needs, without changing what it draws: `<!DOCTYPE html>`, the page's language on `<html>` (the page's language setting, else the project's, else `en`, as an authored page), a `<title>` (the page's title setting, else its name) and the capture mark, so an import of the export always recognizes the page; a page observed at several widths gives its bootstrap the first width's language and title. Custom elements keep their own tags, and a shadow root's rules are scoped to the host's tag. Project saves keep the tree and edits in versioned JSON. Source elements selected in the inspector remain independent across widths unless a later explicit cross-width identity is proved; an edit cannot be silently applied to a different node at another width.
+- A crawl captures one page by default and at most 30, following same-origin links breadth first. A shared resource is downloaded once. Pages beyond the requested count remain external; failed or inaccessible resources are reported. Open shadow content can be flattened with scoped CSS; cross-origin frames, closed shadow roots, canvas/WebGL and protected video may require a labelled same-moment visual fallback and are not represented as editable inner DOM. A screenshot fallback can be edited as an image/box only, never claimed as arbitrary DOM editing.
+- The corpus (`npm run capture:corpus`) uses twenty public sites at 1440, 1180, 834 and 390 px. The original PNG, serialized DOM, runtime values and layout boxes come from the same paused live page after a fresh navigation. SHA-256 binds them to the HAR used for resource bytes, while replay is a separate diagnostic. Two independent live contexts follow the same viewport/cache/cookie history under fixed time and seeded randomness. A live/live match below 99 % invalidates that site's fidelity result; the current user target is 100 % at every width; the pixel comparator remains unchanged. `capture:diagnose` marks changed pixels, the first divergent vertical band and source/export layout boxes without altering the score. The 20-site target remains open until all widths are verified.
+- `capture:audit` reads the saved live observation, localized package, imported JSON and observed export DOM at every width. It lists missing/moved/changed nodes and text, resource files, horizontal overflow, element geometry and computed-style samples with paths and match confidence. Its JSON and Markdown reports are generated automatically after a complete corpus run; it never edits the pixel comparator, reference photographs or fidelity score.
 ### Refusals
 
 A text that is no http or https address (`status.capture.invalidUrl`), refused before any request. A Companion that does

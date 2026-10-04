@@ -53,6 +53,8 @@ import { Affects, TargetChips, classBarControl } from './class-bar.tsx';
 import { Popover, usePopover } from './popover.tsx';
 import { installRowFit } from './row-fit.ts';
 import { breakpointName } from '../../core/document/breakpoints.ts';
+import { openedPage } from '../../core/project/pages.ts';
+import { CapturedInspector } from './captured-inspector.tsx';
 
 const SECTIONS = manifest.properties.sections;
 
@@ -741,11 +743,16 @@ const TAB_BODIES: Readonly<Record<string, ComponentType>> = { style: StyleTab, s
 export function Inspector() {
   const t = useT();
   const open = useEditorState((s) => isPanelOpen(s.ui, 'inspector'));
+  const captured = useEditorState((s) => s.document.pages[openedPage(s)]?.capture !== undefined);
   const tab = useEditorState((s) => inspectorTab(s.ui));
   // a row whose label or value does not fit beside the other stacks (row-fit.ts)
   const aside = useRef<HTMLElement>(null);
   useEffect(() => (open && aside.current !== null ? installRowFit(aside.current) : undefined), [open]);
   if (!open) return null;
+  if (captured) return <aside ref={aside} className="inspector" aria-label={t(panelName('inspector'))} data-panel-focus="inspector">
+    <Splitter splitter="inspector-width" className="splitter--column-start" />
+    <CapturedInspector />
+  </aside>;
   const Body = TAB_BODIES[tab];
   return (
     <aside ref={aside} className="inspector" aria-label={t(panelName('inspector'))} data-panel-focus="inspector">

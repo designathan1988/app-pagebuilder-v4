@@ -77,11 +77,13 @@ describe('the i18n runtime', () => {
     expect(translate('pt-BR', 'dialog.deleteCollection.message', { name: 'Menu', count: 1 })).toBe('Excluir a coleção Menu? Páginas e listas ligadas a ela: 1. O conteúdo delas fica como está.');
     expect(translate('en', 'command.exportPage')).toBe('Export ZIP');
     expect(translate('pt-BR', 'command.exportPage')).toBe('Exportar ZIP');
-    expect(translate('en', 'status.selection.skipped', { count: 1, skipped: 1 })).toBe('Selected: 1. Excluded because locked or hidden: 1.');
-    expect(translate('pt-BR', 'status.selection.skipped', { count: 1, skipped: 1 })).toBe('Selecionados: 1. Fora da seleção por bloqueio ou ocultação: 1.');
+    expect(translate('en', 'status.selection.skipped', { count: 1, skipped: 1 })).toBe('1 element selected, 1 locked or hidden left out.');
+    expect(translate('en', 'status.selection.skipped', { count: 2, skipped: 1 })).toBe('2 elements selected, 1 locked or hidden left out.');
+    expect(translate('pt-BR', 'status.selection.skipped', { count: 1, skipped: 1 })).toBe('1 elemento selecionado; bloqueados ou ocultos fora da seleção: 1.');
+    expect(translate('pt-BR', 'status.selection.skipped', { count: 2, skipped: 1 })).toBe('2 elementos selecionados; bloqueados ou ocultos fora da seleção: 1.');
     expect(translate('en', 'status.interactions.added', { element: 'Card', count: 1 })).toBe('Interaction added to Card. Total: 1.');
     expect(translate('pt-BR', 'status.interactions.added', { element: 'Card', count: 1 })).toBe('Interação adicionada em Card. Total: 1.');
-    expect(translate('en', 'inspector.valuesSet', { count: 1 })).toBe('Values set: 1');
+    expect(translate('en', 'inspector.valuesSet', { count: 1 })).toBe('1 set');
     expect(translate('pt-BR', 'inspector.valuesSet', { count: 1 })).toBe('Valores definidos: 1');
   });
 

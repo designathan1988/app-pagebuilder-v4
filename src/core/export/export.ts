@@ -23,7 +23,7 @@
 // Exporting changes nothing in the document and records nothing; the status bar names the file.
 import { message, registerHandler } from '../commands/registry.ts';
 import { slug } from '../text/fold.ts';
-import { namingFor, roleWord, variantModifier, type Declarations, type Look, type Naming } from './names.ts';
+import { namingFor, pageLanguage, roleWord, variantModifier, type Declarations, type Look, type Naming } from './names.ts';
 import { mergeCssLines } from '../render/clean.ts';
 import { CLASSES_HEADING, ELEMENTS_HEADING } from './sheet-headings.ts';
 import { formNodes } from './authoring.ts';
@@ -48,6 +48,8 @@ import type { SiteScripts } from '../ports/site-scripts.ts';
 import { addressedMotionNodes, treeUsesMotion } from '../motion/document.ts';
 import { motionConfig, siteUsesLottie } from '../motion/export.ts';
 import { rulesForDocument } from '../document/breakpoint-rules.ts';
+import { capturedHtml, capturedResponsiveHtml, exportedCapturedRoot, type CapturedHead } from '../render/captured.ts';
+import { captureSnapshotPath, type CapturedSnapshotPackage } from '../document/captured.ts';
 import { FORMS_SCRIPT, INTERACTIONS_SCRIPT, LOTTIE_SCRIPT, MOTION_SCRIPT, STYLESHEET } from './paths.ts';
 
 export const SITE_ARCHIVE = 'site.zip';
@@ -243,11 +245,25 @@ function runsOn(node: DocNode, inner: readonly DocNode[], rules: ModelRules): bo
   return !(base !== undefined && LAYOUTS.has(base) && displays.every((d) => LAYOUTS.has(d as string)));
 }
 
+// the head an exported captured page completes where its source lacks it: the page's title setting or name, and its
+// language as an authored page's export writes it
+function capturedHeadOf(document: DocumentJson, page: DocumentJson['pages'][number]): CapturedHead {
+  const stored = page.tree.attributes[TITLE_SETTING as keyof DocNode['attributes']];
+  return {
+    title: typeof stored === 'string' && stored !== '' ? stored : page.name,
+    lang: pageLanguage(page.tree.attributes['pageLanguage' as keyof DocNode['attributes']], document.language),
+  };
+}
+
 export function pageLines(document: DocumentJson, pageIndex: number, manifestRules: ModelRules, shared: SharedClasses = newShared(document, manifestRules), relative = true): PageCode {
   // the project's breakpoints: its media queries (core/document/breakpoints.ts)
   const rules = rulesForDocument(manifestRules, document);
   const page = document.pages[pageIndex];
   if (page === undefined) throw new Error(`export: the document has no page ${pageIndex}`);
+  if (page.capture !== undefined) {
+    const source = capturedResponsiveHtml(page.capture, capturedHeadOf(document, page));
+    return { html: source.split('\n').map((text) => ({ text, node: null })), css: [], classes: new Map() };
+  }
   // the elements an interaction addresses, and every element that holds an animation: both take a class, so the script
   // (and the animation's own rule) can name them
   // the elements an interaction or a motion addresses take a class of their own (spec export-events-js,
@@ -519,13 +535,22 @@ export const exportProject = registerHandler('project.export', ({ state, rules, 
   // every file of the project at its path (spec export-assets): an image an element uses is in the archive, so the
   // exported page shows it
   const assets = filesOf(state.document).map((file) => ({ path: file.path, bytes: fileBytes(file) }));
+  const capturedSnapshots = state.document.pages.flatMap((page) => {
+    if (page.capture === undefined) return [];
+    const packageData: CapturedSnapshotPackage = {
+      format: 1,
+      viewports: page.capture.viewports.map((one) => ({ width: one.width, html: capturedHtml(exportedCapturedRoot(one.root, capturedHeadOf(state.document, page))) })),
+      ...(page.capture.resourceProblems === undefined ? {} : { resourceProblems: page.capture.resourceProblems }),
+    };
+    return [{ path: captureSnapshotPath(page.file), bytes: encoder.encode(JSON.stringify(packageData)) }];
+  });
   // the interactions' script, at the path the pages link it by, while the project holds interactions (spec
   // export-events-js)
   const script = site.interactions === null ? [] : [{ path: INTERACTIONS_SCRIPT, bytes: encoder.encode(site.interactions) }];
   if (site.forms !== null) script.push({ path: FORMS_SCRIPT, bytes: encoder.encode(site.forms) });
   if (site.motion !== null) script.push({ path: MOTION_SCRIPT, bytes: encoder.encode(site.motion) });
   if (site.lottie !== null) script.push({ path: LOTTIE_SCRIPT, bytes: encoder.encode(site.lottie) });
-  const entries = [...site.pages.map(({ file, html }) => ({ path: file, bytes: encoder.encode(html) })), { path: STYLESHEET, bytes: encoder.encode(site.css) }, ...script, ...assets];
+  const entries = [...site.pages.map(({ file, html }) => ({ path: file, bytes: encoder.encode(html) })), { path: STYLESHEET, bytes: encoder.encode(site.css) }, ...capturedSnapshots, ...script, ...assets];
   const bytes = zip(entries, FIXED_TIME);
   return { kind: 'change' as const, message: message('status.export.done', { file: SITE_ARCHIVE }), download: { name: SITE_ARCHIVE, type: 'application/zip', bytes } };
 });

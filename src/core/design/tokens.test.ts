@@ -33,7 +33,7 @@ function project(withElements: boolean): DocumentJson {
   const card = (id: string): DocNode => node(id, 'article', 'article', { classes: ['card'], styles: { desktop: { base: { 'box-shadow': shadow('var(--brand)') } } }, animations: [{ name: `pulse-${id}`, settings: { duration: '2s', delay: '0s', iterations: '1', direction: 'normal', fill: 'none', timing: 'ease', 'play-state': 'running' } as unknown as { readonly [k: string]: string }, keyframes: [{ offset: 0, easing: 'ease', declarations: { 'background-color': 'var(--brand)' } }, { offset: 100, easing: 'ease', declarations: { 'background-color': '#ffffff' } }] }] });
   const styles = { desktop: { base: { 'background-color': 'var(--brand)' } } };
   return {
-    version: 2,
+    version: 3,
     pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: withElements ? [card('Card'), card('CardB')] : [] }) }],
     tokens: [{ name: 'brand', kind: 'color', value: '#ff0000' }],
     classes: [{ name: 'card', styles }],

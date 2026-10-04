@@ -53,7 +53,8 @@ async function readResources(read: PageRead, base: string): Promise<Record<strin
       if (text !== null) await sheetNames(text, sheet.href);
     } else if (sheet.text !== null) await sheetNames(sheet.text, base);
   }
-  for (const image of read.images) await fetchOne(image.src);
+  for (const image of read.images) if (!image.src.startsWith('data:')) await fetchOne(image.src);
+  for (const script of read.scripts ?? []) if (script.src !== null) await fetchOne(script.src);
   for (const match of read.html.matchAll(/url\(\s*(?:&quot;|['"])?([^'")&]+)(?:&quot;|['"])?\s*\)/g)) {
     const raw = match[1] ?? '';
     if (!raw.startsWith('data:') && !raw.startsWith('__capture')) await fetchOne(new URL(raw, base).href);

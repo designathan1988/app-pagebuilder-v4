@@ -4376,7 +4376,7 @@
             {
               "door": "project.open#menu-file",
               "args": {
-                "file": "json:{\"version\":2,\"pages\":[]}"
+                "file": "json:{\"version\":4,\"pages\":[]}"
               },
               "target": null,
               "drop": null,
@@ -4405,7 +4405,7 @@
                 {
                   "key": "status.open.newerVersion",
                   "params": {
-                    "version": 2
+                    "version": 4
                   }
                 }
               ]

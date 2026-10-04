@@ -22,6 +22,7 @@ import { authoringProblems } from './authoring.ts';
 import { settingOf } from '../page/grid-settings.ts';
 import { canonical, hasMarks, parseInline, plainText } from '../text/inline.ts';
 import { DOCUMENT_VERSION, walk, type DocNode, type DocumentJson, type Selection } from './model.ts';
+import { capturedProblems, type CapturedNode } from './captured.ts';
 import { breakpointProblems, rulesForDocument, type ProjectBreakpoint } from './breakpoint-rules.ts';
 
 export interface ElementRules {
@@ -401,10 +402,21 @@ export function validateDocument(doc: DocumentJson, selection: Selection, manife
     if (page.tree.type !== rules.root.type) bad(`${at}/tree/type`, `a page's root is a ${rules.root.type} element`);
     validateNode(page.tree, `${at}/tree`, rules, claim, bad, true);
     validateInstances(page.tree, `${at}/tree`, componentNames, false, bad);
+    if (page.capture !== undefined) {
+      if (page.tree.children.length > 0) bad(`${at}/tree/children`, 'captured content is stored only in capture snapshots');
+      for (const problem of capturedProblems(page.capture)) bad(`${at}/capture${problem.path}`, problem.message);
+    }
   });
 
   const nodeIds = new Set<string>();
-  for (const page of doc.pages ?? []) if (isRecord(page.tree)) for (const node of walk(page.tree)) nodeIds.add(node.id);
+  for (const page of doc.pages ?? []) {
+    if (isRecord(page.tree)) for (const node of walk(page.tree)) nodeIds.add(node.id);
+    const visit = (node: CapturedNode): void => {
+      nodeIds.add(node.id);
+      if (node.kind === 'element') node.children.forEach(visit);
+    };
+    for (const viewport of page.capture?.viewports ?? []) visit(viewport.root);
+  }
   const seen = new Set<string>();
   selection.forEach((id, i) => {
     if (!nodeIds.has(id)) bad(`/selection/${i}`, `the selection names "${id}", which is no node of the document`);

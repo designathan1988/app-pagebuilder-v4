@@ -20,7 +20,7 @@ const read=(name:string)=>JSON.parse(readFileSync(new URL(`../../../manifest/${n
 const commands:Command[]=readdirSync(new URL('../../../manifest/commands/',import.meta.url)).filter(name=>name.endsWith('.json')).flatMap(name=>commandsFileSchema.parse(read(`commands/${name.slice(0,-5)}`)).commands);
 const rules=rulesFromManifest(elementsFileSchema.parse(read('elements')),propertiesFileSchema.parse(read('properties')),generatedHtmlSchema.parse(read('generated/html-elements')));
 const node='button-node' as NodeId;
-const initial:DocumentJson={version:2,pages:[{id:'page',name:'Home',file:'index.html',tree:{id:'root' as NodeId,type:'page',name:'Page',tag:'body',attributes:{},styles:{},classes:[],text:null,children:[{id:node,type:'button',name:'Action',tag:'button',attributes:{},styles:{},classes:[],text:'Action',children:[]}]}}]};
+const initial:DocumentJson={version:3,pages:[{id:'page',name:'Home',file:'index.html',tree:{id:'root' as NodeId,type:'page',name:'Page',tag:'body',attributes:{},styles:{},classes:[],text:null,children:[{id:node,type:'button',name:'Action',tag:'button',attributes:{},styles:{},classes:[],text:'Action',children:[]}]}}]};
 const busy=message('common.notAvailableYet');
 interface Group {dispatch<Id extends CommandId>(id:Id,args:CommandArgs[Id]):ReturnType<Store<never>['dispatch']>;active():boolean;commit():void;cancel():void}
 interface GroupStore extends Store<never>{commandGroup(refusal:Message):Group;commandGroupOpen():boolean}

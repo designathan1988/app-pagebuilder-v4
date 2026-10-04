@@ -11,17 +11,15 @@ describe('a captured page’s path', () => {
   });
 });
 
-describe('the rules of custom elements and shadow roots', () => {
-  const custom = new Set(['x-badge', 'mdn-dropdown']);
-  it('writes a custom element’s tag as the class its div wears', () => {
-    expect(scopeCss('mdn-dropdown > a, x-badge.big { color: red }', null, custom)).toBe('.ce-mdn-dropdown>a,.ce-x-badge.big{color:red}');
-  });
+// Custom elements keep their own tags in the captured DOM (DEC-53), so a shadow root's rules are scoped to the host's
+// tag and the page's own sheets are left as they are.
+describe('the rules of shadow roots', () => {
   it('keeps a shadow root’s rules within their host', () => {
-    expect(scopeCss(':host { display: block } p { color: red } :host(.big) ::slotted(span) { margin: 0 }', 'x-badge', custom)).toBe('.ce-x-badge{display:block}.ce-x-badge p{color:red}.ce-x-badge.big span{margin:0}');
+    expect(scopeCss(':host { display: block } p { color: red } :host(.big) ::slotted(span) { margin: 0 }', 'x-badge')).toBe('x-badge{display:block}x-badge p{color:red}x-badge.big span{margin:0}');
   });
-  it('leaves keyframes and a page with no custom element as they are', () => {
-    expect(scopeCss('@keyframes spin { from { opacity: 0 } }', 'x-badge', custom)).toContain('from{opacity:0}');
-    expect(scopeCss('p { color: red }', null, new Set())).toBe('p { color: red }');
+  it('leaves keyframes and a sheet outside a shadow root as they are', () => {
+    expect(scopeCss('@keyframes spin { from { opacity: 0 } }', 'x-badge')).toContain('from{opacity:0}');
+    expect(scopeCss('mdn-dropdown > a { color: red }', null)).toBe('mdn-dropdown > a { color: red }');
   });
 });
 
@@ -30,7 +28,7 @@ it('keeps a whole CSS import when its quoted URL contains a semicolon', async ()
   const font = '@font-face{font-family:Inter;src:local("Inter")}';
   const result = await captureSnapshot({
     url: 'https://site.test/',
-    read: { title: 'Site', html: '<!doctype html><html><head></head><body><h1>Site</h1></body></html>', sheets: [{ href: 'https://site.test/style.css', text: null, scope: null }], images: [], links: [], custom: [] },
+    read: { title: 'Site', html: '<!doctype html><html><head></head><body><h1>Site</h1></body></html>', sheets: [{ href: 'https://site.test/style.css', text: null, scope: null }], images: [], links: [] },
     resources: {
       'https://site.test/style.css': { status: 200, type: 'text/css', base64: Buffer.from(sheet).toString('base64') },
       'https://fonts.test/inter.css?family=Inter:wght@100;900': { status: 200, type: 'text/css', base64: Buffer.from(font).toString('base64') },

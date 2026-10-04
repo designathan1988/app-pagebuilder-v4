@@ -70,6 +70,8 @@ export interface CommandArgs {
   "breakpoints.rename": { readonly breakpoint: string; readonly name: string };
   "breakpoints.setWidth": { readonly breakpoint: string; readonly width: number };
   "breakpoints.remove": { readonly breakpoint: string; readonly styles: "discard" | "wider" | "narrower" };
+  "capture.edit": { readonly target: string; readonly operation: "text" | "attribute" | "insert" | "remove" | "move"; readonly name?: string; readonly value?: string; readonly parent?: string; readonly index?: number };
+  "capture.select": { readonly target: string };
   "checks.applyFix": { readonly target: NodeId; readonly rule: "checks.formSubmit" | "checks.headingLevel" | "checks.imageAlt" | "checks.imageSource" | "checks.iframeTitle" | "checks.linkHref" };
   "clipboard.copy": Record<string, never>;
   "clipboard.paste": { readonly clipboard: ClipboardContent };
@@ -585,7 +587,7 @@ export const FEATURE_COMMANDS: Readonly<Record<FeatureId, readonly CommandId[]>>
   "html-import-states": ["view.enterPreview","project.importHtml"],
   "html-import-roundtrip": ["project.importHtml","project.export"],
   "clipboard-paste-external": ["clipboard.paste"],
-  "capture-url": ["project.captureUrl","workspace.openDialog"],
+  "capture-url": ["project.captureUrl","capture.edit","capture.select","workspace.openDialog"],
   "code-panel-view": ["workspace.setPanelOpen","view.setEditorView","codePanel.setPane"],
   "code-panel-selection-sync": ["selection.select"],
   "code-panel-copy-download": ["codePanel.copyPane","codePanel.downloadPane"],

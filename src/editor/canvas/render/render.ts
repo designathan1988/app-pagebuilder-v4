@@ -58,6 +58,7 @@ import { fontFaceCss } from '../../../core/files/fonts.ts';
 import { animationsOf, keyframesCss, previewDeclarations } from '../../../core/animation/animation.ts';
 import { outputForTable } from '../../../core/document/breakpoint-rules.ts';
 import { captureAssetPath, capturedPageCss, capturedPageStylePath } from '../../../core/import/capture-styles.ts';
+import { mountCaptured } from './captured.ts';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 export const NODE_ATTRIBUTE = 'data-node';
@@ -241,7 +242,7 @@ export class PageRenderer {
     private readonly page = 0,
     // the breakpoint's screen the canvas resolves vh, svh, dvh and lvh against (item 2.3); null in the export's own
     // writing, which keeps the units the person typed
-    private readonly screen: { readonly height: number } | null = null,
+    private readonly screen: { readonly height: number; readonly width?: number } | null = null,
     // how a stored attribute value is written (core/files/values.ts): the canvas hands a source that names a project
     // file over as its object URL and a reference as the target's id attribute; null writes nothing
     private readonly address: (name: string, value: string) => string | null = (_name, value) => value,
@@ -526,6 +527,13 @@ export class PageRenderer {
   mount(doc: DocumentJson): void {
     this.doc = doc;
     this.model = outputForTable(this.manifestModel, doc.breakpoints);
+    const capturedPage = doc.pages[this.page];
+    if (capturedPage?.capture !== undefined) {
+      this.sheets.clear();
+      this.elements.clear();
+      for (const [id, element] of mountCaptured(this.target, doc, capturedPage, this.screen?.width ?? this.target.defaultView?.innerWidth ?? 1440)) this.elements.set(id as NodeId, element);
+      return;
+    }
     // the style elements of every node, also those a previous renderer of this document left
     for (const sheet of [...this.target.head.querySelectorAll(`style[${NODE_STYLE_ATTRIBUTE}], style[${EDITOR_STYLE_ATTRIBUTE}], style[${TOKENS_STYLE_ATTRIBUTE}], style[${CLASSES_STYLE_ATTRIBUTE}], style[${FONTS_STYLE_ATTRIBUTE}], style[${BASE_STYLE_ATTRIBUTE}], style[${CAPTURE_STYLE_ATTRIBUTE}]`)]) sheet.remove();
     for (const sheet of [
@@ -581,6 +589,10 @@ export class PageRenderer {
   // Applies a change's patches to the page: `before` is the document the page shows, `after` the one the patches
   // make of it.
   apply(before: DocumentJson, after: DocumentJson, patches: readonly Patch[]): void {
+    if (before.pages[this.page]?.capture !== undefined || after.pages[this.page]?.capture !== undefined) {
+      this.mount(after);
+      return;
+    }
     // the project's breakpoints changed: every media query is written again
     if (before.breakpoints !== after.breakpoints) return this.mount(after);
     this.doc = after;

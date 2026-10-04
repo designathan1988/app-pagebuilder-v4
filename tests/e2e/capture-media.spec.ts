@@ -41,7 +41,7 @@ test('a captured min-width rule keeps its wide and narrow heights after export',
     expect(await exported.locator('blockquote').evaluate(el => getComputedStyle(el).backgroundColor), `${width}px quote background`).toBe('rgba(0, 0, 0, 0)');
     expect(await exported.locator('[data-capture-class="variable-card"]').evaluate(el => getComputedStyle(el).backgroundColor), `${width}px inline variable`).toBe('rgb(18, 52, 86)');
     expect(await exported.locator('.sized').evaluate(el => Math.round(el.getBoundingClientRect().width)), `${width}px site box sizing`).toBe(100);
-    expect(await exported.locator('[data-capture-class="date"]').evaluate(el => ({ tag: el.tagName, height: Math.round(el.getBoundingClientRect().height), date: el.getAttribute('datetime') })), `${width}px date`).toEqual({ tag: 'SPAN', height: 20, date: '2026-06-15' });
+    expect(await exported.locator('[data-capture-class="date"]').evaluate(el => ({ tag: el.tagName, height: Math.round(el.getBoundingClientRect().height), date: el.getAttribute('datetime') })), `${width}px date`).toEqual({ tag: 'TIME', height: 20, date: '2026-06-15' });
     expect(await exported.locator('section').evaluate(el => Math.round(el.getBoundingClientRect().height)), `${width}px`).toBe(height);
     expect(await exported.getByRole('img', { name: 'Pixel' }).evaluate(el => Math.round(el.getBoundingClientRect().height)), `${width}px image`).toBe(height);
     expect(await exported.getByRole('img', { name: 'Vector logo' }).evaluate(el => [Math.round(el.getBoundingClientRect().width), Math.round(el.getBoundingClientRect().height)]), `${width}px SVG size`).toEqual([83, 24]);

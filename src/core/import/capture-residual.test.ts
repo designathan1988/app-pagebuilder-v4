@@ -1,13 +1,12 @@
 // @vitest-environment happy-dom
 // @vitest-environment-options {"settings":{"disableCSSFileLoading":true,"handleDisabledFileLoadingAsSuccess":true,"disableJavaScriptFileLoading":true}}
-// A captured page keeps what the model does not hold of its sheets (spec capture-url): the import maps what it can into
-// classes and values, and the rest — a selector it does not read, an at-rule, a declaration the editor does not store —
-// goes into the page's residual stylesheet, its addresses written from where that sheet is. A page that is no capture
-// keeps no residual.
+// Format-3 captured pages retain every author sheet and DOM node in their source order. These cases
+// previously exercised a residual CSS split that changed the cascade; authored imports still use their model.
 import { describe, expect, it } from 'vitest';
 import type { PickedFile } from '../../generated/commands.ts';
 import { documentOf, runHandler } from '../testing/handlers.ts';
 import { capturedPageCss } from './capture-styles.ts';
+import type { CapturedNode } from '../document/captured.ts';
 import { importHtmlCommand } from './import.ts';
 
 const file = (name: string, type: string, text: string): PickedFile => {
@@ -30,19 +29,32 @@ function imported(meta: string) {
   return ran.document;
 }
 
-describe('the residual stylesheet of a captured page', () => {
-  it('keeps the selectors, at-rules and declarations the model does not hold, and nothing it maps', () => {
+// Format-3 captures retain the complete author sheet and DOM; no selector is partitioned into a
+// residual rule and a later generated rule. Each prior cascade case now checks its full source.
+const capturedStyles = (document: ReturnType<typeof imported>): string[] => {
+  const root = document.pages[0]?.capture?.viewports[0]?.root;
+  const find = (node: CapturedNode): string[] => node.kind === 'element'
+    ? [...(node.tag === 'style' ? [node.children.filter((child) => child.kind === 'text').map((child) => child.kind === 'text' ? child.value : '').join('')] : []), ...node.children.flatMap(find)]
+    : [];
+  return root === undefined ? [] : find(root);
+};
+
+describe('the original stylesheet of a captured page', () => {
+  it('keeps every selector, at-rule and declaration in source order instead of splitting mapped winners', () => {
     const document = imported('<meta name="builder-capture" content="https://example.com/">');
     const home = document.pages[0];
     if (home === undefined) throw new Error('no page');
-    const css = capturedPageCss(document, home);
-    expect(css).toContain('nav a:hover>span{color:red}');
-    expect(css).toContain('--accent: #b9512a');
-    expect(css).toContain('@font-face');
-    expect(css).toContain('url(fonts/serif.woff2)');
-    expect(css).toContain('@media (prefers-color-scheme:dark)');
-    // the mapped declaration is the class's, not the residual's
-    expect(css).not.toContain('color:#f5e6d3');
+    const sheet = document.files?.find((one) => one.path === 'css/site.css');
+    expect(sheet).toBeDefined();
+    const source = new TextDecoder().decode(Uint8Array.from(atob(sheet?.bytes ?? ''), (character) => character.charCodeAt(0)));
+    expect(source).toBe(SHEET);
+    expect(source).toContain('nav a:hover > span');
+    expect(source).toContain('@font-face');
+    expect(source).toContain('@media (prefers-color-scheme: dark)');
+    expect(source).toContain('color: #f5e6d3');
+    expect(home.capture?.viewports[0]?.root.children.some((one) => one.kind === 'element' && one.tag === 'head' && one.children.some((child) => child.kind === 'element' && child.tag === 'link'))).toBe(true);
+    expect(home.tree.children).toHaveLength(0);
+    expect(capturedPageCss(document, home)).toBe('');
   });
 
   it('is not written for a page that is no capture', () => {
@@ -51,35 +63,30 @@ describe('the residual stylesheet of a captured page', () => {
     if (home === undefined) throw new Error('no page');
     expect(capturedPageCss(document, home)).toBe('');
   });
-  it('keeps an author universal reset for every captured element', () => {
+
+  it('keeps an author universal reset in its inline source sheet', () => {
     const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>*,:before{box-sizing:border-box}</style></head><body><div>Card</div></body></html>';
     const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });
     if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
-    const home = ran.document.pages[0];
-    if (home === undefined) throw new Error('no page');
-    expect(capturedPageCss(ran.document, home)).toContain('*{box-sizing:border-box}');
+    expect(capturedStyles(ran.document)).toContain('*,:before{box-sizing:border-box}');
   });
 
-  it('keeps a width rule nested under a screen stylesheet ahead of generated base styles', () => {
+  it('keeps a width rule nested under a screen sheet without generated base declarations', () => {
     const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>@media screen {.navigation{display:flex;flex-wrap:wrap}@media screen and (min-width:80em){.navigation{flex-wrap:nowrap}}}</style></head><body><nav class="navigation">Links</nav></body></html>';
     const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });
     if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
-    const home = ran.document.pages[0];
-    if (home === undefined) throw new Error('no page');
-    expect(capturedPageCss(ran.document, home)).toContain('flex-wrap:nowrap');
-    expect(JSON.stringify({ tree: home.tree, classes: ran.document.classes })).not.toContain('"flex-wrap"');
+    expect(capturedStyles(ran.document)[0]).toContain('@media screen and (min-width:80em)');
+    expect(ran.document.pages[0]?.tree.children).toHaveLength(0);
   });
 
-  it('keeps rules targeting the drawing inside an opaque SVG', () => {
+  it('keeps CSS and DOM nodes targeting the drawing inside SVG', () => {
     const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>.mandala svg > text { fill: #51565d; }</style></head><body><div class="mandala"><svg viewBox="0 0 10 10"><text>x</text></svg></div></body></html>';
     const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });
     if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
-    const home = ran.document.pages[0];
-    if (home === undefined) throw new Error('no page');
-    expect(capturedPageCss(ran.document, home)).toContain('svg>text{fill:#51565d}');
+    expect(capturedStyles(ran.document)[0]).toContain('.mandala svg > text { fill: #51565d; }');
+    expect(JSON.stringify(ran.document.pages[0]?.capture)).toContain('"tag":"text"');
   });
 });
-
 describe('a state an element does not take', () => {
   it('is reported, and the import stays a valid document', () => {
     const markup = '<!doctype html><html><head><style>a:visited { color: red; }</style></head><body><a href="https://example.com/"><div>Card</div></a></body></html>';

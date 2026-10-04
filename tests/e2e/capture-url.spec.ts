@@ -45,7 +45,8 @@ test.afterAll(async () => {
   await new Promise((resolve) => site.close(resolve));
 });
 
-type Doc = { pages: { file: string; tree: unknown }[]; files?: { path: string }[]; classes?: { name: string }[] };
+type CapturedNode = { kind: 'element' | 'text' | 'comment'; tag?: string; value?: string; attributes?: { name: string; namespace: string | null; value: string }[]; children?: CapturedNode[] };
+type Doc = { pages: { file: string; tree: unknown; capture?: { viewports: { root: CapturedNode }[] } }[]; files?: { path: string }[]; classes?: { name: string }[] };
 const read = (page: Page) => page.evaluate(() => (window as unknown as { __builderTestPort: { document(): Doc } }).__builderTestPort.document());
 
 test('a web address is captured as its script left it and imported as a page', runs('workspace.openDialog#menu-file-capture-url', 'project.captureUrl#capture-url-run'), async ({ page }) => {
@@ -76,6 +77,77 @@ test('a web address is captured as its script left it and imported as a page', r
   const doc = await read(page);
   expect((doc.files ?? []).filter((f) => f.path.startsWith('img/')).length).toBeGreaterThanOrEqual(2);
   await expect.poll(() => frame.locator('img').first().evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+});
+
+test('captured mixed DOM and source cascade survive canvas and export', runs('project.captureUrl#capture-url-run', 'project.export#menu-file', 'capture.select#captured-inspector-node', 'capture.edit#captured-apply', 'history.undo#toolbar-top-bar'), async ({ page, context }) => {
+  test.setTimeout(120_000);
+  const original = await context.newPage();
+  await original.goto(`http://127.0.0.1:${SITE_PORT}/mixed-dom.html`);
+  await original.screenshot({ path: '.cache/logs/captured-mixed-original.png' });
+  const source = await original.locator('#story').evaluate((element) => {
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.querySelector('img')?.removeAttribute('src');
+    return {
+      html: clone.innerHTML,
+      imageSrc: element.querySelector('img')?.getAttribute('src') ?? '',
+      color: getComputedStyle(element).color,
+      width: Math.round(element.querySelector('img')?.getBoundingClientRect().width ?? 0),
+    };
+  });
+  await original.close();
+  await openEditor(page);
+  await runDoor(page, 'workspace.openDialog#menu-file-capture-url');
+  const dialog = page.locator('[data-region="capture-url-dialog"]');
+  await dialog.locator('input[name="url"]').fill(`127.0.0.1:${SITE_PORT}/mixed-dom.html`);
+  await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
+  const destination = page.locator('[data-door="project.importHtml#destination-page"]');
+  await expect(destination).toBeVisible({ timeout: 60_000 });
+  await destination.click();
+  const frame = page.frameLocator('.frame__page');
+  await page.screenshot({ path: '.cache/logs/captured-mixed-before.png' });
+  await expect(frame.locator('#story img')).toBeVisible();
+  await expect(frame.locator('brand-card#custom')).toHaveText('Custom element content');
+  expect(await frame.locator('#story').evaluate((element) => getComputedStyle(element).color)).toBe(source.color);
+  await page.screenshot({ path: '.cache/logs/captured-mixed-canvas.png' });
+  await page.getByText('Formatted captured code').click();
+  await expect(page.locator('.captured-inspector__code').first()).toContainText('<p class="story" id="story" data-capture-class="story">Before');
+  await expect(page.locator('.captured-inspector__code').first()).not.toContainText('animation-play-state:paused!important');
+  await page.screenshot({ path: '.cache/logs/captured-mixed-code.png' });
+  await page.locator('[data-region="captured-inspector"] button').filter({ hasText: 'text: Before' }).click();
+  await page.locator('[data-region="captured-edit"] textarea').fill('Changed ');
+  await page.locator('[data-door="capture.edit#captured-apply"]').click();
+  await expect(frame.locator('#story')).toContainText('Changed');
+  await page.screenshot({ path: '.cache/logs/captured-mixed-edited.png' });
+  await page.locator('[data-door="history.undo#toolbar-top-bar"]').click();
+  await expect(frame.locator('#story')).toContainText('Before');
+  const downloading = page.waitForEvent('download');
+  await runDoor(page, 'project.export#menu-file');
+  const files = unzip(fs.readFileSync(await (await downloading).path()));
+  const exported = await context.newPage();
+  await exported.route('http://made.capture.test/**', route => {
+    const name = new URL(route.request().url()).pathname.slice(1);
+    const bytes = files.get(name);
+    const contentType = name.endsWith('.css') ? 'text/css' : name.endsWith('.svg') ? 'image/svg+xml' : 'text/html';
+    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType, body: bytes });
+  });
+  await exported.goto('http://made.capture.test/mixed-dom.html');
+  const result = await exported.locator('#story').evaluate((element) => {
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.querySelector('img')?.removeAttribute('src');
+    return {
+      html: clone.innerHTML,
+      imageSrc: element.querySelector('img')?.getAttribute('src') ?? '',
+      color: getComputedStyle(element).color,
+      width: Math.round(element.querySelector('img')?.getBoundingClientRect().width ?? 0),
+    };
+  });
+  expect({ html: result.html, color: result.color, width: result.width }).toEqual({ html: source.html, color: source.color, width: source.width });
+  expect(source.imageSrc).toMatch(/^data:image\/svg\+xml,/);
+  expect(files.get(result.imageSrc)?.toString('utf8')).toBe(decodeURIComponent(source.imageSrc.slice(source.imageSrc.indexOf(',') + 1)));
+  await expect.poll(() => exported.locator('#story img').evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await expect(exported.locator('brand-card#custom')).toHaveText('Custom element content');
+  await exported.screenshot({ path: '.cache/logs/captured-mixed-export.png' });
+  await exported.close();
 });
 
 test('a script-driven width survives capture and export at every project viewport', runs('project.captureUrl#capture-url-run', 'project.export#menu-file'), async ({ page, context }) => {
@@ -197,7 +269,9 @@ test('the captured html root class keeps its inherited font in canvas and export
   await destination.click();
   const root = page.frameLocator('.frame__page').locator('html');
   await expect.poll(() => root.evaluate((element) => getComputedStyle(element).fontFamily)).toContain('Courier New');
-  expect(((await read(page)).pages[0]?.tree as { attributes: Record<string, unknown> }).attributes.pageHtmlClasses).toBe('font-brand');
+  const capturedPage = (await read(page)).pages[0];
+  expect(capturedPage?.capture?.viewports[0]?.root.attributes).toContainEqual({ name: 'class', namespace: null, value: 'font-brand' });
+  expect((capturedPage?.tree as { children: unknown[] }).children).toHaveLength(0);
   const downloading = page.waitForEvent('download');
   await runDoor(page, 'project.export#menu-file');
   const files = unzip(fs.readFileSync(await (await downloading).path()));
@@ -239,18 +313,21 @@ test('two pages of the site are captured, the link between them written from one
   // the shared stylesheet reached the second page too
   expect(await frame.getByRole('heading', { name: 'Our plans' }).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(245, 230, 211)');
   // the links between the two pages name the project's pages (the export writes them from each page's folder)
-  const hrefs = await page.evaluate(() => {
-    const port = (window as unknown as { __builderTestPort: { document(): { pages: { tree: unknown }[] } } }).__builderTestPort;
-    const found: Record<string, unknown> = {};
-    const walk = (n: { text?: string | null; attributes?: { href?: unknown }; children?: unknown[] }) => {
-      if (typeof n.text === 'string') found[n.text] = n.attributes?.href;
-      for (const child of n.children ?? []) walk(child as never);
-    };
-    for (const one of port.document().pages) walk(one.tree as never);
-    return found;
-  });
+  const hrefs: Record<string, string> = {};
+  const content = (node: CapturedNode): string => node.kind === 'text' ? node.value ?? '' : (node.children ?? []).map(content).join('');
+  const walk = (node: CapturedNode): void => {
+    if (node.kind === 'element' && node.tag === 'a') {
+      const href = node.attributes?.find((attribute) => attribute.name === 'href')?.value;
+      if (href !== undefined) hrefs[content(node)] = href;
+    }
+    for (const child of node.children ?? []) walk(child);
+  };
+  for (const one of (await read(page)).pages) {
+    const root = one.capture?.viewports[0]?.root;
+    if (root !== undefined) walk(root);
+  }
   expect(hrefs['See the plans']).toBe('plans/index.html');
-  expect(hrefs['Back home']).toBe('index.html');
+  expect(hrefs['Back home']).toBe('../index.html');
 });
 
 test('without the Companion the status bar says how to start it', runs('project.captureUrl#capture-url-run'), async ({ page }) => {

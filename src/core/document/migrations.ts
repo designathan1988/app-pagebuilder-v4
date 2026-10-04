@@ -7,8 +7,8 @@
 // never guessed at. A version the chain has no step for is refused too, so a hole in the chain is a refusal with a
 // reason instead of a document half-read.
 //
-// Version 2 gives captured pages an HTML-root class setting. Older pages have no such setting and keep their
-// existing body classes, so migration changes only their format version and preserves their appearance.
+// Version 2 gives captured pages an HTML-root class setting. Version 3 gives captured pages a distinct ordered
+// source DOM; old authored pages keep their existing tree and gain no capture data in either migration step.
 import { DOCUMENT_VERSION, type DocumentJson } from './model.ts';
 
 export interface Migration {
@@ -22,6 +22,7 @@ export interface Migration {
 // The steps this app knows, in order.
 export const MIGRATIONS: readonly Migration[] = [
   { from: 1, to: 2, migrate: (document) => ({ ...document, version: 2 }) },
+  { from: 2, to: 3, migrate: (document) => ({ ...document, version: 3 }) },
 ];
 
 export type MigrationResult =

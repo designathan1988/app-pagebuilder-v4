@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "pages": [
     { "id": "client-home", "name": "Client home", "file": "index.html", "tree": { "id": "home-root", "name": "ClientHome", "type": "page", "tag": "body", "attributes": {}, "classes": [], "styles": {}, "text": null, "children": [{ "id": "client-title", "name": "ClientTitle", "type": "heading", "tag": "h1", "attributes": {}, "classes": [], "styles": {}, "text": "Client home — keep this page", "children": [] }] } },
     { "id": "client-contact", "name": "Client contact", "file": "contact.html", "tree": { "id": "contact-root", "name": "ClientContact", "type": "page", "tag": "body", "attributes": {}, "classes": [], "styles": {}, "text": null, "children": [{ "id": "contact-title", "name": "ContactTitle", "type": "heading", "tag": "h1", "attributes": {}, "classes": [], "styles": {}, "text": "Client contact — keep this page too", "children": [] }] } }

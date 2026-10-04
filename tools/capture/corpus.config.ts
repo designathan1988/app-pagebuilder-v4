@@ -1,8 +1,7 @@
-// The capture corpus's browser runs (the plan's stage 12, STG-12.6; npm run capture:corpus): each site of corpus.json
-// recorded once into a HAR file and replayed from it, captured by the Companion's capture, imported into the editor
-// with File › Import HTML, exported with File › Export, and the export's pictures compared with the original's at every
-// breakpoint (tools/journey/fidelity.ts comparePictures). Against the e2e build, one site at a time, in the installed
-// Chrome; the records go to .cache/corpus/records/, which tools/capture/report.ts turns into docs/CAPTURE-CORPUS.md.
+// The capture corpus's browser runs (STG-12.6): each width uses a same-load live screenshot and
+// DOM snapshot. The HAR supplies resource bytes and is replayed only as a separate diagnostic.
+// The captured package is imported, exported and compared with the live source at each width.
+// One installed Chrome worker writes records, DOM/layout observations and the automatic boundary audit.
 import { defineConfig } from '@playwright/test';
 import { CHANNEL } from '../runner/environment.ts';
 

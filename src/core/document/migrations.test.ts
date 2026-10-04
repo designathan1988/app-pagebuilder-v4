@@ -54,11 +54,11 @@ describe('the document format versions', () => {
     expect('document' in read).toBe(true);
   });
 
-  it('opens a saved version-one project with its pages and styles intact in version two', () => {
+  it('opens a saved version-one project with its pages and styles intact in version three', () => {
     const old = createEmptyDocument(sequentialIds('legacy'), { page: 'Home', root: 'Page' }, RULES.root);
     const result = readProject({ ...old, version: 1 }, RULES);
     if (!('document' in result)) throw new Error(JSON.stringify(result));
-    expect(result.document.version).toBe(2);
+    expect(result.document.version).toBe(3);
     expect(result.document.pages).toEqual(old.pages);
   });
 });

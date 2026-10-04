@@ -379,9 +379,25 @@ function resolveArgs(ref: string, args: Record<string, unknown>, document: unkno
 // canvas drawn at all (the Code view shows the code pane alone) has nothing to check: the frame is the editor's, and
 // what the centre column shows there is the pane's own business.
 async function canvasProblems(page: Page, document: unknown): Promise<string[]> {
-  const pages = (document as { pages: { tree: Node }[] }).pages;
+  type CapturedElement = { kind: 'element'; id: string; children: (CapturedElement | { kind: 'text' | 'comment'; id: string })[] };
+  const pages = (document as { pages: { tree: Node; capture?: { viewports: { width: number; root: CapturedElement }[] } }[] }).pages;
   if ((await page.locator('.frame__page').count()) === 0) return [];
-  const drawn = await page.frameLocator('.frame__page').locator('[data-node]').evaluateAll((els) => els.map((el) => el.getAttribute('data-node')));
+  const frame = page.frameLocator('.frame__page');
+  if (await frame.locator('html[data-builder-capture]').count() > 0) {
+    const width = await frame.locator('html').evaluate((element) => element.clientWidth);
+    const drawn = await frame.locator('[data-capture-node]').evaluateAll((els) => els.map((el) => el.getAttribute('data-capture-node')));
+    const shown = pages.flatMap((one) => one.capture?.viewports ?? []).filter((one) => one.root.id === drawn[0]);
+    const viewport = shown.sort((a, b) => Math.abs(a.width - width) - Math.abs(b.width - width))[0];
+    if (viewport === undefined) return ['a captured page absent from the document is drawn'];
+    const expected: string[] = [];
+    const walk = (node: CapturedElement): void => {
+      expected.push(node.id);
+      for (const child of node.children) if (child.kind === 'element') walk(child);
+    };
+    walk(viewport.root);
+    return drawn.join() === expected.join() ? [] : [`captured DOM IDs differ: expected ${expected.join(',')}; drawn ${drawn.join(',')}`];
+  }
+  const drawn = await frame.locator('[data-node]').evaluateAll((els) => els.map((el) => el.getAttribute('data-node')));
   const shown = pages.find((p) => drawn.includes(p.tree.id));
   const problems: string[] = [];
   if (shown === undefined) {
@@ -1568,6 +1584,7 @@ async function runStep(page: Page, step: Step, ref: string, held: { current: Hel
       d.context !== FIELD_TEXT_CONTEXT &&
       d.context !== NUMBER_FIELD_CONTEXT &&
       d.context !== SPACING_FIELD_CONTEXT &&
+      d.context !== 'captured-value' &&
       d.context !== COMMAND_FIELD_CONTEXT &&
       Object.keys(standsFor).length > 0
     ) {

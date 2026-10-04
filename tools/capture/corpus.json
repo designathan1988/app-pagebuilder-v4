@@ -1,5 +1,5 @@
 {
-  "$comment": "The capture corpus (the plan's stage 12, STG-12.6): twenty public sites of the kinds a person captures — documentation, landing pages, blogs, shops, React and Vue applications, web fonts, grid layouts and animation. Each is recorded once into .cache/corpus/har/<id>.har and replayed from it (tools/capture/corpus.capture.ts).",
+  "$comment": "The capture corpus (stage 12, STG-12.6): twenty public sites spanning documentation, applications, blogs, shops, fonts, grids and animation. A live photograph at each initial viewport is the reference, stored with a matching HAR digest under .cache/corpus/references/<id>/; the HAR replays for Companion capture and is also compared separately with the live reference (tools/capture/corpus.capture.ts).",
   "sites": [
     { "id": "mdn", "url": "https://developer.mozilla.org/en-US/", "kind": "documentation" },
     { "id": "govuk", "url": "https://www.gov.uk/", "kind": "documentation" },
@@ -13,7 +13,7 @@
     { "id": "bootstrap", "url": "https://getbootstrap.com/", "kind": "landing" },
     { "id": "tailwind", "url": "https://tailwindcss.com/", "kind": "landing" },
     { "id": "overreacted", "url": "https://overreacted.io/", "kind": "blog" },
-    { "id": "csstricks", "url": "https://css-tricks.com/", "kind": "blog" },
+    { "id": "frontendmastersblog", "url": "https://blog.master.dev/", "kind": "blog" },
     { "id": "smashing", "url": "https://www.smashingmagazine.com/", "kind": "blog" },
     { "id": "bellroy", "url": "https://bellroy.com/", "kind": "shop" },
     { "id": "allbirds", "url": "https://www.allbirds.com/", "kind": "shop" },

@@ -174,7 +174,7 @@ test('an authored page can edit its HTML root classes and undo the change', runs
   await page.screenshot({ path: '.cache/logs/qa268/root-classes-undone.png' });
 });
 
-test('a saved version-one page opens with its authored content in version two', runs(OPEN), async ({ page }) => {
+test('a saved version-one page opens with its authored content in version three', runs(OPEN), async ({ page }) => {
   const legacy = JSON.parse(fs.readFileSync(FIXTURE, 'utf8')) as Record<string, unknown>;
   legacy.version = 1;
   await openMenu(page, 'file');
@@ -184,7 +184,7 @@ test('a saved version-one page opens with its authored content in version two', 
   await expect(drawn(page, 'n-intro')).toHaveCount(1);
   expect((await root(page)).name).toBe('Page');
   const version = await page.evaluate(() => (window as unknown as { __builderTestPort: { document(): { version: number } } }).__builderTestPort.document().version);
-  expect(version).toBe(2);
+  expect(version).toBe(3);
 });
 
 test('a setting kept with Enter is stored on the page root, never renames it, and undo gives back the value and the selection', runs(OPEN, PAGE_PROPERTIES, TITLE, SELECT, UNDO, REDO), async ({ page }) => {

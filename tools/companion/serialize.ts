@@ -6,32 +6,51 @@
 // which pages it took) and the custom elements it met. Self-contained: it reads nothing but the page.
 export interface PageRead {
   readonly title: string;
+  readonly viewportWidth?: number;
   readonly html: string;
   readonly sheets: readonly { readonly href: string | null; readonly text: string | null; readonly scope: string | null; readonly media?: string | null }[];
-  readonly images: readonly { readonly index: number; readonly src: string }[];
+  readonly images: readonly { readonly index: number; readonly src: string; readonly folder?: 'img' | 'media' }[];
   readonly links: readonly string[];
-  readonly custom: readonly string[];
+  readonly scripts?: readonly { readonly src: string | null; readonly text: string; readonly type: string }[];
+  readonly opaque?: readonly { readonly path: string; readonly marker: string; readonly kind: 'canvas' | 'video' | 'frame' }[];
 }
 export function serializePage(origin: string): PageRead {
+  const scripts = [...document.querySelectorAll('script')].map((element) => ({
+    src: element.hasAttribute('src') ? element.src : null,
+    text: element.textContent ?? '',
+    type: element.getAttribute('type') ?? '',
+  }));
   const sheets: { readonly href: string | null; readonly text: string | null; readonly scope: string | null; readonly media?: string | null }[] = [];
+  const lightSheets = new Map<Element, number>();
   for (const el of document.querySelectorAll('link[rel~="stylesheet"][href], style')) {
     const media = el.getAttribute('media')?.trim() || null;
-    if (el instanceof HTMLLinkElement) sheets.push({ href: el.href, text: null, scope: null, media });
-    else if (el.textContent !== null && !el.textContent.includes('animation-play-state:paused!important')) sheets.push({ href: null, text: el.textContent, scope: null, media });
+    if (el instanceof HTMLLinkElement) {
+      lightSheets.set(el, sheets.length);
+      sheets.push({ href: el.href, text: null, scope: null, media });
+    }
+    else if (el.textContent !== null && !el.textContent.includes('animation-play-state:paused!important')) {
+      lightSheets.set(el, sheets.length);
+      sheets.push({ href: null, text: el.textContent, scope: null, media });
+    }
   }
-  // Scripts often set layout variables on <html> itself. The document model keeps no root style attribute, so
-  // retain its declarations as the last sheet: the residual capture CSS keeps the html rule on canvas and export.
+  // Existing capture packages expose root runtime declarations as the last sheet. Keep that
+  // representation while the captured DOM also retains the literal, higher-priority inline style.
   const rootStyle = document.documentElement.getAttribute('style')?.trim();
   if (rootStyle) sheets.push({ href: null, text: `html:root{${rootStyle}}`, scope: null });
-  // the custom elements met (a tag with a dash): each becomes a div wearing the class ce-<tag>, which the page's
-  // and the shadow roots' rules are rewritten to (scopeCss), so the import keeps it as an element instead of
-  // unwrapping it, and a shadow root's rules stay within their host
-  const custom = new Set<string>();
   // The page as it is drawn, shadow DOM flattened (the plan's stage 12): a host's open shadow root stands in its
   // place, a <slot> holds the nodes assigned to it (its own fallback when none is), and the host's light children
   // that no slot takes are not drawn, so they go; a shadow root's styles join the page's sheets, :host written as
   // the host's own tag. An image is marked with the source the browser chose for it (its currentSrc).
-  const images: { readonly index: number; readonly src: string }[] = [];
+  const images: { readonly index: number; readonly src: string; readonly folder?: 'img' | 'media' }[] = [];
+  const opaque: { path: string; marker: string; kind: 'canvas' | 'video' | 'frame' }[] = [];
+  const assetMarker = (value: string, folder: 'img' | 'media' = 'img'): string => {
+    if (value === '' || value.startsWith('#') || !URL.canParse(value, document.baseURI)) return value;
+    const source = new URL(value, document.baseURI).href;
+    if (!['http:', 'https:', 'data:'].includes(new URL(source).protocol)) return value;
+    const index = images.length;
+    images.push({ index, src: source, folder });
+    return `__capture_image_${index}__`;
+  };
   // HTML's srcset parser treats a comma inside a URL differently from a separator after a descriptor.
   // Keep the candidate grammar and descriptors, replacing only each candidate URL with a localizable marker.
   const markedSrcset = (value: string): string => {
@@ -72,18 +91,52 @@ export function serializePage(origin: string): PageRead {
   // comes hidden (kept, not drawn), as the page showed it
   const flat = (node: Node, shadowed = false): Node | null => {
     if (!(node instanceof Element)) return node.cloneNode(false);
-    let copy = node.cloneNode(false) as Element;
+    if (node instanceof HTMLStyleElement && (node.textContent ?? '').includes('animation-play-state:paused!important')) return null;
+    const sheet = lightSheets.get(node);
+    if (sheet !== undefined) return document.createComment(`__capture_sheet_${sheet}__`);
+    const copy = node.cloneNode(false) as Element;
     const undrawn = shadowed && getComputedStyle(node).display === 'none';
-    if (node.localName.includes('-')) {
-      custom.add(node.localName);
-      copy = document.createElement('div');
-      for (const attribute of node.attributes) copy.setAttribute(attribute.name, attribute.value);
-      copy.classList.add(`ce-${node.localName}`);
-    }
     if (undrawn) copy.setAttribute('hidden', '');
     // the classes the markup gave it, kept apart: the import may make a class the element's own styles and drop
     // it, and the residual stylesheet's rules name these (core/import residualCss)
     if (copy.getAttribute('class')) copy.setAttribute('data-capture-class', copy.getAttribute('class') as string);
+    if (node instanceof HTMLCanvasElement) {
+      try {
+        copy.setAttribute('data-capture-paint', assetMarker(node.toDataURL('image/png')));
+      }
+      catch {
+        const marker = `__capture_opaque_${opaque.length}__`;
+        copy.setAttribute('data-capture-paint', marker);
+        opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'canvas' });
+      }
+      return copy;
+    }
+    if (node instanceof HTMLVideoElement) {
+      const marker = `__capture_opaque_${opaque.length}__`;
+      copy.removeAttribute('src');
+      copy.removeAttribute('autoplay');
+      copy.setAttribute('poster', marker);
+      opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'video' });
+      for (const source of node.querySelectorAll('source[src]')) {
+        const address = source.getAttribute('src');
+        if (address !== null) assetMarker(address, 'media');
+      }
+      const ownSource = node.getAttribute('src');
+      if (ownSource !== null) assetMarker(ownSource, 'media');
+      return copy;
+    }
+    if (node instanceof HTMLIFrameElement) {
+      const marker = `__capture_opaque_${opaque.length}__`;
+      copy.removeAttribute('src');
+      copy.removeAttribute('srcdoc');
+      copy.setAttribute('data-capture-paint', marker);
+      opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'frame' });
+      return copy;
+    }
+    if (node instanceof HTMLSourceElement) {
+      const srcset = node.getAttribute('srcset');
+      if (srcset !== null) copy.setAttribute('srcset', markedSrcset(srcset));
+    }
     if (node instanceof HTMLImageElement) {
       const src = node.currentSrc || node.getAttribute('src') || '';
       const index = images.length;
@@ -93,6 +146,18 @@ export function serializePage(origin: string): PageRead {
       const srcset = node.getAttribute('srcset');
       if (srcset !== null) copy.setAttribute('srcset', markedSrcset(srcset));
       return copy;
+    }
+    const media = node.localName === 'video' || node.localName === 'audio' || node.localName === 'source' || node.localName === 'track';
+    for (const name of ['src', 'poster', 'data']) {
+      const original = node.getAttribute(name);
+      if (original === null || (name === 'data' && node.localName !== 'object')) continue;
+      copy.setAttribute(name, assetMarker(original, media && name === 'src' ? 'media' : 'img'));
+    }
+    if ((node.localName === 'image' && node.namespaceURI === 'http://www.w3.org/2000/svg') || (node.localName === 'link' && (node.getAttribute('rel') ?? '').split(/\s+/).includes('icon'))) {
+      for (const name of ['href', 'xlink:href']) {
+        const original = node.getAttribute(name);
+        if (original !== null) copy.setAttribute(name, assetMarker(original));
+      }
     }
     const root = node.shadowRoot;
     if (root !== null) {
@@ -131,7 +196,7 @@ export function serializePage(origin: string): PageRead {
   if (body !== null) {
     for (const attribute of document.documentElement.attributes) if (attribute.name.startsWith('data-') && attribute.name !== 'data-capture-class' && !body.hasAttribute(attribute.name)) body.setAttribute(attribute.name, attribute.value);
   }
-  for (const el of clone.querySelectorAll('script, noscript, link[rel~="stylesheet"], style, link[rel="preload"], link[rel="modulepreload"]')) el.remove();
+  for (const el of clone.querySelectorAll('script, noscript, link[rel="preload"], link[rel="modulepreload"]')) el.remove();
   // an image with no source keeps none (its mark is cleared once the sources are written)
   const sourced = images.filter((one) => one.src !== '');
   const links: string[] = [];
@@ -146,5 +211,5 @@ export function serializePage(origin: string): PageRead {
     a.setAttribute('href', `__capture_link__${at.origin}${at.pathname}__${at.hash}__`);
     links.push(`${at.origin}${at.pathname}`);
   });
-  return { title: document.title, html: `<!doctype html>\n${clone.outerHTML}`, sheets, images: sourced, links, custom: [...custom] };
+  return { title: document.title, viewportWidth: window.innerWidth, html: `<!doctype html>\n${clone.outerHTML}`, sheets, images: sourced, links, scripts, opaque };
 }

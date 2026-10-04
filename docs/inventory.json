@@ -2,11 +2,11 @@
   "totals": {
     "features": 214,
     "built": 214,
-    "commands": 371,
-    "doors": 1357,
-    "scenarios": 1827,
-    "modules": 467,
-    "lines": 81414
+    "commands": 373,
+    "doors": 1361,
+    "scenarios": 1830,
+    "modules": 473,
+    "lines": 82267
   },
   "features": [
     {
@@ -2523,11 +2523,15 @@
       "built": true,
       "commands": [
         "project.captureUrl",
+        "capture.edit",
+        "capture.select",
         "workspace.openDialog"
       ],
-      "doors": 6,
-      "scenarios": 3,
+      "doors": 10,
+      "scenarios": 6,
       "modules": [
+        "src/core/capture/edits.ts",
+        "src/editor/capture/selection.ts",
         "src/editor/import/capture.ts",
         "src/editor/workspace/dialogs.ts"
       ]
@@ -3279,7 +3283,7 @@
   "modules": [
     {
       "path": "src/app/commands.ts",
-      "lines": 537,
+      "lines": 541,
       "commands": [],
       "features": []
     },
@@ -3342,6 +3346,16 @@
         "timeline-animation-settings",
         "timeline-animations",
         "timeline-keyframes"
+      ]
+    },
+    {
+      "path": "src/core/capture/edits.ts",
+      "lines": 105,
+      "commands": [
+        "capture.edit"
+      ],
+      "features": [
+        "capture-url"
       ]
     },
     {
@@ -3578,6 +3592,12 @@
       "features": []
     },
     {
+      "path": "src/core/document/captured.ts",
+      "lines": 135,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/core/document/clone.ts",
       "lines": 67,
       "commands": [],
@@ -3585,13 +3605,13 @@
     },
     {
       "path": "src/core/document/migrations.ts",
-      "lines": 48,
+      "lines": 49,
       "commands": [],
       "features": []
     },
     {
       "path": "src/core/document/model.ts",
-      "lines": 318,
+      "lines": 322,
       "commands": [],
       "features": []
     },
@@ -3603,7 +3623,7 @@
     },
     {
       "path": "src/core/document/validate.ts",
-      "lines": 598,
+      "lines": 610,
       "commands": [],
       "features": []
     },
@@ -3776,7 +3796,7 @@
     },
     {
       "path": "src/core/export/export.ts",
-      "lines": 532,
+      "lines": 557,
       "commands": [
         "project.export"
       ],
@@ -4020,7 +4040,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1894,
+      "lines": 1919,
       "commands": [
         "project.importHtml"
       ],
@@ -4242,7 +4262,7 @@
     },
     {
       "path": "src/core/ports/browser.ts",
-      "lines": 28,
+      "lines": 32,
       "commands": [],
       "features": []
     },
@@ -4370,6 +4390,12 @@
     {
       "path": "src/core/render/base.ts",
       "lines": 64,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/core/render/captured.ts",
+      "lines": 198,
       "commands": [],
       "features": []
     },
@@ -5013,7 +5039,7 @@
     },
     {
       "path": "src/editor/browser-ports.ts",
-      "lines": 77,
+      "lines": 105,
       "commands": [],
       "features": []
     },
@@ -5144,6 +5170,12 @@
       "features": []
     },
     {
+      "path": "src/editor/canvas/render/captured.ts",
+      "lines": 111,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/canvas/render/inline.ts",
       "lines": 62,
       "commands": [],
@@ -5151,7 +5183,7 @@
     },
     {
       "path": "src/editor/canvas/render/render.ts",
-      "lines": 852,
+      "lines": 864,
       "commands": [],
       "features": []
     },
@@ -5225,6 +5257,16 @@
       "lines": 99,
       "commands": [],
       "features": []
+    },
+    {
+      "path": "src/editor/capture/selection.ts",
+      "lines": 13,
+      "commands": [
+        "capture.select"
+      ],
+      "features": [
+        "capture-url"
+      ]
     },
     {
       "path": "src/editor/checks/fix.ts",
@@ -5477,7 +5519,7 @@
     },
     {
       "path": "src/editor/import/capture.ts",
-      "lines": 103,
+      "lines": 108,
       "commands": [
         "project.captureUrl"
       ],
@@ -6082,6 +6124,12 @@
       "features": []
     },
     {
+      "path": "src/editor/shell/captured-inspector.tsx",
+      "lines": 128,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/shell/class-bar.tsx",
       "lines": 232,
       "commands": [],
@@ -6209,7 +6257,7 @@
     },
     {
       "path": "src/editor/shell/inspector.tsx",
-      "lines": 823,
+      "lines": 830,
       "commands": [],
       "features": []
     },
@@ -6413,7 +6461,7 @@
     },
     {
       "path": "src/editor/state.ts",
-      "lines": 146,
+      "lines": 148,
       "commands": [],
       "features": []
     },
@@ -6723,13 +6771,13 @@
     },
     {
       "path": "src/generated/commands.ts",
-      "lines": 634,
+      "lines": 636,
       "commands": [],
       "features": []
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6573,
+      "lines": 6605,
       "commands": [],
       "features": []
     },

@@ -8,7 +8,7 @@ import { readOptions } from './interactions.ts';
 import { interactionsJs } from './script.ts';
 
 const node = (id: string, interactions: readonly Interaction[]): DocNode => ({ id: id as NodeId, type: 'button' as DocNode['type'], name: id, tag: 'button', attributes: {}, classes: [], styles: {}, text: null, children: [], interactions });
-const page = (children: DocNode[]): DocumentJson => ({ version: 2, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('root', []), type: 'page' as DocNode['type'], tag: 'body', children } }] });
+const page = (children: DocNode[]): DocumentJson => ({ version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('root', []), type: 'page' as DocNode['type'], tag: 'body', children } }] });
 
 // an element of the stand-in page: its listeners, its classes and its hidden flag
 class Element {

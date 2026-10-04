@@ -71,7 +71,7 @@ export function CanvasFrame({ width, screen, zoom }: { readonly width: number; r
       if (!target) return;
       // the breakpoint's screen: the canvas resolves vh, svh, dvh and lvh against it (item 2.3); a source that names a
       // file of the project draws as its object URL (spec explorer-assets-use)
-      const renderer = new PageRenderer(target, MODEL, page, { height: screen }, (name, value) => canvasValue(store.getState().document, name, value));
+      const renderer = new PageRenderer(target, MODEL, page, { height: screen, width }, (name, value) => canvasValue(store.getState().document, name, value));
       renderer.mount(store.getState().document);
       // an image file dragged in from the operating system lands on the frame too: its own window reports the drag
       // the previous start's listeners go first (a load after a ready start runs start twice), then this one's drop
@@ -203,7 +203,7 @@ export function CanvasFrame({ width, screen, zoom }: { readonly width: number; r
       frame.removeEventListener('load', start);
       stop();
     };
-  }, [store, screen, page]);
+  }, [store, screen, width, page]);
 
   useEffect(() => registerFrame(iframe.current), []);
 

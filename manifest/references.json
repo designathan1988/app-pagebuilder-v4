@@ -2444,6 +2444,16 @@
       "kind": "handler",
       "id": "project.captureUrl",
       "status": "registered"
+    },
+    {
+      "kind": "handler",
+      "id": "capture.edit",
+      "status": "registered"
+    },
+    {
+      "kind": "handler",
+      "id": "capture.select",
+      "status": "registered"
     }
   ]
 }
