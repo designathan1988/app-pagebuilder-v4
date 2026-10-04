@@ -3,10 +3,10 @@
     "features": 214,
     "built": 214,
     "commands": 371,
-    "doors": 1350,
-    "scenarios": 1820,
+    "doors": 1356,
+    "scenarios": 1826,
     "modules": 466,
-    "lines": 81098
+    "lines": 81110
   },
   "features": [
     {
@@ -2277,8 +2277,8 @@
       "commands": [
         "workspace.resizeSplitter"
       ],
-      "doors": 5,
-      "scenarios": 6,
+      "doors": 11,
+      "scenarios": 12,
       "modules": [
         "src/editor/workspace/layout.ts"
       ]
@@ -2318,7 +2318,7 @@
         "workspace.movePanel",
         "inspector.toggleSection"
       ],
-      "doors": 18,
+      "doors": 24,
       "scenarios": 2,
       "modules": [
         "src/editor/inspector/sections.ts",
@@ -6723,7 +6723,7 @@
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6525,
+      "lines": 6537,
       "commands": [],
       "features": []
     },

@@ -1430,6 +1430,156 @@
           "args": {
             "direction": "down"
           }
+        },
+        {
+          "id": "menu-view-sidebar-wider",
+          "kind": "menu",
+          "feature": "panel-resize",
+          "menu": "view",
+          "checked": null,
+          "labelKey": "workspace.sidebarWider",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "menu:view",
+            "order": 24
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {
+            "splitter": "sidebar-width",
+            "direction": "right"
+          }
+        },
+        {
+          "id": "menu-view-sidebar-narrower",
+          "kind": "menu",
+          "feature": "panel-resize",
+          "menu": "view",
+          "checked": null,
+          "labelKey": "workspace.sidebarNarrower",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "menu:view",
+            "order": 25
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {
+            "splitter": "sidebar-width",
+            "direction": "left"
+          }
+        },
+        {
+          "id": "menu-view-inspector-wider",
+          "kind": "menu",
+          "feature": "panel-resize",
+          "menu": "view",
+          "checked": null,
+          "labelKey": "workspace.inspectorWider",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "menu:view",
+            "order": 26
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {
+            "splitter": "inspector-width",
+            "direction": "left"
+          }
+        },
+        {
+          "id": "menu-view-inspector-narrower",
+          "kind": "menu",
+          "feature": "panel-resize",
+          "menu": "view",
+          "checked": null,
+          "labelKey": "workspace.inspectorNarrower",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "menu:view",
+            "order": 27
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {
+            "splitter": "inspector-width",
+            "direction": "right"
+          }
+        },
+        {
+          "id": "menu-view-layers-taller",
+          "kind": "menu",
+          "feature": "panel-resize",
+          "menu": "view",
+          "checked": null,
+          "labelKey": "workspace.layersTaller",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "menu:view",
+            "order": 28
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {
+            "splitter": "sidebar-stack",
+            "direction": "up"
+          }
+        },
+        {
+          "id": "menu-view-layers-shorter",
+          "kind": "menu",
+          "feature": "panel-resize",
+          "menu": "view",
+          "checked": null,
+          "labelKey": "workspace.layersShorter",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "menu:view",
+            "order": 29
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {
+            "splitter": "sidebar-stack",
+            "direction": "down"
+          }
         }
       ]
     },

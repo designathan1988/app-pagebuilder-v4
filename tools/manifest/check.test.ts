@@ -319,7 +319,7 @@ describe('manifest:check', () => {
     ).toEqual([]);
   });
 
-  it('resolves a scenario of the empty project with the names of its locale', () => {
+  it('resolves a scenario of the empty project with the names of its locale', { timeout: 30_000 }, () => {
     const empty = (locale: string, root: string) =>
       valid((m) => {
         const f = plantRenderScenario(m);

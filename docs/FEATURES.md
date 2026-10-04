@@ -5,7 +5,7 @@ the last complete browser run on a clean tree (`docs/feature-results.json`, writ
 hand. `npm run inventory:check` fails while this file is out of step. The requirements these features answer, and the
 open problems, are in `docs/PRODUCT.md`.
 
-214 features (214 built), 371 commands, 1350 doors, 1820 scenarios.
+214 features (214 built), 371 commands, 1356 doors, 1826 scenarios.
 
 Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests passed; 214 features passed every scenario test.
 
@@ -227,7 +227,7 @@ Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests pas
 | `command-bar-set-property` | Set a property or jump to it from the command bar | yes | 10 | 10 | [command-bar-set-property](../spec/BEHAVIOUR.md#command-bar-set-property) | 2 | passes 10/10 |
 | `shortcuts-panel` | Keyboard shortcuts panel generated from the keymap | yes | 2 | 1 | [shortcuts-panel](../spec/BEHAVIOUR.md#shortcuts-panel) | 3 | passes 2/2 |
 | `workbench-panel` | Bottom workbench: tabs, collapse, maximise and developer tools | yes | 10 | 6 | [workbench-panel](../spec/BEHAVIOUR.md#workbench-panel) | 4 | passes 10/10 |
-| `panel-resize` | Resize docks and panels with splitters | yes | 6 | 5 | [panel-resize](../spec/BEHAVIOUR.md#panel-resize) | 6 | passes 7/7 |
+| `panel-resize` | Resize docks and panels with splitters | yes | 12 | 11 | [panel-resize](../spec/BEHAVIOUR.md#panel-resize) | 7 | passes 7/7 |
 | `floating-panels` | Float a panel as a window and dock it again | yes | 5 | 5 | [floating-panels](../spec/BEHAVIOUR.md#floating-panels) | 4 | passes 5/5 |
 | `panel-combine-tabs` | Combine panels as tabs or stack them | yes | 3 | 3 | [panel-combine-tabs](../spec/BEHAVIOUR.md#panel-combine-tabs) | 2 | passes 3/3 |
 | `workspace-persist-reset` | Workspace layout persists and can be reset | yes | 2 | 3 | [workspace-persist-reset](../spec/BEHAVIOUR.md#workspace-persist-reset) | 1 | passes 3/3 |

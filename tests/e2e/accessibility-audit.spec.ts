@@ -195,14 +195,22 @@ test('a selected Layers row keeps its detail readable in the dark theme', runs(O
 // with every inspector section open: a field's input counts by the frame a press focuses it from; an undersized control
 // passes when a 24 px circle on its centre meets no other control nor another such circle (spacing), or when a control of
 // the same name that is large enough does the same on the page (equivalent: a spacing band and the box model's field).
-// The panel splitters are left out by name, an open problem of their own (docs/PRODUCT.md TS1: a 24 px hit area would
-// cover the Layers rows' buttons and the ruler beside them); every other control is held to the rule.
+// A panel splitter (6 px) passes by the equivalent exception when the View menu holds its door in both directions
+// (TS1, DEC-47: Widen and Narrow the sidebar and the inspector, the Layers taller and shorter), read from the manifest.
 test('every control the pointer takes is 24 x 24, or within the target-size exceptions (WCAG 2.5.8)', runs(OPEN, ROW, ALL), async ({ page }) => {
   await openAurora(page, 'n-card-a');
   await openEverySection(page);
   await runDoor(page, ALL);
   await runDoor(page, 'workspace.setPanelOpen#menu-view-workbench');
-  const failing = await page.evaluate(() => {
+  const workspace = JSON.parse(fs.readFileSync('manifest/commands/workspace.json', 'utf8')) as { commands: { id: string; entryPoints: { kind: string; menu?: string; args: { splitter?: string; direction?: string } }[] }[] };
+  const resize = workspace.commands.find((one) => one.id === 'workspace.resizeSplitter');
+  const menuDirections = new Map<string, Set<string>>();
+  for (const door of resize?.entryPoints ?? []) {
+    if (door.kind !== 'menu' || door.menu !== 'view' || door.args.splitter === undefined || door.args.direction === undefined) continue;
+    menuDirections.set(door.args.splitter, (menuDirections.get(door.args.splitter) ?? new Set()).add(door.args.direction));
+  }
+  const equivalentSplitters = [...menuDirections].filter(([, directions]) => directions.size >= 2).map(([splitter]) => splitter);
+  const failing = await page.evaluate((equivalents) => {
     const SIZE = 24;
     const selector = 'button, a[href], input, select, textarea, [role="button"], [role="tab"], [role="menuitem"], [role="option"], [role="treeitem"], [role="combobox"], [role="slider"], [role="switch"], [role="checkbox"], [role="separator"][tabindex]';
     const taken = (el: Element) => {
@@ -215,8 +223,9 @@ test('every control the pointer takes is 24 x 24, or within the target-size exce
     const boxOf = (el: Element) => (el.matches('input, textarea, select') ? (el.closest('.input-wrap, .box__side, .panel-field__form') ?? el) : el).getBoundingClientRect();
     const nameOf = (el: Element) => (el.getAttribute('aria-label') ?? el.textContent ?? '').trim();
     const boxes = controls.map((el) => ({ el, box: boxOf(el), name: nameOf(el) }));
-    // the splitters: open, TS1
-    const small = boxes.filter((c) => (c.box.width < SIZE || c.box.height < SIZE) && !c.el.matches('.splitter'));
+    // a splitter whose View menu doors grow and shrink its panel (the equivalent exception)
+    const splitterEquivalent = (el: Element) => el.matches('.splitter') && equivalents.includes((JSON.parse(el.getAttribute('data-args') ?? '{}') as { splitter?: string }).splitter ?? '');
+    const small = boxes.filter((c) => (c.box.width < SIZE || c.box.height < SIZE) && !splitterEquivalent(c.el));
     const centre = (r: DOMRect) => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
     const distanceTo = (p: { x: number; y: number }, r: DOMRect) => Math.hypot(Math.max(r.left - p.x, 0, p.x - r.right), Math.max(r.top - p.y, 0, p.y - r.bottom));
     return small
@@ -232,6 +241,8 @@ test('every control the pointer takes is 24 x 24, or within the target-size exce
         return !spaced;
       })
       .map((c) => `${c.name || c.el.localName} ${Math.round(c.box.width)}x${Math.round(c.box.height)} (${String((c.el as HTMLElement).className).split(' ')[0]})`);
-  });
+  }, equivalentSplitters);
+  // every splitter of the layout has its two View menu doors
+  expect(equivalentSplitters.sort()).toEqual(['inspector-width', 'sidebar-stack', 'sidebar-width']);
   expect(failing, 'controls under 24 x 24 outside the exceptions').toEqual([]);
 });
