@@ -1269,7 +1269,31 @@ export function isRootTokenRule(rule: CssRule): boolean {
   return rule.media.length === 0 && rule.selector.trim() === ROOT && rule.declarations.length > 0 && rule.declarations.every((declaration) => declaration.text.trim().startsWith('--'));
 }
 
-function rootTokens<Ui>(context: HandlerContext<Ui>, sources: readonly SheetSource[], report: Report): Token[] {
+// The variables a sheet defines inside an at-rule (@supports, @media, @layer): defined again under a condition.
+function conditionalVariables(sources: readonly SheetSource[]): ReadonlySet<string> {
+  const out = new Set<string>();
+  for (const source of sources) {
+    let ast: CssTreeNode;
+    try {
+      ast = parseCssTree(source.text, { parseValue: false, parseCustomProperty: false });
+    } catch {
+      continue;
+    }
+    walkCssTree(ast, {
+      visit: 'Declaration',
+      enter(node) {
+        if (this.atrule !== null && node.property.startsWith('--')) out.add(node.property.slice(2));
+      },
+    });
+  }
+  return out;
+}
+
+// `captured`: on a captured page a variable its sheets define again under a condition (MDN's colours: a value, then a
+// light-dark() one inside @supports) is no token: the project's stylesheet comes after the residual one (capture-styles
+// .ts), so its first value would win over the condition; it stays in the residual stylesheet, in the site's order.
+function rootTokens<Ui>(context: HandlerContext<Ui>, sources: readonly SheetSource[], report: Report, captured = false): Token[] {
+  const conditional = captured ? conditionalVariables(sources) : new Set<string>();
   const declared = new Map<string, { readonly value: string; readonly file: string; readonly line: number }>();
   const usedIn = new Map<string, Set<string>>();
   for (const source of sources) {
@@ -1290,6 +1314,7 @@ function rootTokens<Ui>(context: HandlerContext<Ui>, sources: readonly SheetSour
   };
   const tokens: Token[] = [];
   for (const [name, { value, file, line }] of declared) {
+    if (conditional.has(name)) continue;
     // the kinds whose property reads the value, in their manifest order; the one whose property is the only one the
     // sheets use the variable in wins (a length used only in font sizes is a font size), else the first
     const readers = TOKEN_KINDS.filter((kind) => reads(kind, value));
@@ -1522,7 +1547,7 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   const authors = authorClasses(pages, sources);
   const definitions = new Map<string, Styles>();
   for (const one of built) applyStyles(one.page.tree, one.builder, sources, authors, definitions);
-  const tokens = rootTokens(context, sources, report);
+  const tokens = rootTokens(context, sources, report, markup.some((file) => isCapturedPage(textOfFile(file))));
   report.tokens.push(...tokens.map((token) => token.name));
   report.unusedClasses.push(...unusedClasses(pages, authors).filter((name) => definitions.has(name)));
   // A reference that names no element of the imported pages (a link to #search, whose element was a script's, or one
