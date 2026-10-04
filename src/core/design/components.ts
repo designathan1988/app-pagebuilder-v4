@@ -374,7 +374,9 @@ export const updateFromInstanceCommand = registerHandler('components.updateFromI
   const kept = new Set<string>();
   const rebuilt = (from: DocNode, instance: DocNode | null): DocNode => {
     const ownPart = from.componentPart;
-    const mine = instance === null || ownPart === undefined ? undefined : [...walk(instance)].find((one) => one.componentPart !== undefined && deepEqual(one.componentPart, ownPart) && !kept.has(one.id));
+    // the element of the same part and the same type: a pasted or duplicated part keeps its componentPart, and the
+    // text and attributes of another type are no values of this one (the audit's CS1: the update was refused)
+    const mine = instance === null || ownPart === undefined ? undefined : [...walk(instance)].find((one) => one.componentPart !== undefined && deepEqual(one.componentPart, ownPart) && one.type === from.type && !kept.has(one.id));
     if (mine !== undefined) kept.add(mine.id);
     const plain = unmarked({ ...from, children: [] });
     // an element new to the edited instance reaches the others as a copy does: a new id and a name no element has

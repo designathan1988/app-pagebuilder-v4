@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82533
+    "lines": 82535
   },
   "features": [
     {
@@ -3509,7 +3509,7 @@
     },
     {
       "path": "src/core/design/components.ts",
-      "lines": 466,
+      "lines": 468,
       "commands": [
         "components.create",
         "components.insertInstance",
