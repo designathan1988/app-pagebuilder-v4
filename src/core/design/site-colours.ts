@@ -7,8 +7,9 @@
 //  - design.replaceColour: every value naming the colour names another one, in one undo step;
 //  - design.colourToVariable: a colour variable is made with that colour and every value that is the colour names the
 //    variable instead (var(--name)), in one undo step — the rebrand is then one change of the variable.
-import { message, registerHandler, type HandlerContext, type Outcome } from '../commands/registry.ts';
-import type { DocNode, DocumentJson, StoredValue } from '../document/model.ts';
+import { message, registerHandler, type HandlerContext, type Message, type Outcome } from '../commands/registry.ts';
+import type { DocNode, DocumentJson, NodeId, StoredValue } from '../document/model.ts';
+import { lockRefusal } from '../nodes/flags.ts';
 import type { Patch } from '../history/transaction.ts';
 import { readValue } from '../style/set.ts';
 import { IDENTIFIER_SOURCE } from '../text/identifier.ts';
@@ -109,6 +110,19 @@ export function siteColoursOf(document: DocumentJson): readonly SiteColour[] {
 
 // the patches that make every value naming the colour name `next`; `whole`: only the values that are the colour (a
 // variable stands for a whole value: inside a border written whole it would read otherwise)
+// The lock over the elements these patches change (an element's own style value; a class or a component holds none),
+// or null: a site-wide replace leaves a locked element as it is, so it refuses naming the lock (the audit's LK1).
+function lockedBy(document: DocumentJson, patches: readonly Patch[]): Message | null {
+  for (const patch of patches) {
+    if (patch.path[0] !== 'pages') continue;
+    let node: DocNode | undefined = document.pages[patch.path[1] as number]?.tree;
+    for (let at = 3; node !== undefined && patch.path[at] === 'children'; at += 2) node = node.children[patch.path[at + 1] as number];
+    const refused = node === undefined ? null : lockRefusal(document, node.id as NodeId, 'status.locked.edit');
+    if (refused !== null) return refused;
+  }
+  return null;
+}
+
 function replacing(document: DocumentJson, colour: string, next: string, whole = false): readonly Patch[] {
   return styleValues(document).flatMap((held): Patch[] => {
     if (whole) return typeof held.value === 'string' && colourKey(held.value) === colour ? [{ op: 'replace', path: [...held.path], value: next }] : [];
@@ -135,6 +149,8 @@ export const replaceColourCommand = registerHandler('design.replaceColour', (con
   const written = read.css;
   if (colourKey(written) === from) return { kind: 'change' };
   const patches = replacing(context.state.document, from, written);
+  const locked = lockedBy(context.state.document, patches);
+  if (locked !== null) return { kind: 'refused', message: locked };
   return { kind: 'change', patches, message: message('status.siteColours.replaced', { colour: from, value: written, count: patches.length }) };
 });
 
@@ -149,6 +165,8 @@ export const colourToVariableCommand = registerHandler('design.colourToVariable'
   const held = tokensOf(state.document);
   const made: Patch = state.document.tokens === undefined ? { op: 'add', path: ['tokens'], value: [token] } : { op: 'add', path: ['tokens', held.length], value: token };
   const patches = replacing(state.document, from, `var(--${typed})`, true);
+  const locked = lockedBy(state.document, patches);
+  if (locked !== null) return { kind: 'refused', message: locked };
   return { kind: 'change', patches: [made, ...patches], message: message('status.siteColours.madeVariable', { colour: from, name: typed, count: patches.length }) };
 });
 

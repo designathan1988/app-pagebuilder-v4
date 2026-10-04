@@ -111,6 +111,9 @@ export const setLabelTargetCommand = registerHandler('element.setLabelTarget', (
   // the control gets an id attribute when it has none, so the page has something to point at; the label keeps the
   // control's node id, not that attribute: renaming the attribute later leaves the reference working (A3.4)
   const holder = target.node.attributes.id === undefined || String(target.node.attributes.id) === '';
+  // the control is changed too when it takes an id: a locked one keeps what it holds (the audit's LK1)
+  const lockedControl = holder ? lockRefusal(state.document, target.node.id, 'status.locked.edit') : null;
+  if (lockedControl !== null) return { kind: 'refused', message: lockedControl };
   if (holder) patches.push({ op: 'add', path: [...target.path, 'attributes', 'id'], value: freshId(state.document, target.node.name) });
   if (label.node.attributes.labelFor !== target.node.id) patches.push({ op: label.node.attributes.labelFor === undefined ? 'add' : 'replace', path: [...label.path, 'attributes', 'labelFor'], value: target.node.id });
   return { kind: 'change', patches, message: message('status.label.target', { name: label.node.name, control: target.node.name }) };

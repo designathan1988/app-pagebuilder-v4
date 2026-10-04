@@ -59,6 +59,9 @@ export const setLinkCommand = registerHandler('element.setLink', ({ state, rules
     if (anchor !== undefined) {
       const held = locate(state.document, anchor as NodeId);
       if (held === null) throw new Error(`element.setLink: the document has no node ${String(anchor)}`);
+      // the element is changed too when it takes an id: a locked one keeps what it holds (the audit's LK1)
+      const lockedAnchor = held.node.attributes.id === undefined || String(held.node.attributes.id) === '' ? lockRefusal(state.document, held.node.id, 'status.locked.edit') : null;
+      if (lockedAnchor !== null) return { kind: 'refused', message: lockedAnchor };
       const own = held.node.attributes.id === undefined || String(held.node.attributes.id) === '' ? freshId(state.document, held.node.name) : String(held.node.attributes.id);
       if (held.node.attributes.id === undefined || String(held.node.attributes.id) === '') patches.push({ op: 'add', path: [...held.path, 'attributes', 'id'], value: own });
       written = `#${held.node.id}`;

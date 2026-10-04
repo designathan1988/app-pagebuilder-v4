@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82395
+    "lines": 82433
   },
   "features": [
     {
@@ -3509,7 +3509,7 @@
     },
     {
       "path": "src/core/design/components.ts",
-      "lines": 460,
+      "lines": 466,
       "commands": [
         "components.create",
         "components.insertInstance",
@@ -3541,7 +3541,7 @@
     },
     {
       "path": "src/core/design/site-colours.ts",
-      "lines": 157,
+      "lines": 175,
       "commands": [
         "design.replaceColour",
         "design.colourToVariable"
@@ -3677,7 +3677,7 @@
     },
     {
       "path": "src/core/elements/inputs.ts",
-      "lines": 134,
+      "lines": 137,
       "commands": [
         "element.setInputType",
         "element.setLabelTarget"
@@ -3690,7 +3690,7 @@
     },
     {
       "path": "src/core/elements/link.ts",
-      "lines": 100,
+      "lines": 103,
       "commands": [
         "element.setLink"
       ],
@@ -3840,7 +3840,7 @@
     },
     {
       "path": "src/core/files/assets.ts",
-      "lines": 58,
+      "lines": 61,
       "commands": [
         "assets.insertImageFile"
       ],
@@ -7011,7 +7011,7 @@
     },
     {
       "path": "src/modules/layout-composer/host/handlers.ts",
-      "lines": 871,
+      "lines": 876,
       "commands": [
         "layout.enter",
         "layout.leave",

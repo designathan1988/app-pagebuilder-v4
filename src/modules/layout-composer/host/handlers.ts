@@ -135,6 +135,11 @@ function written(context: Context, graph: LayoutIntent, selection: readonly stri
   const kept = selection.filter((id) => findRegion(graph, id) !== undefined);
   // the elements the composed container no longer holds leave, and whatever pointed at them lets go of them in the same
   // undo step, as a delete releases it (the audit's RF1: deleting a region a link pointed into was refused)
+  // a locked element inside the container keeps what it holds and where it stands (spec lock-element; the audit's LK1:
+  // the composer asked about the container alone)
+  const now = new Map([...walk(built)].map((inner) => [inner.id, JSON.stringify(inner)] as const));
+  const lockedInside = [...walk(container)].find((inner) => inner.locked === true && now.get(inner.id) !== JSON.stringify(inner));
+  if (lockedInside !== undefined) return { kind: 'refused', message: firstLockRefusal(context.state.document, [lockedInside.id as NodeId], 'status.locked.edit') ?? message('status.locked.edit', { name: lockedInside.name }) };
   const staying = new Set([...walk(built)].map((inner) => inner.id));
   const leaving = new Set([...walk(container)].map((inner) => inner.id as NodeId).filter((id) => !staying.has(id)));
   const names = leavingNames(context.state.document, leaving);

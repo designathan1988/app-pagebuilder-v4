@@ -31,6 +31,9 @@ export const insertImageFileCommand = registerHandler('assets.insertImageFile', 
     if (target.node.type !== IMAGE_TYPE) {
       return { kind: 'refused' as const, message: message('status.assets.notImage', { name: target.node.name }) };
     }
+    // a locked image, or one inside a locked element, keeps its picture (spec lock-element; the audit's LK1)
+    const lockedImage = lockRefusal(state.document, target.node.id, 'status.locked.edit');
+    if (lockedImage !== null) return { kind: 'refused' as const, message: lockedImage };
     return {
       kind: 'change' as const,
       patches: [...held, { op: 'add' as const, path: [...target.path, 'attributes', 'src'], value: stored.path }],

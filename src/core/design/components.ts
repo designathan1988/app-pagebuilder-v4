@@ -30,7 +30,7 @@ import { refreshCopiedIdentities } from '../document/clone.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import type { Patch } from '../history/transaction.ts';
 import { deepEqual } from '../history/transaction.ts';
-import { lockRefusal } from '../nodes/flags.ts';
+import { firstLockRefusal, lockRefusal } from '../nodes/flags.ts';
 import { leavingNames, releaseReferencesPatch, withoutReferencesTo } from '../document/tree.ts';
 import { placement } from '../structure/insert.ts';
 import { nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
@@ -345,6 +345,9 @@ export const detachInstanceCommand = registerHandler('components.detach', ({ sta
   const primary = state.selection[0];
   const found = primary === undefined ? null : locate(state.document, primary);
   if (found === null || found.node.component === undefined) return { kind: 'change' };
+  // a locked instance, or one inside a locked element, stays an instance (the audit's LK1)
+  const locked = lockRefusal(state.document, found.node.id as NodeId, 'status.locked.edit');
+  if (locked !== null) return { kind: 'refused', message: locked };
   return { kind: 'change', patches: [{ op: 'replace', path: found.path, value: unmarked(found.node) }], message: message('status.components.detached', { name: found.node.name }) };
 });
 
@@ -396,6 +399,9 @@ export const updateFromInstanceCommand = registerHandler('components.updateFromI
     at.children.forEach((child, i) => visit(child, [...atPath, 'children', i]));
   };
   state.document.pages.forEach((page, i) => visit(page.tree, ['pages', i, 'tree']));
+  // every instance the update rewrites is changed: a locked one, or one inside a locked element, refuses it (LK1)
+  const locked = firstLockRefusal(state.document, written.map((one) => one.before.id as NodeId), 'status.locked.edit');
+  if (locked !== null) return { kind: 'refused', message: locked };
   // what the edited instance no longer holds leaves the other instances, and whatever pointed at it lets go of it in
   // the same undo step (a link, a label, an interaction, a motion action: the audit's RF1, the update was refused): the
   // instances written whole carry their own release, every other node its own patch
