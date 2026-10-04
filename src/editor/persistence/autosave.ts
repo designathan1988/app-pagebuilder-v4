@@ -16,7 +16,7 @@
 // spec autosave-corruption-recovery). A refused write is written again after autosave.retryDelay, and
 // with the next change. While a change is not in IndexedDB, or a write was refused, leaving or reloading the tab asks
 // the browser's leave-page confirmation (spec unsaved-work-guard).
-import { flushDraftCaret, hasPendingDraft } from './drafts.ts';
+import { flushDraftCaret, hasPendingDraft, subscribePendingDraft } from './drafts.ts';
 import { readProject } from '../../core/project/archive.ts';
 import type { DocumentJson, Selection } from '../../core/document/model.ts';
 import { validateDocument, type ModelRules } from '../../core/document/validate.ts';
@@ -240,9 +240,9 @@ export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | un
   // then on it goes to IndexedDB, at every change of the document (AUD-38)
   let journalInDatabase = false;
   // the journal of the pending work, written now (when its document is not in the journal yet)
-  const journalNow = () => {
+  const journalNow = (withSelection = false) => {
     const work = pending;
-    if (work === null || !documentRevisions.has(work.revision) || journalled >= work.revision) return;
+    if (work === null || (!withSelection && !documentRevisions.has(work.revision)) || journalled >= work.revision) return;
     const kept = () => {
       journalled = Math.max(journalled, work.revision);
       for (const older of documentRevisions) if (older < work.revision) documentRevisions.delete(older);
@@ -268,6 +268,9 @@ export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | un
       if (done) kept();
     });
   };
+  // A draft already in session storage must not depend on a later unload event to keep the selection revision it
+  // names. A selection-only revision is journalled once when the first draft is written, not on every keystroke.
+  const stopDraft = subscribePendingDraft(() => journalNow(true));
   // the revisions that changed the document (a selection alone makes none of them)
   const documentRevisions = new Set<number>();
   // the pending work, written when the browser is idle: its journal, then IndexedDB
@@ -280,13 +283,13 @@ export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | un
     };
     idle = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback(run, { timeout: IDLE_WAIT }) : window.setTimeout(run, 0);
   };
-  const writeNow = () => {
+  const writeNow = (withSelection = false) => {
     if (idle !== 0) {
       if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idle);
       else window.clearTimeout(idle);
       idle = 0;
     }
-    journalNow();
+    journalNow(withSelection);
     if (!writing && pending !== null) void flush();
   };
   const flush = async () => {
@@ -332,17 +335,19 @@ export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | un
   // leaving or reloading the tab while the work is not all in IndexedDB asks the browser's confirmation
   const guard = (event: BeforeUnloadEvent) => {
     flushDraftCaret();
+    const draft = hasPendingDraft();
     // the work not written yet goes to the journal now, which a write finishes before the page can unload (an
-    // IndexedDB write started now could be cut short: the next start reads the journal)
-    journalNow();
-    if (state !== 'saving' && refusal === null && !hasPendingDraft()) return;
+    // IndexedDB write started now could be cut short: the next start reads the journal). A selection-only revision
+    // is written too while it binds an unconfirmed draft, so that draft finds the same revision on the next start.
+    journalNow(draft);
+    if (state !== 'saving' && refusal === null && !draft) return;
     event.preventDefault();
     event.returnValue = '';
   };
   window.addEventListener('beforeunload', guard);
   // a hidden tab writes what is pending at once (its journal too), rather than when idle or after the retry delay
   const hidden = () => {
-    if (document.visibilityState === 'hidden' && pending !== null) writeNow();
+    if (document.visibilityState === 'hidden' && pending !== null) writeNow(hasPendingDraft());
   };
   document.addEventListener('visibilitychange', hidden);
   window.addEventListener('pagehide', hidden);
@@ -384,6 +389,7 @@ export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | un
     if (journalInDatabase) journalNow();
   });
   return () => {
+    stopDraft();
     unsubscribe();
     if (idle !== 0) {
       if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idle);

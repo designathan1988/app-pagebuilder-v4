@@ -6,7 +6,7 @@
     "doors": 1356,
     "scenarios": 1826,
     "modules": 466,
-    "lines": 81171
+    "lines": 81184
   },
   "features": [
     {
@@ -5971,13 +5971,13 @@
     },
     {
       "path": "src/editor/persistence/autosave.ts",
-      "lines": 398,
+      "lines": 404,
       "commands": [],
       "features": []
     },
     {
       "path": "src/editor/persistence/drafts.ts",
-      "lines": 186,
+      "lines": 193,
       "commands": [],
       "features": []
     },

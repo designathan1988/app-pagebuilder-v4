@@ -82,6 +82,37 @@ test('canvas text returns after reload with editing open and remains a single un
   await expect.poll(() => project(page)).toEqual(before);
 });
 
+test('a canvas draft restores when its last selection save has not reached idle', runs('text.startEdit#key-enter-in-canvas'), async ({ page }) => {
+  const photos = '.cache/logs/fk1';
+  fs.mkdirSync(photos, { recursive: true });
+  await control(page, 'selection.select#layers-row', { args: { target: 'n-page' } }).click();
+  await expect(page.locator('[data-save-state]')).toHaveAttribute('data-save-state', 'saved');
+  // A busy browser can leave the selection-only autosave queued until the page is reloaded.
+  await page.evaluate(() => {
+    window.requestIdleCallback = () => 1;
+    window.cancelIdleCallback = () => {};
+  });
+  await control(page, 'selection.select#layers-row', { args: { target: 'n-intro' } }).click();
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Enter');
+  const text = page.frameLocator('.frame__page').locator('[data-node="n-intro"]');
+  await page.keyboard.press('End');
+  await page.keyboard.type(' Especial');
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('editing-draft'))).not.toBeNull();
+  expect(await page.evaluate(() => {
+    const draft = JSON.parse(sessionStorage.getItem('editing-draft') ?? 'null') as { revision: number; selection: string[] } | null;
+    const journal = JSON.parse(localStorage.getItem('work-journal') ?? 'null') as { revision: number; selection: string[] } | null;
+    return draft !== null && journal !== null && draft.revision === journal.revision && JSON.stringify(draft.selection) === JSON.stringify(journal.selection);
+  })).toBe(true);
+  const draft = await text.innerText();
+  await page.screenshot({ path: `${photos}/before-reload.png` });
+  page.once('dialog', d => d.accept());
+  await page.reload();
+  await expect(text).toHaveText(draft);
+  await expect(text).toHaveAttribute('contenteditable', 'plaintext-only');
+  await page.screenshot({ path: `${photos}/after-reload.png` });
+});
+
 test('programmatic marks, line breaks and a moved caret survive reload before confirmation', runs('text.startEdit#key-enter-in-canvas'), async ({ page }) => {
   const before = await project(page);
   await page.keyboard.press('Escape');

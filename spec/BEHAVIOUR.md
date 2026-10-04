@@ -390,7 +390,7 @@ Not affected: the history starts empty after a start, as always.
 
 ## autosave-restore
 
-Jornada 03 J23: canvas text (including inline marks) and the four value-field families keep their unconfirmed draft in session storage after every input and programmatic text change. Reload restores the same edit, target, style context and caret without confirming it or adding document history. Confirmation clears the journal and makes the ordinary undo step. Cancellation, project replacement and a stale saved revision discard it. A read-only tab never restores a copied draft. The leave-page guard warns while a draft exists; persistence does not depend on an unload event.
+Jornada 03 J23: canvas text (including inline marks) and the four value-field families keep their unconfirmed draft in session storage after every input and programmatic text change. Reload restores the same edit, target, style context and caret without confirming it or adding document history. If a selection-only autosave has not reached idle when the first draft is written, its revision and selection enter the synchronous journal once, so the draft still names the saved project after a reload or crash. Confirmation clears the journal and makes the ordinary undo step. Cancellation, project replacement and a stale saved revision discard it. A read-only tab never restores a copied draft. The leave-page guard warns while a draft exists; persistence does not depend on an unload event.
 
 How Pager behaves, observed by running it from `.cache/pager-run` (Chrome, window 1600×900) and read from its source. Source references are `path:line` inside Pager. Test document: a fresh profile, then a Section inserted from Elements.
 
@@ -440,7 +440,8 @@ None: saving needs no action.
    `autosave.idleWait` (1 s) after the change, so no input waits for the whole document to be serialised; a reload, a
    closing tab or a hidden tab writes the journal at once (synchronously, before the page can unload), so an immediate
    reload still keeps the change. Only a browser process that dies within that second can lose the last change. A
-   change of the selection alone never serialises the document again.
+   change of the selection alone does not serialise the document again unless a new unconfirmed draft needs that
+   selection's revision before the idle save; then one synchronous journal write binds them before unload.
 2. **The selection is stored apart from the document** (the document in IndexedDB, the selection in `localStorage`, written at different moments). After a crash between the two writes the restored selection can name nodes of another revision, or nothing. Required: the document and the selection are one record, written together in one IndexedDB transaction, and restored together.
 3. **The record's format is Pager's file format mixed with record fields** (`payload` text plus `name`, `saved`, `previous`). Required: the record carries the format version of the saved project from the first save, the same version `project.json` carries (project-save-json), so every future migration is exercised on the real loading path.
 4. **"Saved" is the only proof shown**, and it is a label. Required (tests): the proof is the document and the selection read back after an immediate reload, never the label.

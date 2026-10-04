@@ -37,6 +37,12 @@ let held: Draft | null = null;
 let restoring = false;
 let pending = false;
 let canvasCapture: (() => void) | null = null;
+const draftListeners = new Set<() => void>();
+
+export function subscribePendingDraft(listener: () => void): () => void {
+  draftListeners.add(listener);
+  return () => draftListeners.delete(listener);
+}
 
 export function registerDraftCapture(capture: () => void): () => void {
   canvasCapture = capture;
@@ -57,6 +63,7 @@ function persist(next: Draft | null): void {
     if (next === null) window.sessionStorage.removeItem(KEY);
     else window.sessionStorage.setItem(KEY, JSON.stringify(next));
   } catch { /* The in-memory draft still enables the leave-page warning if storage is unavailable. */ }
+  if (next !== null) for (const listener of [...draftListeners]) listener();
 }
 function context() {
   const state = store?.getState();
