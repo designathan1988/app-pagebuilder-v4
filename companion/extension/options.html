@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Builder Capture</title>
+<style>body{font:14px system-ui,sans-serif;margin:24px;max-width:480px}label{display:block;margin:12px 0 4px}input{width:100%;padding:6px;box-sizing:border-box}p{color:#555}</style>
+</head>
+<body>
+<h1>Builder Capture</h1>
+<p>The Builder Companion prints its token when it starts (npm run companion). Paste it here.</p>
+<label for="port">Companion port</label>
+<input id="port" type="number" value="5410">
+<label for="token">Companion token</label>
+<input id="token" type="text" autocomplete="off" spellcheck="false">
+<p><button id="save" type="button">Save</button> <span id="said" role="status"></span></p>
+<script type="module" src="options.js"></script>
+</body>
+</html>

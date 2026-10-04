@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Builder Capture",
+  "version": "1.0.0",
+  "description": "Captures the page of the current tab, as you see it while logged in, for the Builder: the Builder Companion on this computer receives it, and File › Open a web address… with the tab's address opens it.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://127.0.0.1/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_title": "Capture this page for the Builder" },
+  "options_page": "options.html"
+}

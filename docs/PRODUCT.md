@@ -208,7 +208,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | STG-12.1 | Capture through the Companion in the installed Chrome (DOM after scripts, shadow DOM, stylesheets, assets) | done | QA 117, 119; audit capture of MDN |
 | STG-12.2 | Conversion through the importer; residual stylesheet; scripts kept for preview/export | done | QA 117 |
 | STG-12.3 | Assets downloaded, links rewritten, several pages of a site | done | QA 118 |
-| STG-12.4 | Pages behind a login (Chrome extension) | missing | AUD-15 |
+| STG-12.4 | Pages behind a login (Chrome extension) | done | QA 235: the Builder Capture extension (`companion/extension`) captures the signed-in tab and hands it to the Companion with its token; `capture-url.spec` proves a page, stylesheet and picture that answer only a signed-in visitor |
 | STG-12.5 | Copyright notice in the dialog | done | the capture dialog's text |
 | STG-12.6 | Corpus of 20 sites at ≥ 98 % pixel fidelity per breakpoint | partial | QA 234: `npm run capture:corpus` measures the 20 sites from HAR records (`docs/CAPTURE-CORPUS.md`); 0 of 20 at 98 % (desktop 7.7–86.3 %, one site not captured: css-tricks); AUD-15 |
 | STG-13.1 | Publish: a single preview file (every page, CSS, images and fonts inside) | out | DEC-08 |
@@ -384,7 +384,7 @@ commit closes it with its proof; the Status column then names the commit's QA-LO
 | AUD-12 | 2 | The uploaded font only behind "More values" | audit; J15 | done (QA 161) |
 | AUD-13 | 2 | F6 never focuses the canvas page | audit; J12 | done (QA 162) |
 | AUD-14 | 2 | Export class names partly Portuguese and numbered | audit; J14 | done (QA 163) |
-| AUD-15 | 2 | Capture: 98 % corpus never measured, login capture absent, MDN logo missing | audit; QA 117, 119; QA 233: the logo; QA 234: the corpus measured (0 of 20 at 98 %) | open (the corpus below its target; the login capture remains) |
+| AUD-15 | 2 | Capture: 98 % corpus never measured, login capture absent, MDN logo missing | audit; QA 117, 119; QA 233: the logo; QA 234: the corpus measured (0 of 20 at 98 %) | open (the corpus below its target; the login capture done at QA 235) |
 | AUD-16 | 2 | Plan items dropped without a user decision (steppers, auto-fix) | audit | done (QA 164 the steppers, QA 166 the Checks fixes) |
 | AUD-17 | 2 | `hover-measure` not available in the contract while its code runs | audit | done (QA 167) |
 | AUD-18 | 2 | 39 features without a behaviour section | audit | done (QA 168) |
@@ -502,6 +502,7 @@ Stages 13, 15, 16 and 17 stay out (DEC-08, kept by the user on 2026-10-02).
 | DEC-43 | The text toolbar's Bold and Italic show the letters B and I, as the canonical design (the full name in the tooltip) | the user, 2026-10-03 | — | QA 216 |
 | DEC-44 | Where the canonical mock draws a state the app reads otherwise, the app's reading stands: in a multiple selection with the Element target a value from the class is Inherited (the mock paints it Here); a menu is as wide as its own words and keys and the command palette as tall as its list (within 51 px and 5 px of the mock's); Bold shows on only when the selection is bold (the mock's selected word is); a drag tints the container that receives the drop and the picked target is the row pressed, not a tinted row | the agent, 2026-10-03, under the user's order to decide (plan G3) | — | `tools/parity/decisions.json`; QA 220 |
 | DEC-45 | The first load stays one bundle (3.56 MB, 827 KB gzipped): about 1 MB is the manifest's data (the commands' 764 KB, the properties, the HTML model) and the command table, which the editor needs from its start and dispatches synchronously; the panels a session may not open, loaded on demand, saved 40 KB and broke the doors that expect their panel drawn at once (47 scenarios), so the 2.4 MB budget of the audit's item 7 waits for commands loaded with their module | the agent, 2026-10-03, under the user's order to decide (plan I.7) | — | QA 223 |
+| DEC-46 | The browser extension's test runs in Playwright's bundled Chromium, the one exception to `channel: 'chrome'`: branded Chrome no longer loads an unpacked extension from the command line (`--load-extension`), which Playwright's guide to extensions requires; the editor in the same test still runs in the installed Chrome | the plan's phase H (approved 2026-10-02); the download approved by the user 2026-10-03 | — | QA 235 |
 
 ## 5. Architecture
 
@@ -638,6 +639,7 @@ tools, events, owner).
 | `node tools/parity/pair.ts <state> [light]` | The app against `design/final/index.html` in one of 12 states, region by region, crops and a report in `.cache/logs/parity-<time>/`; `node tools/parity/join.ts <dir>` joins each pair (needs the canonical served on 5394: `node tools/parity/serve-design.ts`) | ~10 s each |
 | `npm run journey [-- <task>…]` | The jornada03 tasks (M1…M5, M3R, D1…D4, C1…C5, P2…P4, H2) replayed in Chrome on the e2e build, a photo per step, then the scoreboard of H1–H17 (`tools/journey/`; records and photos in `.cache/logs/journey/`) | ~3 min |
 | `npm run fidelity -- <site> <target.html>` | The study's fidelity measure of an exported site against the original at 1440, 1180, 834 and 390 | ~20 s |
+| `npm run extension:build` | Builds the Builder Capture extension into `companion/extension/dist` (load it unpacked in Chrome; its options take the token `npm run companion` prints) | ~5 s |
 | `npm run capture:corpus` | The capture corpus: 20 public sites recorded once into HAR files (`.cache/corpus/har`, `CORPUS_RECORD=1` records again), captured from the record, imported and exported through the editor, compared with the original at every breakpoint; writes `docs/CAPTURE-CORPUS.md` (`CORPUS_SITES=a,b` measures some) | ~15 min |
 | `npm run journey:offline`, `npm run journey:check` | The study's offline scorer and its tests | seconds |
 

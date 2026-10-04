@@ -19,6 +19,8 @@ export default defineConfig(
   globalIgnores(['jornada01', 'jornada02', 'jornada03']),
   // Third-party code shipped as it was published (the Lottie player, minified, with its licence): never edited here.
   globalIgnores(['src/**/vendor/**']),
+  // the browser extension as built (npm run extension:build): generated from companion/extension/src
+  globalIgnores(['companion/extension/dist']),
   // worktrees; none is project code. The fixtures are the scenarios' own input (a page HTML, its stylesheet, its
   // script…), data and not source: they are never edited to suit a test.
   globalIgnores(['dist', 'reference', '.cache', '.playwright-mcp', '.claude', 'node_modules', 'test-results', 'playwright-report', 'manifest/features/fixtures']),
@@ -43,6 +45,11 @@ export default defineConfig(
       'max-statements-per-line': ['error', { max: 1 }],
       'max-len': ['error', { code: 250, comments: 120, ignoreUrls: true, ignoreStrings: true, ignoreTemplateLiterals: true, ignoreRegExpLiterals: true, ignorePattern: String.raw`^\s*// (\{|@vitest-environment-options)` }],
     },
+  },
+  {
+    // the browser extension runs in Chrome's extension pages and service worker, with the chrome.* APIs
+    files: ['companion/extension/src/**/*.ts'],
+    languageOptions: { globals: { ...globals.browser, ...globals.serviceworker, chrome: 'readonly' } },
   },
   {
     files: ['*.config.{js,ts}', '.dependency-cruiser.cjs', 'tests/**/*.ts', 'tools/**/*.ts', 'companion/**/*.mjs'],

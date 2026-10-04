@@ -9048,9 +9048,21 @@ instance (`status.locked.edit`).
   (`/` index.html, `/plans/` plans/index.html), a stylesheet or an asset shared by several is downloaded once, and a
   link between two captured pages names the other page of the project. A count out of range is refused
   (`status.capture.badPages`).
-- Not captured: pages beyond the count asked (their links stay absolute), what a script draws live (canvas, WebGL), the content of
-  a frame from another origin, pages behind a login. The pixel-for-pixel corpus of the plan (20 sites, 98 %) is not
-  met: a public site such as MDN arrives whole and editable, but its header and some layout differ (open).
+- The capture's details that keep a page as it was drawn: an `<svg>`'s width and height become its size (presentation
+  attributes, below every rule of the sheets) and a viewBox other than its size keeps the drawing's coordinates; a
+  piece of a text the page does not draw (a hidden short label) is no part of the text; the theme a page sets on its
+  `<html>` (its classes and `data-` attributes) reaches its body; a page's Content Security Policy does not stop the
+  capture.
+- **A page behind a login** (STG-12.4): the **Builder Capture** browser extension (`companion/extension`, built with
+  `npm run extension:build`, loaded unpacked) reads the page of the person's own tab, logged in, with the same reading
+  the Companion runs, and every file the copy needs with the person's credentials, and hands them to the Companion with
+  the Companion's token (printed when it starts; the extension's options hold it). For ten minutes, **File › Open a web
+  address…** with the tab's address is answered from that capture. A page without the token is refused.
+- Not captured: pages beyond the count asked (their links stay absolute), what a script draws live (canvas, WebGL), the
+  content of a frame from another origin.
+- **The corpus** (`npm run capture:corpus`, the report `docs/CAPTURE-CORPUS.md`): twenty public sites recorded once
+  into HAR files and replayed, captured, imported, exported and compared with the original at every breakpoint. The
+  plan's target, 98 % of pixels alike at every breakpoint, is not met (open: AUD-15, STG-12.6).
 
 ### Refusals
 

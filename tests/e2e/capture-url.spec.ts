@@ -10,8 +10,13 @@ import { expect, test, type Page } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
 import { runDoor, runs, openExplorer } from './door.ts';
 import { startCompanion, stopCompanion } from '../../tools/companion/server.ts';
+import { chromium } from '@playwright/test';
+import { buildExtension } from '../../tools/companion/build-extension.ts';
 
 const SITE_PORT = 5421;
+// the signed-in site of the extension's test, and the token the Companion and the extension share
+const LOGIN_PORT = 5422;
+const TOKEN = 'the-companion-token-of-the-test';
 // one site and one Companion for the file's tests: they run one after the other
 test.describe.configure({ mode: 'serial' });
 const TYPES: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.svg': 'image/svg+xml' };
@@ -31,7 +36,7 @@ test.beforeAll(async () => {
     res.end(readFileSync(file));
   });
   await new Promise<void>((resolve) => site.listen(SITE_PORT, '127.0.0.1', () => resolve()));
-  companion = await startCompanion(5410);
+  companion = await startCompanion(5410, { token: TOKEN });
 });
 test.afterAll(async () => {
   await stopCompanion(companion);
@@ -116,6 +121,72 @@ test('without the Companion the status bar says how to start it', runs('project.
     await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
     await expect(page.getByRole('status')).toHaveText('The Builder Companion does not answer: run npm run companion, then capture again.');
   } finally {
-    companion = await startCompanion(5410);
+    companion = await startCompanion(5410, { token: TOKEN });
   }
+});
+
+// A page behind a login (STG-12.4): a site whose page, stylesheet and picture answer only a signed-in visitor (a cookie
+// its /login sets). The Builder Capture extension (companion/extension), loaded in Playwright's own Chromium (Chrome
+// no longer loads an unpacked extension from the command line: DEC-38), captures the signed-in tab and hands it to the
+// Companion with its token; File › Open a web address… with that address then opens the page as the person saw it. The
+// Companion's own Chrome, with no session there, could not have read it.
+test('the browser extension captures a page behind a login, and the editor opens it', runs('project.captureUrl#capture-url-run'), async ({ page }) => {
+  test.setTimeout(180_000);
+  const signedIn = (req: { headers: { cookie?: string | undefined } }) => (req.headers.cookie ?? '').includes('session=ana');
+  const login = createServer((req, res) => {
+    const asked = (req.url ?? '/').split('?')[0];
+    if (asked === '/login') {
+      res.writeHead(302, { 'set-cookie': 'session=ana; Path=/; HttpOnly', location: '/account' }).end();
+      return;
+    }
+    if (!signedIn(req)) {
+      res.writeHead(401, { 'content-type': 'text/html' }).end('<h1>Sign in first</h1>');
+      return;
+    }
+    if (asked === '/account') {
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end('<!doctype html><html lang="en"><head><title>Your account</title><link rel="stylesheet" href="/account.css"></head><body><h1 class="greeting">Welcome back, Ana</h1><img src="/avatar.svg" alt="Ana" width="40" height="40"></body></html>');
+      return;
+    }
+    if (asked === '/account.css') {
+      res.writeHead(200, { 'content-type': 'text/css' }).end('.greeting { color: rgb(12, 99, 51); }');
+      return;
+    }
+    if (asked === '/avatar.svg') {
+      res.writeHead(200, { 'content-type': 'image/svg+xml' }).end('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="18" fill="#0c6333"/></svg>');
+      return;
+    }
+    res.writeHead(404).end();
+  });
+  await new Promise<void>((resolve) => login.listen(LOGIN_PORT, '127.0.0.1', () => resolve()));
+  const extension = await buildExtension();
+  const browser = await chromium.launchPersistentContext('', { channel: 'chromium', args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`] });
+  try {
+    const worker = browser.serviceWorkers()[0] ?? (await browser.waitForEvent('serviceworker'));
+    await worker.evaluate((token) => chrome.storage.local.set({ port: 5410, token }), TOKEN);
+    const tab = browser.pages()[0] ?? (await browser.newPage());
+    await tab.goto(`http://127.0.0.1:${LOGIN_PORT}/login`);
+    await expect(tab.getByRole('heading', { name: 'Welcome back, Ana' })).toBeVisible();
+    const answer = await worker.evaluate(async () => {
+      const [active] = await chrome.tabs.query({ active: true, currentWindow: true });
+      return (globalThis as unknown as { captureTab(tab: chrome.tabs.Tab): Promise<{ ok: boolean; said: string }> }).captureTab(active as chrome.tabs.Tab);
+    });
+    expect(answer, answer.said).toMatchObject({ ok: true });
+  } finally {
+    await browser.close();
+    await new Promise((resolve) => login.close(resolve));
+  }
+  // the editor, in the installed Chrome, asks the Companion for the address the extension captured
+  await openEditor(page);
+  await runDoor(page, 'workspace.openDialog#menu-file-capture-url');
+  const dialog = page.locator('[data-region="capture-url-dialog"]');
+  await dialog.locator('input[name="url"]').fill(`http://127.0.0.1:${LOGIN_PORT}/account`);
+  await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
+  const destination = page.locator('[data-door="project.importHtml#destination-page"]');
+  await expect(destination).toBeVisible({ timeout: 60_000 });
+  await destination.click();
+  const frame = page.frameLocator('.frame__page');
+  // the signed-in page, its stylesheet and its picture, all read with the person's session
+  await expect(frame.getByRole('heading', { name: 'Welcome back, Ana' })).toBeVisible();
+  expect(await frame.getByRole('heading', { name: 'Welcome back, Ana' }).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(12, 99, 51)');
+  await expect.poll(() => frame.locator('img').first().evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });

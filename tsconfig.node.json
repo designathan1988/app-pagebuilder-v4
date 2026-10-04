@@ -19,6 +19,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "tests", "tools"],
+  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "tests", "tools", "companion/extension/src"],
   "exclude": ["node_modules", "reference", ".cache", ".playwright-mcp"]
 }
