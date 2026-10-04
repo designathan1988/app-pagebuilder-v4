@@ -259,7 +259,7 @@ Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests pas
 | `html-import-states` | Import pseudo-class rules as state styles | yes | 2 | 2 | [html-import-states](../spec/BEHAVIOUR.md#html-import-states) | 1 | passes 4/4 |
 | `html-import-roundtrip` | Exported pages import back unchanged | yes | 2 | 2 | [html-import-roundtrip](../spec/BEHAVIOUR.md#html-import-roundtrip) | 1 | passes 4/4 |
 | `clipboard-paste-external` | Paste HTML and text copied from outside the app | yes | 2 | 2 | [clipboard-paste-external](../spec/BEHAVIOUR.md#clipboard-paste-external) | 2 | passes 4/4 |
-| `capture-url` | Open any web address as a page of the project | yes | 6 | 5 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 1 | passes 3/3 |
+| `capture-url` | Open any web address as a page of the project | yes | 6 | 5 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 2 | passes 3/3 |
 
 ## 17-code-panel
 
