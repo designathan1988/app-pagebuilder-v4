@@ -1,37 +1,91 @@
-# Importing arbitrary websites without discarding their structure
+# Importing a website: research, defects and the design (2026-10-04)
 
-## Decision from importer research
+The importer turns a page a person opens (File › Open a web address…, or the Builder Capture extension in their own
+tab) into a page of the project: drawn on the canvas as the site draws it, editable, saved in the document JSON and
+exported as a real page. This document is its contract. It replaces the version of the same date that described the
+per-width snapshot design; the research below found that design wrong at its core (DEC-61).
 
-The Builder has two different import contracts. Ordinary authored HTML can be converted into the editor's restricted element vocabulary. A captured external page must preserve arbitrary HTML, CSS and browser-observed state before the editor offers semantic controls. Treating both inputs as the same upcast destroyed valid source information.
+## What the research found
 
-This distinction is explicit in mature editors: [CKEditor upcast](https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/conversion/upcast.html) converts a view into a schema-bound model, while [General HTML Support](https://ckeditor.com/docs/ckeditor5/latest/features/html/general-html-support.html) retains otherwise unsupported elements, attributes, classes and styles with more limited editing controls. [GrapesJS's parser](https://grapesjs.com/docs/guides/Custom-HTML-parser.html) represents element and text nodes before component recognition; its [parser API](https://grapesjs.com/docs/api/parser.html) separately controls scripts, event attributes and unsafe URL values. For full-page archiving, [SingleFile](https://github.com/gildas-lormeau/SingleFile/blob/master/faq.md) collects page resources, frames and fonts beyond the HTML text, and [Browsertrix](https://github.com/webrecorder/browsertrix-crawler) captures network activity through Chrome DevTools Protocol. These are architectural references; no code is copied from them.
+| Question | What mature tools and the specifications do | Sources |
+| --- | --- | --- |
+| How does a page travel from the browser? | As a tree of nodes, never as HTML text: a DOM built by scripts may not survive "serialize, then parse again" (a `<div>` a script put in `<head>` sends every later head element into `<body>`). rrweb gives each node an id and records element, text and comment nodes with their attributes. | [HTML Standard, parsing and serialization](https://html.spec.whatwg.org/multipage/parsing.html); [rrweb serialization](https://github.com/rrweb-io/rrweb/blob/master/docs/serialization.md) |
+| How are the styles read? | From the CSSOM (`sheet.cssRules`), because CSS-in-JS libraries insert their rules with `insertRule` and leave the `<style>` element's text empty; a cross-origin sheet the CSSOM will not show is fetched by its address. A document's `adoptedStyleSheets` come after its own sheets. | rrweb `stringifyStylesheet` ([source](https://github.com/rrweb-io/rrweb/blob/master/packages/rrweb-snapshot/src/utils.ts)); [styled-components speedy mode](https://github.com/styled-components/styled-components/issues/1603); [CSSOM, document or shadow root CSS style sheets](https://drafts.csswg.org/cssom/#documentorshadowroot-document-or-shadow-root-css-style-sheets) |
+| What runtime state does a faithful copy keep? | Form values, checked and selected states, the scroll position of every scrolled box, canvas pixels, the image `srcset` chose; scripts are removed so the copy cannot change itself. | rrweb `snapshot.ts` (`rr_scrollLeft`, `value`, `rr_dataURL`); [SingleFile](https://github.com/gildas-lormeau/SingleFile); [freeze-dry](https://github.com/WebMemex/freeze-dry); [DevTools Protocol `DOMSnapshot.captureSnapshot`](https://chromedevtools.github.io/devtools-protocol/tot/DOMSnapshot/) (`currentSourceURL`, `inputValue`, `inputChecked`) |
+| Shadow DOM? | Kept as shadow DOM (rrweb rebuilds it with `attachShadow`); a static page carries it as declarative shadow DOM, `<template shadowrootmode="open">`, with no script. Flattening it and rewriting `:host` selectors changes what the rules match. | [MDN, `<template shadowrootmode>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/template) |
+| Several widths? | Builder.io's Copy Layout resizes the browser to capture the layout at several sizes and keeps one block per element with styles per size (`responsiveStyles`). | [Builder.io Chrome extension](https://www.builder.io/c/docs/chrome-extension); [Builder.io Write API](https://www.builder.io/c/docs/write-api) |
+| Convert to the editor's own elements from computed styles? | That is what design tools do (getComputedStyle, getBoundingClientRect, text ranges into layers); Builder.io states 80–90 % accuracy, below this project's 98 % target, so the source DOM and CSS are kept and edited in place, as CKEditor's General HTML Support keeps what its model does not know. | [Builder.io, HTML to design](https://www.builder.io/blog/html-to-design); [CKEditor General HTML Support](https://ckeditor.com/docs/ckeditor5/latest/features/html/general-html-support.html) |
+| Time in a recorded page | Playwright's `setFixedTime` freezes `Date` only; timers keep running, so a script that measures elapsed time with `Date.now()` never finishes (allbirds' hero stayed at opacity 0). `clock.install({ time })` starts the clock at a fixed moment and lets it run. | [Playwright clock](https://playwright.dev/docs/clock) |
 
-## Builder's causal boundary map
+## What was wrong (the design of 2026-10-04 morning)
 
-| Boundary | Previous loss | Required invariant | Owner |
+| # | Defect | Where | Evidence |
 | --- | --- | --- | --- |
-| Browser state → source | A wide HAR replay could omit phone resources; a second navigation could show different content. | For each width, photograph and serialize the same paused live page, record resource bytes and compare an independent live load. An unstable live pair is invalid evidence. | `tools/capture/reference.ts` |
-| Source DOM → captured package | One desktop tree plus selected inline styles cannot encode added, removed or reordered phone nodes. Moving every sheet to the start changes the cascade. | Keep complete ordered DOM observations per width and keep every localized stylesheet at its original position. | `tools/companion/serialize.ts`, `capture.ts` |
-| Captured package → project JSON | Closed `DocNode` types converted text-with-media to text and unwrapped custom tags. | `Page.capture` owns ordered element/text/comment nodes, namespaces and attributes. `Page.tree` has only the page settings root. Existing authored projects migrate forward. | `src/core/document/captured.ts`, `src/core/import/import.ts` |
-| Project JSON → canvas/export | Residual CSS and later generated BEM rules changed layers, specificity, inline priority and presentation hints. | Both readers use the same captured tree, original author CSS and localized resource bytes; authored pages retain their separate pipeline. | `src/editor/canvas/render/captured.ts`, `src/core/render/captured.ts`, `src/core/export/export.ts` |
-| Edit → saved/reopened/exported page | A visual-only copy would be faithful but uneditable. | Edits produce validated JSON patches and one undo step; an inspector-selected captured node never enters authored-node commands. Save, undo, export and re-import read the same updated tree. | `src/core/capture/edits.ts`, `src/editor/capture/selection.ts` |
-| Opaque browser paint | Canvas, video frames, closed shadow trees and inaccessible frames are not in ordinary HTML serialization. | Record an accessible DOM subtree where possible; otherwise save a same-moment image fallback with provenance and expose only image/box editing. Report inaccessible inner DOM precisely. | Capture media work, still open |
+| 1 | The page travelled as HTML text and was parsed again. | `tools/companion/serialize.ts` (`outerHTML`), `src/editor/browser-ports.ts` (`capturedTree`) | allbirds: the project's body held 597 head nodes before its content (`.cache/logs/r7-1004/audit-all-final.json`) |
+| 2 | Each width was a separate tree with its own ids; an edit changed one width only. | `src/core/import/import.ts` (`pageFrom`), `src/core/capture/edits.ts` (`findCaptured`) | the spec said so ("independent across widths") |
+| 3 | The export held every width's copy and chose one with `document.write` at load: blank without scripts, unchanged when the window is resized. | `src/core/render/captured.ts` (`capturedResponsiveHtml`) | the code |
+| 4 | Styles were read from `<style>` text: rules a script inserted were lost; `document.adoptedStyleSheets` were never read. | `serialize.ts` | the code; styled-components' production mode |
+| 5 | Shadow DOM was flattened and its rules rescoped by rewriting selectors. | `serialize.ts`, `tools/companion/capture.ts` (`scopeCss`) | the code |
+| 6 | Scroll positions and form values were not kept. | `serialize.ts` | the code (cloneNode copies attributes, not state) |
+| 7 | The corpus recorder froze `Date`, so time-driven entrances never ran in the reference or the capture. | `tools/capture/reference.ts` (`setFixedTime`) | `.cache/logs/r6-1004/allbirds-probe.txt` |
 
-## Import algorithm
+Kept, because they are sound: resource fetching and localization (`siteBuilder`), the `srcset` grammar, the canvas and
+video paint fallbacks, the safety rules for elements and attributes (`unsafeCapturedElement`,
+`unsafeCapturedAttribute`), HAR replay for the corpus, captured-node selection and the inspector.
 
-1. Observe the live browser at each requested width. Save HTML DOM order, actual selected image candidates, source sheet positions, computed runtime attributes, resources and layout evidence together. Do not infer a missing width from a desktop body index.
-   A response marked [`cf-mitigated: challenge`](https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/) is an access gate, not the requested site. The Companion refuses it and offers the user's own Chrome tab and extension as the route after verification; the automatic corpus substitutes a documented same-kind public source when the site's challenge cannot be completed in automated Chrome.
-2. Parse the saved HTML in an inert browser document, reject scripts, event attributes and executable URL schemes, and encode safe nodes as JSON. Keep unknown HTML tags and SVG/MathML namespaces. [DOMParser security guidance](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString) warns that inert parsing alone does not make later insertion safe.
-3. Persist the captured variants and resource bytes once. Keep CSS as authored, including inline declarations and source order; [CSS Cascade Level 5](https://www.w3.org/TR/css-cascade-5/) makes these properties observable and rules out equivalent reconstruction with later generic selectors.
-4. Render the exact observed variant in the canvas and exported page. At an unobserved width, choose the nearest stored variant and label it approximate. A generated Builder bootstrap may choose a variant, but no wrapper may alter the source's child or sibling selectors.
-5. Apply edits to the captured JSON, validate before committing, and retain only the selected node ID in editor view state. [React's state-structure guidance](https://react.dev/learn/choosing-the-state-structure) recommends deriving the selected object from its ID rather than storing a duplicate; the authored selection remains reserved for authored nodes.
-6. Export the localized resources and snapshot package with the page. Re-import must recover the same variants and edits. The project save uses the versioned document JSON directly.
+## The design
 
-## Required closure evidence
+### 1. Observe (in the page)
 
-The audit is executable: `npm run capture:audit -- <site-id>` reads saved evidence in seconds, and the completed corpus command runs it for all sites. It writes `.cache/logs/capture-import-audit.md` and `.json`, plus one `import-audit.json` beside each site's photographs. Each row names the failing boundary and DOM path, distinguishes exact from ambiguous matches, checks localized CSS/media files and reports geometric/style divergence without altering the acceptance score.
+`serializePage` (shared by the Companion and the extension) returns the page as a tree of nodes:
 
-- A controlled Chrome page with text/media/text, custom elements, root class, SVG and ordered layered CSS must retain DOM order, computed styles, canvas pixels, exported pixels, edit/undo and project reopen. The mixed-media case was red before the new model and has passed after it; the complete matrix is still open.
-- A controlled responsive page must add, remove, reorder and restyle nodes on fresh phone navigation and survive all four exported widths.
-- Frames, video, canvas and shadow content need explicit browser evidence. A fallback's editability limit must be visible in the app, not hidden in a score.
-- The unchanged 20-site corpus is accepted only after all live references are stable or an evidence-backed same-kind replacement is recorded, and all exported widths reach the user's current 100% target. R6, R7 and the corpus target remain open until this proof exists.
+- element `{ kind, key, namespace, tag, attributes, children, shadow?, state? }`, text and comment `{ kind, key, value }`;
+  `key` comes from a per-page `WeakMap`, so a node keeps its key across observations of the same page;
+- a `<link rel=stylesheet>` or `<style>` stays at its place in the tree, naming its entry in `sheets`: a style
+  element's text is read from its CSSOM when the page lets it be read, else from its text; a link is fetched by its
+  address; `document.adoptedStyleSheets` follow the document's sheets; a shadow root's adopted sheets are its own;
+- an open shadow root is kept: `shadow: { mode, children, adopted }`;
+- `state`: an input's value and checked state, an option's selection, a textarea's value, a scrolled box's offsets;
+- left out: scripts, `<noscript>`, resource hints (`preload`, `modulepreload`, `prefetch`, `preconnect`,
+  `dns-prefetch`), the capture's own style.
+
+### 2. Package (the Companion)
+
+Resources are localized on the tree's attribute values, never by replacing text in markup. The package
+`<page>.capture.json` is format 2: `{ format: 2, widths, root, resourceProblems? }`, `root` being the merged tree.
+
+### 3. Merge (pure, `src/core/capture/merge.ts`)
+
+Each width is a fresh navigation (what a person sees when they open the site at that width). The widths are reconciled
+into one tree, widest first: two element siblings correspond when tag, namespace and id agree and their classes match
+best (a longest common subsequence over each child list, then a second pass by tag alone inside the gaps); text and
+comments correspond by position inside a matched parent. A node another width lacks is absent there; a node only one
+width has is present there only; an attribute or text that differs keeps its value per width. Every width draws
+exactly the nodes, attributes and text of its own observation.
+
+### 4. Document (`Page.capture`, document format 4)
+
+`{ widths, root, resourceProblems? }`: one tree. A node may carry `at: { [width]: { absent?, attributes?, value? } }`.
+Format 3 pages migrate by keeping their widest snapshot (the other snapshots had no node identity to merge by); a
+format 1 capture package imports the same way.
+
+### 5. Canvas and export
+
+`capturedAt(capture, width)` projects the tree at the observed width nearest the canvas's (stated as approximate between
+widths). The export writes the widest projection as static HTML (no script needed to see the page), shadow roots as
+declarative shadow DOM, and a Builder-owned script that applies the other widths' nodes, attributes and text when the
+window matches them, on load and on resize. Every written page parses back to the tree it came from: an element the
+HTML parser would move out of `<head>` is not written there (a head is never drawn).
+
+### 6. Edit
+
+An edit applies to the node at every width: the per-width values of what it changes are dropped. Delete, insert and
+move act on the one tree.
+
+## Proof
+
+- Unit: the observation of a page with a script-built head, inserted rules, adopted sheets, an open shadow root,
+  scrolled boxes and form values; the merge of widths with added, removed, reordered and restyled nodes; the projection
+  and the export parsing back to the same tree; an edit seen at every width.
+- Browser: a controlled page captured by the Companion and exported, at four widths, before and after a resize.
+- Corpus: `npm run capture:corpus` after the recorder's clock is fixed, with the audit at every boundary.
