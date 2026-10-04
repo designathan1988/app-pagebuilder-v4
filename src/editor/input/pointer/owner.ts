@@ -49,16 +49,14 @@ export interface PointerSession {
   unfold: ReturnType<typeof setTimeout> | null;
   // the colour picker's area held with the pointer
   pickingColor: { area: HTMLElement; pointer: number } | null;
-  // the resize handle pressed: its door and handle, where it went down, what the element measured then and the zoom,
-  // and the gesture its drag opened (none before the threshold) with the cancellations counted when it opened
-  // a resize: its handle, where it began, its basis, the zoom, and the resized node and its box then (page px), which
-  // the snapping reads
+  // a resize: its handle's door and handle, where it began, its basis, the zoom, the resized node and its box then
+  // (page px), which the snapping reads, and the gesture its drag opened with the cancellations counted when it opened
   resizing: { entry: DoorEntry; handle: string; pointer: number; start: Point; basis: ResizeFrom; zoom: number; gesture: Gesture | null; cancels: number; node: NodeId; box: Box | null; media: boolean } | null;
-  // a rotation in progress: its handle's door, the element's centre and the pointer's angle around it at the press, the
-  // angle the element held, and its gesture once the pointer moved past the threshold
   // a guide drag in progress: a new guide out of a ruler or a guide moved, its axis, the guide once there is one, and
   // its gesture once the pointer moved past the threshold
   guiding: { kind: 'create' | 'move'; axis: string; guide: string | null; pointer: number; start: Point; gesture: Gesture | null; cancels: number } | null;
+  // a rotation in progress: its handle's door, the element's centre and the pointer's angle around it at the press, the
+  // angle the element held, and its gesture once the pointer moved past the threshold
   rotating: { entry: DoorEntry; property: string; pointer: number; start: Point; centre: Point; startAngle: number; base: number; gesture: Gesture | null; cancels: number } | null;
   spacing: SpacingDrag | null;
   // the timer that confirms the side drop offered after wrap.sideDwell, and the frame loop of the autoscroll
@@ -148,15 +146,10 @@ export interface PointerSession {
   // (pointercancel) and a press while a gesture is still open (a release that never arrived) end every open gesture
   // with nothing kept, so no command is ever sent through a closed gesture.
   captured: number | null;
-  // the gestures of a handle (a spacing band, a guide, a rotation, a resize), the pan and the colour pick: ended, their
-  // open gesture cancelled
   // a press a pointer tool took (pointer-tools.ts): its session, the pointer, the gesture open now (opened at the
   // press, opened anew at each move that runs a command) and the cancellations counted at the press (Escape,
   // drag.cancel)
   tooling: { readonly session: ToolSession; readonly pointer: number; gesture: Gesture; readonly cancels: number } | null;
-  // The keys of the drag (drag-session.ts) change the editor state while the gesture is open: a level key's new level
-  // is redrawn at once; drag.cancel records a cancellation, and one newer than the open gesture ends it (once the
-  // dispatch that recorded it has returned).
   // the picker's session follows the picker: opened with it, committed or cancelled as it closes
   pickerClosings: number;
   pickerCancels: number;

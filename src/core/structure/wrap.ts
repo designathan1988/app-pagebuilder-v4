@@ -9,6 +9,7 @@
 // cannot be wrapped, nor a locked element or one inside a locked element (spec lock-element), and a parent whose
 // content model refuses the wrapper's element refuses it; nothing changes then. The
 // wrapper becomes the selection. element.unwrap (feature unwrap, below) takes a wrapper away and lifts its children.
+import { instanceMoveRefusal } from '../design/components.ts';
 import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler, registerPredicate, type HandlerContext, type Outcome } from '../commands/registry.ts';
 import { locate, type DocNode, type Location, type StoredValue, type Styles } from '../document/model.ts';
@@ -242,6 +243,10 @@ export const wrapBesideCommand = registerHandler('element.wrapBeside', ({ state,
   const moving = entry === undefined ? arriving.map((n) => n.id) : [];
   const locked = firstLockRefusal(state.document, moving, 'status.locked.move') ?? lockRefusal(state.document, at.parent.id, 'status.locked.insert') ?? lockRefusal(state.document, target, 'status.locked.move');
   if (locked !== null) return { kind: 'refused', message: locked };
+  // what moves into the wrapper lands in the target's parent: a part stays in its instance and no instance goes
+  // inside another, as element.moveTo asks (the audit's IN1)
+  const instanced = instanceMoveRefusal(state.document, entry === undefined ? arriving : [], at.parent.id as NodeId);
+  if (instanced !== null) return { kind: 'refused', message: instanced };
 
   const definition = rules.wrappers.get(kind as WrapperId);
   const element = definition === undefined ? undefined : rules.elements.get(definition.element);

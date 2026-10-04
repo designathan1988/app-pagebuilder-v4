@@ -18,11 +18,11 @@ import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler, registerPredicate, type HandlerContext } from '../commands/registry.ts';
 import { locate, type DocNode } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
-import type { Patch } from '../history/transaction.ts';
+import { applyPatches, type Patch } from '../history/transaction.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
 import { selectionRoots } from '../structure/remove.ts';
 import { valuePredicateHolds } from '../style/couplings.ts';
-import { propertyName, readValue, writeDeclarations, writeStyle } from '../style/set.ts';
+import { propertyName, readValue, styleHolders, writeDeclarations, writeStyle } from '../style/set.ts';
 import { storedValue } from '../style/stored.ts';
 
 export const setPositionModeCommand = registerHandler('position.setMode', (context, { property, mode }) => {
@@ -31,17 +31,23 @@ export const setPositionModeCommand = registerHandler('position.setMode', (conte
   // back in the flow, the coordinates and the stacking of a positioned element are inert: they leave the document
   // with the mode, so the export holds no dead declarations (the user's real-use audit, item A3.31)
   if (mode === 'static' || mode === 'relative') {
-    const { breakpoint, state: base } = context.rules.base;
-    const removed = context.state.selection.flatMap((id) => {
+    // the insets leave through the one writer of declarations and the holders every style write goes to (a class that
+    // is the style target, an instance's component and its copies: the audit's OW1), and the mode is written on the
+    // document they left, so the two writes of one holder never undo each other (LU1)
+    const insets = (context.rules.compositeFacts.get(INSET)?.longhands ?? []).filter((p) => p !== property);
+    const roots = context.state.selection.flatMap((id) => {
       const found = locate(context.state.document, id);
-      if (found === null) return [];
-      const inert = [INSET].flatMap((composite) => context.rules.compositeFacts.get(composite)?.longhands ?? []).filter((p) => p !== property && storedValue(found.node, p, context.rules) !== undefined);
-      return inert.map((p) => ({ op: 'remove' as const, path: [...found.path, 'styles', breakpoint, base, p] }));
+      return found === null ? [] : [found];
+    });
+    const removed = styleHolders(context, roots).flatMap((held) => {
+      const inert = insets.filter((p) => storedValue(held.node, p, context.rules) !== undefined);
+      return inert.length === 0 ? [] : writeDeclarations(held.node, held.path, context.rules.base, Object.fromEntries(inert.map((p) => [p, null])));
     });
     if (removed.length > 0) {
-      const written = writeStyle(context, property, read.css);
+      const left = applyPatches(context.state.document, removed).document;
+      const written = writeStyle({ ...context, state: { ...context.state, document: left } }, property, read.css);
       if (written.kind !== 'change') return written;
-      return { ...written, patches: [...(written.patches ?? []), ...removed] };
+      return { ...written, patches: [...removed, ...(written.patches ?? [])] };
     }
   }
   return writeStyle(context, property, read.css);

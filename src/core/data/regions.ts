@@ -10,7 +10,8 @@ import { refreshCopiedIdentities } from '../document/clone.ts';
 import { locate, walk, type ComponentDefinition, type DocNode, type DocumentJson } from '../document/model.ts';
 import { componentName, copied, createRefusal, marked, unmarked } from '../design/components.ts';
 import { placementRefusal } from '../elements/content-model.ts';
-import { deepEqual } from '../history/transaction.ts';
+import { applyPatches, deepEqual } from '../history/transaction.ts';
+import { leavingNames, releaseReferencesPatch } from '../document/tree.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { freshName, nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
 import { DataRefusal, refuse } from './collections.ts';
@@ -212,5 +213,10 @@ export function syncRegions(before: DocumentJson, after: DocumentJson, context: 
       });
     }
   }
+  // the places conform() dropped from other instances leave the pages: what pointed at them lets go (the audit's RF2,
+  // as the repeated items a fill removes do in materialize.ts)
+  const kept = new Set(working.pages.flatMap((page) => [...walk(page.tree)].map((one) => one.id)));
+  const removed = new Set(after.pages.flatMap((page) => [...walk(page.tree)].map((one) => one.id as NodeId)).filter((id) => !kept.has(id)));
+  if (removed.size > 0) working = applyPatches(working, releaseReferencesPatch(working, removed, leavingNames(after, removed))).document;
   return working;
 }

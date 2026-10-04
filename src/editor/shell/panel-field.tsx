@@ -113,6 +113,8 @@ export function PanelField({
             setEdited(true);
             setDraft(event.target.value);
           }}
+          // left without keeping it, the typing goes and the document's value shows again (the audit's FD2)
+          onBlur={() => setEdited(false)}
         />
         {curve ? <EasingCurveButton value={value} label={label} disabled={!ready} run={runWith} /> : null}
         <button type="submit" className="visually-hidden" tabIndex={-1}>

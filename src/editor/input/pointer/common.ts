@@ -109,7 +109,6 @@ export const TILE_DRAGS = manifest.doors.filter((d) => d.door.kind === 'canvas-d
 // The dwell that unfolds a folded row, once its feature is built (the row's own click and drop doors are measured
 // with the drops, input/drop-proposals.ts).
 export const ROW_DWELL = layersDrag('collapsed-row-dwell');
-// how long the pointer rests on a folded row before it unfolds (interactions.json layers.expandDwell)
 // the confirmed side drop's pill: where it is drawn from the pointer, and how near it the pointer keeps the offer
 export const PILL_OFFSET = pairConstant('wrap.pillOffset');
 export const PILL_FREEZE = numberConstant('wrap.pillFreeze');
@@ -316,13 +315,13 @@ export const STOP_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-dr
 export const LAYER_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source.endsWith('-shadow-row'));
 // the drag of a shadow's light on its pad (spec shadow-editor): the panel drags pressed on a light pad
 export const PAD_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.gesture === 'shadow-pad-drag');
-// The quick panel's grip (spec quick-panel): the panel drag doors pressed on it.
 // the four sides of a box, in the composite's order (properties.json: top, right, bottom, left)
 export const BOX_SIDES = manifest.properties.composites.find((c) => c.control === 'box-model')?.longhands ?? [];
 export const SIDES: readonly string[] = BOX_SIDES.map((property) => property.slice(property.lastIndexOf('-') + 1));
 // the margin arguments geometry.resize takes for a flow drag (the manifest's own names): the dragged edge follows
 // the pointer by its margin (item 4.2)
 export const MARGIN_ARGS: Readonly<Record<'marginLeft' | 'marginTop', string>> = { marginLeft: 'marginLeft', marginTop: 'marginTop' };
+// The quick panel's grip (spec quick-panel): the panel drag doors pressed on it.
 export const GRIP_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'quick-panel-grip');
 // The splitters (spec panel-resize): the panel drag doors pressed on a divider between panels; the frame's edge is
 // one too (spec breakpoints-switch): it sizes the screen the canvas shows, from the width at the press.

@@ -153,7 +153,7 @@ export const choosePreviewSheet = registerHandler<'data.previewSheet', EditorUi>
     const index = preview?.sheets.findIndex((one) => one.name === sheet) ?? -1;
     if (preview === undefined || index < 0) return { kind: 'refused', message: argumentRefused('sheet') };
     const shown = preview.sheets[index];
-  return { kind: 'change', ui: withData(state.ui, { preview: { ...preview, sheet: index, types: guessed(shown) } }), message: message('status.data.sheetShown', { name: sheet, count: { plural: 'data.rows', count: shown?.rows.length ?? 0 } }) };
+    return { kind: 'change', ui: withData(state.ui, { preview: { ...preview, sheet: index, types: guessed(shown) } }), message: message('status.data.sheetShown', { name: sheet, count: { plural: 'data.rows', count: shown?.rows.length ?? 0 } }) };
   },
   (state, { sheet }) => {
     const preview = dataOf(state.ui).preview;

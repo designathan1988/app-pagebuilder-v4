@@ -67,7 +67,6 @@ import type { PointerViews } from '../input/pointer/views.ts';
 export { controlBoxes, handleHitBox, placeLabel, visibleCanvas } from './placement.ts';
 export type { Box, Placement } from './placement.ts';
 
-// the palette's entries by id: the element a creation drag inserts and the words that name it
 // the resize handles (spec resize-handles): the doors of the resize gesture, one per handle, drawn on the one selected
 // element that can be resized (not the page, not locked, shown), each pressed outside the element
 // (the resize gesture: the one whose Shift keeps the aspect ratio, interactions.json)
@@ -1066,7 +1065,7 @@ export function CanvasChrome() {
           <span className="chrome__distance-label">{t('canvas.measure.distance', { value: d.value })}</span>
         </div>
       ))}
-      {drawnBand !== null && shown.band ? <div className="chrome__band" data-chrome="band" style={at(shown.band)} /> : null}
+      {drawnBand !== null && shown.band ? <div className="chrome__marquee" data-chrome="band" style={at(shown.band)} /> : null}
       {shown.selected.map((b, i) => (
         <div
           key={i}

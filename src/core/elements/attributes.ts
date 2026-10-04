@@ -15,7 +15,7 @@ import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler, type Outcome } from '../commands/registry.ts';
 import { allNodes, locate, walk, type DocNode, type DocumentJson, type Location } from '../document/model.ts';
 import { formAttributeIssue } from '../forms/config.ts';
-import { customAttributeRefusal, reservedAttributeOwner, type ModelRules } from '../document/validate.ts';
+import { customAttributeRefusal, customAttributeValueRefusal, reservedAttributeOwner, type ModelRules } from '../document/validate.ts';
 import { missingClassDefinitions, validClassName } from '../design/classes.ts';
 import { hasIncompatibleMask, inputTypeOf } from './inputs.ts';
 import type { Patch } from '../history/transaction.ts';
@@ -281,6 +281,9 @@ export const setCustomAttributeCommand = registerHandler('element.setCustomAttri
   const owner = reservedAttributeOwner(typed, rules);
   if (owner !== null) return { kind: 'refused', message: message('status.attribute.reserved', { name: typed, owner: words(owner as never) }) };
   if (customAttributeRefusal(typed, rules) !== null) return { kind: 'refused', message: message('status.attribute.invalidName', { name: typed }) };
+  // an address attribute's value passes the one rule of an address (the audit's XA1: formaction="javascript:…")
+  const address = customAttributeValueRefusal(typed, String(value)) === null ? null : readAddress(String(value));
+  if (address !== null && !address.ok) return { kind: 'refused', message: address.refusal };
   const locked = lockRefusal(state.document, at.node.id, 'status.locked.edit');
   if (locked !== null) return { kind: 'refused', message: locked };
   const custom = at.node.customAttributes ?? {};

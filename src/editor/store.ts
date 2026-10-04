@@ -10,7 +10,7 @@ import { rulesFromManifest, type ModelRules } from '../core/document/validate.ts
 import { rulesForDocument } from '../core/document/breakpoints.ts';
 import { systemClock, type Clock } from '../core/ports/clock.ts';
 import { randomIds, type IdGenerator } from '../core/ports/ids.ts';
-import { createStore, type Store, type StoreState } from '../core/store/store.ts';
+import { createStore, type Gesture, type Store, type StoreState } from '../core/store/store.ts';
 import type { CommandId, ConstantId } from '../generated/ids.ts';
 import { translate } from '../i18n/index.ts';
 import { manifest } from '../manifest/runtime.ts';
@@ -149,7 +149,47 @@ export function createEditorStore(options: EditorStoreOptions = {}): EditorStore
   });
   persistPreferences(store, storage);
   persistWorkspace(store, options.workspace ?? browserWorkspace);
-  return store;
+  return gestureSafe(store);
+}
+
+// The store the editor hands its parts, safe for the moments one of them cannot run as it asks (the audit's GB1 and
+// AG1): a press while the assistant's turn holds a command group opens a gesture whose document changes are refused
+// with the group's busy words (a selection or a view change still runs), never an uncaught error; and a dispatch that
+// arrives while a pointer gesture is open (a file read that resolved, the wheel during a drag) runs through that
+// gesture when it changes no document, else once the gesture has ended, in order.
+const UNDOABLE = new Map(manifest.commands.map((c) => [c.id as CommandId, c.history.undoable] as const));
+function gestureSafe(store: EditorStore): EditorStore {
+  let open: Gesture | null = null;
+  const waiting: (() => void)[] = [];
+  const settle = () => {
+    open = null;
+    for (const run of waiting.splice(0)) run();
+  };
+  return {
+    ...store,
+    gesture: () => {
+      if (store.commandGroupOpen()) return { dispatch: (id, args) => store.dispatch(id, args), commit: () => undefined, cancel: () => undefined };
+      const gesture = store.gesture();
+      open = gesture;
+      return {
+        dispatch: (id, args) => gesture.dispatch(id, args),
+        commit: () => {
+          gesture.commit();
+          settle();
+        },
+        cancel: () => {
+          gesture.cancel();
+          settle();
+        },
+      };
+    },
+    dispatch: (id, args) => {
+      if (open === null) return store.dispatch(id, args);
+      if (UNDOABLE.get(id) !== true) return open.dispatch(id, args);
+      waiting.push(() => void store.dispatch(id, args));
+      return { status: 'done', changed: false };
+    },
+  };
 }
 
 // a first visit in a narrow window opens with the sidebar closed (workspace/narrow.ts)

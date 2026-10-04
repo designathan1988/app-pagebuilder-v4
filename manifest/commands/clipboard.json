@@ -130,7 +130,8 @@
         "status.refused.notInside",
         "status.refused.singleChild",
         "status.refused.noChildren",
-        "status.locked.insert"
+        "status.locked.insert",
+        "status.paste.invalid"
       ],
       "confirmation": null,
       "history": {
@@ -456,7 +457,8 @@
       "refusals": [
         "status.paste.empty",
         "status.clipboard.denied",
-        "status.locked.edit"
+        "status.locked.edit",
+        "status.paste.invalid"
       ],
       "confirmation": null,
       "history": {

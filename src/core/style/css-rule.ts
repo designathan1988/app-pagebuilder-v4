@@ -7,7 +7,7 @@
 import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
-import type { Patch } from '../history/transaction.ts';
+import { replaceLayer } from './set.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { parseDeclarations } from './custom.ts';
 
@@ -28,7 +28,6 @@ export const applyCssRuleCommand = registerHandler('style.applyCssRule', (contex
   const same = Object.keys(current).length === Object.keys(wanted).length && Object.entries(wanted).every(([property, value]) => current[property] === value);
   const said = message('status.css.applied', { name: at.node.name });
   if (same) return { kind: 'change' as const, message: said };
-  const stylesPath = [...at.path, 'styles'];
-  const patch: Patch = byBreakpoint === undefined ? { op: 'add', path: [...stylesPath, breakpoint], value: { [base]: wanted } } : { op: byBreakpoint[base] === undefined ? 'add' : 'replace', path: [...stylesPath, breakpoint, base], value: wanted };
-  return { kind: 'change' as const, patches: [patch], message: said };
+  // the one writer of declarations, through the holders every style write goes to (the audit's OW1)
+  return { kind: 'change' as const, patches: replaceLayer(context, at, wanted), message: said };
 });

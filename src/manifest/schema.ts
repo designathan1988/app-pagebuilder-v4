@@ -960,6 +960,10 @@ const documentPath = z.string().regex(/^(\/@[a-zA-Z]+|(\/[^/@][^/]*)+(\/@[a-zA-Z
 // Arguments: a node argument is a node path; for a drag, the arguments are the parent and index its drop produces;
 // a rect or point argument is produced by the gesture (the marquee band, a pointer position), so a step leaves it
 // out; every other required argument the door does not fix is present (manifest:check rule step).
+// A `file` argument names what the runner hands the browser's file chooser: "fixture:<id>" the fixture's JSON,
+// "download" the file an earlier step downloaded last, "json:<text>" a project.json holding that text, "png:<name>"
+// the runner's own 4x3 PNG, "woff2:<name>" the runner's own test font, "folder:<id>" the directory
+// tests/support/folders/<id> (a whole folder, for a command whose door reads one; spec explorer-open-folder).
 const stepSchema = z.strictObject({
   door: doorRef,
   args: z.record(camelId, jsonValue),
@@ -984,10 +988,6 @@ const stepSchema = z.strictObject({
   // The button the step presses in the confirmation its command asks (a command with `confirmation` in the manifest,
   // such as File › Open over a page that holds work): "confirm" or "cancel". A step that leaves a confirmation
   // unanswered fails. Optional: absent is null.
-  // A `file` argument names what the runner hands the browser's file chooser: "fixture:<id>" the fixture's JSON,
-  // "download" the file an earlier step downloaded last, "json:<text>" a project.json holding that text, "png:<name>"
-  // the runner's own 4x3 PNG, "woff2:<name>" the runner's own test font, "folder:<id>" the directory
-  // tests/support/folders/<id> (a whole folder, for a command whose door reads one; spec explorer-open-folder).
   answer: z.enum(['confirm', 'cancel']).nullable().optional(),
   // The milliseconds the runner waits after this step, the pointer and the keys as the step left them (a held drag at
   // an edge scrolls while it waits: spec drag-autoscroll). Optional: absent is no wait.

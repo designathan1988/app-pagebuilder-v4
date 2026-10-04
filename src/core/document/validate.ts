@@ -16,7 +16,9 @@ import type { Attribute, Coupling, ElementsFile, GeneratedHtml, PropertiesFile, 
 import { contentModelFrom, type ContentModel } from '../elements/content-model.ts';
 import { orphanReferences, setReferenceAttributes } from '../elements/references.ts';
 import { addressAllowed } from '../elements/address.ts';
+import { projectPathProblem } from '../files/path-rule.ts';
 import { motionProblems } from '../motion/document.ts';
+import { interactionProblems } from '../events/interaction-rule.ts';
 import { deepEqual } from '../history/transaction.ts';
 import { authoringProblems } from './authoring.ts';
 import { settingOf } from '../page/grid-settings.ts';
@@ -251,7 +253,8 @@ export function attributeValueRefusal(name: string, value: unknown, rules: Model
   if (facts.valueType === 'url' && text !== '' && !addressAllowed(text)) return `"${text}" is not an address this page can use`;
   if (facts.html === 'pattern' && text !== '') {
     try {
-      new RegExp(text);
+      // as the HTML Standard compiles it: anchored, with the v flag (unicodeSets; whatwg/html#7908, the audit's PT1)
+      new RegExp(`^(?:${text})$`, 'v');
     } catch {
       return `"${text}" is not a pattern the browser takes`;
     }
@@ -389,13 +392,32 @@ export function validateDocument(doc: DocumentJson, selection: Selection, manife
   }
   if (doc.swatches !== undefined && (!Array.isArray(doc.swatches) || doc.swatches.length === 0 || doc.swatches.some((c) => typeof c !== 'string' || c.trim() === ''))) bad('/swatches', 'the saved colours are a list of colour texts');
   // the project's folders (spec explorer-file-system): a path each, no empty segment (the root is '')
-  if (doc.folders !== undefined && (!Array.isArray(doc.folders) || doc.folders.some((one) => typeof one !== 'string' || one.trim() === '' || one.split('/').some((part) => part === '')))) bad('/folders', 'the folders are a list of paths');
+  if (doc.folders !== undefined && (!Array.isArray(doc.folders) || doc.folders.some((one) => typeof one !== 'string' || one.trim() === '' || projectPathProblem(one) !== null))) bad('/folders', 'the folders are a list of paths');
+  // the project's files (spec explorer-file-system): each a path of the one rule of a project path (the audit's FP1:
+  // the export writes it as a ZIP entry), a type and its bytes as base64 text, once each
+  if (doc.files !== undefined) {
+    if (!Array.isArray(doc.files)) bad('/files', 'the files are a list');
+    else {
+      const paths = new Set<string>();
+      doc.files.forEach((file: unknown, i) => {
+        const at = `/files/${i}`;
+        if (!isRecord(file)) return bad(at, 'a file is an object');
+        const path = file.path;
+        const problem = typeof path === 'string' ? projectPathProblem(path) : 'a file has a path';
+        if (problem !== null) bad(`${at}/path`, problem);
+        else if (paths.has(path as string)) bad(`${at}/path`, `two files are ${String(path)}`);
+        else paths.add(path as string);
+        if (typeof file.type !== 'string') bad(`${at}/type`, 'a file has a type');
+        if (typeof file.bytes !== 'string') bad(`${at}/bytes`, 'a file holds its bytes as base64 text');
+      });
+    }
+  }
   const files = new Set<string>();
   (doc.pages ?? []).forEach((page, i) => {
     const at = `/pages/${i}`;
     claim(page.id, `${at}/id`);
     if (typeof page.name !== 'string' || page.name.trim() === '') bad(`${at}/name`, 'a page has a name');
-    if (typeof page.file !== 'string' || !PAGE_FILE.test(page.file)) bad(`${at}/file`, `"${String(page.file)}" is not a page file path such as index.html`);
+    if (typeof page.file !== 'string' || !PAGE_FILE.test(page.file) || projectPathProblem(page.file) !== null) bad(`${at}/file`, `"${String(page.file)}" is not a page file path such as index.html`);
     else if (files.has(page.file)) bad(`${at}/file`, `two pages are ${page.file}`);
     else files.add(page.file);
     if (!isRecord(page.tree)) return bad(`${at}/tree`, 'a page has a tree');
@@ -429,6 +451,21 @@ export function validateDocument(doc: DocumentJson, selection: Selection, manife
   // the motion data: each timeline, interaction and behaviour read strictly, the timeline names unique, every timeline
   // played and every element picked held by the document (core/motion/document.ts)
   for (const problem of motionProblems(doc)) bad(problem.path, problem.message);
+  // the event interactions of every element (core/events/interactions.ts, the audit's EV2): read as strictly as the
+  // motion data, so an opened file never holds an address that runs code or a target that is not there
+  doc.pages.forEach((page, p) => {
+    const visit = (node: DocNode, at: string): void => {
+      if ('interactions' in node) {
+        const held: unknown = node.interactions;
+        if (!Array.isArray(held) || held.length === 0) bad(`${at}/interactions`, 'interactions is a list of at least one interaction, or absent');
+        else held.forEach((one, i) => {
+          for (const problem of interactionProblems(one, nodeIds)) bad(`${at}/interactions/${i}${problem.field === '' ? '' : `/${problem.field}`}`, problem.message);
+        });
+      }
+      if (Array.isArray(node.children)) node.children.forEach((child, i) => visit(child, `${at}/children/${i}`));
+    };
+    if (isRecord(page) && isRecord(page.tree)) visit(page.tree as DocNode, `/pages/${p}/tree`);
+  });
   for (const orphan of orphanReferences(doc)) {
     bad('/pages', `${orphan.node.name} holds ${orphan.attribute} "${orphan.value}", which names no element of the document`);
   }
@@ -470,6 +507,16 @@ export function reservedAttributeOwner(name: string, rules: ModelRules): string 
   if (special !== undefined) return special;
   const declared = [...rules.attributeValues.values()].find((attribute) => attribute.html === name);
   return declared?.labelKey ?? null;
+}
+// The HTML attributes whose value is an address the browser follows (a navigation, a submission, a fetch) that no field
+// of the editor owns, so a person may write them as their own (a button's formaction, an object's data): their value
+// passes the one rule of an address like every address field's, so none runs code (OWASP's XSS filter evasion lists
+// <button formaction="javascript:…">; the audit's XA1). The others an address field owns are reserved names already.
+const ADDRESS_ATTRIBUTES: ReadonlySet<string> = new Set(['formaction', 'action', 'href', 'src', 'xlink:href', 'data', 'poster', 'background', 'ping', 'codebase', 'cite', 'longdesc', 'manifest', 'lowsrc', 'dynsrc']);
+// why a custom attribute cannot hold this value, or null: an address attribute's value is an address the rule allows
+export function customAttributeValueRefusal(name: string, value: string): string | null {
+  if (!ADDRESS_ATTRIBUTES.has(name) || value.trim() === '') return null;
+  return addressAllowed(value) ? null : `"${value}" is not an address this page can use`;
 }
 export function customAttributeRefusal(name: string, rules: ModelRules): string | null {
   if (!/^[a-z][a-z0-9_.:-]*$/.test(name)) return 'not an attribute name';
@@ -547,6 +594,10 @@ function validateNode(
         const why = customAttributeRefusal(name, rules);
         if (why !== null) bad(`${at}/customAttributes/${name}`, why);
         if (typeof value !== 'string') bad(`${at}/customAttributes/${name}`, 'a custom attribute value is a string');
+        else {
+          const unsafe = customAttributeValueRefusal(name, value);
+          if (unsafe !== null) bad(`${at}/customAttributes/${name}`, unsafe);
+        }
       }
   }
 

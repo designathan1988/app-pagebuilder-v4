@@ -24,7 +24,7 @@ import { locate, type DocNode, type DocumentJson, type NodeId } from '../../core
 import { lockRefusal } from '../../core/nodes/flags.ts';
 import { selectedAlone } from '../../core/selection/selection.ts';
 import type { StoreState } from '../../core/store/store.ts';
-import { canonical, hasMarks, isSafeHref, linkAddressAt, pastedRuns, plainText, type InlineChange, type InlineRun, type TextRange } from '../../core/text/inline.ts';
+import { canonical, hasMarks, isSafeHref, keptHref, linkAddressAt, pastedRuns, plainText, type InlineChange, type InlineRun, type TextRange } from '../../core/text/inline.ts';
 import type { KeyContextId, RegionId } from '../../generated/ids.ts';
 import { manifest } from '../../manifest/runtime.ts';
 import type { Command } from '../../manifest/schema.ts';
@@ -158,7 +158,8 @@ export const editLink = registerHandler<'text.editLink', EditorUi>('text.editLin
   }
   const address = href.trim();
   if (address !== '' && !isSafeHref(address)) return { kind: 'refused', message: message('status.link.unsafe') };
-  return { kind: 'change', ui: changed(state.ui, { kind: 'link', href: address === '' ? null : address }, null), message: message('status.textEdit.editing') };
+  // the link keeps the address the rule reads, a bare domain as https:// (the audit's AD2)
+  return { kind: 'change', ui: changed(state.ui, { kind: 'link', href: address === '' ? null : keptHref(address) }, null), message: message('status.textEdit.editing') };
 });
 
 // Ctrl+V while editing: what the system clipboard held, as marked text (its bold, italic and allowed links kept, the

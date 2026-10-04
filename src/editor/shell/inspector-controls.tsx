@@ -42,7 +42,6 @@ export const TARGETS = new Map<string, Target>([
   ...manifest.properties.composites.map((c) => [c.id, { ...c, icons: {} }] as const),
   ...manifest.properties.recipes.map((r) => [r.id, { ...r, icons: {}, subsets: [] }] as const),
 ]);
-// the selector bar's target chip and the × drawn inside a class chip
 // The track editor's doors (manifest commands/style.json, style.setGridTracks): the track field, the add and the
 // remove button, one of each per axis.
 export const TRACK_DOORS: readonly DoorEntry[] = manifest.properties.properties.filter((p) => p.control === 'track-editor').flatMap((p) => p.doors.flatMap((ref) => manifest.doorByRef.get(ref as never) ?? []));
@@ -577,10 +576,6 @@ export function BoxModel({ doors }: { readonly doors: readonly DoorEntry[] }) {
   return draw(0);
 }
 
-// The section header (the disclosure door of inspector-style) and every door after it, in its section; an editor
-// control sits in the section of the field before it. A section with no Style field (Content: its fields are in the
-// Settings tab; Interactions: its own tab) is not a Style section.
-
 export const ANCHOR_CONTROL = 'anchor-control';
 // the rows follow position.setAnchors's edges in the manifest's order: left, right, top, bottom, the two centres, the
 // two stretches; a door's label is its edge's (command.anchor.<edge in camel case>)
@@ -607,6 +602,9 @@ const EDGE_ICONS: Readonly<Record<string, string>> = {
   'vertical-stretch': 'chevrons-up-down',
 };
 
+// The anchor control (spec absolute-anchors, Problems in Pager 2): per axis, the start edge, the centre, the end edge
+// and both edges, each the control's door standing for that edge set (position.setAnchors, mode set), the anchors held
+// drawn pressed; disabled while the selection is not positioned.
 export function AnchorControl({ entry }: { readonly entry: DoorEntry }) {
   const t = useT();
   const ready = isFeatureBuilt(entry.door.feature as FeatureId);

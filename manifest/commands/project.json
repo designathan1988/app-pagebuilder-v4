@@ -316,7 +316,7 @@
       "refusals": [
         "status.folder.unsupported",
         "status.import.noPage",
-        "status.folder.pageRefused"
+        "status.import.invalidArchive"
       ],
       "confirmation": {
         "messageKey": "dialog.openFolder.message",

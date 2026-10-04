@@ -374,9 +374,6 @@ function shownInEssentials(entry: DoorEntry, held: ReadonlySet<string>, revealed
   if (target === null) return true;
   return isEssential(target) || target === revealed || editedProperties(target).some((p) => held.has(p));
 }
-// The anchor control (spec absolute-anchors, Problems in Pager 2): per axis, the start edge, the centre, the end edge
-// and both edges, each the control's door standing for that edge set (position.setAnchors, mode set), the anchors held
-// drawn pressed; disabled while the selection is not positioned.
 // Whether a door of the Style tab is drawn for the selection (spec props-element-specific): a field of a kind of
 // element (a table's, a list's, a form control's, a medium's) only while every selected element is of that kind, and a
 // field of a layout the element is in (a flex container's, an item's) only while the page computes that layout for it.

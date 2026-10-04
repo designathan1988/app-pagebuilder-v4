@@ -45,7 +45,8 @@ export function GridEditor() {
       const layers = inside && at !== null ? (at.node.styles as Record<string, Record<string, Record<string, unknown>>>) : null;
       const spanText = spanProperty === '' || layers === null ? '' : String(Object.values(layers)[0]?.base?.[spanProperty] ?? '');
       const span = /span\s+(\d+)/i.exec(spanText);
-      setDrawn(
+      // a new object only when what is drawn changed: an idle grid editor renders nothing (the audit's RL1)
+      const next =
         origin === undefined || found === null || grid === null
           ? null
           : {
@@ -53,8 +54,8 @@ export function GridEditor() {
               tracks: found.map((b) => ({ x: b.x - origin.x, y: b.y - origin.y, width: b.width, height: b.height })),
               grid: { x: grid.x - origin.x, y: grid.y - origin.y, width: grid.width, height: grid.height },
               itemSpan: held === null ? null : { box: { x: held.x - origin.x, y: held.y - origin.y, width: held.width, height: held.height }, span: span === null ? 1 : Number.parseInt(span[1] as string, 10) },
-            },
-      );
+            };
+      setDrawn((before) => (JSON.stringify(before) === JSON.stringify(next) ? before : next));
       request = requestAnimationFrame(measure);
     };
     request = requestAnimationFrame(measure);

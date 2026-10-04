@@ -218,6 +218,12 @@ export function withStandInIds(document: unknown): unknown {
         attributes[name] = name === 'href' ? `#${String(own)}` : String(own);
       }
     }
+    // an interaction's target is stored by the node id too (the validator checks it names an element: the audit's EV2)
+    for (const interaction of Array.isArray(node.interactions) ? node.interactions : []) {
+      if (!isObject(interaction) || typeof interaction.target !== 'string' || !interaction.target.startsWith('@/')) continue;
+      const found = resolveNode(doc, interaction.target.slice(2).split('/').filter((each) => each !== ''));
+      if (typeof found !== 'string') interaction.target = String(found.node.id);
+    }
     for (const child of childrenOf(node)) cite(child);
   };
   for (const page of Array.isArray(doc.pages) ? doc.pages : []) if (isObject(page)) cite(page.tree ?? null);

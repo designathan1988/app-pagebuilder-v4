@@ -47,7 +47,7 @@ type Path = readonly (string | number)[];
 interface Use {
   readonly path: Path;
   readonly value: StoredValue;
-  readonly holder: 'element' | 'class' | 'component' | 'animation' | 'token';
+  readonly holder: 'element' | 'class' | 'component' | 'animation' | 'token' | 'timeline';
   readonly element: string | null;
   readonly className: string | null;
   readonly component: string | null;
@@ -101,6 +101,23 @@ function walkPaths(node: DocNode, base: Path, visit: (node: DocNode, path: Path)
   node.children.forEach((child, i) => walkPaths(child, [...base, 'children', i], visit));
 }
 
+// Every CSS text the project's motion timelines hold, with its path: the keyframes of every track (an animate or a
+// split-text action's), and the value a style or a variable action writes.
+export function timelineTexts(document: DocumentJson): readonly { readonly path: Path; readonly value: string }[] {
+  const found: { path: Path; value: string }[] = [];
+  (document.motionTimelines ?? []).forEach((timeline, t) => {
+    timeline.actions.forEach((action, a) => {
+      const base: Path = ['motionTimelines', t, 'actions', a, 'effect'];
+      const effect = action.effect;
+      if (effect.kind === 'animate' || effect.kind === 'split-text') {
+        effect.tracks.forEach((track, k) => track.keyframes.forEach((frame, f) => found.push({ path: [...base, 'tracks', k, 'keyframes', f, 'value'], value: frame.value })));
+      }
+      if ((effect.kind === 'style' || effect.kind === 'variable') && typeof effect.value === 'string') found.push({ path: [...base, 'value'], value: effect.value });
+    });
+  });
+  return found;
+}
+
 // every place a value names the variable: every element of every page (and its animations), every class definition,
 // every component's tree, and the variables' own values (an alias). The one traversal rename and delete read.
 export function usesOf(document: DocumentJson, name: string): readonly Use[] {
@@ -120,6 +137,11 @@ export function usesOf(document: DocumentJson, name: string): readonly Use[] {
       const make = (at: Path, value: StoredValue): Use => ({ path: at, value, holder: 'component', element: null, className: null, component: definition.name });
       usesInNode(name, node, path, make, found);
     });
+  });
+  // the motion timelines (the audit's SV1): a keyframe recorded from a style write keeps the CSS text, var(--x) too,
+  // and a style or variable action writes CSS text
+  timelineTexts(document).forEach(({ path, value }) => {
+    if (referenceTo(name).test(value)) found.push({ path, value, holder: 'timeline', element: null, className: null, component: null });
   });
   tokensOf(document).forEach((token, index) => {
     if (referenceTo(name).test(token.value)) found.push({ path: ['tokens', index, 'value'], value: token.value, holder: 'token', element: null, className: null, component: null });

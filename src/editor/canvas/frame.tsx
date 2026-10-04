@@ -31,7 +31,7 @@ const MODEL = renderModelFromManifest(manifest.elements, manifest.properties, ma
 // an empty page the renderer fills: no script, no style of the editor
 const PAGE = '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>';
 
-//  is the breakpoint's screen (its height, from properties.json): the page inside the frame takes it as its
+// screen is the breakpoint's screen (its height, from properties.json): the page inside the frame takes it as its
 // viewport, so vh, svh and dvh measure it whatever the zoom, and the page scrolls inside the frame as it does on the
 // site (the user's real-use audit, item 2.3)
 export function CanvasFrame({ width, screen, zoom }: { readonly width: number; readonly screen: number; readonly zoom: number }) {

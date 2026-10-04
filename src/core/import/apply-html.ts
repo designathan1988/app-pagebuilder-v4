@@ -32,7 +32,8 @@ function reconciled(before: DocNode, made: DocNode): DocNode {
     ...held,
     tag: made.tag,
     attributes: made.attributes,
-    classes: made.classes.length > 0 ? made.classes : before.classes,
+    // the classes the markup lists, none when it lists none (the pane shows the element's own classes only: CP2)
+    classes: made.classes,
     text: made.text,
     ...(made.inline === undefined ? {} : { inline: made.inline }),
     ...(made.customAttributes === undefined ? {} : { customAttributes: made.customAttributes }),

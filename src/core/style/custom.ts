@@ -11,9 +11,8 @@
 import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler, type HandlerContext, type Message, type Outcome } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
-import type { Patch } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { declarationsOf, readValue } from './set.ts';
+import { declarationsOf, readValue, replaceLayer } from './set.ts';
 import { readAddress } from '../elements/address.ts';
 
 // every address a url(…) in a value carries, in order (spec props-attributes, the audit's A3.2)
@@ -83,10 +82,6 @@ export const setCustomDeclarationsCommand = registerHandler('style.setCustomDecl
   const same = Object.keys(current).length === Object.keys(wanted).length && Object.entries(wanted).every(([p, v]) => current[p] === v);
   const said = message('status.style.declarationsSet', { name: at.node.name, count: parsed.declarations.size });
   if (same) return { kind: 'change', message: said };
-  const stylesPath = [...at.path, 'styles'];
-  const patch: Patch =
-    byBreakpoint === undefined
-      ? { op: 'add', path: [...stylesPath, breakpoint], value: { [base]: wanted } }
-      : { op: byBreakpoint[base] === undefined ? 'add' : 'replace', path: [...stylesPath, breakpoint, base], value: wanted };
-  return { kind: 'change', patches: [patch], message: said };
+  // the one writer of declarations, through the holders every style write goes to (the audit's OW1)
+  return { kind: 'change' as const, patches: replaceLayer(context, at, wanted), message: said };
 });

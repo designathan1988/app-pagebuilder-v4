@@ -20,6 +20,7 @@ import { useT } from '../../text.ts';
 import { MOTION_DOORS, motionDoor } from './doors.ts';
 import { camel, controlsFor, interactionFields, interactionValue } from './options.ts';
 import { DIRECTION } from '../../../core/motion/words.ts';
+import { behaviourAxis } from '../../../core/motion/commands.ts';
 
 type Translate = ReturnType<typeof useT>;
 
@@ -142,7 +143,7 @@ function Behaviours({ node }: { readonly node: DocNode }) {
           {behaviour.kind === 'smooth-scroll' ? null : (
             <PanelField
               entry={motionDoor(MOTION_DOORS.behaviourAmount)}
-              args={{ behaviour: behaviour.kind, axis: behaviour.axis ?? 'y' }}
+              args={{ behaviour: behaviour.kind, axis: behaviourAxis(behaviour) }}
               value={String(behaviour.amount)}
               label={t(`motion.behaviour.amount.${camel(behaviour.kind)}` as MessageId)}
             />
@@ -150,7 +151,7 @@ function Behaviours({ node }: { readonly node: DocNode }) {
           {behaviour.kind === 'parallax' || behaviour.kind === 'marquee' ? (
             <div className="motion-behaviours__axis" role="group" aria-label={t('motion.field.axis')}>
               {(['x', 'y'] as const).map((axis) => (
-                <PanelButton key={axis} entry={motionDoor(MOTION_DOORS.behaviourAxis(axis))} args={{ behaviour: behaviour.kind, axis }} label={t(`motion.axis.${axis}` as MessageId)} pressed={(behaviour.axis ?? 'x') === axis} />
+                <PanelButton key={axis} entry={motionDoor(MOTION_DOORS.behaviourAxis(axis))} args={{ behaviour: behaviour.kind, axis }} label={t(`motion.axis.${axis}` as MessageId)} pressed={behaviourAxis(behaviour) === axis} />
               ))}
             </div>
           ) : null}

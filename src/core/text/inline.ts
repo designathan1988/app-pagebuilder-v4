@@ -51,6 +51,12 @@ const PLAIN: Omit<Segment, 'text'> = { strong: false, em: false, href: null };
 export function isSafeHref(href: string): boolean {
   return readAddress(href).ok;
 }
+// the address a link keeps: what the one rule of an address reads (a bare domain becomes https://), the text as it is
+// when the rule refuses it (the caller refuses then) — every address field stores the rule's value (the audit's AD2)
+export const keptHref = (href: string): string => {
+  const read = readAddress(href);
+  return read.ok ? read.value : href;
+};
 
 // The marked characters of a tree, in order, empty stretches left out; an inner link's address wins over an outer one.
 export function segmentsOf(runs: readonly InlineRun[], marks: Omit<Segment, 'text'> = PLAIN): Segment[] {
@@ -292,7 +298,7 @@ function htmlSegments(nodes: readonly ClipboardNode[], model: ContentModel): Seg
           : tag === 'em' || tag === 'i'
             ? { ...marks, em: true }
             : tag === 'a' && node.href !== null && isSafeHref(node.href.trim())
-              ? { ...marks, href: node.href.trim() }
+              ? { ...marks, href: keptHref(node.href.trim()) }
               : marks;
       const block = model.phrasing(tag) === false;
       if (block) pieces.push({ kind: 'break', hard: false });

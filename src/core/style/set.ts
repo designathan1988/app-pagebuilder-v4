@@ -72,6 +72,19 @@ export function styleHolders<Ui>(context: HandlerContext<Ui>, nodes: readonly Lo
 
 // The patches that write these values on a node (a null value removes its property), at a breakpoint and state; empty
 // when the node already holds them all.
+// The layer an element's own rule stands for (the active breakpoint and state), replaced whole by these declarations,
+// through the one writer of declarations and the holders every style write goes to (a class that is the style
+// target, an instance's component and its copies): the code pane's rule and the custom declarations write so (the
+// audit's OW1: a patch of their own left empty layers and wrote an instance's element alone).
+export function replaceLayer<Ui>(context: HandlerContext<Ui>, at: Location, wanted: Readonly<Record<string, StoredValue>>): Patch[] {
+  const layer = context.rules.base;
+  return styleHolders(context, [at]).flatMap((held) => {
+    const current = (held.node.styles as Layers)[layer.breakpoint]?.[layer.state] ?? {};
+    const cleared = Object.fromEntries(Object.keys(current).filter((property) => !(property in wanted)).map((property) => [property, null]));
+    return writeDeclarations(held.node, held.path, layer, { ...cleared, ...wanted });
+  });
+}
+
 export function writeDeclarations(
   node: DocNode,
   path: readonly (string | number)[],
@@ -328,7 +341,10 @@ export function writeStyle<Ui>(context: HandlerContext<Ui>, property: string, cs
     const place = onPage ? (within: 'parent' | 'viewport') => context.layout.place(held.node.id as NodeId, within) : () => null;
     const written = coupledScene(held.node, held.parent, plain, via, rules, place);
     patches.push(...writeDeclarations(held.node, held.path, layer, { ...clearedRecipes(held.node, written.own, rules), ...structured }));
-    if (onPage && held.parent !== null && Object.keys(written.parent).length > 0) {
+    // a parent that is itself written by this write takes its own values, never the ones its child's couplings make of
+    // it from the document before the write (the audit's LU1: parent and child made absolute left the parent relative)
+    const parentHeld = held.parent !== null && holders.some((one) => one.node.id === held.parent?.id);
+    if (onPage && held.parent !== null && !parentHeld && Object.keys(written.parent).length > 0) {
       const parentLocked = firstLockRefusal(state.document, [held.parent.id as NodeId], 'status.locked.edit');
       if (parentLocked !== null) return { kind: 'refused', message: parentLocked };
       patches.push(...writeDeclarations(held.parent, held.path.slice(0, -2), layer, written.parent));

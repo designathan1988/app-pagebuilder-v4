@@ -52,7 +52,6 @@ export function ruleText(state: { readonly document: DocumentJson; readonly sele
     .join('\n');
 }
 
-
 // The lines of one element's own markup (and of everything inside it): the export's lines for the subtree, with the
 // page's indentation taken off and the class the export invents for its stylesheet left out of the element's own line
 // (it is not the element's data). What the HTML pane shows while one element is selected, and what element.applyHtml
@@ -72,7 +71,11 @@ export function elementLines(state: { readonly document: DocumentJson; readonly 
     }
   };
   collect(found.node);
-  const lines = pageLines(state.document, page, rules).html;
+  const code = pageLines(state.document, page, rules);
+  const lines = code.html;
+  // the classes the export invents for its stylesheet, of every element the markup holds: none is the element's data,
+  // so none is shown or written back (the audit's CP2: an element inside kept its invented class)
+  const invented = new Set([...inside].flatMap((id) => (code.classes.get(id) === undefined ? [] : [code.classes.get(id) as string])));
   const first = lines.findIndex((line) => line.node !== null && inside.has(line.node));
   const last = lines.reduce((at, line, i) => (line.node !== null && inside.has(line.node) ? i : at), -1);
   if (first < 0 || last < first) return null;
@@ -85,9 +88,14 @@ export function elementLines(state: { readonly document: DocumentJson; readonly 
   }, null as string | null);
   const cut = indent === null ? 0 : indent.length;
   const held = new Set(found.node.classes);
+  const withoutInvented = (text: string): string =>
+    text.replace(/\sclass="([^"]*)"/g, (all, names: string) => {
+      const kept = names.split(/\s+/).filter((one) => one !== '' && !invented.has(one));
+      return kept.length === names.split(/\s+/).filter((one) => one !== '').length ? all : kept.length === 0 ? '' : ` class="${kept.join(' ')}"`;
+    });
   return block.map((line, at) => {
     const text = line.text.trim() === '' ? '' : line.text.slice(cut);
-    if (at > 0) return { text, node: line.node };
+    if (at > 0) return { text: withoutInvented(text), node: line.node };
     const written = /^(\s*<[^>]*\sclass=")([^"]*)(")/.exec(text);
     const kept = written === null ? [] : (written[2] ?? '').split(/\s+/).filter((one) => one !== '' && held.has(one));
     const opened = written === null ? text : kept.length === 0 ? text.replace(/^(\s*<[^>]*)\sclass="[^"]*"/, '$1') : text.replace(/^(\s*<[^>]*\sclass=")([^"]*)(")/, `$1${kept.join(' ')}$3`);

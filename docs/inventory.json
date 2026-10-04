@@ -5,8 +5,8 @@
     "commands": 373,
     "doors": 1362,
     "scenarios": 1831,
-    "modules": 474,
-    "lines": 82615
+    "modules": 475,
+    "lines": 82672
   },
   "features": [
     {
@@ -3360,7 +3360,7 @@
     },
     {
       "path": "src/core/clipboard/clipboard.ts",
-      "lines": 356,
+      "lines": 370,
       "commands": [
         "clipboard.copy",
         "clipboard.cut",
@@ -3460,7 +3460,7 @@
     },
     {
       "path": "src/core/data/regions.ts",
-      "lines": 217,
+      "lines": 223,
       "commands": [],
       "features": []
     },
@@ -3509,7 +3509,7 @@
     },
     {
       "path": "src/core/design/components.ts",
-      "lines": 468,
+      "lines": 474,
       "commands": [
         "components.create",
         "components.insertInstance",
@@ -3541,7 +3541,7 @@
     },
     {
       "path": "src/core/design/site-colours.ts",
-      "lines": 175,
+      "lines": 181,
       "commands": [
         "design.replaceColour",
         "design.colourToVariable"
@@ -3562,7 +3562,7 @@
     },
     {
       "path": "src/core/design/tokens.ts",
-      "lines": 247,
+      "lines": 269,
       "commands": [
         "tokens.create",
         "tokens.update",
@@ -3623,7 +3623,7 @@
     },
     {
       "path": "src/core/document/validate.ts",
-      "lines": 610,
+      "lines": 661,
       "commands": [],
       "features": []
     },
@@ -3635,7 +3635,7 @@
     },
     {
       "path": "src/core/elements/attributes.ts",
-      "lines": 305,
+      "lines": 308,
       "commands": [
         "element.setId",
         "element.setClasses",
@@ -3726,7 +3726,7 @@
     },
     {
       "path": "src/core/elements/svg.ts",
-      "lines": 282,
+      "lines": 317,
       "commands": [
         "element.setSvgMarkup"
       ],
@@ -3765,8 +3765,14 @@
       ]
     },
     {
+      "path": "src/core/events/interaction-rule.ts",
+      "lines": 45,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/core/events/interactions.ts",
-      "lines": 371,
+      "lines": 387,
       "commands": [
         "interactions.add",
         "interactions.update",
@@ -3778,7 +3784,7 @@
     },
     {
       "path": "src/core/events/script.ts",
-      "lines": 211,
+      "lines": 216,
       "commands": [],
       "features": []
     },
@@ -3796,7 +3802,7 @@
     },
     {
       "path": "src/core/export/export.ts",
-      "lines": 557,
+      "lines": 563,
       "commands": [
         "project.export"
       ],
@@ -3850,7 +3856,7 @@
     },
     {
       "path": "src/core/files/files.ts",
-      "lines": 573,
+      "lines": 578,
       "commands": [
         "files.upload",
         "files.createFolder",
@@ -3873,6 +3879,12 @@
     {
       "path": "src/core/files/fonts.ts",
       "lines": 74,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/core/files/path-rule.ts",
+      "lines": 13,
       "commands": [],
       "features": []
     },
@@ -3948,7 +3960,7 @@
     },
     {
       "path": "src/core/geometry/position.ts",
-      "lines": 116,
+      "lines": 122,
       "commands": [
         "position.setMode",
         "position.move"
@@ -4002,7 +4014,7 @@
     },
     {
       "path": "src/core/import/apply-html.ts",
-      "lines": 86,
+      "lines": 87,
       "commands": [
         "element.applyHtml"
       ],
@@ -4017,12 +4029,6 @@
       "features": []
     },
     {
-      "path": "src/core/import/css.ts",
-      "lines": 265,
-      "commands": [],
-      "features": []
-    },
-    {
       "path": "src/core/import/destinations.ts",
       "lines": 97,
       "commands": [],
@@ -4030,7 +4036,7 @@
     },
     {
       "path": "src/core/import/folder.ts",
-      "lines": 256,
+      "lines": 199,
       "commands": [
         "project.openFolder"
       ],
@@ -4040,7 +4046,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1930,
+      "lines": 1952,
       "commands": [
         "project.importHtml"
       ],
@@ -4085,7 +4091,7 @@
     },
     {
       "path": "src/core/motion/commands.ts",
-      "lines": 800,
+      "lines": 805,
       "commands": [
         "motion.add",
         "motion.update",
@@ -4499,7 +4505,7 @@
     },
     {
       "path": "src/core/structure/insert.ts",
-      "lines": 237,
+      "lines": 241,
       "commands": [
         "element.createNaturalChild",
         "element.insert"
@@ -4579,7 +4585,7 @@
     },
     {
       "path": "src/core/structure/wrap.ts",
-      "lines": 288,
+      "lines": 293,
       "commands": [
         "element.wrapRow",
         "element.wrapColumn",
@@ -4651,7 +4657,7 @@
     },
     {
       "path": "src/core/style/color.ts",
-      "lines": 370,
+      "lines": 383,
       "commands": [],
       "features": []
     },
@@ -4663,7 +4669,7 @@
     },
     {
       "path": "src/core/style/css-rule.ts",
-      "lines": 35,
+      "lines": 34,
       "commands": [
         "style.applyCssRule"
       ],
@@ -4673,7 +4679,7 @@
     },
     {
       "path": "src/core/style/custom.ts",
-      "lines": 93,
+      "lines": 88,
       "commands": [
         "style.setCustomDeclarations"
       ],
@@ -4773,7 +4779,7 @@
     },
     {
       "path": "src/core/style/set.ts",
-      "lines": 387,
+      "lines": 403,
       "commands": [
         "style.set"
       ],
@@ -4908,7 +4914,7 @@
     },
     {
       "path": "src/core/text/inline.ts",
-      "lines": 333,
+      "lines": 339,
       "commands": [],
       "features": []
     },
@@ -4920,7 +4926,7 @@
     },
     {
       "path": "src/core/text/text.ts",
-      "lines": 41,
+      "lines": 43,
       "commands": [
         "text.set"
       ],
@@ -5063,13 +5069,13 @@
     },
     {
       "path": "src/editor/canvas/chrome.tsx",
-      "lines": 1113,
+      "lines": 1112,
       "commands": [],
       "features": []
     },
     {
       "path": "src/editor/canvas/coordinates.ts",
-      "lines": 654,
+      "lines": 657,
       "commands": [],
       "features": []
     },
@@ -5081,7 +5087,7 @@
     },
     {
       "path": "src/editor/canvas/edit-handles.tsx",
-      "lines": 402,
+      "lines": 406,
       "commands": [],
       "features": []
     },
@@ -5119,7 +5125,7 @@
     },
     {
       "path": "src/editor/canvas/grid-editor.tsx",
-      "lines": 112,
+      "lines": 113,
       "commands": [],
       "features": []
     },
@@ -5183,7 +5189,7 @@
     },
     {
       "path": "src/editor/canvas/render/render.ts",
-      "lines": 864,
+      "lines": 868,
       "commands": [],
       "features": []
     },
@@ -5225,7 +5231,7 @@
     },
     {
       "path": "src/editor/canvas/text-edit.ts",
-      "lines": 230,
+      "lines": 231,
       "commands": [
         "text.startEdit",
         "text.cancelEdit",
@@ -5286,7 +5292,7 @@
     },
     {
       "path": "src/editor/code-panel/code-panel.ts",
-      "lines": 157,
+      "lines": 165,
       "commands": [
         "codePanel.setPane",
         "codePanel.copyPane",
@@ -5321,7 +5327,7 @@
     },
     {
       "path": "src/editor/data/controls.tsx",
-      "lines": 143,
+      "lines": 146,
       "commands": [],
       "features": []
     },
@@ -5571,13 +5577,13 @@
     },
     {
       "path": "src/editor/input/pointer.ts",
-      "lines": 263,
+      "lines": 250,
       "commands": [],
       "features": []
     },
     {
       "path": "src/editor/input/pointer/common.ts",
-      "lines": 563,
+      "lines": 562,
       "commands": [],
       "features": []
     },
@@ -5607,7 +5613,7 @@
     },
     {
       "path": "src/editor/input/pointer/owner.ts",
-      "lines": 220,
+      "lines": 213,
       "commands": [],
       "features": []
     },
@@ -5625,7 +5631,7 @@
     },
     {
       "path": "src/editor/input/pointer/resize.ts",
-      "lines": 96,
+      "lines": 97,
       "commands": [],
       "features": []
     },
@@ -5989,7 +5995,7 @@
     },
     {
       "path": "src/editor/motion/ui/interactions.tsx",
-      "lines": 186,
+      "lines": 187,
       "commands": [],
       "features": []
     },
@@ -6251,7 +6257,7 @@
     },
     {
       "path": "src/editor/shell/inspector-controls.tsx",
-      "lines": 637,
+      "lines": 635,
       "commands": [],
       "features": []
     },
@@ -6263,7 +6269,7 @@
     },
     {
       "path": "src/editor/shell/inspector.tsx",
-      "lines": 830,
+      "lines": 827,
       "commands": [],
       "features": []
     },
@@ -6299,7 +6305,7 @@
     },
     {
       "path": "src/editor/shell/panel-field.tsx",
-      "lines": 178,
+      "lines": 180,
       "commands": [],
       "features": []
     },
@@ -6473,7 +6479,7 @@
     },
     {
       "path": "src/editor/store.ts",
-      "lines": 171,
+      "lines": 211,
       "commands": [],
       "features": []
     },
@@ -6783,7 +6789,7 @@
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6607,
+      "lines": 6608,
       "commands": [],
       "features": []
     },
@@ -6927,7 +6933,7 @@
     },
     {
       "path": "src/manifest/scenario.ts",
-      "lines": 281,
+      "lines": 287,
       "commands": [],
       "features": []
     },
@@ -6963,7 +6969,7 @@
     },
     {
       "path": "src/modules/layout-composer/compiler/compile.ts",
-      "lines": 606,
+      "lines": 611,
       "commands": [],
       "features": []
     },
@@ -7017,7 +7023,7 @@
     },
     {
       "path": "src/modules/layout-composer/host/handlers.ts",
-      "lines": 876,
+      "lines": 892,
       "commands": [
         "layout.enter",
         "layout.leave",
@@ -7155,7 +7161,7 @@
     },
     {
       "path": "src/modules/layout-composer/ui/panel.tsx",
-      "lines": 311,
+      "lines": 314,
       "commands": [],
       "features": []
     },

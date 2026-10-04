@@ -95,14 +95,18 @@ const px = (value: string | undefined): number => {
 };
 
 // the values the page computes for these properties of a node, read at every frame while they are drawn
-function useComputed(node: NodeId | null, properties: readonly string[]): Readonly<Record<string, string>> | null {
+export function useComputed(node: NodeId | null, properties: readonly string[]): Readonly<Record<string, string>> | null {
   const [read, setRead] = useState<{ readonly node: NodeId; readonly values: Readonly<Record<string, string>> | null } | null>(null);
+  // the properties by their names: the list is a new array at every render of the caller, and the loop restarted
+  // with it, its first frame storing a new object that rendered again (the audit's RL1)
+  const key = properties.join('|');
   useEffect(() => {
-    if (node === null || properties.length === 0) return;
+    const wanted = key === '' ? [] : key.split('|');
+    if (node === null || wanted.length === 0) return;
     let request = 0;
     let last = '';
     const measure = () => {
-      const values = computedValues(node, properties, lineStyles(MODEL_RULES));
+      const values = computedValues(node, wanted, lineStyles(MODEL_RULES));
       const text = JSON.stringify(values);
       if (text !== last) {
         last = text;
@@ -112,7 +116,7 @@ function useComputed(node: NodeId | null, properties: readonly string[]): Readon
     };
     request = requestAnimationFrame(measure);
     return () => cancelAnimationFrame(request);
-  }, [node, properties]);
+  }, [node, key]);
   return read !== null && read.node === node ? read.values : null;
 }
 

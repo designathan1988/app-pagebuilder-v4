@@ -341,6 +341,17 @@ export function withChannel(colour: Rgba, channel: ColorChannel, text: string): 
 // the colour as it is.
 export function editedColour(base: string, channel: ColorChannel, text: string, format: string): string | null {
   const exact = parseSrgb(base) ?? { r: 0, g: 0, b: 0, a: 1 };
+  // the alpha of a colour shown in OKLCH or OKLab is written in that space, from the colour as it is: through RGB
+  // it was clamped to sRGB (the audit's CH1)
+  if (channel === 'alpha' && (format === OKLAB || format === OKLCH)) {
+    const n = whole(text, 0, 100);
+    if (n === null) return null;
+    const ok = toOklab(exact);
+    const { c, h } = polar(ok.a, ok.b);
+    const alpha = n < 100 ? ` / ${fixed(n / 100, 2)}` : '';
+    const l = `${fixed(ok.l * 100, 2)}%`;
+    return format === OKLAB ? `oklab(${l} ${fixed(ok.a, 4)} ${fixed(ok.b, 4)}${alpha})` : `oklch(${l} ${fixed(c, 4)} ${fixed(h % 360, 2)}${alpha})`;
+  }
   if (!OK_CHANNELS.includes(channel)) {
     const edited = withChannel(parseColor(base) ?? { r: 0, g: 0, b: 0, a: 1 }, channel, text);
     const a = channel === 'alpha' ? edited?.a ?? exact.a : pickedAlpha(exact.a, edited?.a ?? exact.a);
@@ -350,7 +361,8 @@ export function editedColour(base: string, channel: ColorChannel, text: string, 
   const { c, h } = polar(ok.a, ok.b);
   // a channel of OKLCH or OKLab changes the colour, not the alpha: from a transparent one it is written opaque too
   // the alpha channel of OKLCH or OKLab does set the alpha; the others keep it (made opaque from a transparent one)
-  const shown = channel === 'ok-a' ? exact.a : pickedAlpha(exact.a, exact.a);
+  // OKLab's a axis is a colour axis like b, never the alpha (CH1)
+  const shown = pickedAlpha(exact.a, exact.a);
   const alpha = shown < 1 ? ` / ${fixed(shown, 2)}` : '';
   const lightness = channel === 'ok-l' ? decimal(text, 0, 100) : ok.l * 100;
   if (lightness === null) return null;
@@ -367,3 +379,4 @@ export function editedColour(base: string, channel: ColorChannel, text: string, 
 }
 // the format whose L writes oklab(); L in any other writes oklch()
 const OKLAB = 'oklab';
+const OKLCH = 'oklch';

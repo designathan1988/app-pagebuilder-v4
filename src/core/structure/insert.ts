@@ -12,7 +12,8 @@ import type { ElementType, MessageId } from '../../generated/ids.ts';
 import type { TemplateNode } from '../../manifest/schema.ts';
 import type { WrapperId } from '../document/validate.ts';
 import { message, registerHandler, registerPredicate, type Message, type Outcome } from '../commands/registry.ts';
-import { allNodes, locate, type DocNode, type DocumentJson, type Location, type Selection, type Styles } from '../document/model.ts';
+import { allNodes, locate, walk, type DocNode, type DocumentJson, type Location, type Selection, type Styles } from '../document/model.ts';
+import { releaseReferencesPatch } from '../document/tree.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import { lockRefusal } from '../nodes/flags.ts';
@@ -217,9 +218,12 @@ export const insertCommand = registerHandler('element.insert', ({ state, ids, ru
   const cell = index === undefined && at.index === receiver.children.length ? emptyCell(receiver, rules) : -1;
   if (cell >= 0) {
     const path = [...at.parent.path, 'children', cell];
+    // the cell leaves: what pointed at it lets go in the same change (the audit's RF2), as a delete releases it
+    const replaced = receiver.children[cell];
+    const leaving = new Set(replaced === undefined ? [] : [...walk(replaced)].map((one) => one.id as NodeId));
     return {
       kind: 'change',
-      patches: [{ op: 'remove', path }, { op: 'add', path, value: placed }],
+      patches: [...releaseReferencesPatch(state.document, leaving), { op: 'remove', path }, { op: 'add', path, value: placed }],
       selection: [node.id],
       message: message('status.placed', { element: node.name, parent: receiver.name, position: cell + 1, count: receiver.children.length }),
     };

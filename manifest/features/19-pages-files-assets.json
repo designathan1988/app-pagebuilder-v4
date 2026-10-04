@@ -6157,6 +6157,11 @@
                                 "color": "#123456",
                                 "font-size": "40px"
                               }
+                            },
+                            "phone": {
+                              "base": {
+                                "font-size": "24px"
+                              }
                             }
                           },
                           "text": "Welcome",
@@ -6167,10 +6172,21 @@
                           "name": "Card",
                           "tag": "div",
                           "attributes": {},
-                          "classes": [
-                            "card"
-                          ],
-                          "styles": {},
+                          "classes": [],
+                          "styles": {
+                            "desktop": {
+                              "base": {
+                                "padding-top": "24px",
+                                "padding-right": "24px",
+                                "padding-bottom": "24px",
+                                "padding-left": "24px",
+                                "background-color": "#fafafa"
+                              },
+                              "hover": {
+                                "background-color": "#eeeeee"
+                              }
+                            }
+                          },
                           "text": null,
                           "children": [
                             {
@@ -6228,6 +6244,11 @@
                               "base": {
                                 "color": "#123456",
                                 "font-size": "40px"
+                              }
+                            },
+                            "phone": {
+                              "base": {
+                                "font-size": "24px"
                               }
                             }
                           },
@@ -6295,20 +6316,6 @@
                         }
                       }
                     }
-                  },
-                  {
-                    "name": "card",
-                    "styles": {
-                      "desktop": {
-                        "base": {
-                          "padding-top": "24px",
-                          "padding-right": "24px",
-                          "padding-bottom": "24px",
-                          "padding-left": "24px",
-                          "background-color": "#fafafa"
-                        }
-                      }
-                    }
                   }
                 ]
               }
@@ -6338,9 +6345,7 @@
                     "kept": "css/site.css, css/styles-1.css, img/logo.png, js/app.js, js/interactions-1.js",
                     "created": "none",
                     "renamed": "css/styles.css → css/styles-1.css, js/interactions.js → js/interactions-1.js",
-                    "droppedElements": 1,
-                    "droppedAttributes": 0,
-                    "droppedRules": 2
+                    "notes": " Scripts kept (lines 14). css/site.css: rules mapped to the nearest breakpoint (lines 22)."
                   }
                 }
               ]
@@ -6471,9 +6476,7 @@
                     "kept": "none",
                     "created": "index.html",
                     "renamed": "none",
-                    "droppedElements": 0,
-                    "droppedAttributes": 0,
-                    "droppedRules": 0
+                    "notes": ""
                   }
                 }
               ]
@@ -6640,6 +6643,11 @@
                                 "color": "#123456",
                                 "font-size": "40px"
                               }
+                            },
+                            "phone": {
+                              "base": {
+                                "font-size": "24px"
+                              }
                             }
                           },
                           "text": "Welcome",
@@ -6650,10 +6658,21 @@
                           "name": "Card",
                           "tag": "div",
                           "attributes": {},
-                          "classes": [
-                            "card"
-                          ],
-                          "styles": {},
+                          "classes": [],
+                          "styles": {
+                            "desktop": {
+                              "base": {
+                                "padding-top": "24px",
+                                "padding-right": "24px",
+                                "padding-bottom": "24px",
+                                "padding-left": "24px",
+                                "background-color": "#fafafa"
+                              },
+                              "hover": {
+                                "background-color": "#eeeeee"
+                              }
+                            }
+                          },
                           "text": null,
                           "children": [
                             {
@@ -6711,6 +6730,11 @@
                               "base": {
                                 "color": "#123456",
                                 "font-size": "40px"
+                              }
+                            },
+                            "phone": {
+                              "base": {
+                                "font-size": "24px"
                               }
                             }
                           },
@@ -6775,20 +6799,6 @@
                       "desktop": {
                         "base": {
                           "letter-spacing": "2px"
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "name": "card",
-                    "styles": {
-                      "desktop": {
-                        "base": {
-                          "padding-top": "24px",
-                          "padding-right": "24px",
-                          "padding-bottom": "24px",
-                          "padding-left": "24px",
-                          "background-color": "#fafafa"
                         }
                       }
                     }

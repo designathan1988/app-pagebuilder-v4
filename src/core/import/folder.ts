@@ -1,25 +1,24 @@
 // project.openFolder (INVENTORY.md, owners; the manifest's explorer-open-folder): a folder the person
 // picked with the browser's directory picker read into a project. Every file lands at the same path in the project's
 // tree, except one whose path belongs to a generated file (css/styles.css, js/interactions.js): that one is kept under
-// a new name (css/styles-1.css, core/files/files.ts pathGenerated). A page's HTML goes through the one owner of
-// reading markup (core/import/import.ts, the same rules the clipboard and the code pane's markup read by), so an
-// imported page is an ordinary page of the document; the stylesheets its pages link are resolved from the folder and
-// read into the document's styles by the one reader of a stylesheet (core/import/css.ts) — the document JSON is the
-// source of truth, and the .css file stays in the tree as an ordinary file no page links any more. JS, images and
-// fonts are kept as files. Each page becomes a page named after its file, at its path (about/index.html is the page
-// index in the folder about), and the root index.html is the home page; a folder without one gets an empty home page
-// index.html. What the import converted, kept, made or dropped is the report the status bar tells.
+// a new name (css/styles-1.css, core/files/files.ts pathGenerated) and what names it follows. The pages go through the
+// HTML importer (core/import/import.ts importedSite, the one reader of a site's HTML: its cascade, media queries,
+// states, style attributes, style blocks, scripts and the report with their lines); the audit's FO1 found a reader of
+// the folder's own here (the code pane's strict reader and a second stylesheet reader, which dropped all of that). Each
+// page is named after its file (about/index.html is the page index in the folder about, "About"), the root index.html
+// is the home page, and a folder without one gets an empty home page. The original .css files stay as files no page
+// links any more; scripts, images and fonts are kept as files.
 //
 // The command replaces the project (outcome `load`): it asks first over work (outcome `confirm`, the manifest's
 // confirmation) and the selection and the history start empty, as File › Open project does.
+import type { PickedFile } from '../../generated/commands.ts';
 import { message, registerHandler, type HandlerContext, type Message, type MessageParam } from '../commands/registry.ts';
-import { projectLanguages } from './import.ts';
-import { DOCUMENT_VERSION, isEmptyProject, type DocNode, type DocumentJson, type Page, type ProjectFile } from '../document/model.ts';
-import type { ModelRules } from '../document/validate.ts';
+import type { MessageId } from '../../generated/ids.ts';
+import { importedSite, pickedRefusal, projectLanguages, reportNotes } from './import.ts';
+import { isEmptyProject, type DocNode, type DocumentJson, type Page, type ProjectFile } from '../document/model.ts';
 import { folderOf, nameOfPath, pathGenerated, resolveHref, typeOfFile, type UploadedFile } from '../files/files.ts';
-import { nodeMaker } from '../structure/node-maker.ts';
-import { placeSheet, readSheet } from './css.ts';
-import { nodesFromMarkup } from './import.ts';
+import { addressAttributes, followPaths } from '../files/references.ts';
+import { applyPatches } from '../history/transaction.ts';
 import { pageHead } from './markup.ts';
 
 // A file of the folder the person picked: what the one reader of a file a door hands over gives (core/files/files.ts
@@ -36,7 +35,7 @@ export interface FolderImport {
 export interface FolderReport {
   // the pages the folder's HTML became, in the project's order
   readonly pages: readonly { readonly path: string; readonly name: string }[];
-  // the stylesheets that were read into the document's styles (their files stay in the tree)
+  // the stylesheets the pages link, read into the document's styles (their files stay in the tree)
   readonly stylesheets: readonly string[];
   // every file kept as it is
   readonly kept: readonly string[];
@@ -44,38 +43,11 @@ export interface FolderReport {
   readonly created: readonly string[];
   // the files kept under another name, their path belonging to a generated file
   readonly renamed: readonly { readonly from: string; readonly to: string }[];
-  // what could not come through: the pieces the markup reader dropped, and the stylesheet rules and declarations the
-  // style reader could not place
-  readonly droppedElements: number;
-  readonly droppedAttributes: number;
-  readonly droppedRules: number;
+  // what the HTML importer reports of the pages and their sheets, in the person's words, with the source lines
+  readonly notes: string;
 }
 
 const isHtml = (path: string): boolean => /\.html?$/i.test(path);
-// An imported element carries only what the source says: the defaults a palette insert gives an element of its type
-// (a div's padding 0, an image's max-width, elements.json defaultStyles) are taken off, so a rule read from a linked
-// stylesheet — a class's padding — is not overridden by a value the source never wrote.
-function withoutDefaults(node: DocNode, rules: ModelRules): DocNode {
-  const defaults = rules.elements.get(node.type)?.defaultStyles ?? {};
-  const { breakpoint, state } = rules.baseLayer;
-  const layers = node.styles as Record<string, Record<string, Record<string, unknown>>>;
-  const declarations = layers[breakpoint]?.[state];
-  let styles = node.styles;
-  if (declarations !== undefined) {
-    const kept = Object.fromEntries(Object.entries(declarations).filter(([property, value]) => defaults[property as keyof typeof defaults] !== value));
-    if (Object.keys(kept).length !== Object.keys(declarations).length) {
-      // the layer a declaration was taken from goes with it, so nothing the source never wrote stays behind
-      const states = Object.entries(layers[breakpoint] as Record<string, Record<string, unknown>>)
-        .filter(([name]) => name !== state)
-        .map(([name, held]) => [name, held] as const);
-      if (Object.keys(kept).length > 0) states.push([state, kept] as const);
-      const rest = Object.entries(layers).filter(([name]) => name !== breakpoint);
-      if (states.length > 0) rest.push([breakpoint, Object.fromEntries(states)] as [string, Record<string, Record<string, unknown>>]);
-      styles = Object.fromEntries(rest) as DocNode['styles'];
-    }
-  }
-  return { ...node, styles, children: node.children.map((child) => withoutDefaults(child, rules)) };
-}
 const textOf = (bytes: string): string => new TextDecoder().decode(Uint8Array.from(atob(bytes), (char) => char.charCodeAt(0)));
 
 // The name a page takes from its file ("index.html" of the root: the home page's name; "about/index.html" -> "About";
@@ -117,115 +89,88 @@ function freePath(path: string, taken: ReadonlySet<string>): string {
 }
 
 // The folder's files read into a project document, with the report; or the refusal that names why it cannot be (no
-// file at all, no HTML page, a page the markup reader refuses).
-export function importFolder(folder: FolderImport, context: HandlerContext<unknown>): { readonly document: DocumentJson; readonly report: FolderReport } | { readonly refused: Message } {
+// file at all, no HTML page, an archive the reader refused).
+export function importFolder<Ui>(folder: FolderImport, context: HandlerContext<Ui>): { readonly document: DocumentJson; readonly report: FolderReport } | { readonly refused: Message } {
   const { rules, ids, words } = context;
   const files = folder.files.filter((file) => file.path !== '');
   if (files.length === 0) return { refused: message('status.folder.unsupported') };
-  if (!files.some((file) => isHtml(file.path))) return { refused: message('status.import.noPage') };
-  // a file whose path belongs to a generated file keeps its content under another name (spec explorer-open-folder)
-  const taken = new Set<string>(files.map((file) => file.path));
-  const renamed: { from: string; to: string }[] = [];
+  // every file of the folder as the HTML importer reads picked files: by the path it holds in the folder, so the
+  // pages' addresses find them
+  const picked: PickedFile[] = files.map((file) => ({ name: file.path, type: file.type === '' ? typeOfFile(file.path) : file.type, bytes: file.bytes, ...(file.width === undefined ? {} : { width: file.width }), ...(file.height === undefined ? {} : { height: file.height }) }));
+  const refused = pickedRefusal(picked);
+  if (refused !== null) return { refused };
+  const site = importedSite(context, picked, true);
+  // The files: every file of the folder that is no page, in the folder's order (the importer's record where it kept
+  // one), then the files the import made (an inline script's code).
+  const made = new Map((site.document.files ?? []).map((file) => [file.path, file] as const));
   const kept: ProjectFile[] = [];
-  // the path each file of the folder was kept at, by the path it arrived with (a link follows its file)
+  for (const file of picked) {
+    if (isHtml(file.name)) continue;
+    kept.push(made.get(file.name) ?? { path: file.name, type: file.type, bytes: file.bytes, ...(file.width === undefined ? {} : { width: file.width }), ...(file.height === undefined ? {} : { height: file.height }) });
+    made.delete(file.name);
+  }
+  kept.push(...made.values());
+  // a file whose path belongs to a generated file moves aside, and what names it follows
+  const taken = new Set<string>(kept.map((file) => file.path));
+  const renamed: { from: string; to: string }[] = [];
   const moved = new Map<string, string>();
-  for (const file of files) {
-    let path = file.path;
-    if (pathGenerated(path)) {
-      path = freePath(path, taken);
-      taken.add(path);
-      renamed.push({ from: file.path, to: path });
-    }
-    moved.set(file.path, path);
-    if (isHtml(file.path)) continue;
-    kept.push({ path, type: file.type === '' ? typeOfFile(file.path) : file.type, bytes: file.bytes, ...(file.width === undefined ? {} : { width: file.width }), ...(file.height === undefined ? {} : { height: file.height }) });
+  for (const file of kept) {
+    if (!pathGenerated(file.path)) continue;
+    const to = freePath(file.path, taken);
+    taken.add(to);
+    moved.set(file.path, to);
+    renamed.push({ from: file.path, to });
   }
-  // a page per HTML file: the root index.html first (the home page), then the others by path
-  const html = files.filter((file) => isHtml(file.path)).map((file) => file.path).sort((a, b) => (a === 'index.html' ? -1 : b === 'index.html' ? 1 : a < b ? -1 : 1));
-  const home = words('pages.defaultHome');
+  const files_ = kept.map((file) => (moved.has(file.path) ? { ...file, path: moved.get(file.path) as string } : file));
+  let document: DocumentJson = { ...site.document, ...(files_.length === 0 ? {} : { files: files_ }) };
+  if (files_.length === 0) {
+    const { files: _dropped, ...rest } = document;
+    void _dropped;
+    document = rest;
+  }
+  if (moved.size > 0) document = applyPatches(document, followPaths(document, (path) => moved.get(path) ?? path, undefined, addressAttributes(rules))).document;
+  // Each page named after its file, its root too, its head's title kept as its title; the root index.html first, then
+  // the others by path. A folder without an index.html gets an empty home page, first.
+  const home = words('pages.defaultHome' as MessageId);
   const pageNames = new Set<string>();
-  const report: { pages: { path: string; name: string }[]; stylesheets: string[]; kept: string[]; created: string[]; renamed: { from: string; to: string }[]; droppedElements: number; droppedAttributes: number; droppedRules: number } = {
-    pages: [],
-    stylesheets: [],
-    kept: kept.map((file) => file.path),
-    created: [],
-    renamed,
-    droppedElements: 0,
-    droppedAttributes: 0,
-    droppedRules: 0,
-  };
-  let document: DocumentJson = { version: DOCUMENT_VERSION, pages: [] };
-  const linked: { readonly page: string; readonly stylesheets: readonly string[] }[] = [];
-  for (const path of html) {
-    const file = files.find((one) => one.path === path);
-    if (file === undefined) continue;
-    const markup = textOf(file.bytes);
-    const make = nodeMaker(document, rules, ids, words);
-    const imported = nodesFromMarkup(markup, make, context as HandlerContext<never>);
-    if ('line' in imported) {
-      return { refused: message('status.folder.pageRefused', { path, reason: { key: imported.message.key, params: imported.message.params } }) };
-    }
-    report.droppedElements += imported.dropped.elements;
-    report.droppedAttributes += imported.dropped.attributes;
-    const head = pageHead(markup);
-    const name = freshName(pageNames, path === 'index.html' ? home : pageNameOf(path, home));
-    // the page's own settings, kept on its root as the page's panel keeps them (elements.json isPageSetting)
-    const attributes: Record<string, unknown> = {};
-    // the project's own language is no setting of the page (spec export-clean)
-    if (head.lang !== null && head.lang !== (context.state.document.language ?? 'en')) attributes.pageLanguage = head.lang;
-    if (head.dir === 'ltr' || head.dir === 'rtl') attributes.pageDirection = head.dir;
-    if (head.title !== null) attributes.pageTitle = head.title;
-    // the scripts the page runs, as the tree's paths (a script whose file the folder does not hold is dropped)
-    const scripts = head.scripts.map((src) => resolveHref(path, src)).filter((one): one is string => one !== null && moved.has(one)).map((one) => moved.get(one) as string);
-    if (scripts.length > 0) attributes.pageScripts = scripts.join(' ');
-    const root: DocNode = {
-      id: ids.next(),
-      type: rules.root.type,
-      name: freshName(new Set(make.taken), name),
-      tag: rules.root.tag,
-      attributes: attributes as DocNode['attributes'],
-      classes: [],
-      styles: {},
-      text: null,
-      children: imported.nodes.map((child) => withoutDefaults(child, rules)),
-    };
-    const made: Page = { id: ids.next(), name, file: path, tree: root };
-    document = { ...document, pages: [...document.pages, made] };
-    report.pages.push({ path, name });
-    linked.push({ page: path, stylesheets: head.stylesheets });
-  }
-  // a folder without an index.html gets an empty home page, first (listed in the report as made)
-  if (!document.pages.some((page) => page.file === 'index.html')) {
+  const ordered = [...document.pages].sort((a, b) => (a.file === 'index.html' ? -1 : b.file === 'index.html' ? 1 : a.file < b.file ? -1 : 1));
+  const created: string[] = [];
+  const pages: Page[] = ordered.map((page) => {
+    const name = freshName(pageNames, page.file === 'index.html' ? home : pageNameOf(page.file, home));
+    const source = picked.find((file) => file.name === page.file);
+    const title = source === undefined ? null : pageHead(textOf(source.bytes)).title;
+    const attributes = title === null || title.trim() === '' ? page.tree.attributes : { ...page.tree.attributes, pageTitle: title.trim() };
+    return { ...page, name, tree: { ...page.tree, name, attributes: attributes as DocNode['attributes'] } };
+  });
+  if (!pages.some((page) => page.file === 'index.html')) {
     const name = freshName(pageNames, home);
-    const make = nodeMaker(document, rules, ids, words);
-    const root: DocNode = { id: ids.next(), type: rules.root.type, name: freshName(make.taken, name), tag: rules.root.tag, attributes: {}, classes: [], styles: {}, text: null, children: [] };
-    document = { ...document, pages: [{ id: ids.next(), name, file: 'index.html', tree: root }, ...document.pages] };
-    report.pages.unshift({ path: 'index.html', name });
-    report.created.push('index.html');
+    const root: DocNode = { id: ids.next(), type: rules.root.type, name, tag: rules.root.tag, attributes: {}, classes: [], styles: {}, text: null, children: [] };
+    pages.unshift({ id: ids.next(), name, file: 'index.html', tree: root });
+    created.push('index.html');
   }
-  // the stylesheets the pages link, each read once: their rules land on the class registry and on the elements they
-  // match (core/import/css.ts); the file itself stays in the tree
-  const read = new Set<string>();
-  for (const entry of linked) {
-    for (const href of entry.stylesheets) {
-      const original = resolveHref(entry.page, href);
-      const path = original === null ? null : (moved.get(original) ?? null);
-      const file = path === null ? undefined : files.find((one) => one.path === original);
-      const record = path === null ? undefined : kept.find((one) => one.path === path);
-      if (file === undefined || record === undefined || read.has(path as string)) continue;
-      const sheet = readSheet(textOf(file.bytes));
-      const placed = placeSheet(document, sheet, context);
-      document = placed.document;
-      report.droppedRules += placed.dropped;
-      read.add(path as string);
-      report.stylesheets.push(path as string);
+  document = { ...document, pages };
+  // the stylesheets the pages link that the folder holds, each once, in the pages' order
+  const stylesheets: string[] = [];
+  for (const file of picked.filter((one) => isHtml(one.name))) {
+    for (const href of pageHead(textOf(file.bytes)).stylesheets) {
+      const path = resolveHref(file.name, href);
+      if (path === null || !picked.some((one) => one.name === path)) continue;
+      const at = moved.get(path) ?? path;
+      if (!stylesheets.includes(at)) stylesheets.push(at);
     }
   }
-  const documentFiles: DocumentJson = kept.length === 0 ? document : { ...document, files: kept };
-  return { document: documentFiles, report };
+  const report: FolderReport = {
+    pages: pages.map((page) => ({ path: page.file, name: page.name })),
+    stylesheets,
+    kept: files_.map((file) => file.path),
+    created,
+    renamed,
+    notes: reportNotes(site.report, (key, params) => words(key, params)),
+  };
+  return { document, report };
 }
 
-// the words the import report is told in (status.folder.imported): the files by role, and what was dropped
+// the words the import report is told in (status.folder.imported): the files by role, and what the importer reports
 const listOf = (entries: readonly string[]): MessageParam => (entries.length === 0 ? { key: 'status.folder.none' } : entries.join(', '));
 export function reportMessage(folder: string, report: FolderReport): Message {
   return message('status.folder.imported', {
@@ -235,9 +180,7 @@ export function reportMessage(folder: string, report: FolderReport): Message {
     kept: listOf(report.kept),
     created: listOf(report.created),
     renamed: listOf(report.renamed.map((one) => `${one.from} → ${one.to}`)),
-    droppedElements: report.droppedElements,
-    droppedAttributes: report.droppedAttributes,
-    droppedRules: report.droppedRules,
+    notes: report.notes,
   });
 }
 

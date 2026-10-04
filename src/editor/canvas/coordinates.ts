@@ -567,7 +567,7 @@ function wins(a: Declared, b: Declared): boolean {
 // at 59 % and a 2 px one alike. The rules whose selector the browser matches on the element, inside the @media and
 // @supports blocks that hold now, are ranked as the cascade ranks them (wins; their specificity is
 // import/selectors.ts's specificityOf), and the winner's value is said in px when it is a keyword.
-function declaredWidth(element: Element, property: string): string | null {
+export function declaredWidth(element: Element, property: string): string | null {
   const view = element.ownerDocument.defaultView;
   if (view === null) return null;
   let best: Declared | null = null;
@@ -610,6 +610,9 @@ function declaredWidth(element: Element, property: string): string | null {
         const name = (rule as CSSLayerBlockRule).name || `anonymous ${String(order)}`;
         if (!layers.has(name)) layers.set(name, layers.size);
         walk((rule as CSSLayerBlockRule).cssRules, layers.get(name) ?? 0);
+      } else if (kind === 'CSSLayerStatementRule') {
+        // "@layer a, b;" orders its layers as a block would, before any of their rules appear
+        for (const name of (rule as CSSLayerStatementRule).nameList) if (!layers.has(name)) layers.set(name, layers.size);
       }
     }
   };

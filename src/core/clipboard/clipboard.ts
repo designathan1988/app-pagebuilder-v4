@@ -26,12 +26,12 @@ import type { ClipboardContent, ClipboardNode, NodeId } from '../../generated/co
 import type { ElementType, MessageId } from '../../generated/ids.ts';
 import { message, registerHandler, type HandlerContext, type Message, type Outcome } from '../commands/registry.ts';
 import { allNodes, locate, type DocNode, type DocumentJson, type Location, type Styles } from '../document/model.ts';
-import type { ModelRules } from '../document/validate.ts';
+import { validateDocument, type ModelRules } from '../document/validate.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import { referenceHtmlOf } from '../elements/references.ts';
 import { animationNamesOf, withFreshAnimationNames } from '../document/clone.ts';
 import { pageCss, pageLines } from '../export/export.ts';
-import { deepEqual, type Patch } from '../history/transaction.ts';
+import { applyPatches, deepEqual, type Patch } from '../history/transaction.ts';
 import { nodesFromExternal, reportNotes } from '../import/import.ts';
 import { firstLockRefusal, lockRefusal } from '../nodes/flags.ts';
 import { openedPage, pageShown } from '../project/pages.ts';
@@ -266,9 +266,13 @@ export const pasteCommand = registerHandler('clipboard.paste', (context, { clipb
   // the one rule of where elements may go (content-model.ts placementRefusal), as for an insert
   const refused = placementRefusal(state.document, rules, receiver.id, nodes);
   if (refused !== null) return { kind: 'refused', message: refused };
+  const patches: Patch[] = nodes.map((node, i) => ({ op: 'add' as const, path: [...at.parent.path, 'children', at.index + i], value: node }));
+  // what a clipboard text holds is anybody's (another version, another project, a page that writes the format): it is
+  // read as the validator reads a document, before any patch is handed on (the audit's CB1)
+  if (!pastable(state.document, patches, rules)) return { kind: 'refused', message: message('status.paste.invalid') };
   return {
     kind: 'change',
-    patches: nodes.map((node, i) => ({ op: 'add' as const, path: [...at.parent.path, 'children', at.index + i], value: node })),
+    patches,
     selection: nodes.map((node) => node.id),
     message: said,
   };
@@ -304,6 +308,15 @@ function paragraphOf(text: string, make: NodeMaker): DocNode {
     children: [],
   };
 }
+// whether a paste's patches leave a document the validator takes (CB1)
+function pastable(document: DocumentJson, patches: readonly Patch[], rules: ModelRules): boolean {
+  try {
+    return validateDocument(applyPatches(document, patches).document, [], rules).length === 0;
+  } catch {
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------- styles (spec copy-paste-styles)
 // the name of the app's style format, the first field of its JSON text: every style value of an element, by
 // breakpoint and state, exactly as the document holds them
@@ -351,5 +364,6 @@ export const pasteStyleCommand = registerHandler('clipboard.pasteStyle', (contex
   const said = holders.length === 1 ? message('status.style.pasted', { name: holders[0]?.name ?? '' }) : message('status.style.pastedMany', { count: holders.length });
   // a holder that already holds these styles stays: a paste of what is there records nothing
   const patches: Patch[] = holders.flatMap((holder) => (deepEqual(holder.node.styles, styles) ? [] : [{ op: 'replace' as const, path: [...holder.path, 'styles'], value: styles }]));
+  if (patches.length > 0 && !pastable(state.document, patches, context.rules)) return { kind: 'refused', message: message('status.paste.invalid') };
   return patches.length === 0 ? { kind: 'change', message: said } : { kind: 'change', patches, message: said };
 });

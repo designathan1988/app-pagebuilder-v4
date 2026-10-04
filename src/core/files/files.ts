@@ -23,6 +23,7 @@ import { capturedPageStylePath } from '../import/capture-styles.ts';
 import { argumentRefused } from '../store/args.ts';
 import { GENERATED_PATHS } from '../export/paths.ts';
 import { browserPorts } from '../ports/browser.ts';
+import { projectPathProblem } from './path-rule.ts';
 
 export type { ProjectFile };
 
@@ -70,8 +71,10 @@ export function uploadPath(document: DocumentJson, folder: string, name: string)
 }
 
 // a file's size as the shortest of B, KB and MB with one decimal at most (data, not prose: no i18n)
+// the bytes a base64 text holds: three for every four characters, less the padding (the audit's SZ1)
+export const byteCount = (base64: string): number => Math.floor((base64.length * 3) / 4) - (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0);
 export function sizeLabel(file: ProjectFile): string {
-  const bytes = Math.floor((file.bytes.length * 3) / 4);
+  const bytes = byteCount(file.bytes);
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -370,6 +373,7 @@ export function copiedCaptureSheet(document: DocumentJson, source: Page, copy: P
 // involved, and the home page keeps its index.html in the root
 function renameRefusal(document: DocumentJson, from: string, to: string): Message | null {
   if (to === from) return null;
+  if (projectPathProblem(to) !== null) return message('status.files.badName', { name: nameOfPath(to) });
   const fixed = (path: string): boolean => pathGenerated(path) || holdsGenerated(path);
   if (fixed(from) || fixed(to)) return message('status.files.generatedPath', { path: pathGenerated(from) || holdsGenerated(from) ? from : to });
   // the destination itself: another file, folder or page file already there (the checks below look at what moves
@@ -422,6 +426,7 @@ function patchesForMoves(document: DocumentJson, moves: ReturnType<typeof movedP
 
 // whether a path may be made: its folder exists, and nothing holds its place
 function makingRefusal(document: DocumentJson, path: string): Message | null {
+  if (projectPathProblem(path) !== null) return message('status.files.badName', { name: path });
   if (pathGenerated(path)) return message('status.files.generatedPath', { path });
   if (pathTaken(document, path)) return message('status.files.nameTaken', { path, name: nameOfPath(path) });
   const above = folderOf(path);

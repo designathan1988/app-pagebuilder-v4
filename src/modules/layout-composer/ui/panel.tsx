@@ -94,7 +94,9 @@ function DoorField({ entry, value, type = 'text', arg = 'value' }: { readonly en
   const keep = () => {
     const input = field.current;
     if (input === null || !door.available || input.value === (input.dataset.shown ?? value)) return;
-    (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(entry.command.id, { ...entry.door.args, [arg]: input.value });
+    const outcome = (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(entry.command.id, { ...entry.door.args, [arg]: input.value });
+    // a value the command refused is not kept: the field shows the document's value again (the audit's FD2)
+    if (outcome.status !== 'done') input.value = value;
     markFieldKept(input, input.value);
   };
   return (
@@ -172,6 +174,7 @@ export function LayoutPanel(): ReactNode {
   const container = useEditorState((s) => (composer === null ? null : (locate(s.document, composer.target)?.node ?? null)));
   const breakpoint = useEditorState((s) => activeBreakpoint(s));
   const table = useEditorState((s) => breakpointsOf(s.document));
+  const project = useEditorState((s) => s.document);
   // the project's images: read from the files list the document holds, so the panel redraws only when it changes
   const files = useEditorState((s) => s.document.files);
   const images = useMemo(() => imageFiles({ files } as DocumentJson), [files]);
@@ -192,12 +195,12 @@ export function LayoutPanel(): ReactNode {
   const groupName = group === null ? container.name : (findRegion(record.intent, group)?.name ?? container.name);
   const prediction = predict(record.intent, group);
   const strategy = record.intent.preferences?.[preferenceKey(group)] ?? 'auto';
-  const offered = usefulSuggestions(record.intent);
+  const offered = usefulSuggestions(record.intent, project);
   const reference = record.intent.reference;
   // the widths check (spec "Layout Stress Testing"): the widest width at which a region no longer fits or no longer
   // reads, measured on the layout as the page lays it out (with its automatic reflow)
   const widths = stressWidths(record.intent.viewport.width, table.map((b) => b.width), NARROWEST);
-  const issues = stress(laidOut(record.intent), widths.map((width) => ({ width, scale: 1, content: {} })));
+  const issues = stress(laidOut(record.intent, project), widths.map((width) => ({ width, scale: 1, content: {} })));
   const breaking = issues.length === 0 ? null : issues.reduce((a, b) => (b.viewport > a.viewport ? b : a));
   return (
     <section className="view layout-panel" data-region="layout-composer-panel" aria-label={t('panel.layoutComposer')}>

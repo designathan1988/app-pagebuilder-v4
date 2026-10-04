@@ -23,8 +23,12 @@ body {
   overflow: hidden;
 }
 
+/* every form control takes the interface's type, a select and a textarea too (the browser's own is 13.333 px, a
+   textarea's monospace: TY1) */
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
   color: inherit;
 }

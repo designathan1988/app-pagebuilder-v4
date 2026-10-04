@@ -13,7 +13,7 @@ import { lockRefusal } from '../nodes/flags.ts';
 import type { Patch } from '../history/transaction.ts';
 import { readValue } from '../style/set.ts';
 import { IDENTIFIER_SOURCE } from '../text/identifier.ts';
-import { probeOf, tokensOf } from './tokens.ts';
+import { probeOf, timelineTexts, tokensOf } from './tokens.ts';
 
 type Path = readonly (string | number)[];
 
@@ -82,6 +82,10 @@ function valuesInStyles(styles: DocNode['styles'] | undefined, base: Path, into:
 
 function valuesInTree(node: DocNode, base: Path, into: Held[]): void {
   valuesInStyles(node.styles, [...base, 'styles'], into);
+  // the element's own animations: their keyframes' declarations are colours of the site too (the audit's SV1)
+  (node.animations ?? []).forEach((animation, a) => animation.keyframes.forEach((frame, k) => {
+    for (const [property, value] of Object.entries(frame.declarations as Record<string, StoredValue | undefined>)) if (value !== undefined) into.push({ path: [...base, 'animations', a, 'keyframes', k, 'declarations', property], value });
+  }));
   node.children.forEach((child, i) => valuesInTree(child, [...base, 'children', i], into));
 }
 
@@ -91,6 +95,8 @@ function styleValues(document: DocumentJson): readonly Held[] {
   document.pages.forEach((page, index) => valuesInTree(page.tree, ['pages', index, 'tree'], found));
   (document.classes ?? []).forEach((styleClass, index) => valuesInStyles(styleClass.styles, ['classes', index, 'styles'], found));
   (document.components ?? []).forEach((definition, index) => valuesInTree(definition.tree, ['components', index, 'tree'], found));
+  // the motion timelines' CSS texts (SV1)
+  for (const { path, value } of timelineTexts(document)) found.push({ path, value });
   return found;
 }
 

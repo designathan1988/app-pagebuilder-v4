@@ -12,7 +12,7 @@ import { message, registerHandler } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
 import { deepEqual, type Patch } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
-import { canonical, hasMarks, parseInline, plainText, withText, type InlineRun } from './inline.ts';
+import { canonical, hasMarks, keptHref, mapInlineLinks, parseInline, plainText, withText, type InlineRun } from './inline.ts';
 import { argumentRefused } from '../store/args.ts';
 
 export const setTextCommand = registerHandler('text.set', ({ state, rules }, { target, content }) => {
@@ -21,7 +21,9 @@ export const setTextCommand = registerHandler('text.set', ({ state, rules }, { t
   if (!found) throw new Error(`text.set: the document has no node ${target}`);
   if (rules.elements.get(found.node.type)?.content !== 'text') return { kind: 'refused', message: message('status.element.notApplicable', { command: { key: 'command.editText' }, name: found.node.name }) };
   // a plain text keeps the marks of what it keeps of a marked text (the inspector's text field); a tree is whole
-  const runs = typeof content === 'string' ? withText(found.node.inline ?? [found.node.text ?? ''], content) : parseInline(content);
+  // a link the content brings keeps the address the rule reads (keptHref: the audit's AD2)
+  const parsed = typeof content === 'string' ? withText(found.node.inline ?? [found.node.text ?? ''], content) : parseInline(content);
+  const runs = Array.isArray(parsed) ? [...mapInlineLinks(parsed, keptHref)] : parsed;
   if (runs === null) return { kind: 'refused', message: argumentRefused('content') };
   // the text of a locked element, or of one inside a locked element, stays (spec lock-element)
   const locked = lockRefusal(state.document, target, 'status.locked.editText');

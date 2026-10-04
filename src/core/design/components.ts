@@ -315,7 +315,13 @@ export const fillFromDataCommand = registerHandler('components.fillFromData', ({
     if (row === undefined) continue;
     const next = filled(child, row, i, columns, state.document, rules);
     if (isMessage(next)) return { kind: 'refused', message: next };
-    if (!deepEqual(next, child)) patches.push({ op: 'replace', path: [...parentPath, index], value: next });
+    if (deepEqual(next, child)) continue;
+    // an item that is locked, or holds a locked element its row would change, stays: the whole fill refuses (the
+    // audit's LK2: only the parent's lock was asked)
+    const now = new Map([...walk(next)].map((one) => [one.id, one] as const));
+    const locked = [...walk(child)].find((one) => one.locked === true && !deepEqual(now.get(one.id), one));
+    if (locked !== undefined) return { kind: 'refused', message: message('status.locked.edit', { name: locked.name }) };
+    patches.push({ op: 'replace', path: [...parentPath, index], value: next });
   }
   // rows beyond the items: new items after the last one, each a fresh instance filled with its row
   const last = items.at(-1)?.index ?? found.index;

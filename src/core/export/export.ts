@@ -474,6 +474,12 @@ export function siteScriptsWritten(document: DocumentJson, manifestRules: ModelR
 
 // A page as the preview shows it (spec preview-mode): the exported page itself, its stylesheet written in its head in
 // place of the link (the preview has no files to load), and links and forms opening in a new tab, never in the editor.
+// A script's code written inside the page's own <script> element (the preview has no folder to load it from): a
+// "</script" in it would end the element early, so it is written "<\/script", which every place it can stand in code
+// (a string, a regular expression, a comment) reads as the same text (the audit's PS1). The code is always handed to
+// String.replace through a function, so its $&, $' and $` stay as they are (RP1).
+const inlineScript = (code: string): string => code.replace(/<\/script/gi, '<\\/script');
+
 export function previewPage(document: DocumentJson, rules: ModelRules, pageIndex = 0, scripts?: SiteScripts): string {
   // the preview writes the paths as the document holds them, then draws each through its data URL: its frame has an
   // opaque origin, where a blob: URL of the editor's origin does not load (files.ts dataUrl)
@@ -499,7 +505,7 @@ export function previewPage(document: DocumentJson, rules: ModelRules, pageIndex
     const file = fileAt(document, path);
     if (file === null) continue;
     const text = new TextDecoder().decode(fileBytes(file));
-    html = html.replace(`  <script src="${dataUrl(file)}"></script>`, `  <script>\n${text}\n  </script>`);
+    html = html.replace(`  <script src="${dataUrl(file)}"></script>`, () => `  <script>\n${inlineScript(text)}\n  </script>`);
   }
   // a font of the project draws in the preview from its own bytes too, as the page's own sources do (the preview has
   // no folder to serve css/styles.css's relative paths from)
@@ -516,16 +522,16 @@ export function previewPage(document: DocumentJson, rules: ModelRules, pageIndex
   // has no address the preview could load, so its text is written in, and it waits for the page as its `defer` does —
   // an inline script is never deferred.
   if (site.interactions !== null) {
-    const inline = `  <script>document.addEventListener('DOMContentLoaded', function () {\n${site.interactions}  });</script>`;
-    html = html.replace(`  <script defer src="${relativePath(page?.file ?? '', INTERACTIONS_SCRIPT)}"></script>`, inline);
+    const inline = `  <script>document.addEventListener('DOMContentLoaded', function () {\n${inlineScript(site.interactions)}  });</script>`;
+    html = html.replace(`  <script defer src="${relativePath(page?.file ?? '', INTERACTIONS_SCRIPT)}"></script>`, () => inline);
   }
   const link = `  <link rel="stylesheet" href="${STYLESHEET}">`;
-  if (site.forms !== null) html = html.replace(`  <script defer src="${FORMS_SCRIPT}"></script>`, () => `  <script>document.addEventListener('DOMContentLoaded', function () {\n${site.forms}\n});</script>`);
+  if (site.forms !== null) html = html.replace(`  <script defer src="${FORMS_SCRIPT}"></script>`, () => `  <script>document.addEventListener('DOMContentLoaded', function () {\n${inlineScript(site.forms ?? '')}\n});</script>`);
   // the Lottie player and the motion script run in the preview from their own text, in their order (the page links
   // them by paths the preview cannot load)
   const pageFile = page?.file ?? '';
-  if (site.lottie !== null) html = html.replace(`  <script defer src="${relativePath(pageFile, LOTTIE_SCRIPT)}"></script>`, () => `  <script>\n${site.lottie?.replace(/<\/script/gi, '<\\/script') ?? ''}\n  </script>`);
-  if (site.motion !== null) html = html.replace(`  <script defer src="${relativePath(pageFile, MOTION_SCRIPT)}"></script>`, () => `  <script>document.addEventListener('DOMContentLoaded', function () {\n${site.motion?.replace(/<\/script/gi, '<\\/script') ?? ''}\n});</script>`);
+  if (site.lottie !== null) html = html.replace(`  <script defer src="${relativePath(pageFile, LOTTIE_SCRIPT)}"></script>`, () => `  <script>\n${inlineScript(site.lottie ?? '')}\n  </script>`);
+  if (site.motion !== null) html = html.replace(`  <script defer src="${relativePath(pageFile, MOTION_SCRIPT)}"></script>`, () => `  <script>document.addEventListener('DOMContentLoaded', function () {\n${inlineScript(site.motion ?? '')}\n});</script>`);
   return html.replace(link, `  <base target="_blank">\n  <style>\n${css}  </style>`);
 }
 

@@ -726,6 +726,11 @@ const BEHAVIOUR_DEFAULTS: Readonly<Record<RuntimeBehaviourKind, Behaviour>> = {
   'cursor-follow': { kind: 'cursor-follow', amount: 0.85 },
 };
 
+// The axis a behaviour runs on: the one it holds, else its kind's own (parallax y, marquee x), the one the runtime
+// reads too (editor/motion/runtime/behaviours.ts). The inspector draws and edits that axis (the audit's BA1).
+export const behaviourAxis = (behaviour: Behaviour): 'x' | 'y' =>
+  behaviour.axis ?? (isRuntimeBehaviour(behaviour.kind) ? BEHAVIOUR_DEFAULTS[behaviour.kind].axis : undefined) ?? 'y';
+
 const isRuntimeBehaviour = (kind: string): kind is RuntimeBehaviourKind => (RUNTIME_BEHAVIOURS as readonly string[]).includes(kind);
 
 // The properties a style behaviour writes, in the order its door's adapter lists them (manifest/commands/motion.json:

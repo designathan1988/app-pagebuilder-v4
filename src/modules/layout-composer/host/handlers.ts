@@ -3,8 +3,8 @@
 // with (gestures/recognize.ts readStroke), so what is committed is what the person saw; the new intent is compiled and
 // written into the container at once (host/materialize.ts), so the page is always the ordinary structure the layout
 // means — there is no separate "apply" that could leave the two apart.
-import { activeBreakpoint, BASE_BREAKPOINT, breakpointWords, firstLockRefusal, hidePanel, imageFiles, isPanelOpen, leavingNames, locate, manifest, message, nodeMaker, numberConstant, pageShown, registerHandler, registerPredicate, releaseReferencesPatch, showPanel, tracksToValue, walk, withoutReferencesTo, zoomOf } from '../../../editor/host.ts';
-import type { DocNode, EditorUi, HandlerContext, Message, MessageId, NodeId, Outcome, Shown } from '../../../editor/host.ts';
+import { activeBreakpoint, BASE_BREAKPOINT, breakpointsOf, breakpointWords, firstLockRefusal, hidePanel, imageFiles, isPanelOpen, leavingNames, locate, manifest, message, nodeMaker, numberConstant, pageShown, registerHandler, registerPredicate, releaseReferencesPatch, showPanel, tracksToValue, walk, withoutReferencesTo, zoomOf } from '../../../editor/host.ts';
+import type { DocNode, DocumentJson, EditorUi, HandlerContext, Message, MessageId, NodeId, Outcome, Shown } from '../../../editor/host.ts';
 import { propertyVocabulary } from '../adapters/properties.ts';
 import { compile, type CompilerPorts } from '../compiler/compile.ts';
 import { execute, type Naming, type Operation, type RegionValues } from '../gestures/operations.ts';
@@ -104,11 +104,13 @@ function namesFromElements(container: DocNode, intent: LayoutIntent): LayoutInte
 }
 
 // The project's breakpoints as the composer maps its rules to them.
-const projectBreakpoints = () => manifest.properties.breakpoints.map((b) => ({ id: b.id, maxWidth: b.width, base: b.base }));
+// the project's own table (breakpointsOf: a project adds breakpoints and sets their widths), never the manifest's
+// default one: a rule recorded at the width the canvas shows maps to the breakpoint that has it (the audit's BP1)
+export const projectBreakpoints = (document: DocumentJson) => breakpointsOf(document).map((b) => ({ id: b.id, maxWidth: b.width, base: b.base }));
 
 // The intent as the page lays it out: what the person chose, with the automatic reflow at narrower screens wherever
 // they chose nothing (responsive/continuum.ts withAdaptation). The compiler writes it and the widths check measures it.
-export const laidOut = (graph: LayoutIntent): LayoutIntent => withAdaptation(graph, adaptationFor(projectBreakpoints()));
+export const laidOut = (graph: LayoutIntent, document: DocumentJson): LayoutIntent => withAdaptation(graph, adaptationFor(projectBreakpoints(document)));
 
 // The regions whose element holds something the person put inside it (an element the composer did not write): their
 // content sets their height (compiler/compile.ts filled).
@@ -137,20 +139,30 @@ function written(context: Context, graph: LayoutIntent, selection: readonly stri
   // undo step, as a delete releases it (the audit's RF1: deleting a region a link pointed into was refused)
   // a locked element inside the container keeps what it holds and where it stands (spec lock-element; the audit's LK1:
   // the composer asked about the container alone)
+  const replaced = containerWrite(context, container, path, built);
+  if ('refused' in replaced) return { kind: 'refused', message: replaced.refused };
+  return {
+    kind: 'change',
+    patches: replaced.patches,
+    ui: withComposer(context.state.ui, { ...state, selection: kept }),
+    message: message('layout.status.changed'),
+  };
+}
+
+// The container written whole with what the composer built: a locked element inside it keeps what it holds and where
+// it stands (spec lock-element; the audit's LK1, which asked about the container alone), and the elements it no longer
+// holds leave with whatever pointed at them let go in the same undo step (RF1). Every write of the container goes
+// through here: a stroke, a Select-tool placement and an entry that reads the page back (the audit's LK3).
+function containerWrite(context: Context, container: DocNode, path: readonly (string | number)[], built: DocNode): { readonly patches: ReturnType<typeof releaseReferencesPatch> } | { readonly refused: Message } {
   const now = new Map([...walk(built)].map((inner) => [inner.id, JSON.stringify(inner)] as const));
   const lockedInside = [...walk(container)].find((inner) => inner.locked === true && now.get(inner.id) !== JSON.stringify(inner));
-  if (lockedInside !== undefined) return { kind: 'refused', message: firstLockRefusal(context.state.document, [lockedInside.id as NodeId], 'status.locked.edit') ?? message('status.locked.edit', { name: lockedInside.name }) };
+  if (lockedInside !== undefined) return { refused: firstLockRefusal(context.state.document, [lockedInside.id as NodeId], 'status.locked.edit') ?? message('status.locked.edit', { name: lockedInside.name }) };
   const staying = new Set([...walk(built)].map((inner) => inner.id));
   const leaving = new Set([...walk(container)].map((inner) => inner.id as NodeId).filter((id) => !staying.has(id)));
   const names = leavingNames(context.state.document, leaving);
   const next = leaving.size === 0 ? built : withoutReferencesTo(built, names);
   const released = leaving.size === 0 ? [] : releaseReferencesPatch(context.state.document, leaving, names).filter((patch) => !path.every((key, i) => patch.path[i] === key));
-  return {
-    kind: 'change',
-    patches: [...released, { op: 'replace', path: [...path], value: next }],
-    ui: withComposer(context.state.ui, { ...state, selection: kept }),
-    message: message('layout.status.changed'),
-  };
+  return { patches: [...released, { op: 'replace', path: [...path], value: next }] };
 }
 
 // The container with the structure the intent compiles to written into it.
@@ -165,11 +177,11 @@ function structured(context: Context, container: DocNode, record: ContainerRecor
     }
   };
   visit(container);
-  const shown = laidOut(graph);
+  const shown = laidOut(graph, context.state.document);
   const compiled = compile(shown, COMPILER, { previous: fresh ? new Set() : keys, filled: filledRegions(container) });
   // the container keeps what the person chose; the automatic reflow is derived again every time
   const compilation = { ...compiled, intent: { ...compiled.intent, responsive: graph.responsive } };
-  const breakpoints = mapBreakpoints(shown, projectBreakpoints());
+  const breakpoints = mapBreakpoints(shown, projectBreakpoints(context.state.document));
   const make = nodeMaker(context.state.document, context.rules, context.ids, context.words);
   return materialize(context, withAuthoring(container, { ...record, intent: graph }), compilation, { make, regionType: REGION_TYPE, breakpoints });
 }
@@ -404,9 +416,11 @@ export const enterLayout = registerHandler<'layout.enter', EditorUi>('layout.ent
     const adopted = adopt(context, back.container, back.intent);
     const record: ContainerRecord = { role: 'container', version: 1, intent: adopted.graph, owns: held?.owns ?? {} };
     const entered = back.changed ? structured(context, withAuthoring(adopted.container, record), record, adopted.graph, false) : withAuthoring(adopted.container, record);
+    const replaced = containerWrite(context, at.node, at.path, entered);
+    if ('refused' in replaced) return { kind: 'refused', message: replaced.refused };
     return {
       kind: 'change',
-      patches: [{ op: 'replace', path: [...at.path], value: entered }],
+      patches: replaced.patches,
       ui: (() => {
         const layers = composerOf(context.state.ui)?.layers ?? isPanelOpen(context.state.ui, LAYERS);
         // the view the sidebar showed before the tool (kept when the tool comes on again over itself)
@@ -548,9 +562,11 @@ export const placeLayout = registerHandler<'layout.place', EditorUi>('layout.pla
     const graph = inferMeaning(reading.result.graph, { name: (key) => context.words(`layout.template.part.${key}` as MessageId), numbered: (n) => context.words('layout.label.region' as MessageId, { n }), generic: numberedWith(context.words) }, tree.id === owner.container.id);
     // a width or a height the Select tool wrote on a region before would hold it where it was: the layout owns its size
     const next = structured(context, releasedSizes(context, back.container), record, graph, false);
+    const replaced = containerWrite(context, owner.container, at.path, next);
+    if ('refused' in replaced) return { kind: 'refused', message: replaced.refused };
     const placed = findRegion(graph, owner.region);
     const said = reading.mode === 'edge' && placed !== undefined ? message('layout.status.resized', { sizes: context.words('layout.status.size' as MessageId, { name: placed.name, width: Math.round(placed.box.width), height: Math.round(placed.box.height) }) }) : gestureSaid(reading.mode, record.intent, graph, reading.result.affected);
-    return { kind: 'change', patches: [{ op: 'replace', path: [...at.path], value: next }], message: said };
+    return { kind: 'change', patches: replaced.patches, message: said };
   }),
 );
 
@@ -776,11 +792,11 @@ export const unrelateLayout = registerHandler<'layout.unrelate', EditorUi>('layo
 
 // The suggestions worth offering (spec "Structural Suggestions": only on strong evidence): those whose acceptance
 // changes what the page is. One that compiles to the very structure the page has says nothing new.
-export function usefulSuggestions(graph: LayoutIntent): Suggestion[] {
+export function usefulSuggestions(graph: LayoutIntent, document: DocumentJson): Suggestion[] {
   const plain: Naming = { named: (base, n) => base ?? String(n) };
   const fingerprint = (one: LayoutIntent): string | null => {
     try {
-      return compile(laidOut(one), COMPILER).fingerprint;
+      return compile(laidOut(one, document), COMPILER).fingerprint;
     } catch (error) {
       if (error instanceof LayoutRefusal) return null;
       throw error;
@@ -799,7 +815,7 @@ export function usefulSuggestions(graph: LayoutIntent): Suggestion[] {
 export const suggestLayout = registerHandler<'layout.suggest', EditorUi>('layout.suggest', (context, { suggestion }) =>
   guarded(context, () => {
     const { record } = composed(context);
-    const found = usefulSuggestions(record.intent).find((s) => s.id === suggestion);
+    const found = usefulSuggestions(record.intent, context.state.document).find((s) => s.id === suggestion);
     if (found === undefined) throw new LayoutRefusal('unknown-region', { region: suggestion });
     const outcome = operate(context, acceptSuggestion(record.intent, found));
     return outcome.kind === 'change' ? { ...outcome, message: message('layout.status.suggested') } : outcome;

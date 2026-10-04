@@ -176,6 +176,9 @@ function cost(n: CompiledNode, previous: ReadonlySet<string> | undefined, held: 
 // costs more (spec "Inferência de Flexbox": one predominant axis).
 const ONE_DIMENSIONAL_GRID = 15;
 
+// the words grid-area reads as keywords, never as an area's name (CSS Grid's <custom-ident> and CSS's wide keywords)
+const AREA_KEYWORDS: ReadonlySet<string> = new Set(['auto', 'span', 'none', 'inherit', 'initial', 'unset', 'revert', 'revert-layer', 'default']);
+
 export function compile(intent: LayoutIntent, ports: CompilerPorts, options: CompileOptions = {}): Compilation {
   const solution = solve(intent);
   const problems = [...solution.conflicts, ...validateIntent(solution.graph)];
@@ -473,7 +476,9 @@ export function compile(intent: LayoutIntent, ports: CompilerPorts, options: Com
     const taken = new Map<string, number>();
     const names = ordered.map(({ r }, i) => {
       const plain = r.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-      const ident = /^[a-z]/.test(plain) ? plain : `r${i + 1}`;
+      // a keyword is no area name: grid-area: auto places the region automatically, a CSS-wide keyword not at all (the
+      // audit's GA1), so such a name takes the area suffix
+      const ident = !/^[a-z]/.test(plain) ? `r${i + 1}` : AREA_KEYWORDS.has(plain) ? `${plain}-area` : plain;
       const seen = taken.get(ident) ?? 0;
       taken.set(ident, seen + 1);
       return seen === 0 ? ident : `${ident}-${seen + 1}`;

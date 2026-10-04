@@ -32,16 +32,41 @@ export interface Box {
 
 // ------------------------------------------------------------------ markup
 
-// what never stays in an SVG's markup: elements that run code or hold HTML, with everything inside them
-const DROPPED = new Set(['script', 'foreignobject']);
+// The elements an SVG's markup keeps: SVG's own (SVG 2's element index, its filter primitives and its animation
+// elements), as an allowlist (the way DOMPurify sanitizes SVG). Anything else goes with everything inside it: a script
+// or a foreignObject runs code or holds HTML, and an HTML start tag (<p>, <img>, <font>…) ends the SVG when the page's
+// HTML parser reads it inline (the HTML Standard's rules for parsing tokens in foreign content), so what followed it
+// would be HTML (an <iframe src>, a <form action>): the audit's S1, second reading.
+const SVG_ELEMENTS = new Set(
+  [
+    'a', 'animate', 'animateMotion', 'animateTransform', 'circle', 'clipPath', 'defs', 'desc', 'ellipse', 'feBlend',
+    'feColorMatrix', 'feComponentTransfer', 'feComposite', 'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap',
+    'feDistantLight', 'feDropShadow', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage',
+    'feMerge', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile',
+    // eslint-disable-next-line builder/no-manifest-id -- SVG element names (the filter element), not CSS properties.
+    'feTurbulence', 'filter', 'g', 'image', 'line', 'linearGradient', 'marker', 'mask', 'metadata', 'mpath', 'path',
+    'pattern', 'polygon', 'polyline', 'radialGradient', 'rect', 'set', 'stop', 'style', 'svg', 'switch', 'symbol', 'text',
+    'textPath', 'title', 'tspan', 'use', 'view',
+  ].map((name) => name.toLowerCase()),
+);
 const LINK_ATTRIBUTES = new Set(['href', 'xlink:href']);
 // the attributes of an animation element that write a value at run time: a javascript: one there is a link that runs
 // code once played (<set attributeName="href" to="javascript:…">: the audit's S1)
 const ANIMATED_VALUES = new Set(['to', 'from', 'values', 'by']);
-// an address that runs code, whatever its case and the spaces or control characters in it (a browser skips them)
+// The character references an attribute's value may spell its scheme with: the HTML parser decodes them before the
+// address runs (java&#115;cript:, javascript&colon;). Numeric ones, with or without their semicolon, and the named ones
+// that stand for a colon or a character the URL parser skips (no named reference stands for an ASCII letter).
+const NAMED: Readonly<Record<string, string>> = { colon: ':', tab: '\t', newline: '\n' };
+const decoded = (value: string): string =>
+  value
+    .replace(/&#x([0-9a-f]+);?/gi, (_all, hex: string) => String.fromCodePoint(Math.min(parseInt(hex, 16), 0x10ffff)))
+    .replace(/&#([0-9]+);?/g, (_all, digits: string) => String.fromCodePoint(Math.min(parseInt(digits, 10), 0x10ffff)))
+    .replace(/&(colon|tab|newline);/gi, (all, name: string) => NAMED[name.toLowerCase()] ?? all);
+// an address that runs code, whatever its case, its character references and the spaces or control characters in it
+// (a browser skips them)
 const SCRIPT_SCHEME = 'javascript:';
 const scripted = (value: string) =>
-  [...value]
+  [...decoded(value)]
     .filter((c) => c.charCodeAt(0) > 32)
     .join('')
     .toLowerCase()
@@ -145,7 +170,7 @@ export function sanitizedSvgMarkup(text: string): Parsed {
       attributes.push(` ${attribute}="${value.replaceAll('"', '&quot;').replaceAll('<', '&lt;')}"`);
     }
     at = i + 1;
-    if (dropping === 0 && DROPPED.has(name.toLowerCase())) {
+    if (dropping === 0 && !SVG_ELEMENTS.has(name.toLowerCase())) {
       if (!closed) {
         open.push(name);
         dropping = open.length;
@@ -181,10 +206,20 @@ export const setSvgMarkupCommand = registerHandler('element.setSvgMarkup', ({ st
   return { kind: 'change', patches: [{ op: held === undefined ? 'add' : 'replace', path, value: parsed.markup }], message: said };
 });
 
-// the markup an SVG's node keeps, '' for none
+// The markup an SVG's node keeps, '' for none, read through the sanitizer: the one reader the canvas and the export
+// write it with, so markup that arrived another way (a project file, an older version's rules) never reaches a page
+// as it was stored (the audit's S1, second reading). The last answers are kept: the canvas asks at every render.
+const SANITIZED = new Map<string, string>();
 export const svgMarkupOf = (node: DocNode): string => {
   const held = node.attributes[MARKUP];
-  return typeof held === 'string' ? held : '';
+  if (typeof held !== 'string' || held === '') return '';
+  const known = SANITIZED.get(held);
+  if (known !== undefined) return known;
+  const read = sanitizedSvgMarkup(held);
+  const safe = 'markup' in read ? read.markup : '';
+  if (SANITIZED.size > 200) SANITIZED.clear();
+  SANITIZED.set(held, safe);
+  return safe;
 };
 
 // ------------------------------------------------------------------ the SVG's size and viewBox

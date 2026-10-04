@@ -6,7 +6,7 @@
 // files.open. Folders, renaming, moving and deleting are explorer-file-system's own work (not built yet).
 import { message, registerHandler } from '../../core/commands/registry.ts';
 import type { DocumentJson, Page, ProjectFile } from '../../core/document/model.ts';
-import { fileAt, folderOf, folderPaths } from '../../core/files/files.ts';
+import { byteCount, fileAt, folderOf, folderPaths } from '../../core/files/files.ts';
 import { filesOf } from '../../core/document/model.ts';
 import { FORMS_SCRIPT, INTERACTIONS_SCRIPT, LOTTIE_SCRIPT, MOTION_SCRIPT, STYLESHEET, siteFiles, siteScriptsWritten } from '../../core/export/export.ts';
 import { siteScripts } from '../forms/script.ts';
@@ -81,7 +81,7 @@ export function fileRows(document: DocumentJson, rules: ModelRules): readonly Fi
     { path: STYLESHEET, kind: 'css' as const, generated: true, size: null },
     ...generatedScriptPaths(document, rules).map((path) => ({ path, kind: 'js' as const, generated: true, size: null })),
   ];
-  const owned: FileRow[] = filesOf(document).map((file: ProjectFile) => ({ path: file.path, kind: kindOf(file.path, file.type), generated: false, size: Math.floor((file.bytes.length * 3) / 4) }));
+  const owned: FileRow[] = filesOf(document).map((file: ProjectFile) => ({ path: file.path, kind: kindOf(file.path, file.type), generated: false, size: byteCount(file.bytes) }));
   return [...generated, ...owned];
 }
 
@@ -119,7 +119,7 @@ export function treeRows(document: DocumentJson, rules: ModelRules): readonly Tr
       kind: kindOf(one.path, one.file?.type ?? ''),
       generated: one.page !== null || (one.file === null && one.page === null) || isGenerated(one.path, document),
       page: one.page?.id ?? null,
-      size: one.file === null ? null : Math.floor((one.file.bytes.length * 3) / 4),
+      size: one.file === null ? null : byteCount(one.file.bytes),
     });
   };
   // in each folder the site's pages first, in the project's order (design/final's Explorer: index.html, planos.html,

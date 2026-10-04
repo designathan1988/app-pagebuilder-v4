@@ -51,9 +51,12 @@ export function DoorField({ entry, args, name, value, options, kind = 'text', la
   const run = useRun(entry);
   const said = useEditorState((state) => state.message);
   const field = useRef<HTMLInputElement & HTMLSelectElement & HTMLTextAreaElement>(null);
+  const menu = options !== undefined;
   useEffect(() => {
-    if (field.current !== null && document.activeElement !== field.current) field.current.value = value;
-  }, [value, said]);
+    // a menu holds no draft: after a choice the document refused it shows the document's value again even while it
+    // keeps the focus (the audit's FD2); a text field being typed in keeps its typing
+    if (field.current !== null && (menu || document.activeElement !== field.current)) field.current.value = value;
+  }, [value, said, menu]);
   const keep = (typed: string) => {
     if (!door.available || typed === value) return;
     if (kind === 'number' && typed.trim() !== '' && !Number.isFinite(Number(typed))) return;

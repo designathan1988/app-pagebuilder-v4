@@ -381,7 +381,8 @@
       },
       "refusals": [
         "status.files.nameTaken",
-        "status.files.generatedPath"
+        "status.files.generatedPath",
+        "status.files.badName"
       ],
       "confirmation": null,
       "history": {
@@ -438,7 +439,8 @@
       },
       "refusals": [
         "status.files.nameTaken",
-        "status.files.generatedPath"
+        "status.files.generatedPath",
+        "status.files.badName"
       ],
       "confirmation": null,
       "history": {
@@ -551,7 +553,8 @@
       "refusals": [
         "status.files.nameTaken",
         "status.files.generatedPath",
-        "status.files.pageNeedsHtml"
+        "status.files.pageNeedsHtml",
+        "status.files.badName"
       ],
       "confirmation": null,
       "history": {
@@ -619,7 +622,8 @@
       "refusals": [
         "status.files.nameTaken",
         "status.files.generatedPath",
-        "status.files.pageNeedsHtml"
+        "status.files.pageNeedsHtml",
+        "status.files.badName"
       ],
       "confirmation": null,
       "history": {

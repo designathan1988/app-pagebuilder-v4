@@ -81,9 +81,10 @@ export default defineConfig(
   },
   {
     // A gesture's transaction is opened by the pointer owner's doors, never by a handler (the owner is pointer.ts and
-    // its parts, pointer/*.ts); the store's own tests open gestures to prove them.
+    // its parts, pointer/*.ts); the store's own tests open gestures to prove them, and the editor's store wraps the
+    // core store's gesture so that one never overlaps a command group (src/editor/store.ts, the audit's GB1).
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/editor/input/pointer.ts', 'src/editor/input/pointer/**', 'src/**/*.test.ts'],
+    ignores: ['src/editor/input/pointer.ts', 'src/editor/input/pointer/**', 'src/editor/store.ts', 'src/**/*.test.ts'],
     plugins: { builder },
     rules: { 'builder/gesture-owner': 'error' },
   },

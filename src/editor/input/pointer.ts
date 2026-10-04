@@ -140,19 +140,6 @@ export function installPointer(store: EditorStore, target: Window = window): () 
   // the owner's parts (pointer/*.ts), each reading the others through it: all are bound before the first event
   const p = { store, target, ps, shared, views } as PointerOwner;
   Object.assign(p, pointerPanels(p), pointerResize(p), pointerDrag(p), pointerEffects(p), pointerTools(p), pointerEvents(p));
-  // The splitter follows the pointer from the press on: its travel along the splitter's own axis is handed to the
-
-
-
-
-
-
-
-
-
-
-
-
 
   shared.sessionDispatch = (id, args) => {
     const through = shared.session ?? null;

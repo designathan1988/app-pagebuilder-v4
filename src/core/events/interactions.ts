@@ -13,13 +13,16 @@
 //    (manifest: adapter.fields). The editing canvas never runs an interaction; the preview and the exported page do,
 //    through src/core/events/script.ts.
 import { message, registerHandler, type HandlerContext, type Message, type Outcome, type RegisteredHandler } from '../commands/registry.ts';
-import { locate, walk, type DocNode, type DocumentJson, type Interaction, type NodeId, type Selection } from '../document/model.ts';
+import { allNodes, locate, walk, type DocNode, type DocumentJson, type Interaction, type NodeId, type Selection } from '../document/model.ts';
 import type { MessageId } from '../../generated/ids.ts';
 import type { Patch } from '../history/transaction.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
 import { readAddress } from '../elements/address.ts';
 import { animationsOf } from '../animation/animation.ts';
 import { manifest } from '../../manifest/runtime.ts';
+import { MAX_DELAY, interactionProblems } from './interaction-rule.ts';
+
+export { interactionProblems };
 
 const NONE: readonly Interaction[] = [];
 export const interactionsOf = (node: DocNode): readonly Interaction[] => node.interactions ?? NONE;
@@ -71,10 +74,12 @@ export function playedAnimations(document: DocumentJson): ReadonlyMap<NodeId, Re
     for (const node of walk(page.tree)) {
       for (const interaction of interactionsOf(node)) {
         if (interaction.action !== 'play-animation' || interaction.animation === undefined) continue;
-        const target = (interaction.target ?? node.id) as NodeId;
-        const held = found.get(target) ?? new Set<string>();
+        // the animation is the holder's own (interactions.add reads it there): the export writes it as a class rule
+        // beside its @keyframes, and the script adds the class to whatever element the action acts on (the audit's EV3)
+        const holder = node.id as NodeId;
+        const held = found.get(holder) ?? new Set<string>();
         held.add(interaction.animation);
-        found.set(target, held);
+        found.set(holder, held);
       }
     }
   }
@@ -150,8 +155,8 @@ function optionsFrom(node: DocNode, action: string, text: string): { readonly ch
 // and a submit fire every time unless the interaction says once.
 const ONCE_BY_NATURE: ReadonlySet<string> = new Set(['scroll-into-view', 'page-load']);
 export const firesOnce = (interaction: Interaction): boolean => interaction.once ?? ONCE_BY_NATURE.has(interaction.trigger);
-// the longest wait an action takes (10 s): a longer one reads as a site that does not answer
-export const MAX_DELAY = 10_000;
+// the longest wait an action takes (interaction-rule.ts): a longer one reads as a site that does not answer
+export { MAX_DELAY };
 
 export interface InteractionOptions {
   readonly once?: boolean;
@@ -214,6 +219,9 @@ export const addInteractionCommand = registerHandler('interactions.add', (contex
   const held = options !== null && typeof options === 'object' && !Array.isArray(options) ? (options as Record<string, unknown>) : {};
   const timing = optionsOfChanges(held);
   if (timing === null) return { kind: 'refused', message: message('status.interactions.badOptions', { text: String(held.delay) }) };
+  // an address is kept as the one rule of an address reads it (a bare domain becomes https://), or refused with its reason
+  const address = typeof held.address === 'string' ? readAddress(held.address) : null;
+  if (address !== null && !address.ok) return { kind: 'refused', message: address.refusal };
   const interaction: Interaction = withOptions(
     {
       trigger: chosenTrigger,
@@ -221,12 +229,17 @@ export const addInteractionCommand = registerHandler('interactions.add', (contex
       ...(typeof target === 'string' ? { target: target as NodeId } : {}),
       ...(typeof held.className === 'string' ? { className: held.className } : {}),
       ...(typeof held.animation === 'string' ? { animation: held.animation } : {}),
-      ...(typeof held.address === 'string' ? { address: held.address } : {}),
+      ...(address !== null && address.ok ? { address: address.value } : {}),
       ...(held.newTab === true ? { newTab: true as const } : {}),
       ...(typeof held.scope === 'string' && held.scope !== '' ? { scope: held.scope } : {}),
     },
     timing,
   );
+  // what the options say is read as the validator reads a stored interaction (EV2): refused before any patch exists
+  const nodeIds = new Set([...allNodes(context.state.document)].map((one) => one.id as string));
+  const problem = interactionProblems(interaction, nodeIds)[0];
+  if (problem !== undefined) return { kind: 'refused', message: message('status.interactions.badOptions', { text: problem.field }) };
+  if (interaction.animation !== undefined && !animationsOf(found.node).some((one) => one.name === interaction.animation)) return { kind: 'refused', message: message('status.interactions.notApplicable', { name: interaction.animation }) };
   return {
     kind: 'change',
     patches: writeInteractions(found, [...interactionsOf(found.node), interaction]),
@@ -311,7 +324,10 @@ export function updateInteractionCommand<Ui>(make: PickMaking<Ui>): RegisteredHa
       if (locate(context.state.document, wanted.target as NodeId) === null) return { kind: 'refused', message: message('status.interactions.notApplicable', { name: wanted.target }) };
       next = { ...next, target: wanted.target as NodeId };
     }
-    if (typeof wanted.scope === 'string') next = { ...next, scope: wanted.scope };
+    if (typeof wanted.scope === 'string') {
+      if (wanted.scope !== '' && !CLASS_NAME.test(wanted.scope)) return { kind: 'refused', message: message('status.interactions.notApplicable', { name: wanted.scope }) };
+      next = { ...next, scope: wanted.scope };
+    }
     if (typeof wanted.trigger === 'string') {
       if (!applicableTriggers(found.node).includes(wanted.trigger)) return { kind: 'refused', message: message('status.interactions.notApplicable', { name: { key: triggerLabel(wanted.trigger) } }) };
       next = { ...next, trigger: wanted.trigger };

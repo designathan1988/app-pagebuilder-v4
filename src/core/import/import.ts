@@ -37,7 +37,7 @@ import { readValue } from '../style/set.ts';
 import { allNodes, isEmptyProject, type Animation, type DocNode, type DocumentJson, type Keyframe, type Page, type ProjectFile, type StoredValue, type Styles } from '../document/model.ts';
 import { SETTINGS as ANIMATION_SETTINGS, defaultSetting, keyframeEasingProperty, settingProperty } from '../animation/animation.ts';
 import type { InlineRun } from '../text/inline.ts';
-import { attributeValueRefusal, customAttributeRefusal, type ModelRules } from '../document/validate.ts';
+import { attributeValueRefusal, customAttributeRefusal, customAttributeValueRefusal, type ModelRules } from '../document/validate.ts';
 import { validClassName } from '../design/classes.ts';
 import { followCssUrls } from '../files/references.ts';
 import { importDestination } from './destinations.ts';
@@ -133,7 +133,7 @@ const recordOf = (file: PickedFile): ProjectFile => ({
 // ---------------------------------------------------------------- the import report
 
 // What the import found, per kind, by the source line: the message the command says reads it, nothing else does.
-interface Report {
+export interface Report {
   readonly scripts: number[];
   readonly handlers: number[];
   readonly unwrapped: number[];
@@ -666,7 +666,7 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
       continue;
     }
     // the person's own attributes (aria-*, data-*, role…): kept as they are, unless the model refuses the name
-    if (customAttributeRefusal(html, rules) === null) customAttributes = { ...customAttributes, [html]: value };
+    if (customAttributeRefusal(html, rules) === null && customAttributeValueRefusal(html, value) === null) customAttributes = { ...customAttributes, [html]: value };
     else if (builder.mode === 'import') builder.report.attributes.push(line);
     else builder.dropped.attributes += 1;
   }
@@ -1626,7 +1626,7 @@ function pageFrom(file: PickedFile, builder: Builder): Page {
       attributes = { ...attributes, [id]: value };
       continue;
     }
-    if (customAttributeRefusal(html, rules) === null) customAttributes = { ...customAttributes, [html]: value };
+    if (customAttributeRefusal(html, rules) === null && customAttributeValueRefusal(html, value) === null) customAttributes = { ...customAttributes, [html]: value };
     else builder.report.attributes.push(lineOf(builder.markup, '<body'));
   }
   if (inlineStyle !== null) builder.inline.set(body.id, styleDeclarations(builder, inlineStyle, lineOf(builder.markup, '<body')));
@@ -1666,18 +1666,26 @@ function settingValue(valueType: string, value: string, rules: ModelRules, setti
 
 export const importPageFiles = (files: readonly PickedFile[]): PickedFile[] => files.filter(file => isHtmlFile(file.name)).sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
 
-export const importHtmlCommand = registerHandler('project.importHtml', (context, { files, destination = 'page', target }) => {
-  const { state, rules, ids, words, confirmed } = context;
-  const picked = (files ?? []) as readonly PickedFile[];
+// Why picked files cannot be imported at all, before anything is read: an archive the reader refused, or no page.
+export function pickedRefusal(picked: readonly PickedFile[]): Message | null {
   const broken = picked.find((file) => file.error !== undefined && file.error !== '');
-  if (broken !== undefined) return { kind: 'refused' as const, message: message('status.import.invalidArchive', { file: broken.name, reason: typeof broken.error === 'string' ? broken.error : (archiveReason(broken.error) ?? '') }) };
+  if (broken !== undefined) return message('status.import.invalidArchive', { file: broken.name, reason: typeof broken.error === 'string' ? broken.error : (archiveReason(broken.error) ?? '') });
+  return importPageFiles(picked).length === 0 ? message('status.import.noPage') : null;
+}
+
+// What the import makes of picked files, before it lands anywhere: the project the pages, their sheets and their files
+// read into (its pages, design tokens, class definitions and kept files), the report, and how many elements came in.
+// The one reader of a site's HTML: File › Import HTML composes it into the project (importDestination), File › Open
+// folder loads it as the project (core/import/folder.ts; the audit's FO1: the folder had a reader of its own).
+export interface ImportedSite {
+  readonly document: DocumentJson;
+  readonly report: Report;
+  readonly elements: number;
+}
+export function importedSite<Ui>(context: HandlerContext<Ui>, picked: readonly PickedFile[], replacing: boolean): ImportedSite {
+  const { state, rules, ids, words } = context;
   // the home page first: index.html, else the files in their own order
   const markup = importPageFiles(picked);
-  if (markup.length === 0) return { kind: 'refused' as const, message: message('status.import.noPage') };
-  // Only explicit replacement asks to remove work; new-page import may reuse a pristine blank placeholder.
-  if (destination === 'replace' && confirmed !== true) return { kind: 'confirm' as const };
-  const pristine = isEmptyProject(state.document) && [state.document.classes, state.document.files, state.document.components, state.document.tokens, state.document.swatches, state.document.folders].every(values => !values?.length);
-  const replacing = destination === 'replace' || (destination === 'page' && pristine);
   const report = emptyReport();
   // Merging reserves every existing node name; replacement starts a fresh naming scope.
   const make: NodeMaker = { rules, ids, words, taken: replacing ? new Set() : new Set([...allNodes(state.document)].map(node => node.name)) };
@@ -1790,11 +1798,24 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
     ...(definitions.size ? { classes: [...definitions].map(([name, styles]) => ({ name, styles })) } : {}),
     ...(held.length ? { files: held } : {})
   };
+  return { document: parsed, report, elements };
+}
+
+export const importHtmlCommand = registerHandler('project.importHtml', (context, { files, destination = 'page', target }) => {
+  const { state, words, confirmed } = context;
+  const picked = (files ?? []) as readonly PickedFile[];
+  const refused = pickedRefusal(picked);
+  if (refused !== null) return { kind: 'refused' as const, message: refused };
+  // Only explicit replacement asks to remove work; new-page import may reuse a pristine blank placeholder.
+  if (destination === 'replace' && confirmed !== true) return { kind: 'confirm' as const };
+  const pristine = isEmptyProject(state.document) && [state.document.classes, state.document.files, state.document.components, state.document.tokens, state.document.swatches, state.document.folders].every(values => !values?.length);
+  const replacing = destination === 'replace' || (destination === 'page' && pristine);
+  const { document: parsed, report, elements } = importedSite(context, picked, replacing);
   const composed = importDestination(context, parsed, replacing ? 'replace' : destination, (target ?? (state.selection.length === 1 ? state.selection[0] : undefined)) as NodeId | undefined);
   if ('refused' in composed) return { kind: 'refused' as const, message: composed.refused };
   const said = message('status.import.done', {
     elements,
-    files: markup.map((file) => file.name).join(', '),
+    files: importPageFiles(picked).map((file) => file.name).join(', '),
     notes: reportNotes(report, words),
   });
   return { kind: 'change' as const, ...composed, message: said };
@@ -1806,7 +1827,8 @@ export const projectLanguages = (document: DocumentJson): Pick<DocumentJson, 'la
   ...(document.codeLanguage === undefined ? {} : { codeLanguage: document.codeLanguage }),
 });
 
-const rank = (name: string): number => (name === 'index.html' || name.endsWith('/index.html') ? 0 : 1);
+// the home page first: the shallowest index.html (the root's, or a ZIP's top folder's), then the others by name
+const rank = (name: string): number => (name === 'index.html' || name.endsWith('/index.html') ? name.split('/').length - 1 : 1000);
 
 // every node of a tree
 function countOf(node: DocNode): number {

@@ -11,6 +11,7 @@ import type { PointerOwner } from './owner.ts';
 export function pointerResize(p: PointerOwner): Pick<PointerOwner, 'resize' | 'positionedNow' | 'snappedResize' | 'moveFree' | 'dropHandleGestures'> {
   const { ps, shared, store } = p;
   const { setBanding, setResizing, setGuideOnRuler, setPanView } = p.views;
+  // The splitter follows the pointer from the press on: its travel along the splitter's own axis is handed to the
   // command, which sizes the panel from the size it held at the press (spec panel-resize); the gesture is cancelled
   // back to that size first, so Escape puts it back
   const resize = (at: Point) => {

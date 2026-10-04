@@ -87,7 +87,9 @@ const quoted = (text: string): string => `'${text.replaceAll('\\', '\\\\').repla
 // element itself (actionTarget; an action on its own element wrote `if (target)` with no target declared, which throws
 // in the script's strict mode, so an animation an element plays on itself never played in the exported site)
 function actionJs(node: DocNode, interaction: Interaction, selectorOf: SelectorOf): string | null {
-  const find = needsTarget(interaction.action) ? `var target = document.querySelector(${quoted(selectorOf(actionTarget(node, interaction)))});` : null;
+  // an action on the element itself acts on the element the event fired on (`el`): elements that share a class (a
+  // component's instances, an interaction that applies to a class) each act on their own (the audit's EV1)
+  const find = !needsTarget(interaction.action) ? null : interaction.target === undefined ? 'var target = el;' : `var target = document.querySelector(${quoted(selectorOf(actionTarget(node, interaction)))});`;
   const act: string | null = (() => {
     if (interaction.action === 'show') return `if (target) target.hidden = false;`;
     if (interaction.action === 'hide') return `if (target) target.hidden = true;`;
@@ -145,7 +147,7 @@ function wiringJs(node: DocNode, interaction: Interaction, triggerSelectorOf: Se
       return `each(${quoted(selector)}, function (el) {\n    var fired = false;\n    var observer = new IntersectionObserver(function (entries) {\n      for (var i = 0; i < entries.length; i += 1) {\n        if (!entries[i].isIntersecting || fired) continue;\n        fired = true;\n        observer.disconnect();\n        ${act}\n      }\n    }, { threshold: 0.5 });\n    observer.observe(el);\n  });`;
     return `each(${quoted(selector)}, function (el) {\n    var inside = false;\n    var observer = new IntersectionObserver(function (entries) {\n      for (var i = 0; i < entries.length; i += 1) {\n        var now = entries[i].isIntersecting;\n        if (now && !inside) { ${act} }\n        inside = now;\n      }\n    }, { threshold: 0.5 });\n    observer.observe(el);\n  });`;
   }
-  if (interaction.trigger === 'page-load') return `each(${quoted(selector)}, function () { ${act} });`;
+  if (interaction.trigger === 'page-load') return `each(${quoted(selector)}, function (el) { ${act} });`;
   if (interaction.trigger === 'form-submit') return `each(${quoted(selector)}, function (el) { ${flag}el.addEventListener('submit', function (event) { event.preventDefault(); ${guard}${act} }); });`;
   return null;
 }
@@ -189,8 +191,11 @@ export function interactionsJs(document: DocumentJson, selectorOf: SelectorOf): 
         blocks.push(tabsRuntime(selector));
       }
       for (const interaction of interactionsOf(node)) {
-        const wired = wiringJs(node, interaction, () => selectorOf(node.id as NodeId), selectorOf);
-        if (wired !== null) blocks.push(wired);
+        // an interaction that applies to a class binds every element with it (model.ts scope, "Applies to": EV1)
+        const wired = wiringJs(node, interaction, () => (interaction.scope === undefined ? selectorOf(node.id as NodeId) : `.${interaction.scope}`), selectorOf);
+        // the same binding once: the instances of a component share their class, so their copies of one interaction
+        // write the same block, which binds every one of them already (EV1)
+        if (wired !== null && !blocks.includes(wired)) blocks.push(wired);
       }
     }
   }

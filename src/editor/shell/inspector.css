@@ -881,7 +881,8 @@ textarea.input {
 }
 
 /* the input inside the box draws no border of its own: the box is the field, its value in the code role (12/18 mono,
-   jornada02 R-27) — a lean field (its value, its unit, its Reset) leaves a pair's value the room for it */
+   jornada02 R-27) — it takes what its row's own affordances (the unit menu, the value list, the Reset) leave, so
+   nothing wraps to a second line and a pair's value keeps the room for it */
 .input-wrap .input {
   flex: 1;
   min-width: 0;
@@ -890,13 +891,6 @@ textarea.input {
   border: 0;
   background: none;
   font: var(--fw-code) var(--fs-code) / var(--lh-code) var(--font-mono);
-}
-
-/* The input of a field shares its row with the field's own affordances (the unit menu, the value list): the input
-   takes what is left instead of the whole cell, so nothing wraps to a second line (the design's field). */
-.input-wrap .input {
-  flex: 1;
-  min-width: 0;
 }
 
 /* a field of a form of its own: the form takes no box, so the input stays the wrap's child */
