@@ -43,3 +43,10 @@ export function baseCss(): string {
 :where(legend) { padding-inline: 0.25rem; font-weight: 600; }
 `;
 }
+
+// A captured site's own cascade layers must outrank the Builder's neutral starting rules. This layer is declared
+// before the captured sheet's layers by its residual CSS, including when that sheet loads before the export CSS.
+export const CAPTURE_BASE_LAYER = '__builder_base';
+export function capturedBaseCss(): string {
+  return `@layer ${CAPTURE_BASE_LAYER} {\n${baseCss()}}\n`;
+}

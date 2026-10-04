@@ -52,7 +52,7 @@ import { parseDeclarations } from '../style/custom.ts';
 import { shadowLayersFromCss } from '../style/shadows.ts';
 import { matches, readSelector, type Compound, type Facts, type Selector } from './selectors.ts';
 import { readDeclarations, readStylesheet, type CssRule, type CssSheet } from './stylesheet.ts';
-import { baseCss } from '../render/base.ts';
+import { baseCss, CAPTURE_BASE_LAYER } from '../render/base.ts';
 import { ELEMENTS_HEADING, underClassesHeading } from '../export/sheet-headings.ts';
 // reading markup (core/import/markup.ts): the DOM walk and the source lines, moved out of this file
 import { lineOf, lineOfNode, parseMarkup, parsePage, textOf, type MarkupChild, type MarkupNode } from './markup.ts';
@@ -1795,6 +1795,7 @@ export function residualCss(text: string, from: string, at: string, context: Han
       }
       if (node.type === 'Atrule') {
         const prelude = node.prelude === null ? '' : generateCssTree(node.prelude);
+        if (node.name.toLowerCase() === 'layer' && prelude === CAPTURE_BASE_LAYER && node.block !== null) return [];
         if (node.name.toLowerCase() === 'media' && !inMedia && node.block !== null && !mediaPlace([prelude], rules).unmappable) {
           const inner = rulesOf(node.block.children.toArray(), true);
           return inner.length === 0 ? [] : [`@media ${prelude}{${inner.join('')}}`];
@@ -1804,7 +1805,9 @@ export function residualCss(text: string, from: string, at: string, context: Han
       return [];
     });
   const residual = ast.type === 'StyleSheet' ? rulesOf(ast.children.toArray(), false).join('\n') : '';
-  return residual === '' ? '' : byCaptureClass(residual);
+  if (residual === '') return '';
+  const ordered = residual.startsWith(`@layer ${CAPTURE_BASE_LAYER};`) ? residual : `@layer ${CAPTURE_BASE_LAYER};\n${residual}`;
+  return byCaptureClass(ordered);
 }
 
 // A captured element keeps the classes its markup gave it in data-capture-class (the Companion writes it), whatever the

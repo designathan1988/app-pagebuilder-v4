@@ -495,6 +495,10 @@ Not applicable.
 - It holds `box-sizing: border-box` for every element and its pseudo-elements. Its neutral presentation defaults cover
   the body font and margin, heading hierarchy, text spacing, links, lists, quotes, code, tables, form controls and media.
   The presentation selectors use `:where()` so an element's or class's own styles take precedence.
+- A captured page's base text is placed in the first `__builder_base` cascade layer in both canvas and export; its
+  residual sheet declares that layer before the captured site's own layers. Thus a site's layered normal rules outrank
+  neutral Builder defaults, while the person's generated element and class rules remain later unlayered rules. Adding
+  or removing the capture sheet updates the canvas base layer as well.
 
 ## breakpoint-overrides
 
@@ -9046,6 +9050,9 @@ instance (`status.locked.edit`).
   prefix), in the page's residual stylesheet (`<page>.capture.css`). The canvas draws it and the export links it before
   the project's own stylesheet, so the page looks as it did and what the person edits in the inspector wins over it. A
   page that is no capture keeps none.
+- The residual sheet declares the Builder's base layer before the site's own layers. The exported and canvas base
+  styles use that lower-priority layer, so a captured site's layered rules such as an inherited link colour outrank
+  Builder defaults, following the normal cascade order.
 - When a captured sheet uses a width condition the project's breakpoints cannot represent (such as `min-width`, a
   non-pixel threshold or a width range), the properties used by that condition remain in the captured stylesheet at
   every width. The importer does not write competing base values for those properties into the project's later sheet;

@@ -40,7 +40,7 @@
 // text-inline-formatting). The marks go when the edit ends, and the element shows again the text the document holds.
 // They are the renderer's state, never the document's, and the page still gets no event handler.
 import type { NodeId } from '../../../generated/commands.ts';
-import { baseCss } from '../../../core/render/base.ts';
+import { baseCss, capturedBaseCss } from '../../../core/render/base.ts';
 import { formNodes } from '../../../core/export/authoring.ts';
 import { classesCss, elementAttributes, fileUrlsIn, nodeCss, outputModelFromManifest, type OutputModel } from '../../../core/render/output.ts';
 export { elementAttributes, nodeCss, outputModelFromManifest, type OutputModel } from '../../../core/render/output.ts';
@@ -57,7 +57,7 @@ import { filesOf } from '../../../core/document/model.ts';
 import { fontFaceCss } from '../../../core/files/fonts.ts';
 import { animationsOf, keyframesCss, previewDeclarations } from '../../../core/animation/animation.ts';
 import { outputForTable } from '../../../core/document/breakpoint-rules.ts';
-import { captureAssetPath, capturedPageCss } from '../../../core/import/capture-styles.ts';
+import { captureAssetPath, capturedPageCss, capturedPageStylePath } from '../../../core/import/capture-styles.ts';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 export const NODE_ATTRIBUTE = 'data-node';
@@ -773,8 +773,12 @@ export class PageRenderer {
   // A captured page's residual stylesheet (capture-styles.ts), its addresses drawn from the project's files.
   private writeCapture(doc: DocumentJson): void {
     const sheet = this.target.head.querySelector(`style[${CAPTURE_STYLE_ATTRIBUTE}]`);
+    const base = this.target.head.querySelector(`style[${BASE_STYLE_ATTRIBUTE}]`);
     const page = doc.pages[this.page];
     const css = page === undefined ? '' : fileUrlsIn(capturedPageCss(doc, page), (address) => resolvedSource(doc, captureAssetPath(page, address)));
+    const hasCapture = page !== undefined && doc.files?.some(file => file.path === capturedPageStylePath(page));
+    const starting = hasCapture ? capturedBaseCss() : baseCss();
+    if (base !== null && base.textContent !== starting) base.textContent = starting;
     if (sheet !== null && sheet.textContent !== css) sheet.textContent = css;
   }
 

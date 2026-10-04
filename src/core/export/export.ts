@@ -32,7 +32,7 @@ import type { NodeId } from '../../generated/commands.ts';
 import { walk, type Animation, type DocNode, type DocumentJson } from '../document/model.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { zip } from '../project/zip.ts';
-import { baseCss } from '../render/base.ts';
+import { baseCss, capturedBaseCss } from '../render/base.ts';
 import { classesCss, elementAttributes, fileUrlsIn, mediaQuery, nodeCss, writesNode } from '../render/output.ts';
 import { svgMarkupOf } from '../elements/svg.ts';
 import { dataUrl, fileAt, fileBytes, relativePath } from '../files/files.ts';
@@ -397,7 +397,8 @@ export function siteFiles(
   // the person's classes and the elements' own rules each under its heading (core/export/sheet-headings.ts), so the
   // import tells a class of the person's one element alone lists from the class the export made for its own styles
   const classRules = classesCss(document.classes ?? [], rules.output, 'block');
-  const shared = [baseCss(), rootCss(document.tokens ?? []), fonts === '' ? '' : `${fonts}\n`, classRules === '' ? '' : `${CLASSES_HEADING}\n${classRules}`].filter((c) => c !== '').map((c) => `${relative ? writtenCss(document, c, STYLESHEET) : c}\n`);
+  const base = document.pages.some(page => fileAt(document, capturedPageStylePath(page)) !== null) ? capturedBaseCss() : baseCss();
+  const shared = [base, rootCss(document.tokens ?? []), fonts === '' ? '' : `${fonts}\n`, classRules === '' ? '' : `${CLASSES_HEADING}\n${classRules}`].filter((c) => c !== '').map((c) => `${relative ? writtenCss(document, c, STYLESHEET) : c}\n`);
   // the elements' rules in cascade order (every base rule, then each breakpoint's block, widest first), their identical
   // bodies merged inside a block (core/render/clean.ts; the audit's AUD-02)
   const media = rules.output.breakpoints.filter((breakpoint) => !breakpoint.base).map(mediaQuery);
