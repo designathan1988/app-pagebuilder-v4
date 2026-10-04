@@ -65,7 +65,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | REQ-U03 | A basic test for every feature; at the end of a block the tests of the block; the complete suite once at the end | brief orders 1–2 (2026-09-28), memory | done | 2,537 browser tests, 2,409 unit; AUD-35 |
 | REQ-U04 | Browser verification always with Playwright on the installed Chrome (`channel: 'chrome'`), a photo per step | brief order 3 | done | `npm run ui`, the suite, the audit journeys |
 | REQ-U05 | Never edit, skip or loosen a test or a scenario to make it pass | brief order 4, CLAUDE.md | done | phase 6 of the audit: no assertion lost except two deliberate removals (AUD-16) |
-| REQ-U06 | Every feature of the application built and working end to end, without errors | brief order 5 | partial | AUD-01, AUD-02 block end-to-end use |
+| REQ-U06 | Every feature of the application built and working end to end, without errors | brief order 5 | done | QA 240: the complete suite on a clean tree, every feature passing (QA 237), the 19 journeys with no incident; `docs/AUDIT-2026-10-03.md` |
 | REQ-U07 | Everything in English (specs, manifest, docs, scenarios, commits, comments, names); Portuguese only in chat reports | brief order 6, CLAUDE.md | done | phase 8 of the audit (translations, exceptions in section 7) |
 | REQ-U08 | The Pager (`../builder-5/reference/`) is a reference for behaviour, never for code | brief order 7 | done | — |
 | REQ-U09 | Do not stop between items or ask; decide by what was decided and record it | brief order 8 | done | decisions register (section 4) |
@@ -82,7 +82,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 
 | ID | Request | Status | Proof / problems |
 |---|---|---|---|
-| PLAN-R1 | Fix 100 % of the Journey 03 findings (J1–J28, H1–H17, task gaps, 32 wishes, bets A–F, backlog) | partial | sections 2.4–2.8; J25, H17 not met; AUD-01 |
+| PLAN-R1 | Fix 100 % of the Journey 03 findings (J1–J28, H1–H17, task gaps, 32 wishes, bets A–F, backlog) | partial | sections 2.4–2.8; QA 240: J25 and H17 met, H1–H17 hold; J28 (copy) partial |
 | PLAN-R2 | Complete interactions (every trigger and action) and working behaviours | done | stage 10 rows; features `motion-*` |
 | PLAN-R3 | Forms with masks and validation, complete catalogue | done | stage 9; feature `forms-masks-validation` |
 | PLAN-R4 | Animation working and a real timeline | done | stage 10; `motion-timeline` 58/58 |
@@ -160,7 +160,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | STG-6.3 | No `padding: 0px` on every div; plain divs get no class | done | QA 51 |
 | STG-6.4 | Class names by role in the project's code language, unnumbered across pages, batch rename | done | QA 51, 82, 163 |
 | STG-6.5 | `<html lang>`, `<button type>`; Checks rules with automatic fixes | done | QA 51; the export always writes lang, button and input types (QA 160); QA 166 (one fix door per rule) |
-| STG-6.6 | Fidelity remeasured: ≥ 85 % desktop, ≥ 80 % at 834 and 390 | partial | after QA 150: 86.2 / 81.0 / 75.0 % common (80.6 / 77.1 / 72.2 adjusted), the study's values again; 390 below target: the M2/M3 rebuild is redone in phase G2 |
+| STG-6.6 | Fidelity remeasured: ≥ 85 % desktop, ≥ 80 % at 834 and 390 | done | QA 240: the journeys M2/M3, 86.2 / 83.0 / 86.6 % common (80.6 / 82.1 / 86.0 adjusted) |
 | STG-7.1 | Variables in every field and the colour picker; make a variable from a value | done | QA 72, 76, 111 |
 | STG-7.2 | Find uses and replace across the site | done | QA 111; C1 |
 | STG-7.3 | Extract to a class, move into an existing class, apply to all similar | done | QA 113; D1; AUD-19 |
@@ -405,7 +405,7 @@ commit closes it with its proof; the Status column then names the commit's QA-LO
 | AUD-33 | 1 | 11 controls outside the manifest (`data-local`) | audit | done (QA 187) |
 | AUD-34 | 1 | A test edited per new feature; misfiled manifest group | audit | done (QA 188) |
 | AUD-35 | 1 | Weak tests and thinly covered features | audit | done (QA 191, 193, 195–199: triggers proven, presence proxies read their artifacts, 27 of 29 thin features with scenarios for their doors and showable refusals, drag-autoscroll's Layers rule a browser test; found AN1, RF1, LC1, LP1, PS1, LA1) |
-| AUD-36 | 1 | Undo by keys over its 35 ms per-group reference | audit; QA 44, 80 | partial (QA 190: undo 41.8 → 34.7–36.8 ms, --enforce passed once in two runs; the rest is React reconciling the subscribed controls) |
+| AUD-36 | 1 | Undo by keys over its 35 ms per-group reference | audit; QA 44, 80 | partial (QA 190: undo 41.8 → 34.7–36.8 ms; QA 240: undo by keys 31.9 and 29.8 ms p50, within; undo by the button 36.3 then 31.4 ms, --enforce passed on the second run) |
 | AUD-38 | 1 | Crash journal silently off for projects over the storage quota (probable) | audit | done (QA 189) |
 | R4 | — | `e2e:affected` selects the whole suite for 80 % of source changes | review R4; QA 221: with the coverage of `npm run e2e:coverage`, the tests that ran a changed line or used a changed rule's selector (`tools/runner/affected-coverage.ts`) | done (QA 221; the coverage is recorded by the complete run of phase Z) |
 | T7 | — | The pointer's module-level singletons matter only with two editors on a page | deferred (DEC-26); QA 231: the pointer's state is each editor's own (`pointerViews(store)`, the pan, open gesture and picker session by store; one pointer owner per window), proven by two editors in two windows that never share a hover or Alt | done (QA 231) |
