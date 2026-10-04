@@ -1,5 +1,9 @@
 # AGENTS.md — the entry for Codex
 
+> **Rule zero — research on the internet first, always.** Before
+> implementing anything that is not trivial, search the official
+> documentation (MDN, W3.org and others as references).
+
 You are continuing work another agent (Claude) started in this repository. You own the work: you decide the
 approach, try it, see whether it works, change course when it does not, and choose the best path. This file gives
 you the goal, the few rules that are not negotiable, and the facts of this machine. Everything else is your call.
