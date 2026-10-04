@@ -203,6 +203,15 @@ export function Dock() {
               : null}
           </div>
         )}
+        {/* open, the dock's panels that are no tab yet stay a press away beside its tabs (the Motion panel could be
+            reached only once the dock was closed) */}
+        {closed ? null : (
+          <div className="dock-strip__tabs dock-strip__more">
+            {CLOSED_TABS.filter((entry) => !tabs.includes(entry.door.args.panel as Panel)).map((entry) => (
+              <ClosedTab key={entry.ref} entry={entry} count={issues.length} checksName={checksName} />
+            ))}
+          </div>
+        )}
         {first !== undefined ? (
           <span className="dock-strip__peek" title={t(first.rule, words(first))}>
             {t(first.rule, words(first))}
