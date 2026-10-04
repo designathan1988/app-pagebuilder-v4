@@ -115,6 +115,13 @@ describe('what the importer keeps of a page', () => {
     expect(container?.children.map((child) => child.type)).toEqual(['linkBlock']);
     expect(container?.children[0]?.children.map((child) => child.type)).toEqual(['image']);
   });
+  it('keeps a list link and its following words on one editable line', () => {
+    const tree = run('<!doctype html><html><body><ul><li><a href="https://example.com/">Perch CMS</a> - a small CMS.</li></ul></body></html>');
+    const item = tree?.children[0]?.children[0];
+    expect(item?.children).toHaveLength(1);
+    expect(item?.children[0]).toMatchObject({ type: 'paragraph', tag: 'span', text: 'Perch CMS - a small CMS.' });
+    expect(item?.children[0]?.inline).toEqual([{ tag: 'a', href: 'https://example.com/', children: ['Perch CMS'] }, ' - a small CMS.']);
+  });
   it('takes the hidden attribute as the element hidden', () => {
     const tree = run('<!doctype html><html><body><div hidden><p>Closed</p></div></body></html>');
     expect(tree?.children[0]?.hidden).toBe(true);

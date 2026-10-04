@@ -7,13 +7,13 @@ and replayed from it, captured by the Companion, imported with File › Import H
 compared with the original at every breakpoint: the share of pixels alike over the whole page (a channel within 24 of
 255), scaled by the shorter page over the longer. Target: 98 % at every breakpoint (STG-12.6).
 
-Sites at the target: 0 of 20. Measured: 20.
+Sites at the target: 1 of 20. Measured: 20.
 
 | Site | Kind | Files | Elements | 1440px | 1180px | 834px | 390px | Problem |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 609 | 93.2 ✗ | 92.9 ✗ | 92.0 ✗ | 86.2 ✗ |  |
 | [govuk](https://www.gov.uk/) | documentation | 11 | 483 | 87.6 ✗ | 86.2 ✗ | 82.9 ✗ | 78.6 ✗ |  |
-| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 91.4 ✗ | 89.7 ✗ | 74.9 ✗ | 62.0 ✗ |  |
+| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 91.5 ✗ | 89.9 ✗ | 75.1 ✗ | 62.2 ✗ |  |
 | [react](https://react.dev/) | React application | 54 | 730 | 88.2 ✗ | 87.7 ✗ | 86.7 ✗ | 82.9 ✗ |  |
 | [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 98.3 | 98.2 | 96.5 ✗ | 94.2 ✗ |  |
 | [vue](https://vuejs.org/) | Vue application | 47 | 573 | 91.0 ✗ | 90.0 ✗ | 82.3 ✗ | 86.0 ✗ |  |
@@ -28,6 +28,6 @@ Sites at the target: 0 of 20. Measured: 20.
 | [bellroy](https://bellroy.com/) | shop | 115 | 1573 | 66.7 ✗ | 20.2 ✗ | 29.0 ✗ | 26.4 ✗ |  |
 | [allbirds](https://www.allbirds.com/) | shop | 362 | 1290 | 83.1 ✗ | 84.0 ✗ | 87.0 ✗ | 48.9 ✗ |  |
 | [typewolf](https://www.typewolf.com/) | web fonts | 60 | 630 | 65.5 ✗ | 61.8 ✗ | 56.4 ✗ | 49.5 ✗ |  |
-| [gridbyexample](https://gridbyexample.com/) | grid | 8 | 96 | 93.5 ✗ | 93.4 ✗ | 93.9 ✗ | 96.5 ✗ |  |
+| [gridbyexample](https://gridbyexample.com/) | grid | 8 | 93 | 99.4 | 99.2 | 99.1 | 99.0 |  |
 | [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 48.9 ✗ | 57.1 ✗ | 56.3 ✗ | 57.5 ✗ |  |
 | [animatestyle](https://animate.style/) | animation | 13 | 656 | 67.9 ✗ | 69.7 ✗ | 60.5 ✗ | 63.0 ✗ |  |

@@ -2765,6 +2765,9 @@ Ctrl is the modifier; there is no keyboard way to pick the measured element.
 
 Jornada 03 J3: file, ZIP and folder import first offer three destinations: new pages (default), inside the selected container, and replace the whole project. New pages retain all authored pages and use unique source filenames; a pristine empty project reuses its blank placeholder. Inside import inserts each body as a container preserving its styles and contents. Only replacement asks an explicit destructive confirmation. Imported classes and asset paths are isolated on collision, references follow the renamed paths, scripts remain inert in the editor, and the entire operation is one undo step. Folder-relative paths are retained.
 
+A list item with a text link and adjacent words keeps them together as one editable inline text run. The export writes
+the link and its words on the same line, without introducing a block paragraph between them.
+
 How Pager behaves, read from its source and observed by running it from `.cache/pager-run` (Chrome, window 1600×900). Source references are `path:line` inside Pager.
 
 ### Trigger

@@ -18,6 +18,7 @@
         ],
         "expected": [
           "Each supported tag becomes the matching element type in the document JSON with its text, inline marks and supported attributes (href, src, alt, type, name, ...).",
+          "A list item's text link and adjacent words remain one editable inline run on export.",
           "Element names are taken from BEM classes when present, else from the element type.",
           "The import is one undo step.",
           "New-page and folder imports preserve existing pages, filenames, styles and assets; conflicting imported names receive unique names and their references follow. Inside import is one undoable insertion; replacement alone asks to remove the current project."

@@ -717,7 +717,9 @@ function buildChildren(children: readonly MarkupChild[], parentTag: string, ance
     const runs = canonical(runsOf(run, builder, parentTag === 'pre' || parentTag === 'textarea'));
     const text = plainOf(runs);
     if (text.trim() === '') return;
-    place(buildParagraph(text, runs, builder, parentLine), parentTag, ancestors, out, builder);
+    // A list item's link followed by words is one line; a block paragraph would split it after the link.
+    const inlineListText = parentTag === 'li' && run.some((one) => typeof one !== 'string' && one.tag === 'a') && run.some((one) => typeof one === 'string' && one.trim() !== '');
+    place(buildParagraph(text, runs, builder, parentLine, inlineListText ? 'span' : undefined), parentTag, ancestors, out, builder);
   };
   for (const grand of children) {
     if (typeof grand === 'string') {
@@ -725,7 +727,8 @@ function buildChildren(children: readonly MarkupChild[], parentTag: string, ance
       continue;
     }
     const standaloneTime = builder.mode === 'import' && grand.tag === 'time' && children.every((one) => typeof one !== 'string' || one.trim() === '');
-    if (holdsInline(grand, rules) && !standaloneTime) {
+    const linkedListText = parentTag === 'li' && grand.tag === 'a' && !holdsBlock(grand, rules) && !holdsLinkedMedia(grand) && children.some((one) => typeof one === 'string' && one.trim() !== '');
+    if ((holdsInline(grand, rules) || linkedListText) && !standaloneTime) {
       phrasing.push(grand);
       continue;
     }
@@ -770,14 +773,14 @@ function visualOnlyChildren(children: readonly MarkupChild[]): boolean {
 }
 
 // the Paragraph a run of text directly inside a container becomes: built as any text element, some of its runs marked
-function buildParagraph(text: string, runs: readonly InlineRun[], builder: Builder, line: number): DocNode {
+function buildParagraph(text: string, runs: readonly InlineRun[], builder: Builder, line: number, tag?: string): DocNode {
   const { rules, make } = builder;
   const element = rules.elements.get('paragraph' as ElementType);
   const node: DocNode = {
     id: make.ids.next(),
     type: 'paragraph' as ElementType,
     name: freshName(make, make.words((element?.labelKey ?? 'element.paragraph.label') as MessageId)),
-    tag: element?.tags[0] ?? 'p',
+    tag: tag ?? element?.tags[0] ?? 'p',
     attributes: {},
     classes: [],
     styles: {},
