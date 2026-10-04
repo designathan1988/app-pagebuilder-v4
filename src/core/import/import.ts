@@ -657,8 +657,14 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
     else if (builder.mode === 'import') builder.report.attributes.push(line);
     else builder.dropped.attributes += 1;
   }
+  const inlineDeclarations = inlineStyle === null ? null : styleDeclarations(builder, inlineStyle, line);
   const captureHint = builder.captured && (svgSize.declarations !== '' || imageSize.size > 0);
-  const keptCustom = captureHint ? { ...customAttributes, 'data-capture-size-hint': encodeURIComponent(start.id) } : customAttributes;
+  const captureInlineVariables = builder.captured && inlineDeclarations?.some(([property]) => property.startsWith('--')) === true;
+  const keptCustom = {
+    ...customAttributes,
+    ...(captureHint ? { 'data-capture-size-hint': encodeURIComponent(start.id) } : {}),
+    ...(captureInlineVariables ? { 'data-capture-inline-variable': encodeURIComponent(start.id) } : {}),
+  };
   const made: DocNode = {
     ...start,
     attributes: attributes as DocNode['attributes'],
@@ -666,7 +672,7 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
     ...(hiddenFlag ? { hidden: true as const } : {}),
   };
   builder.lines.set(made.id, line);
-  if (inlineStyle !== null) builder.inline.set(made.id, styleDeclarations(builder, inlineStyle, line));
+  if (inlineDeclarations !== null) builder.inline.set(made.id, inlineDeclarations);
   if (svgSize.declarations !== '') builder.presentational.set(made.id, styleDeclarations(builder, svgSize.declarations, line));
   if (imageSize.size > 0) {
     const [widthProperty, heightProperty] = rules.boxSize;
@@ -1711,7 +1717,19 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
       }).join('');
       return [`[data-capture-size-hint="${key}"]{${body}}`];
     });
-    const css = [...fromSheets, ...(hints.length === 0 ? [] : [`@layer ${CAPTURE_BASE_LAYER}{${hints.join('')}}`])].filter((part) => part !== '').join('\n');
+    const inlineVariables = [...walkNodes(one.page.tree)].flatMap((node) => {
+      const key = node.customAttributes?.['data-capture-inline-variable'];
+      const declarations = one.builder.inline.get(node.id)?.filter(([property]) => property.startsWith('--'));
+      if (key === undefined || declarations === undefined || declarations.length === 0) return [];
+      const body = declarations.map(([property, value]) => {
+        if (typeof value !== 'string') throw new Error(`Inline custom property ${property} is not CSS text`);
+        return `${property}:${followCssUrls(value, path => movedUrl(path, one.builder.file, at))};`;
+      }).join('');
+      // The source inline value outranks even a more specific site selector. An ID-level selector approximates that
+      // priority without writing a style attribute in the clean export; the node's generated values still follow it.
+      return [`[data-capture-inline-variable="${key}"]:not(#__builder_unused_inline_${key}){${body}}`];
+    });
+    const css = [...fromSheets, ...(hints.length === 0 ? [] : [`@layer ${CAPTURE_BASE_LAYER}{${hints.join('')}}`]), ...inlineVariables].filter((part) => part !== '').join('\n');
     if (css === '') continue;
     const index = held.findIndex((file) => file.path === at);
     const record: ProjectFile = { path: at, type: 'text/css', bytes: base64(new TextEncoder().encode(css)) };

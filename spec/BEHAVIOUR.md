@@ -9093,6 +9093,10 @@ instance (`status.locked.edit`).
   as an editable Paragraph using a `span` tag, so its layout class still applies without an invented paragraph margin.
   An inline `<time>` within surrounding text stays in that text run. This representation preserves the visual date
   and its machine-readable value as an attribute, while exact `<time>` semantics require a model tag extension.
+- A captured element's inline custom properties remain effective when the site's stylesheet declares the same name
+  through a more specific normal selector. The export keeps those values in the residual CSS under an element-specific
+  selector with ID-level specificity; asset URLs inside them follow the residual file's path. This preserves the
+  inline value without putting a `style` attribute in the clean export.
 - A plain, attribute-free `<span>` containing only visual media or a visual link releases its wrapper and keeps each
   child, including the link and its image, editable. Image width and height attributes remain lower-priority hints:
   when a captured responsive stylesheet controls

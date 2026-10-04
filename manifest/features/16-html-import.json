@@ -3521,7 +3521,8 @@
         "expected": [
           "The page as its scripts left it arrives through Import HTML: its destinations, then a page with its classes, images and fonts.",
           "Inline layout values produced at the reference viewport widths remain responsive on the canvas and in the exported page.",
-          "The captured page keeps the site's own resets and browser defaults while authored pages keep Builder defaults."
+          "The captured page keeps the site's own resets and browser defaults while authored pages keep Builder defaults.",
+          "Custom properties written inline by the site keep their effect in the exported page without inline styles."
         ]
       },
       "scenarios": [
