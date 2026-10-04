@@ -53,7 +53,7 @@ import { shadowLayersFromCss } from '../style/shadows.ts';
 import { matches, readSelector, type Compound, type Facts, type Selector } from './selectors.ts';
 import { readDeclarations, readStylesheet, type CssRule, type CssSheet } from './stylesheet.ts';
 import { baseCss } from '../render/base.ts';
-import { underClassesHeading } from '../export/sheet-headings.ts';
+import { ELEMENTS_HEADING, underClassesHeading } from '../export/sheet-headings.ts';
 // reading markup (core/import/markup.ts): the DOM walk and the source lines, moved out of this file
 import { lineOf, lineOfNode, parseMarkup, parsePage, textOf, type MarkupChild, type MarkupNode } from './markup.ts';
 import { browserPorts } from '../ports/browser.ts';
@@ -319,6 +319,8 @@ interface Builder {
   // rule of the sheets (applySvgSize)
   readonly presentational: Map<string, readonly (readonly [string, StoredValue])[]>;
   readonly lines: Map<string, number>;
+  readonly nameBlocks: Map<string, Set<string>>;
+  exportedSheet: boolean;
   // 'import': an unknown element is unwrapped and a forbidden nesting repaired or dropped, each reported; 'strict':
   // the code pane's own reader (element.applyHtml) refuses a nesting the model forbids and drops what it cannot read
   readonly mode: 'import' | 'strict';
@@ -554,10 +556,21 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   const element = rules.elements.get(type as ElementType);
   const line = lineOfNode(builder.markup, child);
   const kept = classList(child.attributes.get('class') ?? '');
+  const proposedName = elementName(kept.names, type, rules, make);
+  const generated = kept.names.at(-1) ?? '';
+  const block = generated.includes('__') ? generated.split('__')[0] ?? '' : '';
+  const previousBlocks = builder.nameBlocks.get(proposedName);
+  const keepRepeatedName = builder.exportedSheet && block !== '' && previousBlocks !== undefined && !previousBlocks.has(block);
+  const name = keepRepeatedName ? proposedName : freshName(make, proposedName);
+  if (builder.exportedSheet && block !== '') {
+    const blocks = previousBlocks ?? new Set<string>();
+    blocks.add(block);
+    builder.nameBlocks.set(proposedName, blocks);
+  }
   const start: DocNode = {
     id: make.ids.next(),
     type: type as ElementType,
-    name: freshName(make, elementName(kept.names, type, rules, make)),
+    name,
     tag: child.tag,
     attributes: {},
     classes: kept.names,
@@ -1364,7 +1377,7 @@ export function nodesFromMarkup(markup: string, make: NodeMaker, context: Handle
 }
 
 // One builder per page (or per markup the code pane reads)
-function newBuilder(make: NodeMaker, context: HandlerContext<never>, markup: string, picked: readonly PickedFile[], file: string, mode: 'import' | 'strict', report: Report = emptyReport(), held: ProjectFile[] = []): Builder {
+function newBuilder(make: NodeMaker, context: HandlerContext<never>, markup: string, picked: readonly PickedFile[], file: string, mode: 'import' | 'strict', report: Report = emptyReport(), held: ProjectFile[] = [], nameBlocks: Map<string, Set<string>> = new Map()): Builder {
   return {
     make,
     rules: make.rules,
@@ -1380,6 +1393,8 @@ function newBuilder(make: NodeMaker, context: HandlerContext<never>, markup: str
     inline: new Map(),
     presentational: new Map(),
     lines: new Map(),
+    nameBlocks,
+    exportedSheet: false,
     mode,
     dropped: { elements: 0, attributes: 0 },
     problem: null,
@@ -1418,6 +1433,10 @@ function pageFrom(file: PickedFile, builder: Builder): Page {
   if (lang !== '' && lang !== (builder.context.state.document.language ?? 'en')) settings.push(['pageLanguage', lang]);
   if (['ltr', 'rtl', 'auto'].includes(dir)) settings.push(['pageDirection', dir]);
   for (const node of parsed.head) {
+    if (node.tag === 'script') {
+      keepScript(node, builder);
+      continue;
+    }
     if (node.tag === 'meta') {
       const name = (node.attributes.get('name') ?? '').trim().toLowerCase();
       const property = (node.attributes.get('property') ?? '').trim().toLowerCase();
@@ -1450,6 +1469,7 @@ function pageFrom(file: PickedFile, builder: Builder): Page {
       builder.sheets.push({ file: builder.file, css: readStylesheet(text), text });
     }
   }
+  builder.exportedSheet = builder.sheets.some((sheet) => sheet.text.split('\n').some((line) => line.trim() === ELEMENTS_HEADING));
   const children = buildChildren(parsed.body, 'body', ['body'], builder, lineOf(builder.markup, '<body'));
   // the body's own attributes: its classes, its inline style and the person's own attributes
   let attributes: Record<string, unknown> = {};
@@ -1535,9 +1555,10 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   const pages: Page[] = [];
   const sources: SheetSource[] = [];
   const built: { readonly page: Page; readonly builder: Builder }[] = [];
+  const nameBlocks = new Map<string, Set<string>>();
   let elements = 0;
   for (const file of markup) {
-    const builder = newBuilder(make, context as HandlerContext<never>, textOfFile(file), picked, file.name, 'import', report, held);
+    const builder = newBuilder(make, context as HandlerContext<never>, textOfFile(file), picked, file.name, 'import', report, held, nameBlocks);
     const page = pageFrom(file, builder);
     elements += countOf(page.tree) - 1;
     pages.push(page);

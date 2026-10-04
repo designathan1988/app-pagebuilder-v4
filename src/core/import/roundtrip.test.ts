@@ -27,12 +27,16 @@ type Answer = { readonly status: string };
 // as the browser does
 const grammarCss: CssSupport = { supports: (property, value) => cssLexer.matchProperty(property, value).error === null };
 
-async function exported(document: DocumentJson): Promise<Map<string, Uint8Array>> {
+async function exportedArchive(document: DocumentJson): Promise<Uint8Array> {
   let bytes: Uint8Array | null = null;
   const store = createEditorStore({ storage: memory(), workspace: memory(), clock: manualClock(1), ids: sequentialIds('x'), restored: { document, selection: [] }, ports: { readOnly: () => false, css: grammarCss, downloads: { deliver: (file) => void (bytes = file.bytes) } }, freeze: true });
   const answer = (store.dispatch as unknown as (id: CommandId, args: unknown) => Answer)('project.export' as CommandId, {});
   if (answer.status !== 'done' || bytes === null) throw new Error(`export: ${answer.status}`);
-  return unzip(bytes);
+  return bytes;
+}
+
+async function exported(document: DocumentJson): Promise<Map<string, Uint8Array>> {
+  return unzip(await exportedArchive(document));
 }
 
 function imported(files: Map<string, Uint8Array>): DocumentJson {
@@ -65,6 +69,17 @@ const text = (files: Map<string, Uint8Array>, name: string) => new TextDecoder()
 const FIXTURES = fs.readdirSync('manifest/features/fixtures').filter((name) => name.endsWith('.json'));
 
 describe('export then import back (AUD-05)', () => {
+  it('writes the canonical fixture byte for byte again after importing its export', async () => {
+    const document = JSON.parse(fs.readFileSync('manifest/features/fixtures/canonical.json', 'utf8')) as DocumentJson;
+    const firstArchive = await exportedArchive(document);
+    const first = await unzip(firstArchive);
+    const againArchive = await exportedArchive(imported(first));
+    const again = await unzip(againArchive);
+    expect([...again.keys()].sort()).toEqual([...first.keys()].sort());
+    for (const [name, bytes] of first) expect(again.get(name), name).toEqual(bytes);
+    expect(againArchive).toEqual(firstArchive);
+  });
+
   it('keeps the pages, the declarations, the variables and the classes of every fixture', { timeout: 300_000 }, async () => {
     const losses: string[] = [];
     for (const name of FIXTURES) {

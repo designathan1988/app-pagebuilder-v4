@@ -75,7 +75,9 @@ function headLines(document: DocumentJson, page: DocNode, rules: ModelRules, fro
     const [form, name = ''] = facts.head.split(/:(.*)/s) as [string, string?];
     const values = facts.valueType === 'path-list' ? held.split(/\s+/).filter((each) => each !== '') : [held];
     for (const value of values) {
-      if (form === 'script') lines.push(`  <script src="${escapeAttribute(written(value))}"></script>`);
+      if (form === 'script') {
+        if (!generatedScriptPaths.includes(value)) lines.push(`  <script src="${escapeAttribute(written(value))}"></script>`);
+      }
       else if (form === 'link') lines.push(`  <link rel="${escapeAttribute(name)}" href="${escapeAttribute(value)}">`);
       else if (name.startsWith('og:') || name.startsWith('twitter:')) lines.push(`  <meta property="${escapeAttribute(name)}" content="${escapeAttribute(value)}">`);
       else lines.push(`  <meta name="${escapeAttribute(name)}" content="${escapeAttribute(value)}">`);
@@ -83,6 +85,10 @@ function headLines(document: DocumentJson, page: DocNode, rules: ModelRules, fro
   }
   return lines;
 }
+
+const generatedScriptPaths: readonly string[] = [INTERACTIONS_SCRIPT, FORMS_SCRIPT, LOTTIE_SCRIPT, MOTION_SCRIPT];
+const linksScript = (page: DocNode, path: string): boolean =>
+  typeof page.attributes.pageScripts === 'string' && page.attributes.pageScripts.split(/\s+/).includes(path);
 
 // a text's runs as HTML: marks as their elements, a line break as <br>
 function runsHtml(runs: readonly InlineRun[], resolve: (href: string) => string): string {
@@ -343,11 +349,11 @@ export function pageLines(document: DocumentJson, pageIndex: number, manifestRul
     ...headLines(document, page.tree, rules, from),
     ...(fileAt(document, capturedPageStylePath(page)) === null ? [] : [`  <link rel="stylesheet" href="${escapeAttribute(relativePath(from, capturedPageStylePath(page)))}">`]),
     `  <link rel="stylesheet" href="${escapeAttribute(relativePath(from, STYLESHEET))}">`,
-    ...(usesInteractions ? [`  <script defer src="${escapeAttribute(relativePath(from, INTERACTIONS_SCRIPT))}"></script>`] : []),
-    ...(pageUsesForms(page.tree) ? [`  <script defer src="${escapeAttribute(relativePath(from, FORMS_SCRIPT))}"></script>`] : []),
+    ...(usesInteractions || linksScript(page.tree, INTERACTIONS_SCRIPT) ? [`  <script defer src="${escapeAttribute(relativePath(from, INTERACTIONS_SCRIPT))}"></script>`] : []),
+    ...(pageUsesForms(page.tree) || linksScript(page.tree, FORMS_SCRIPT) ? [`  <script defer src="${escapeAttribute(relativePath(from, FORMS_SCRIPT))}"></script>`] : []),
     // a page holding motion links the Lottie player when the site uses one, then the motion script
-    ...(treeUsesMotion(page.tree) && siteUsesLottie(document) ? [`  <script defer src="${escapeAttribute(relativePath(from, LOTTIE_SCRIPT))}"></script>`] : []),
-    ...(treeUsesMotion(page.tree) ? [`  <script defer src="${escapeAttribute(relativePath(from, MOTION_SCRIPT))}"></script>`] : []),
+    ...(treeUsesMotion(page.tree) && siteUsesLottie(document) || linksScript(page.tree, LOTTIE_SCRIPT) ? [`  <script defer src="${escapeAttribute(relativePath(from, LOTTIE_SCRIPT))}"></script>`] : []),
+    ...(treeUsesMotion(page.tree) || linksScript(page.tree, MOTION_SCRIPT) ? [`  <script defer src="${escapeAttribute(relativePath(from, MOTION_SCRIPT))}"></script>`] : []),
     '</head>',
   ].map((text) => ({ text, node: null }));
   const html: CodeLine[] = [...head, ...body, { text: '</html>', node: null }, { text: '', node: null }];
