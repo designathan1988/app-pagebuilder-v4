@@ -20,7 +20,7 @@ import { TEXT_EDITING, editArgs } from '../canvas/text-edit.ts';
 import { readClipboard } from '../clipboard.ts';
 import type { EditorStore } from '../store.ts';
 import { cancelPan, holdSpace, modifierOf, openGesture } from './pointer.ts';
-import { holdLetter, releaseLetters } from './pointer-tools.ts';
+import { holdLetter, releaseLetters, toolKeyContext } from './pointer-tools.ts';
 import { pointerViews } from './pointer/views.ts';
 import { shortcutRuns } from './shortcut-rule.ts';
 import { keyContextIn } from '../canvas/edit-mode.ts';
@@ -247,6 +247,7 @@ const LAYERS_CONTEXT = 'layers-tree' as KeyContextId;
 const CHOSEN_CONTEXTS: ReadonlySet<string> = new Set([CANVAS_CONTEXT, LAYERS_CONTEXT]);
 const FIELD_CONTEXT: KeyContextId = 'field';
 const GLOBAL_CONTEXT: KeyContextId = 'global';
+const TOOLBAR_CONTEXT: KeyContextId = 'toolbar';
 const keptField = (target: EventTarget | null): target is DraftField =>
   (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) && target.dataset.draft === DRAFT_KEPT && target.value === target.dataset.shown;
 const CANVAS: KeyContextId = 'canvas';
@@ -435,7 +436,10 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
     // while an Edit on canvas mode is on, the canvas's keys are its mode's (canvas/edit-mode.ts)
     // while every selected element is absolute or fixed, the canvas's arrows nudge them (canvas-positioned)
     // while previewing, the keys are the preview's, wherever the focus is in the editor (spec preview-mode)
-    const context = gesture?.context ?? (previewing(store.getState().ui) ? PREVIEW : hand !== null ? HAND : positionedContext(store, keyContextIn(store.getState().ui, focused)));
+    // A tool's stage takes focus after it is measured; Escape still leaves that tool while its toolbar button holds
+    // focus between the command and the stage's first focus. Other toolbar keys keep their own context.
+    const toolEscape = event.key === 'Escape' && focused === TOOLBAR_CONTEXT ? toolKeyContext(store.getState().ui) : null;
+    const context = gesture?.context ?? (previewing(store.getState().ui) ? PREVIEW : hand !== null ? HAND : toolEscape ?? positionedContext(store, keyContextIn(store.getState().ui, focused)));
     // a session's context (a gesture, the hand, the preview) replaces the focused one; otherwise a field inside a
     // region that absorbs fields (the quick panel) runs the region's keys before its own (focusChain)
     const chain = gesture !== null || hand !== null || previewing(store.getState().ui) ? keyContextChain(context) : focusChain(event.target, context);
