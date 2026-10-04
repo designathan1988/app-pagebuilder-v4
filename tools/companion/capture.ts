@@ -149,24 +149,49 @@ function siteBuilder(fetched: Fetcher) {
     files.push({ path, type: TYPES[extensionOf(url, type)] ?? (type.split(';')[0] ?? 'application/octet-stream'), base64: response.body.toString('base64') });
     return path;
   };
+  // CSS imports are syntax nodes: a quoted URL may itself contain a semicolon (a Google Fonts axis list).
+  // Their source ranges also keep the asset pass from treating an imported stylesheet as an image.
+  const importsOf = (text: string): { start: number; end: number; url: string }[] => {
+    let ast: CssNode;
+    try {
+      ast = parseCss(text, { positions: true });
+    } catch {
+      return [];
+    }
+    if (ast.type !== 'StyleSheet') return [];
+    return ast.children.toArray().flatMap((rule) => {
+      if (rule.type !== 'Atrule' || rule.name.toLowerCase() !== 'import' || rule.loc === null || rule.loc === undefined || rule.prelude?.type !== 'AtrulePrelude') return [];
+      const values = rule.prelude.children.toArray();
+      if (values.length !== 1) return [];
+      const source = values[0];
+      return source?.type === 'String' || source?.type === 'Url' ? [{ start: rule.loc.start.offset, end: rule.loc.end.offset, url: source.value }] : [];
+    });
+  };
   // a sheet with every url() it names downloaded (fonts to fonts/, the rest to img/), written from css/
   const localSheet = async (text: string, sheetUrl: string): Promise<string> => {
     let out = text;
+    const imports = importsOf(text);
+    const assetsToReplace: { start: number; end: number; value: string }[] = [];
     for (const match of text.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g)) {
+      const start = match.index;
+      if (start === undefined || imports.some((rule) => start >= rule.start && start < rule.end)) continue;
       const raw = match[2] ?? '';
       if (raw.startsWith('data:') || raw.startsWith('#')) continue;
       const absolute = new URL(raw, sheetUrl).href;
       const font = /\.(woff2?|ttf|otf|eot)(\?|#|$)/i.test(absolute);
       const local = await fetchAsset(absolute, font ? 'fonts' : 'img');
-      if (local !== null) out = out.split(match[0]).join(`url("../${local}")`);
+      if (local !== null) assetsToReplace.push({ start, end: start + match[0].length, value: `url("../${local}")` });
     }
+    for (const one of assetsToReplace.reverse()) out = out.slice(0, one.start) + one.value + out.slice(one.end);
     // an @import is fetched and laid in its place
-    for (const match of out.matchAll(/@import\s+(?:url\()?\s*['"]?([^'")\s;]+)['"]?\s*\)?[^;]*;/g)) {
-      const absolute = new URL(match[1] ?? '', sheetUrl).href;
+    const sheetsToReplace: { start: number; end: number; value: string }[] = [];
+    for (const rule of importsOf(out)) {
+      const absolute = new URL(rule.url, sheetUrl).href;
       const response = await fetched(absolute);
       const inner = response !== null && response.ok ? await localSheet(response.body.toString('utf8'), absolute) : '';
-      out = out.split(match[0]).join(inner);
+      sheetsToReplace.push({ start: rule.start, end: rule.end, value: inner });
     }
+    for (const one of sheetsToReplace.reverse()) out = out.slice(0, one.start) + one.value + out.slice(one.end);
     return out;
   };
   // a page's file: its markup with its sheets linked, its images and backgrounds downloaded, and the capture's mark

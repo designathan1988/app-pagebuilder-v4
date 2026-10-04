@@ -11,12 +11,12 @@ Sites at the target: 0 of 20. Measured: 20.
 
 | Site | Kind | Files | Elements | 1440px | 1180px | 834px | 390px | Problem |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 597 | 48.4 ✗ | 49.1 ✗ | 45.4 ✗ | 54.7 ✗ |  |
-| [govuk](https://www.gov.uk/) | documentation | 11 | 475 | 49.9 ✗ | 48.4 ✗ | 50.9 ✗ | 63.4 ✗ |  |
+| [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 605 | 59.1 ✗ | 62.2 ✗ | 61.2 ✗ | 69.7 ✗ |  |
+| [govuk](https://www.gov.uk/) | documentation | 11 | 477 | 65.4 ✗ | 64.3 ✗ | 65.8 ✗ | 80.1 ✗ |  |
 | [w3c](https://www.w3.org/) | documentation | 17 | 294 | 59.2 ✗ | 60.1 ✗ | 64.7 ✗ | 72.6 ✗ |  |
-| [react](https://react.dev/) | React application | 53 | 705 | 86.3 ✗ | 83.3 ✗ | 79.5 ✗ | 73.3 ✗ |  |
+| [react](https://react.dev/) | React application | 53 | 730 | 85.8 ✗ | 83.6 ✗ | 79.8 ✗ | 73.5 ✗ |  |
 | [nextjs](https://nextjs.org/) | React application | 39 | 1115 | 68.5 ✗ | 67.4 ✗ | 87.9 ✗ | 95.3 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 46 | 440 | 69.1 ✗ | 66.0 ✗ | 69.9 ✗ | 53.5 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 46 | 573 | 90.7 ✗ | 86.8 ✗ | 85.1 ✗ | 87.5 ✗ |  |
 | [nuxt](https://nuxt.com/) | Vue application | 73 | 1044 | 62.4 ✗ | 64.0 ✗ | 76.5 ✗ | 78.0 ✗ |  |
 | [svelte](https://svelte.dev/) | landing | 24 | 229 | 49.1 ✗ | 44.9 ✗ | 46.3 ✗ | 42.7 ✗ |  |
 | [astro](https://astro.build/) | landing | 26 | 876 | 50.8 ✗ | 48.8 ✗ | 64.7 ✗ | 86.0 ✗ |  |
@@ -26,7 +26,7 @@ Sites at the target: 0 of 20. Measured: 20.
 | [csstricks](https://css-tricks.com/) | blog | 0 | — | — | — | — | — | TimeoutError: page.goto: Timeout 45000ms exceeded. |
 | [smashing](https://www.smashingmagazine.com/) | blog | 29 | 557 | 53.0 ✗ | 56.9 ✗ | 57.6 ✗ | 51.0 ✗ |  |
 | [bellroy](https://bellroy.com/) | shop | 115 | 1545 | 16.1 ✗ | 13.5 ✗ | 17.9 ✗ | 16.8 ✗ |  |
-| [allbirds](https://www.allbirds.com/) | shop | 361 | 1250 | 7.7 ✗ | 7.6 ✗ | 8.4 ✗ | 9.6 ✗ |  |
+| [allbirds](https://www.allbirds.com/) | shop | 359 | 1284 | 7.9 ✗ | 7.9 ✗ | 8.6 ✗ | 10.1 ✗ |  |
 | [typewolf](https://www.typewolf.com/) | web fonts | 60 | 582 | 23.8 ✗ | 20.7 ✗ | 26.3 ✗ | 18.8 ✗ |  |
 | [gridbyexample](https://gridbyexample.com/) | grid | 9 | 96 | 84.0 ✗ | 77.5 ✗ | 77.2 ✗ | 84.3 ✗ |  |
 | [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 48.7 ✗ | 56.6 ✗ | 55.1 ✗ | 57.6 ✗ |  |

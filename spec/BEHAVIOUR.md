@@ -9028,7 +9028,8 @@ instance (`status.locked.edit`).
   `COMPANION_PORT`, 5410 by default). It opens the address in the installed Chrome, waits for the network to rest,
   scrolls to the end so lazy content loads, stops animations and transitions, and reads the page as its scripts left
   it: the markup (scripts left out: their effect is already in it), every stylesheet in order (a linked one fetched
-  whole, from any origin, its `@import`s laid in place; a `<style>` as written), and the images, backgrounds and fonts
+  whole, from any origin, its `@import`s laid in place (parsed as CSS rules, so a semicolon inside a quoted address
+  does not cut the rule); a `<style>` as written), and the images, backgrounds and fonts
   they name, downloaded to `img/` and `fonts/` with every reference rewritten.
 - **File › Open a web address…** (`workspace.openDialog`, dialog `capture-url`) asks for the address (a bare host is read
   as https), reminds that a captured site belongs to its authors, and says how the Companion is started. **Capture**
@@ -9060,7 +9061,9 @@ instance (`status.locked.edit`).
   attributes, below every rule of the sheets) and a viewBox other than its size keeps the drawing's coordinates; a
   piece of a text the page does not draw (a hidden short label) is no part of the text; the theme a page sets on its
   `<html>` (its classes and `data-` attributes) reaches its body; a page's Content Security Policy does not stop the
-  capture.
+  capture. An anchor with an image, SVG or video becomes a Link Block, retaining its editable visual child. Ordinary
+  HTML whitespace in text runs collapses to spaces, while an actual `<br>` remains a line break and preformatted text
+  keeps its whitespace.
 - **A page behind a login** (STG-12.4): the **Builder Capture** browser extension (`companion/extension`, built with
   `npm run extension:build`, loaded unpacked) reads the page of the person's own tab, logged in, with the same reading
   the Companion runs, and every file the copy needs with the person's credentials, and hands them to the Companion with

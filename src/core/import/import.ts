@@ -386,11 +386,11 @@ function elementName(classes: readonly string[], type: string, rules: ModelRules
 type Raw = { readonly node: DocNode } | { readonly text: string } | { readonly nothing: true } | { readonly nodes: readonly DocNode[] };
 
 // the inline runs of a text element's markup: its elements' marks, its texts as they are (a <br> is a line break)
-function runsOf(children: readonly MarkupChild[], builder: Builder): InlineRun[] {
+function runsOf(children: readonly MarkupChild[], builder: Builder, preserveWhitespace = false): InlineRun[] {
   const out: InlineRun[] = [];
   for (const child of children) {
     if (typeof child === 'string') {
-      if (child !== '') out.push(child);
+      if (child !== '') out.push(preserveWhitespace ? child : child.replace(/\s+/g, ' '));
       continue;
     }
     if (child.tag === 'br') {
@@ -403,7 +403,7 @@ function runsOf(children: readonly MarkupChild[], builder: Builder): InlineRun[]
       if (builder.mode === 'import') builder.report.dropped.push(lineOfNode(builder.markup, child));
       continue;
     }
-    const inner = runsOf(child.children, builder);
+    const inner = runsOf(child.children, builder, preserveWhitespace);
     if (child.tag === 'a') {
       const href = (child.attributes.get('href') ?? '').trim();
       // the one rule of an address a link may have (core/elements/address.ts): one it refuses leaves the text plain,
@@ -518,7 +518,7 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   const { rules, make } = builder;
   // an <a> is the Link Block when it holds a block of its own (a card made of one link) and the Link otherwise, as
   // the editor's two types of the same tag are meant (elements.json)
-  const type = child.tag === 'a' ? (holdsBlock(child, rules) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
+  const type = child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
   if (type === null) {
     // A script and a style are no elements of the page: the import reads them itself (a page keeps its script's code,
     // a linked sheet's rules land on the elements), the code pane's reader drops them as anything else it has no
@@ -637,7 +637,7 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   if (svgSize.declarations !== '') builder.presentational.set(made.id, styleDeclarations(builder, svgSize.declarations, line));
   const content = element?.content ?? 'children';
   if (content === 'text') {
-    const runs = canonical(runsOf(child.children, builder));
+    const runs = canonical(runsOf(child.children, builder, child.tag === 'pre' || child.tag === 'textarea'));
     // the tree of marks is kept only while something is marked: a plain text carries none (validate.ts)
     return { node: { ...made, text: plainOf(runs), ...(hasMarks(runs) ? { inline: runs } : {}) } };
   }
@@ -664,7 +664,7 @@ function buildChildren(children: readonly MarkupChild[], parentTag: string, ance
     const run = phrasing;
     phrasing = [];
     if (run.length === 0) return;
-    const runs = canonical(runsOf(run, builder));
+    const runs = canonical(runsOf(run, builder, parentTag === 'pre' || parentTag === 'textarea'));
     const text = plainOf(runs);
     if (text.trim() === '') return;
     place(buildParagraph(text, runs, builder, parentLine), parentTag, ancestors, out, builder);
@@ -706,6 +706,12 @@ function holdsInline(node: MarkupNode, rules: ModelRules): boolean {
 // know counts as inline unless a block is inside it)
 function holdsBlock(node: MarkupNode, rules: ModelRules): boolean {
   return node.children.some((child) => typeof child !== 'string' && (rules.contentModel.phrasing(child.tag) === false || holdsBlock(child, rules)));
+}
+
+// An image or another visual child is phrasing content in HTML but cannot live in the editor's text-only Link.
+// The Link Block owns children, so the image stays editable and exportable inside the anchor.
+function holdsLinkedMedia(node: MarkupNode): boolean {
+  return node.children.some((child) => typeof child !== 'string' && (['img', 'svg', 'video'].includes(child.tag) || holdsLinkedMedia(child)));
 }
 
 // the Paragraph a run of text directly inside a container becomes: built as any text element, some of its runs marked
