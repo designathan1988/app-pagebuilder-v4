@@ -1,5 +1,20 @@
 # AGENTS.md — the rules of work for every agent
 
+> **Rule zero — research on the internet first, always.** Before
+> implementing anything that is not trivial, search the official
+> documentation (MDN, W3.org and other relevant primary sources).
+> Do this before editing code. If internet access is unavailable,
+> report the blocker; do not treat memory or an unverified assumption
+> as a substitute.
+
+> **No trial and error.** Before changing code for a defect, establish the observed
+> failure, trace it to its root cause across the affected boundaries, research the
+> relevant official sources, and record a causal implementation plan. Implement
+> the shared cause rather than a site-specific symptom or a speculative tweak.
+> When verification fails, inspect the new evidence and revise the hypothesis
+> before editing again; do not cycle through ungrounded variations or tune tests,
+> references, or metrics to make the result appear successful.
+
 Builder is a desktop pagebuilder that runs in recent Chrome only, for professionals who build websites. This file is
 the one rulebook: Codex reads it directly, Claude Code reads it through `CLAUDE.md` (which imports it and adds only
 what is Claude-specific). What the product is and must do, its status, open problems and decisions live in
@@ -35,19 +50,14 @@ looks done.
    hook: it reads its task list before ending a turn. For a long order, the user can also set `/goal <criteria>` in
    Claude Code, which has a separate model check the criteria after every turn.
 
-## Rule zero: research first
+## How to apply rule zero
 
-Before implementing anything that is not trivial, a bug fix included, search the official documentation of the
-technology involved (MDN, the W3C and WHATWG specifications, the tool's own documentation) and how shipped products
-solve the same problem. Record the source that informed the change (QA-LOG row, decision, comment). Reuse a source
-already checked in the same investigation. If internet access is unavailable, report the blocker; memory or an
-unverified assumption is not a substitute. Web research does not replace the repository's own evidence: its code, tests
-and the real app.
-
-**No trial and error.** Before changing code for a defect, establish the observed failure, trace it to its root cause
-across the affected boundaries and plan the change from the cause. Implement the shared cause, not a site-specific
-symptom. When verification fails, read the new evidence and revise the hypothesis before editing again; never cycle
-through ungrounded variations, and never tune tests, references or metrics to make a result look better.
+- A bug fix counts as non-trivial. Besides the specification, look at how shipped products solve the same problem.
+- Research before the first change, not after an attempt failed. Measure before guessing: a cause is named from
+  evidence (a log, a measurement, the code), never from a hunch.
+- Record the source that informed the change (QA-LOG row, decision, comment). Reuse a source already checked in the same
+  investigation.
+- Web research does not replace the repository's own evidence: its code, tests and the real app.
 
 ## One tree, one copy
 
