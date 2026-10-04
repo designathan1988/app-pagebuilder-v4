@@ -62,11 +62,11 @@ export function referenceHtmlOf(attribute: string): string | undefined {
 }
 
 // Whether a stored attribute value is a reference to a node that is leaving: the one test the writers share.
-export function referenceNamesLeaving(attribute: string, value: unknown, leaving: ReadonlySet<NodeId>): boolean {
+export function referenceNamesLeaving(attribute: string, value: unknown, leaving: ReadonlySet<string>): boolean {
   const html = referenceHtmlOf(attribute);
   if (html === undefined || typeof value !== 'string' || value === '') return false;
   if (html === 'href' && !value.startsWith('#')) return false;
-  return leaving.has((value.startsWith('#') ? value.slice(1) : value) as NodeId);
+  return leaving.has(value.startsWith('#') ? value.slice(1) : value);
 }
 export function setReferenceAttributes(entries: readonly { readonly id: string; readonly html: string | null }[]): void {
   REFERENCE_ATTRIBUTES = new Map(entries.filter((entry) => entry.html !== null && REFERENCE_HTM.includes(entry.html)).map((entry) => [entry.id, entry.html as string]));

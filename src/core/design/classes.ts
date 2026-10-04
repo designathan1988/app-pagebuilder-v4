@@ -12,7 +12,7 @@
 //    style target (HandlerContext.styleClass), while the project has it and every selected element lists it.
 import { isIdentifier } from '../text/identifier.ts';
 import { message, registerHandler, type HandlerContext, type Outcome } from '../commands/registry.ts';
-import { locate, walk, type DocumentJson, type NodeId, type Selection, type StyleClass } from '../document/model.ts';
+import { locate, walk, type DocNode, type DocumentJson, type NodeId, type Selection, type StyleClass } from '../document/model.ts';
 import type { Patch } from '../history/transaction.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
 import { commandOf } from '../../manifest/runtime.ts';
@@ -118,12 +118,25 @@ function classUses(document: DocumentJson, name: string) {
   return document.pages.flatMap((page) => [...walk(page.tree)].filter((node) => node.classes.includes(name)).map((node) => locate(document, node.id)).filter((at) => at !== null));
 }
 
+// Every element that lists a class, with its path: the pages' (classUses) and the components' definitions', whose
+// instances placed later list what the definition lists (the audit's RF1: a renamed class stayed in a definition, and
+// every instance placed after it came out unstyled).
+function classListers(document: DocumentJson, name: string): { readonly node: DocNode; readonly path: readonly (string | number)[] }[] {
+  const found: { node: DocNode; path: readonly (string | number)[] }[] = classUses(document, name).map((at) => ({ node: at.node, path: at.path }));
+  const visit = (node: DocNode, path: readonly (string | number)[]): void => {
+    if (node.classes.includes(name)) found.push({ node, path });
+    node.children.forEach((child, i) => visit(child, [...path, 'children', i]));
+  };
+  (document.components ?? []).forEach((component, i) => visit(component.tree, ['components', i, 'tree']));
+  return found;
+}
+
 // Shared by class renaming and collision isolation of an imported group.
 export function renameClassPatches(document: DocumentJson, className: string, nextName: string): Patch[] {
   const index = classesOf(document).findIndex(c => c.name === className);
   return [
     ...(index < 0 ? [] : [{ op: 'replace' as const, path: ['classes', index, 'name'], value: nextName }]),
-    ...classUses(document, className).map((at): Patch => ({ op: 'replace', path: [...at.path, 'classes'], value: at.node.classes.map(name => name === className ? nextName : name) })),
+    ...classListers(document, className).map((at): Patch => ({ op: 'replace', path: [...at.path, 'classes'], value: at.node.classes.map(name => name === className ? nextName : name) })),
   ];
 }
 
@@ -149,7 +162,7 @@ export const deleteClassCommand = registerHandler('classes.delete', ({ state, co
   if (locked !== null) return { kind: 'refused', message: locked };
   if (!confirmed) return { kind: 'confirm', params: { count: uses.length } };
   const patches: Patch[] = [
-    ...uses.map((at): Patch => ({ op: 'replace', path: [...at.path, 'classes'], value: at.node.classes.filter((name) => name !== className) })),
+    ...classListers(state.document, className).map((at): Patch => ({ op: 'replace', path: [...at.path, 'classes'], value: at.node.classes.filter((name) => name !== className) })),
     classes.length === 1 ? { op: 'remove', path: ['classes'] } : { op: 'remove', path: ['classes', index] },
   ];
   return { kind: 'change', patches, message: message('status.classes.deleted', { name: className, count: uses.length }) };

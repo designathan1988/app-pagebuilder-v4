@@ -3,7 +3,7 @@
 // with (gestures/recognize.ts readStroke), so what is committed is what the person saw; the new intent is compiled and
 // written into the container at once (host/materialize.ts), so the page is always the ordinary structure the layout
 // means — there is no separate "apply" that could leave the two apart.
-import { activeBreakpoint, BASE_BREAKPOINT, breakpointWords, firstLockRefusal, hidePanel, imageFiles, isPanelOpen, locate, manifest, message, nodeMaker, numberConstant, pageShown, registerHandler, registerPredicate, showPanel, tracksToValue, zoomOf } from '../../../editor/host.ts';
+import { activeBreakpoint, BASE_BREAKPOINT, breakpointWords, firstLockRefusal, hidePanel, imageFiles, isPanelOpen, leavingNames, locate, manifest, message, nodeMaker, numberConstant, pageShown, registerHandler, registerPredicate, releaseReferencesPatch, showPanel, tracksToValue, walk, withoutReferencesTo, zoomOf } from '../../../editor/host.ts';
 import type { DocNode, EditorUi, HandlerContext, Message, MessageId, NodeId, Outcome, Shown } from '../../../editor/host.ts';
 import { propertyVocabulary } from '../adapters/properties.ts';
 import { compile, type CompilerPorts } from '../compiler/compile.ts';
@@ -131,11 +131,18 @@ function filledRegions(container: DocNode): Set<string> {
 // stays behind.
 function written(context: Context, graph: LayoutIntent, selection: readonly string[], fresh = false): Outcome<EditorUi> {
   const { state, container, path, record } = composed(context);
-  const next = structured(context, container, record, graph, fresh);
+  const built = structured(context, container, record, graph, fresh);
   const kept = selection.filter((id) => findRegion(graph, id) !== undefined);
+  // the elements the composed container no longer holds leave, and whatever pointed at them lets go of them in the same
+  // undo step, as a delete releases it (the audit's RF1: deleting a region a link pointed into was refused)
+  const staying = new Set([...walk(built)].map((inner) => inner.id));
+  const leaving = new Set([...walk(container)].map((inner) => inner.id as NodeId).filter((id) => !staying.has(id)));
+  const names = leavingNames(context.state.document, leaving);
+  const next = leaving.size === 0 ? built : withoutReferencesTo(built, names);
+  const released = leaving.size === 0 ? [] : releaseReferencesPatch(context.state.document, leaving, names).filter((patch) => !path.every((key, i) => patch.path[i] === key));
   return {
     kind: 'change',
-    patches: [{ op: 'replace', path: [...path], value: next }],
+    patches: [...released, { op: 'replace', path: [...path], value: next }],
     ui: withComposer(context.state.ui, { ...state, selection: kept }),
     message: message('layout.status.changed'),
   };

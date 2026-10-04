@@ -4,7 +4,7 @@ import { refreshCopiedIdentities } from '../document/clone.ts';
 import { renameClassPatches } from '../design/classes.ts';
 import { renameTokenPatches } from '../design/tokens.ts';
 import { uniqueFilePath } from '../files/files.ts';
-import { followPaths } from '../files/references.ts';
+import { addressAttributes, followPaths } from '../files/references.ts';
 import { applyPatches, type Patch } from '../history/transaction.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import { lockRefusal } from '../nodes/flags.ts';
@@ -51,8 +51,7 @@ export function importDestination(context: HandlerContext<never>, parsed: Docume
     reserved.add(next);
     paths.set(path, next);
   }
-  const addresses = new Set([...context.rules.attributeValues].filter(([, facts]) => facts.valueType === 'url' || facts.valueType === 'path-list' || facts.html === 'srcset').map(([name]) => name));
-  imported = applyPatches(imported, followPaths(imported, path => paths.get(path) ?? path, undefined, addresses)).document;
+  imported = applyPatches(imported, followPaths(imported, path => paths.get(path) ?? path, undefined, addressAttributes(context.rules))).document;
   const names = new Set(current.pages.map(page => page.name));
   const pages = imported.pages.map(page => {
     let name = page.name;

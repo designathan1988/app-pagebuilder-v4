@@ -12,7 +12,7 @@
 import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler, registerPredicate, type HandlerContext, type Outcome } from '../commands/registry.ts';
 import { locate, type DocNode, type Location, type StoredValue, type Styles } from '../document/model.ts';
-import { childPath, movesIntoItself, releaseReferencesPatch, removeSubtree, withoutReferencesTo } from '../document/tree.ts';
+import { childPath, leavingNames, movesIntoItself, releaseReferencesPatch, removeSubtree, withoutReferencesTo } from '../document/tree.ts';
 import type { ModelRules, WrapperId } from '../document/validate.ts';
 import { applyPatches, type Patch } from '../history/transaction.ts';
 import { firstLockRefusal, lockRefusal } from '../nodes/flags.ts';
@@ -211,7 +211,8 @@ export const unwrapCommand = registerHandler('element.unwrap', ({ state, rules }
   // what a Row or a Column gave its children (their growing alike, elements.json wrappers childStyles) goes with it,
   // when the child still holds exactly that: unwrap undoes what wrap did, and a value the person changed since stays
   const given = wrapperChildStyles(rules, wrapper.node);
-  const kept = wrapper.node.children.map((child) => withoutChildStyles(rules, withoutReferencesTo(child, leaving), given));
+  const names = leavingNames(state.document, leaving);
+  const kept = wrapper.node.children.map((child) => withoutChildStyles(rules, withoutReferencesTo(child, names), given));
   // the wrapper's own place (`…/children/<i>`) gives way to its children, at the wrapper's index on
   const parentPath = wrapper.path.slice(0, -2);
   const patches: Patch[] = [

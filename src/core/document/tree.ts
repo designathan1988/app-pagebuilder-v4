@@ -39,16 +39,36 @@ export function movesIntoItself(moved: readonly DocNode[], parentId: NodeId): bo
   return moved.some((node) => [...walk(node)].some((inner) => inner.id === parentId));
 }
 
+// The names a reference may give what is leaving: every node id going away, and the HTML id each of them carries that
+// no node staying carries too — an imported reference names its target by that id (a label's for="email", a link's
+// "#contact": references.ts orphanReferences), and once its element leaves it names nothing (the audit's RF1).
+export function leavingNames(document: DocumentJson, leaving: ReadonlySet<NodeId>): ReadonlySet<string> {
+  const names = new Set<string>(leaving);
+  const staying = new Set<string>();
+  const going: string[] = [];
+  for (const page of document.pages) {
+    for (const node of walk(page.tree)) {
+      const id = node.attributes.id;
+      if (typeof id !== 'string' || id === '') continue;
+      if (leaving.has(node.id)) going.push(id);
+      else staying.add(id);
+    }
+  }
+  for (const id of going) if (!staying.has(id)) names.add(id);
+  return names;
+}
+
 // The patches that release every reference pointing at what is leaving: a label's `for`, a link's `#anchor`. What
-// leaves is the id of every node going away — the node itself and, when a subtree goes, everything inside it — and no
-// node that stays may point at one of them (a reference to nothing is what the validator refuses a document over).
-export function releaseReferencesPatch(document: DocumentJson, leaving: ReadonlySet<NodeId>): Patch[] {
+// leaves is the id of every node going away — the node itself and, when a subtree goes, everything inside it — with the
+// HTML id it alone carries (leavingNames), and no node that stays may point at one of them (a reference to nothing is
+// what the validator refuses a document over).
+export function releaseReferencesPatch(document: DocumentJson, leaving: ReadonlySet<NodeId>, names: ReadonlySet<string> = leavingNames(document, leaving)): Patch[] {
   const patches: Patch[] = [];
   for (const reference of referencesOf(document)) {
     // a node that is itself leaving goes with its attributes: nothing to release
     if (leaving.has(reference.node.id)) continue;
-    const named = (reference.value.startsWith('#') ? reference.value.slice(1) : reference.value) as NodeId;
-    if (!leaving.has(named)) continue;
+    const named = reference.value.startsWith('#') ? reference.value.slice(1) : reference.value;
+    if (!names.has(named)) continue;
     const at = locate(document, reference.node.id);
     if (at !== null) patches.push({ op: 'remove', path: [...at.path, 'attributes', reference.attribute] });
   }
@@ -73,12 +93,13 @@ export function subtreeIds(node: DocNode): ReadonlySet<NodeId> {
   return new Set([...walk(node)].map((inner) => inner.id as NodeId));
 }
 
-// A node and its subtree with every reference to what is leaving taken away.
+// A node and its subtree with every reference to what is leaving taken away (`leaving`: the names leavingNames gives,
+// the node ids and the HTML ids that go).
 //
 // A patch cannot do this job for a node a command writes back — a re-inserted child, a replaced subtree: the patch
 // would have to run before the write (the old paths) and the write puts the value back. So the rule has two shapes,
 // both here: patches for the nodes that stay where they are, and this value-level one for the nodes that are written.
-export function withoutReferencesTo(node: DocNode, leaving: ReadonlySet<NodeId>): DocNode {
+export function withoutReferencesTo(node: DocNode, leaving: ReadonlySet<string>): DocNode {
   const attributes = Object.fromEntries(Object.entries(node.attributes).filter(([attribute, value]) => !referenceNamesLeaving(attribute, value, leaving)));
   const children = node.children.map((child) => withoutReferencesTo(child, leaving));
   const changed = children.some((child, i) => child !== node.children[i]);

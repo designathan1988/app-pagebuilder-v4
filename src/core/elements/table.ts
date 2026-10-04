@@ -18,6 +18,7 @@ import { locate, type DocNode, type DocumentJson, type Location } from '../docum
 import type { Patch } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { newElement, nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
+import { releaseReferencesPatch, subtreeIds } from '../document/tree.ts';
 
 const TABLE = 'table';
 const HEAD = 'tableHead';
@@ -120,13 +121,17 @@ export const removeColumnCommand = registerHandler('table.removeColumn', ({ stat
   if (refused !== null) return { kind: 'refused', message: refused };
   if (at.row.node.children.length <= 1) return { kind: 'refused', message: message('status.table.lastColumn') };
   const index = at.cell.index;
-  const patches = rowsOf(at.table)
+  const leaving = rowsOf(at.table).filter(({ row }) => index < row.children.length).flatMap(({ row }) => [...subtreeIds(row.children[index] as DocNode)]);
+  // what pointed into the cells that leave goes with them, in the same undo step, as a delete releases it (RF1)
+  const released = releaseReferencesPatch(state.document, new Set(leaving));
+  const removed = rowsOf(at.table)
     .filter(({ row }) => index < row.children.length)
     .map(({ groupIndex, rowIndex }): Patch => ({ op: 'remove', path: [...at.table.path, 'children', groupIndex, 'children', rowIndex, 'children', index] }));
+  const patches = [...released, ...removed];
   // the selection moves to the cell that takes the removed one's place in its row, else the one before it
   const row = at.row.node.children;
   const next = row[index + 1] ?? row[index - 1];
-  return { kind: 'change', patches, selection: next === undefined ? [] : [next.id], message: message('status.table.columnRemoved', { count: patches.length }) };
+  return { kind: 'change', patches, selection: next === undefined ? [] : [next.id], message: message('status.table.columnRemoved', { count: removed.length }) };
 });
 
 export const addRowAfterCommand = registerHandler('table.addRowAfter', ({ state, rules, ids, words }): Outcome<never> => {
@@ -150,7 +155,8 @@ export const removeRowCommand = registerHandler('table.removeRow', ({ state }): 
   const cell = next?.children[Math.min(at.cell.index, next.children.length - 1)];
   return {
     kind: 'change',
-    patches: [{ op: 'remove', path: at.row.path }],
+    // what pointed into the row goes with it, in the same undo step (RF1)
+    patches: [...releaseReferencesPatch(state.document, subtreeIds(at.row.node)), { op: 'remove', path: at.row.path }],
     selection: [cell?.id ?? at.table.node.id],
     message: message('status.table.rowRemoved', { name: at.row.node.name }),
   };

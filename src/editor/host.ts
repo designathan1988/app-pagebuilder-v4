@@ -10,7 +10,8 @@ export type { HandlerContext, Message, Outcome } from '../core/commands/registry
 export type { DispatchResult, Gesture } from '../core/store/store.ts';
 
 // the document: its model, its pages, breakpoints, files, locks and the elements a module makes
-export { locate } from '../core/document/model.ts';
+export { locate, walk } from '../core/document/model.ts';
+export { leavingNames, releaseReferencesPatch, withoutReferencesTo } from '../core/document/tree.ts';
 export type { DocNode, DocumentJson, NodeId, ProjectFile, Styles } from '../core/document/model.ts';
 export { breakpointName, breakpointWords, breakpointsOf } from '../core/document/breakpoints.ts';
 export { pageShown } from '../core/project/pages.ts';

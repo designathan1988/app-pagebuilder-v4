@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82245
+    "lines": 82395
   },
   "features": [
     {
@@ -3331,7 +3331,7 @@
     },
     {
       "path": "src/core/animation/animation.ts",
-      "lines": 345,
+      "lines": 352,
       "commands": [
         "animation.create",
         "animation.rename",
@@ -3478,7 +3478,7 @@
     },
     {
       "path": "src/core/design/classes.ts",
-      "lines": 216,
+      "lines": 229,
       "commands": [
         "classes.create",
         "classes.apply",
@@ -3509,7 +3509,7 @@
     },
     {
       "path": "src/core/design/components.ts",
-      "lines": 446,
+      "lines": 460,
       "commands": [
         "components.create",
         "components.insertInstance",
@@ -3617,7 +3617,7 @@
     },
     {
       "path": "src/core/document/tree.ts",
-      "lines": 93,
+      "lines": 114,
       "commands": [],
       "features": []
     },
@@ -3635,7 +3635,7 @@
     },
     {
       "path": "src/core/elements/attributes.ts",
-      "lines": 289,
+      "lines": 305,
       "commands": [
         "element.setId",
         "element.setClasses",
@@ -3703,7 +3703,7 @@
     },
     {
       "path": "src/core/elements/parts.ts",
-      "lines": 126,
+      "lines": 128,
       "commands": [
         "parts.toggle",
         "parts.add",
@@ -3736,7 +3736,7 @@
     },
     {
       "path": "src/core/elements/table.ts",
-      "lines": 158,
+      "lines": 164,
       "commands": [
         "table.addColumnAfter",
         "table.addColumnEnd",
@@ -3850,7 +3850,7 @@
     },
     {
       "path": "src/core/files/files.ts",
-      "lines": 539,
+      "lines": 565,
       "commands": [
         "files.upload",
         "files.createFolder",
@@ -3878,7 +3878,7 @@
     },
     {
       "path": "src/core/files/references.ts",
-      "lines": 132,
+      "lines": 140,
       "commands": [],
       "features": []
     },
@@ -4002,7 +4002,7 @@
     },
     {
       "path": "src/core/import/apply-html.ts",
-      "lines": 75,
+      "lines": 78,
       "commands": [
         "element.applyHtml"
       ],
@@ -4024,7 +4024,7 @@
     },
     {
       "path": "src/core/import/destinations.ts",
-      "lines": 98,
+      "lines": 97,
       "commands": [],
       "features": []
     },
@@ -4334,7 +4334,7 @@
     },
     {
       "path": "src/core/project/pages.ts",
-      "lines": 211,
+      "lines": 237,
       "commands": [
         "pages.add",
         "pages.rename",
@@ -4579,7 +4579,7 @@
     },
     {
       "path": "src/core/structure/wrap.ts",
-      "lines": 287,
+      "lines": 288,
       "commands": [
         "element.wrapRow",
         "element.wrapColumn",
@@ -5513,7 +5513,7 @@
     },
     {
       "path": "src/editor/host.ts",
-      "lines": 44,
+      "lines": 45,
       "commands": [],
       "features": []
     },
@@ -7011,7 +7011,7 @@
     },
     {
       "path": "src/modules/layout-composer/host/handlers.ts",
-      "lines": 864,
+      "lines": 871,
       "commands": [
         "layout.enter",
         "layout.leave",

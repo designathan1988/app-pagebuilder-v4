@@ -5,6 +5,7 @@
 // font-family that names its family, are written with the new path in the same undo step. Nothing else changes.
 import type { AttributeValue, ComponentDefinition, DocNode, DocumentJson, StyleClass, Styles } from '../document/model.ts';
 import type { Patch } from '../history/transaction.ts';
+import type { ModelRules } from '../document/validate.ts';
 import { cssFamily } from './fonts.ts';
 import { mapInlineLinks } from '../text/inline.ts';
 
@@ -105,6 +106,13 @@ function followNode(node: DocNode, rewrite: PathRewrite, families: FamilyRenames
   const children = node.children.map((child) => followNode(child, rewrite, families, addresses));
   const same = attributes === node.attributes && styles === node.styles && inline === node.inline && children.every((child, i) => child === node.children[i]);
   return same ? node : { ...node, attributes, styles, ...(inline === undefined ? {} : { inline }), children };
+}
+
+// The attributes that hold an address (elements.json: a url, a list of paths, a srcset): the only ones a moved path is
+// written into. An id, an alt or a title that happens to read like the path is the person's text (the audit's RF1: a
+// folder img renamed images took an element's id "img" with it).
+export function addressAttributes(rules: Pick<ModelRules, 'attributeValues'>): ReadonlySet<string> {
+  return new Set([...rules.attributeValues].filter(([, facts]) => facts.valueType === 'url' || facts.valueType === 'path-list' || facts.html === 'srcset').map(([id]) => id));
 }
 
 // The patches that write every reference of the document through `rewrite` (and the renamed font families), one per

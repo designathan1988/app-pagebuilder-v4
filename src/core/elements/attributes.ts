@@ -21,6 +21,7 @@ import { hasIncompatibleMask, inputTypeOf } from './inputs.ts';
 import type { Patch } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { readAddress } from './address.ts';
+import { referencesOf } from './references.ts';
 
 const ID = /^[A-Za-z][A-Za-z0-9_-]*$/;
 
@@ -155,8 +156,23 @@ export const setIdCommand = registerHandler('element.setId', ({ state, rules, wo
   }
   const patch = attributePatch(at, 'id', typed === '' ? undefined : typed);
   const said = message(typed === '' ? 'status.attribute.removed' : 'status.attribute.set', { attribute: labelOf(rules, words as never, 'id'), name: at.node.name, value: typed });
-  return patch === null ? { kind: 'change', message: said } : { kind: 'change', patches: [patch], message: said };
+  return patch === null ? { kind: 'change', message: said } : { kind: 'change', patches: [patch, ...followedReferences(state.document, at.node)], message: said };
 });
+
+// The references that named the element by the HTML id it is leaving (an imported label's for="email", a link's
+// "#contact": references.ts orphanReferences reads them by that id) name it by its node id from now on, the model's own
+// way, so they keep naming it whatever its id becomes (the audit's RF1: a changed id was refused as an orphan).
+function followedReferences(document: DocumentJson, target: DocNode): Patch[] {
+  const old = target.attributes.id;
+  if (typeof old !== 'string' || old === '') return [];
+  if ([...allNodes(document)].some((one) => one.id !== target.id && one.attributes.id === old)) return [];
+  return referencesOf(document).flatMap((reference): Patch[] => {
+    const fragment = reference.value.startsWith('#');
+    if ((fragment ? reference.value.slice(1) : reference.value) !== old) return [];
+    const at = locate(document, reference.node.id);
+    return at === null ? [] : [{ op: 'replace', path: [...at.path, 'attributes', reference.attribute], value: fragment ? `#${target.id}` : target.id }];
+  });
+}
 
 export const setClassesCommand = registerHandler('element.setClasses', ({ state, rules, words }, { classes, target }): Outcome<never> => {
   const at = nodeOf(state, target as NodeId | undefined);

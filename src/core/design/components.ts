@@ -31,6 +31,7 @@ import { placementRefusal } from '../elements/content-model.ts';
 import type { Patch } from '../history/transaction.ts';
 import { deepEqual } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
+import { leavingNames, releaseReferencesPatch, withoutReferencesTo } from '../document/tree.ts';
 import { placement } from '../structure/insert.ts';
 import { nodeMaker, type NodeMaker } from '../structure/node-maker.ts';
 import { copyName } from '../structure/duplicate.ts';
@@ -383,18 +384,31 @@ export const updateFromInstanceCommand = registerHandler('components.updateFromI
     if (mine === undefined && instance !== null) taken.add(element.name);
     return { ...element, children: from.children.map((child) => rebuilt(child, instance)) };
   };
-  const patches: Patch[] = [{ op: 'replace', path: ['components', index, 'tree'], value: definitionTree }];
+  const written: { readonly path: readonly (string | number)[]; readonly before: DocNode; readonly tree: DocNode }[] = [];
   let count = 0;
   const visit = (at: DocNode, atPath: (string | number)[]) => {
     if (at.component === name) {
       const tree = at.id === source.id ? rebuilt(source, null) : rebuilt(source, at);
-      patches.push({ op: 'replace', path: atPath, value: marked({ ...tree, name: at.name }, [], name) });
+      written.push({ path: atPath, before: at, tree: marked({ ...tree, name: at.name }, [], name) });
       if (at.id !== source.id) count += 1;
       return;
     }
     at.children.forEach((child, i) => visit(child, [...atPath, 'children', i]));
   };
   state.document.pages.forEach((page, i) => visit(page.tree, ['pages', i, 'tree']));
+  // what the edited instance no longer holds leaves the other instances, and whatever pointed at it lets go of it in
+  // the same undo step (a link, a label, an interaction, a motion action: the audit's RF1, the update was refused): the
+  // instances written whole carry their own release, every other node its own patch
+  const staying = new Set(written.flatMap((one) => [...walk(one.tree)].map((inner) => inner.id)));
+  const leaving = new Set(written.flatMap((one) => [...walk(one.before)].map((inner) => inner.id as NodeId)).filter((id) => !staying.has(id)));
+  const names = leavingNames(state.document, leaving);
+  const under = (path: readonly (string | number)[]) => written.some((one) => one.path.every((key, i) => path[i] === key));
+  const released = leaving.size === 0 ? [] : releaseReferencesPatch(state.document, leaving, names).filter((patch) => !under(patch.path));
+  const patches: Patch[] = [
+    ...released,
+    { op: 'replace', path: ['components', index, 'tree'], value: definitionTree },
+    ...written.map((one): Patch => ({ op: 'replace', path: one.path, value: leaving.size === 0 ? one.tree : withoutReferencesTo(one.tree, names) })),
+  ];
   return { kind: 'change', patches, message: message('status.components.updated', { name, count }) };
 });
 

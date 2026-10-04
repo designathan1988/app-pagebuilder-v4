@@ -10,7 +10,7 @@ import type { NodeId } from '../../generated/commands.ts';
 import { message, registerHandler, type HandlerContext } from '../commands/registry.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import { locate, walk, type DocNode } from '../document/model.ts';
-import { releaseReferencesPatch, withoutReferencesTo } from '../document/tree.ts';
+import { leavingNames, releaseReferencesPatch, withoutReferencesTo } from '../document/tree.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { nodeMaker } from '../structure/node-maker.ts';
 import { nodesFromMarkup } from './import.ts';
@@ -57,7 +57,10 @@ export const applyHtmlCommand = registerHandler('element.applyHtml', (context, {
   // document is released by its own patch (the plan's T1/T6; the kernel owns both shapes of the rule).
   const kept = new Set([...walk(reconciledNode)].map((inner) => inner.id as NodeId));
   const leaving = new Set([...walk(at.node)].map((inner) => inner.id as NodeId).filter((id) => !kept.has(id)));
-  const written = leaving.size === 0 ? reconciledNode : withoutReferencesTo(reconciledNode, leaving);
+  // an HTML id the written markup still carries keeps what names it by that id (leavingNames reads the document before)
+  const carried = new Set([...walk(reconciledNode)].flatMap((inner) => (typeof inner.attributes.id === 'string' ? [inner.attributes.id] : [])));
+  const names = new Set([...leavingNames(state.document, leaving)].filter((name) => leaving.has(name as NodeId) || !carried.has(name)));
+  const written = leaving.size === 0 ? reconciledNode : withoutReferencesTo(reconciledNode, names);
   const same = JSON.stringify(at.node) === JSON.stringify(written);
   const said = message('status.html.applied', { name: at.node.name });
   if (same) return { kind: 'change' as const, message: said };
@@ -65,7 +68,7 @@ export const applyHtmlCommand = registerHandler('element.applyHtml', (context, {
   const released =
     leaving.size === 0
       ? []
-      : releaseReferencesPatch(state.document, leaving).filter((patch) => {
+      : releaseReferencesPatch(state.document, leaving, names).filter((patch) => {
           // the written subtree carries its own release; these patches cover the references that stay where they are
           const owner = patch.path.slice(0, at.path.length).join('/');
           return owner !== rootPath;

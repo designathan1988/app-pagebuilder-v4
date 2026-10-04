@@ -44,7 +44,9 @@ export const togglePartCommand = registerHandler('parts.toggle', ({ state, rules
   const index = table.node.children.findIndex((child) => child.type === type);
   if (index >= 0) {
     const part = table.node.children[index] as DocNode;
-    return { kind: 'change', patches: [{ op: 'remove', path: [...table.path, 'children', index] }], selection: [table.node.id], message: message('status.table.partRemoved', { part: part.name, table: table.node.name }) };
+    // what pointed into the part goes with it, in the same undo step, as parts.remove and a delete release it (RF1)
+    const released = releaseReferencesPatch(state.document, subtreeIds(part));
+    return { kind: 'change', patches: [...released, { op: 'remove', path: [...table.path, 'children', index] }], selection: [table.node.id], message: message('status.table.partRemoved', { part: part.name, table: table.node.name }) };
   }
   const make = nodeMaker(state.document, rules, ids, words);
   const part = type === CAPTION ? newElement(make, CAPTION) : newElement(make, type, (m) => [newRow(m, type, columns(table.node))]);

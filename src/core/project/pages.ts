@@ -21,7 +21,9 @@ import { refreshCopiedIdentities } from '../document/clone.ts';
 import type { Patch } from '../history/transaction.ts';
 import { walk, type NodeId } from '../document/model.ts';
 import { releaseReferencesPatch } from '../document/tree.ts';
-import { followPaths, movedPath } from '../files/references.ts';
+import { addressAttributes } from '../files/references.ts';
+import { pathMovePatches, pathTaken } from '../files/files.ts';
+import type { ModelRules } from '../document/validate.ts';
 import { slug } from '../text/fold.ts';
 import { registerReferenceKind } from '../store/references.ts';
 import { argumentRefused } from '../store/args.ts';
@@ -96,7 +98,7 @@ export function addPageCommand<Ui extends WithPage>() {
   });
 }
 
-export const renamePageCommand = registerHandler('pages.rename', ({ state }, { page, name }) => {
+export const renamePageCommand = registerHandler('pages.rename', ({ state, rules }, { page, name }) => {
   const document = state.document;
   const at = pageIndex(document.pages, page);
   const held = document.pages[at];
@@ -105,17 +107,21 @@ export const renamePageCommand = registerHandler('pages.rename', ({ state }, { p
   if (typed === '') return { kind: 'refused' as const, message: argumentRefused('name') };
   if (held.name === typed) return { kind: 'change' as const, message: message('status.pages.renamed', { name: typed }) };
   if (document.pages.some((p, i) => i !== at && p.name === typed)) return { kind: 'refused' as const, message: message('status.pages.nameTaken', { name: typed }) };
-  const wanted = pageFile(typed);
+  // the file follows the name inside the folder it stands in (blog/post.html renamed is blog/<name>.html, never a page
+  // of the root: the audit's RF1); a folder's index page (about/index.html) is its folder's address and keeps its file
+  const folder = held.file.includes('/') ? held.file.slice(0, held.file.lastIndexOf('/') + 1) : '';
+  const wanted = `${folder}${pageFile(typed)}`;
   // the home page keeps its file (index.html is what the project opens on); another page's file follows its new name
   // while nothing else holds it, so a file a link points at is never taken silently
-  const free = held.file !== HOME && wanted !== HOME && !document.pages.some((p, i) => i !== at && p.file === wanted);
+  const free = held.file !== HOME && !held.file.endsWith(`/${HOME}`) && wanted !== HOME && !pathTaken(document, wanted);
   const patches: Patch[] = [{ op: 'replace', path: ['pages', at, 'name'], value: typed }];
   // the page's root takes its new name too (the journey "site": the page Contato's root read "Page 3" in the Layers,
   // the breadcrumb and the status bar), unique among the pages' roots
   const root = rootName(document.pages.filter((_, i) => i !== at), typed);
   if (held.tree.name !== root) patches.push({ op: 'replace', path: ['pages', at, 'tree', 'name'], value: root });
-  // the links to the page follow its file (references.ts): a link written "about.html" becomes "sobre.html"
-  if (free && held.file !== wanted) patches.push({ op: 'replace', path: ['pages', at, 'file'], value: wanted }, ...followPaths(document, movedPath(held.file, wanted)));
+  // the file and every user of it follow (files.ts pathMovePatches: a link written "about.html" becomes "sobre.html", a
+  // captured page's stylesheet moves with it)
+  if (free && held.file !== wanted) patches.push(...pathMovePatches(document, rules, held.file, wanted));
   return { kind: 'change' as const, patches, message: message('status.pages.renamed', { name: typed }) };
 });
 
@@ -158,7 +164,7 @@ export function duplicatePageCommandFor<Ui extends WithPage>() {
 // the command for a caller that holds no editor state (the core's tests)
 export const duplicatePageCommand = duplicatePageCommandFor<never>();
 
-export const deletePageCommand = registerHandler('pages.delete', ({ state, confirmed }, { page }) => {
+export const deletePageCommand = registerHandler('pages.delete', ({ state, rules, confirmed }, { page }) => {
   const document = state.document;
   const at = pageIndex(document.pages, page);
   const held = document.pages[at];
@@ -170,10 +176,30 @@ export const deletePageCommand = registerHandler('pages.delete', ({ state, confi
   // interaction that acts on one (element delete's rule, tree.ts)
   const leaving = new Set([...walk(held.tree)].map((node) => node.id as NodeId));
   const released = releaseReferencesPatch(document, leaving);
+  // and a link of another page that leads to its file lets go of it, as a link to an element that leaves does: no
+  // exported link leads to a page that is no more (the audit's RF1)
+  const unlinked = pageLinksReleased(document, held.file, rules);
   // the selection goes with the page: a node of a page that is not open is not on the canvas (the store reads the
   // open page through openedPage, which falls back to the first while ui.page names a page that is gone)
-  return { kind: 'change' as const, patches: [...released, { op: 'remove', path: ['pages', at] }], selection: [], message: message('status.pages.deleted', { name: held.name }) };
+  return { kind: 'change' as const, patches: [...released, ...unlinked, { op: 'remove', path: ['pages', at] }], selection: [], message: message('status.pages.deleted', { name: held.name }) };
 });
+
+// The patches that take away every address that leads to a page's file (an attribute's, with or without its #fragment
+// or ?query), from the nodes of the other pages and of the components: what a page delete releases.
+function pageLinksReleased(document: DocumentJson, file: string, rules: ModelRules): Patch[] {
+  const addresses = addressAttributes(rules);
+  const leads = (value: unknown): boolean => typeof value === 'string' && value.replace(/[#?].*$/, '') === file;
+  const patches: Patch[] = [];
+  const visit = (node: DocNode, path: readonly (string | number)[]): void => {
+    for (const [name, value] of Object.entries(node.attributes)) if (addresses.has(name) && leads(value)) patches.push({ op: 'remove', path: [...path, 'attributes', name] });
+    node.children.forEach((child, i) => visit(child, [...path, 'children', i]));
+  };
+  document.pages.forEach((page, i) => {
+    if (page.file !== file) visit(page.tree, ['pages', i, 'tree']);
+  });
+  (document.components ?? []).forEach((component, i) => visit(component.tree, ['components', i, 'tree']));
+  return patches;
+}
 
 // the editor state's part pages.switch owns: the page the editor shows (the editor's EditorUi is wider)
 export interface WithPage {

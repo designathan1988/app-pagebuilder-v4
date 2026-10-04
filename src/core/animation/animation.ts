@@ -254,7 +254,14 @@ export const deleteAnimationCommand = registerHandler('animation.delete', (conte
   const locked = lockedRefusal(context, found.node);
   if (locked !== null) return { kind: 'refused', message: locked };
   const next = animationsOf(found.node).filter((each) => each.name !== animation);
-  return { kind: 'change', patches: writeAnimations(found, next), message: message('status.animation.deleted', { name: animation }) };
+  // an interaction that played it goes with it, as one that acts on a deleted element does: it would play nothing
+  // (an element plays its own animations: core/events/interactions.ts; the audit's RF1)
+  const playing = (found.node.interactions ?? []).filter((each) => !(each.action === 'play-animation' && each.animation === animation));
+  const without = withAnimations(found.node, next);
+  const { interactions: _held, ...rest } = without;
+  void _held;
+  const written = playing.length === (found.node.interactions ?? []).length ? without : playing.length === 0 ? rest : { ...without, interactions: playing };
+  return { kind: 'change', patches: [{ op: 'replace', path: [...found.path], value: written }], message: message('status.animation.deleted', { name: animation }) };
 });
 
 export const addKeyframeCommand = registerHandler('animation.addKeyframe', (context, { animation, offset }): Outcome<never> => {

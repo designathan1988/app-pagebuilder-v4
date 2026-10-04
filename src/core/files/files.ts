@@ -18,7 +18,8 @@ import type { Patch } from '../history/transaction.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { filesOf } from '../document/model.ts';
 import { familyOf, fontFiles } from './fonts.ts';
-import { followPaths, movedPath } from './references.ts';
+import { addressAttributes, followCssUrls, followPaths, movedPath } from './references.ts';
+import { capturedPageStylePath } from '../import/capture-styles.ts';
 import { argumentRefused } from '../store/args.ts';
 import { GENERATED_PATHS } from '../export/paths.ts';
 import { browserPorts } from '../ports/browser.ts';
@@ -326,14 +327,35 @@ export function linkedBy(document: DocumentJson, path: string): readonly Page[] 
 // so both halves of the tree move together.
 function movedPaths(document: DocumentJson, from: string, to: string): { readonly files: readonly ProjectFile[]; readonly folders: readonly string[]; readonly pages: readonly { readonly index: number; readonly file: string }[] } {
   const rewritten = (path: string): string => (path === from ? to : path.startsWith(`${from}/`) ? `${to}${path.slice(from.length)}` : path);
+  // a captured page's residual stylesheet stands beside its file, named after it (capture-styles.ts): it moves with the
+  // page, its own addresses written again from where it now stands (the audit's RF1: the page lost its styles)
+  const sheets = new Map<string, string>();
+  for (const page of document.pages) {
+    const moved = rewritten(page.file);
+    if (page.capture !== undefined && moved !== page.file) sheets.set(capturedPageStylePath({ file: page.file }), capturedPageStylePath({ file: moved }));
+  }
   return {
     files: filesOf(document).map((file) => {
+      const sheet = sheets.get(file.path);
+      if (sheet !== undefined) return capturedSheetMoved(file, sheet, rewritten);
       const path = rewritten(file.path);
       return path === file.path ? file : { ...file, path, type: file.type === '' ? typeOfName(path) : file.type };
     }),
     folders: (document.folders ?? []).map(rewritten),
     pages: document.pages.map((page, index) => ({ index, file: rewritten(page.file) })).filter((one) => one.file !== document.pages[one.index]?.file),
   };
+}
+
+// A captured page's residual stylesheet at its new place: every relative url() of it resolved from where it stood, that
+// path moved as the tree's paths move, and written again relative to where it stands now.
+function capturedSheetMoved(file: ProjectFile, to: string, rewritten: (path: string) => string): ProjectFile {
+  const text = new TextDecoder().decode(fileBytes(file));
+  const moved = followCssUrls(text, (address) => {
+    // an address from the site's root ("/img/a.png") names the same place wherever the sheet stands
+    const path = address.startsWith('/') ? null : resolveHref(file.path, address);
+    return path === null ? address : relativePath(to, rewritten(path));
+  });
+  return { ...file, path: to, bytes: base64Of(moved) };
 }
 
 // whether moving or renaming `from` to `to` is allowed: every path it gives must be free, nothing generated may be
@@ -369,7 +391,13 @@ function followMove(document: DocumentJson, rules: ModelRules, from: string, to:
     if (was !== now) names.set(was, now);
   }
   const properties = new Set([...rules.propertyFacts].filter(([, facts]) => facts.codec === FAMILY_LIST_CODEC).map(([property]) => property));
-  return followPaths(document, rewrite, { names, properties });
+  return followPaths(document, rewrite, { names, properties }, addressAttributes(rules));
+}
+
+// The patches that move a path of the tree (a file, a folder, a page's file) to another and take every user of it with
+// it: one owner for files.rename, files.move and a page renamed (pages.rename).
+export function pathMovePatches(document: DocumentJson, rules: ModelRules, from: string, to: string): Patch[] {
+  return [...patchesForMoves(document, movedPaths(document, from, to)), ...followMove(document, rules, from, to)];
 }
 
 // the codec of a property whose value lists font families (properties.json)
@@ -425,8 +453,7 @@ export const renameFileCommand = registerHandler('files.rename', ({ state, rules
   const to = pathIn(folderOf(from), typed);
   const refusal = renameRefusal(state.document, from, to);
   if (refusal !== null) return { kind: 'refused' as const, message: refusal };
-  const moves = movedPaths(state.document, from, to);
-  return { kind: 'change' as const, patches: [...patchesForMoves(state.document, moves), ...followMove(state.document, rules, from, to)], message: message('status.files.renamed', { name: typed }) };
+  return { kind: 'change' as const, patches: pathMovePatches(state.document, rules, from, to), message: message('status.files.renamed', { name: typed }) };
 });
 
 // files.move: the file, folder or page file at `path` moves under `to` (a folder), keeping its name. One undo step.
@@ -438,8 +465,7 @@ export const moveFileCommand = registerHandler('files.move', ({ state, rules }, 
   const wanted = pathIn(folder, nameOfPath(from));
   const refusal = renameRefusal(state.document, from, wanted);
   if (refusal !== null) return { kind: 'refused' as const, message: refusal };
-  const moves = movedPaths(state.document, from, wanted);
-  const patches = [...patchesForMoves(state.document, moves), ...followMove(state.document, rules, from, wanted)];
+  const patches = pathMovePatches(state.document, rules, from, wanted);
   // a move that changes nothing (the row is already in that folder, which is what opening the folder list does)
   // says nothing
   if (patches.length === 0) return { kind: 'change' as const };
