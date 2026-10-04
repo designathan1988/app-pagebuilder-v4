@@ -9096,6 +9096,10 @@ instance (`status.locked.edit`).
 - A visual-only `<span>` with classes or other attributes remains a children-bearing editable wrapper. Because the
   model's `span` is text-only, the wrapper uses the Div element's tag while retaining its author classes and attributes;
   its images and responsive class rules remain visible in the canvas and export.
+- On a captured page, an SVG or image's HTML size hints live in the residual sheet's first `__builder_base` layer,
+  keyed to that element. They remain in force at widths where the site's CSS sets no dimension; an author rule for
+  that element, including one inside a width query, outranks the hints. The exported project CSS does not write those
+  hints again after the site's stylesheet. A page that is not a capture still stores its size hints in the model.
 - A runtime style on the page's `<html>` is kept as a last sheet when the capture reads it, since the project model has
   no root style attribute. A declaration of an author class still competes in the imported cascade (including its
   `!important` priority); if it wins, a lower-priority rule is not copied onto the element as its own style.

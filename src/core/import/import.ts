@@ -312,6 +312,7 @@ interface Builder {
   readonly rules: ModelRules;
   readonly context: HandlerContext<never>;
   readonly markup: string;
+  readonly captured: boolean;
   readonly picked: readonly PickedFile[];
   readonly file: string;
   readonly pageFile: string;
@@ -321,8 +322,7 @@ interface Builder {
   readonly held: ProjectFile[];
   // the declarations a style attribute holds, by node id, and the line each node was written on
   readonly inline: Map<string, readonly (readonly [string, StoredValue])[]>;
-  // the declarations an <svg>'s width and height attributes give it, by node id: presentation attributes, below every
-  // rule of the sheets (applySvgSize)
+  // the declarations SVG and image size attributes give them, by node id: presentation hints below author CSS
   readonly presentational: Map<string, readonly (readonly [string, StoredValue])[]>;
   readonly lines: Map<string, number>;
   readonly nameBlocks: Map<string, Set<string>>;
@@ -656,10 +656,12 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
     else if (builder.mode === 'import') builder.report.attributes.push(line);
     else builder.dropped.attributes += 1;
   }
+  const captureHint = builder.captured && (svgSize.declarations !== '' || imageSize.size > 0);
+  const keptCustom = captureHint ? { ...customAttributes, 'data-capture-size-hint': encodeURIComponent(start.id) } : customAttributes;
   const made: DocNode = {
     ...start,
     attributes: attributes as DocNode['attributes'],
-    ...(Object.keys(customAttributes).length === 0 ? {} : { customAttributes }),
+    ...(Object.keys(keptCustom).length === 0 ? {} : { customAttributes: keptCustom }),
     ...(hiddenFlag ? { hidden: true as const } : {}),
   };
   builder.lines.set(made.id, line);
@@ -1124,8 +1126,9 @@ function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: 
       const held = base.own.get(property);
       if (held === undefined || higher(rank, held.rank)) base.own.set(property, { value, rank });
     }
-    // an <svg>'s width and height attributes: below every rule of the sheets, which all rank above them
-    for (const [property, value] of builder.presentational.get(node.id) ?? []) if (!base.own.has(property) && !deferred.has(property)) base.own.set(property, { value, rank: [0, 0, 0, 0, 0, 0] });
+    // Non-captured HTML keeps presentation hints in the model. Captures write them into the residual's lowest layer,
+    // where a conditional author rule can override them without erasing the base size at other widths.
+    if (!builder.captured) for (const [property, value] of builder.presentational.get(node.id) ?? []) if (!base.own.has(property)) base.own.set(property, { value, rank: [0, 0, 0, 0, 0, 0] });
     const own = new Map<string, Layer>();
     for (const [key, layer] of layers) if (layer.own.size > 0) own.set(key, layer);
     if (own.size > 0) winners.set(node.id, own);
@@ -1462,6 +1465,7 @@ function newBuilder(make: NodeMaker, context: HandlerContext<never>, markup: str
     rules: make.rules,
     context,
     markup,
+    captured: mode === 'import' && isCapturedPage(markup),
     picked,
     file,
     pageFile: baseName(file),
@@ -1648,7 +1652,7 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   const definitions = new Map<string, Styles>();
   const captured = markup.some((file) => isCapturedPage(textOfFile(file)));
   const deferred = captured ? capturedWidthProperties(sources, context as HandlerContext<never>, rules) : new Set<string>();
-  for (const one of built) applyStyles(one.page.tree, one.builder, sources, authors, definitions, isCapturedPage(one.builder.markup) ? deferred : new Set());
+  for (const one of built) applyStyles(one.page.tree, one.builder, sources, authors, definitions, one.builder.captured ? deferred : new Set());
   const tokens = rootTokens(context, sources, report, markup.some((file) => isCapturedPage(textOfFile(file))));
   report.tokens.push(...tokens.map((token) => token.name));
   report.unusedClasses.push(...unusedClasses(pages, authors).filter((name) => definitions.has(name)));
@@ -1692,10 +1696,20 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   }
   // a captured page keeps what the model does not hold of its sheets, in its residual stylesheet (spec capture-url)
   for (const one of built) {
-    const source = markup.find((file) => file.name === one.builder.file);
-    if (source === undefined || !isCapturedPage(textOfFile(source))) continue;
+    if (!one.builder.captured) continue;
     const at = capturedPageStylePath(one.page);
-    const css = one.builder.sheets.map((sheet) => residualCss(sheet.text, sheet.file, at, context as HandlerContext<never>, rules, deferred)).filter((part) => part !== '').join('\n');
+    const fromSheets = one.builder.sheets.map((sheet) => residualCss(sheet.text, sheet.file, at, context as HandlerContext<never>, rules, deferred));
+    const hints = [...walkNodes(one.page.tree)].flatMap((node) => {
+      const key = node.customAttributes?.['data-capture-size-hint'];
+      const declarations = one.builder.presentational.get(node.id);
+      if (key === undefined || declarations === undefined) return [];
+      const body = declarations.map(([property, value]) => {
+        if (typeof value !== 'string') throw new Error(`Presentation hint ${property} is not CSS text`);
+        return `${property}:${value};`;
+      }).join('');
+      return [`[data-capture-size-hint="${key}"]{${body}}`];
+    });
+    const css = [...fromSheets, ...(hints.length === 0 ? [] : [`@layer ${CAPTURE_BASE_LAYER}{${hints.join('')}}`])].filter((part) => part !== '').join('\n');
     if (css === '') continue;
     const index = held.findIndex((file) => file.path === at);
     const record: ProjectFile = { path: at, type: 'text/css', bytes: base64(new TextEncoder().encode(css)) };
