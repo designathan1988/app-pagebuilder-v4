@@ -65,6 +65,10 @@ describe('element.setLink (src/core/elements/link.ts)', () => {
     expect(run(docWith(undefined), { href: 'https://x.co' }, ['Card', 'Intro']).refused?.key).toBe('status.needsSingleSelection');
   });
 
+  it('refuses with words, never throws, when no address, page, section or tab choice is given (the invariant probe, seed 55)', () => {
+    expect(run(docWith(undefined), { target: 'Card' }).refused).toEqual({ key: 'status.args.invalid', params: { argument: 'href' } });
+  });
+
   it('replaces a link, and records nothing for the link it already has', () => {
     expect(run(docWith('https://a.co'), { target: 'Card', href: 'tel:+5511999999999' }).attributes).toEqual({ href: 'tel:+5511999999999' });
     const same = run(docWith('https://a.co'), { target: 'Card', href: 'https://a.co' });

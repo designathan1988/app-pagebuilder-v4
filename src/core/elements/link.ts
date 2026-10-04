@@ -19,6 +19,7 @@ import type { Patch } from '../history/transaction.ts';
 import { freshId } from './inputs.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { readAddress } from './address.ts';
+import { argumentRefused } from '../store/args.ts';
 
 // the attribute that holds a link (elements.json: its command is element.setLink, its value an address)
 const LINK = 'href';
@@ -71,7 +72,8 @@ export const setLinkCommand = registerHandler('element.setLink', ({ state, rules
     if (stored !== written) patches.push({ op: stored === undefined ? 'add' : 'replace', path, value: written });
     return { kind: 'change', patches, message: message('status.link.set', { name: found.node.name, href: shown }) };
   }
-  if (typeof href !== 'string') throw new Error('element.setLink: the address is not a string');
+  // a door hands an address, a page, a section or the new-tab choice; a call with none is refused with words
+  if (typeof href !== 'string') return { kind: 'refused', message: argumentRefused('href') };
   const typed = href.trim();
   if (typed === '') {
     const removed = message('status.link.removed', { name: found.node.name });
