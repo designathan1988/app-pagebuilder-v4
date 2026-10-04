@@ -18,7 +18,7 @@ const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = 
 const HERO_STYLES = { desktop: { base: { 'padding-top': '56px' } } } as DocNode['styles'];
 // Page > Hero (section, styled) > Title (h1), Intro (p), Actions (div); Page > Terms (dl) > Group (div) > Word (dt)
 const document = (hero: Partial<DocNode> = {}): DocumentJson => ({
-  version: 1,
+  version: 2,
   pages: [
     {
       id: 'p',
@@ -125,7 +125,7 @@ describe('element.setTag', () => {
 
   it('refuses a tag that makes the element interactive inside an element that excludes interactive content', () => {
     const inLinkBlock: DocumentJson = {
-      version: 1,
+      version: 2,
       pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: [node('Card', 'linkBlock', 'a', { children: [node('Go', 'link', 'a', { text: 'Go' })] })] }) }],
     };
     expect(run(inLinkBlock, 'Go', 'button')).toEqual(refusal('status.refused.interactiveInside', { parent: 'Card' }));

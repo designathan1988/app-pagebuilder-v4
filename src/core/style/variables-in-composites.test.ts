@@ -25,7 +25,7 @@ const TOKENS = [
   { name: 'pair', kind: 'size', value: '10px 20px' },
 ];
 const doc = (): DocumentJson => ({
-  version: 1,
+  version: 2,
   tokens: TOKENS,
   classes: [{ name: 'card', styles: {} }],
   pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: [node('Card', 'div', 'div', { classes: ['card'] })] }) }],

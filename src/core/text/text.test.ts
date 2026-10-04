@@ -16,7 +16,7 @@ import { deepFreeze } from '../store/store.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const DOC: DocumentJson = {
-  version: 1,
+  version: 2,
   pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: [node('Hero', 'section', 'section', { children: [node('Intro', 'paragraph', 'p', { text: 'Old' })] })] }) }],
 };
 const context: HandlerContext<never> = {

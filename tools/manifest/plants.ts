@@ -2,6 +2,7 @@
 // The unit test proves that every rule of manifest:check fails on its plant, and only on that rule;
 // `npm run manifest:check -- --plant <id>` shows the raw failure.
 import type { ManifestInput, RuleId } from '../../src/manifest/check.ts';
+import { DOCUMENT_VERSION } from '../../src/core/document/model.ts';
 
 type Json = Record<string, unknown>;
 interface MutableInput {
@@ -113,7 +114,7 @@ const leaf = (id: string, type: string, name: string, tag: string, text: string 
 
 function plantFixture(m: MutableInput): Json {
   const tree = leaf('n1', 'page', 'Page', 'body', null, [leaf('n2', 'section', 'Section', 'section', null, [leaf('n3', 'heading', 'Heading', 'h2', 'Title'), leaf('n4', 'paragraph', 'Paragraph', 'p', 'Body')])]);
-  const fixture = { version: 1, pages: [{ id: 'p1', name: 'Home', file: 'index.html', tree }] };
+  const fixture = { version: DOCUMENT_VERSION, pages: [{ id: 'p1', name: 'Home', file: 'index.html', tree }] };
   m.files[fixtureFile] = fixture;
   return fixture;
 }

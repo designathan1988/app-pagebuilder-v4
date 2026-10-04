@@ -340,7 +340,11 @@ export function pageLines(document: DocumentJson, pageIndex: number, manifestRul
   // a page that uses interactions links the script (spec export-events-js); one that does not, does not
   const usesInteractions = pageNeedsScript(page.tree);
   const capturedStyle = fileAt(document, capturedPageStylePath(page));
-  if (capturedStyle !== null) pageAttributes.set('data-builder-capture', '');
+  if (capturedStyle !== null) {
+    pageAttributes.set('data-builder-capture', '');
+    const rootClasses = pageAttributes.get('class');
+    if (rootClasses !== undefined && rootClasses !== '') pageAttributes.set('data-capture-class', rootClasses);
+  }
   const head: CodeLine[] = [
     '<!DOCTYPE html>',
     `<html${attributesHtml(pageAttributes)}>`,

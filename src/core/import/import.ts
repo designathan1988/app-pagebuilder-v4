@@ -1525,10 +1525,12 @@ function pageFrom(file: PickedFile, builder: Builder): Page {
   const settings: [string, string][] = [];
   const lang = (parsed.htmlAttributes.get('lang') ?? '').trim();
   const dir = (parsed.htmlAttributes.get('dir') ?? '').trim().toLowerCase();
+  const htmlClasses = (parsed.htmlAttributes.get('class') ?? '').trim();
   // a page's language that is the project's own is no setting of the page (the export writes the project's on every
   // page: re-importing it keeps the page as it was; spec export-clean)
   if (lang !== '' && lang !== (builder.context.state.document.language ?? 'en')) settings.push(['pageLanguage', lang]);
   if (['ltr', 'rtl', 'auto'].includes(dir)) settings.push(['pageDirection', dir]);
+  if (htmlClasses !== '') settings.push(['pageHtmlClasses', htmlClasses]);
   for (const node of parsed.head) {
     if (node.tag === 'script') {
       keepScript(node, builder);

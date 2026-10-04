@@ -140,6 +140,39 @@ test('picture sources keep the selected artwork in the exported desktop and phon
   await exported.close();
 });
 
+test('the captured html root class keeps its inherited font in canvas and export', runs('project.captureUrl#capture-url-run', 'project.export#menu-file'), async ({ page, context }) => {
+  test.setTimeout(120_000);
+  await openEditor(page);
+  await runDoor(page, 'workspace.openDialog#menu-file-capture-url');
+  const dialog = page.locator('[data-region="capture-url-dialog"]');
+  await dialog.locator('input[name="url"]').fill(`127.0.0.1:${SITE_PORT}/root-classes.html`);
+  await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
+  const destination = page.locator('[data-door="project.importHtml#destination-page"]');
+  await expect(destination).toBeVisible({ timeout: 60_000 });
+  await destination.click();
+  const root = page.frameLocator('.frame__page').locator('html');
+  await expect.poll(() => root.evaluate((element) => getComputedStyle(element).fontFamily)).toContain('Courier New');
+  expect(((await read(page)).pages[0]?.tree as { attributes: Record<string, unknown> }).attributes.pageHtmlClasses).toBe('font-brand');
+  const downloading = page.waitForEvent('download');
+  await runDoor(page, 'project.export#menu-file');
+  const files = unzip(fs.readFileSync(await (await downloading).path()));
+  const exported = await context.newPage();
+  await exported.route('http://made.capture.test/**', route => {
+    const name = new URL(route.request().url()).pathname.slice(1);
+    const bytes = files.get(name);
+    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType: name.endsWith('.css') ? 'text/css' : 'text/html', body: bytes });
+  });
+  for (const width of [1440, 390]) {
+    await exported.setViewportSize({ width, height: 900 });
+    await exported.goto('http://made.capture.test/root-classes.html');
+    const state = await exported.locator('html').evaluate((element) => ({ classes: element.className, font: getComputedStyle(element).fontFamily, bodyClasses: document.body.className }));
+    expect(state.classes, `${width}px html classes`).toContain('font-brand');
+    expect(state.font, `${width}px inherited root font`).toContain('Courier New');
+    expect(state.bodyClasses, `${width}px body keeps only its own classes`).not.toContain('font-brand');
+  }
+  await exported.close();
+});
+
 test('two pages of the site are captured, the link between them written from one file to the other', runs('project.captureUrl#capture-url-run'), async ({ page }) => {
   test.setTimeout(120_000);
   await openEditor(page);

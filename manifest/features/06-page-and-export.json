@@ -23,6 +23,7 @@
         "expected": [
           "The Page root is selected and the inspector shows page settings above the page styles.",
           "Title, language and direction are stored in the page settings of the document JSON; the iframe html element gets lang and dir.",
+          "The HTML root class setting remains separate from body classes, is editable and undoable, and reaches canvas and export.",
           "Page background, colour and font are stored on the Page root styles and computed in the iframe."
         ]
       },
@@ -239,6 +240,86 @@
                   "params": {
                     "setting": "Page language",
                     "value": "pt-BR"
+                  }
+                }
+              ]
+            },
+            "editor": null,
+            "persistence": {
+              "reload": "immediate",
+              "document": "same",
+              "preferences": null,
+              "selection": null
+            },
+            "export": null
+          },
+          "refusals": []
+        },
+        {
+          "id": "the-html-root-class-is-editable-and-kept",
+          "setup": {
+            "fixture": "aurora",
+            "selection": [
+              "/Page"
+            ],
+            "context": "global",
+            "breakpoint": "desktop",
+            "state": "base",
+            "locale": "en",
+            "viewport": "desktop-1440",
+            "zoom": "fit"
+          },
+          "steps": [
+            {
+              "door": "page.openProperties#inspector-page-properties-button",
+              "args": {},
+              "target": null,
+              "drop": null,
+              "action": false,
+              "hold": false,
+              "type": null
+            },
+            {
+              "door": "page.setSetting#inspector-page-html-classes",
+              "args": {
+                "setting": "pageHtmlClasses",
+                "value": "font-brand"
+              },
+              "target": null,
+              "drop": null,
+              "action": true,
+              "hold": false,
+              "type": "font-brand\n"
+            }
+          ],
+          "doors": [
+            "page.setSetting#inspector-page-html-classes"
+          ],
+          "expect": {
+            "document": [
+              {
+                "op": "set",
+                "path": "/Page/@attributes/pageHtmlClasses",
+                "value": "font-brand"
+              }
+            ],
+            "selection": [
+              "/Page"
+            ],
+            "history": {
+              "undoSteps": 1,
+              "undoRestores": true,
+              "redoRestores": true
+            },
+            "render": {
+              "computed": [],
+              "geometry": [],
+              "feedback": [
+                {
+                  "key": "status.page.settingSet",
+                  "params": {
+                    "setting": "HTML root classes",
+                    "value": "font-brand"
                   }
                 }
               ]

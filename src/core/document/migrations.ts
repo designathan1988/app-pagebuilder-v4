@@ -7,8 +7,8 @@
 // never guessed at. A version the chain has no step for is refused too, so a hole in the chain is a refusal with a
 // reason instead of a document half-read.
 //
-// The chain ships empty: the format has not changed since version 1. The first real change to the document's shape
-// adds its step here (from n to n+1) and the version constant moves with it, in the same commit.
+// Version 2 gives captured pages an HTML-root class setting. Older pages have no such setting and keep their
+// existing body classes, so migration changes only their format version and preserves their appearance.
 import { DOCUMENT_VERSION, type DocumentJson } from './model.ts';
 
 export interface Migration {
@@ -19,8 +19,10 @@ export interface Migration {
   readonly migrate: (document: Record<string, unknown>) => Record<string, unknown>;
 }
 
-// The steps this app knows, in order. None yet: version 1 is the first format.
-export const MIGRATIONS: readonly Migration[] = [];
+// The steps this app knows, in order.
+export const MIGRATIONS: readonly Migration[] = [
+  { from: 1, to: 2, migrate: (document) => ({ ...document, version: 2 }) },
+];
 
 export type MigrationResult =
   | { readonly ok: true; readonly document: unknown }

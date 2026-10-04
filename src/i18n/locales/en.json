@@ -81,6 +81,7 @@
   "attribute.pageDescription.label": "Description",
   "attribute.pageDirection.label": "Text direction",
   "attribute.pageFavicon.label": "Favicon",
+  "attribute.pageHtmlClasses.label": "HTML root classes",
   "attribute.pageLanguage.label": "Page language",
   "attribute.pageOgImage.label": "Sharing image",
   "attribute.pageOgTitle.label": "Sharing title",

@@ -1985,6 +1985,18 @@
       "global": true
     },
     {
+      "id": "pageHtmlClasses",
+      "html": "class",
+      "labelKey": "attribute.pageHtmlClasses.label",
+      "valueType": "text",
+      "keywords": [],
+      "elements": [
+        "page"
+      ],
+      "command": "page.setSetting",
+      "global": true
+    },
+    {
       "id": "pageDescription",
       "html": null,
       "labelKey": "attribute.pageDescription.label",
@@ -2258,7 +2270,8 @@
         "buttonType",
         "pageTitle",
         "pageLanguage",
-        "pageDirection"
+        "pageDirection",
+        "pageHtmlClasses"
       ]
     },
     {

@@ -181,6 +181,32 @@
           "args": {}
         },
         {
+          "id": "inspector-page-html-classes",
+          "kind": "inspector-field",
+          "drawnAs": "field",
+          "feature": "page-properties",
+          "property": null,
+          "composite": null,
+          "recipe": null,
+          "attribute": "pageHtmlClasses",
+          "control": "field",
+          "labelKey": "command.setPageSetting",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": {
+            "region": "inspector-settings",
+            "order": 46
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {}
+        },
+        {
           "id": "inspector-page-description",
           "kind": "inspector-field",
           "drawnAs": "field",

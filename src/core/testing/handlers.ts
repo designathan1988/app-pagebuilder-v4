@@ -4,7 +4,7 @@
 import type { NodeId } from '../../generated/commands.ts';
 import { manifest } from '../../manifest/runtime.ts';
 import type { HandlerContext, Outcome } from '../commands/registry.ts';
-import type { DocNode, DocumentJson } from '../document/model.ts';
+import { DOCUMENT_VERSION, type DocNode, type DocumentJson } from '../document/model.ts';
 import { rulesFromManifest, validateDocument } from '../document/validate.ts';
 import { EMPTY_HISTORY } from '../history/history.ts';
 import { applyPatches } from '../history/transaction.ts';
@@ -31,7 +31,7 @@ export const node = (id: string, type: string, tag: string, fields: Partial<DocN
 
 // a one-page (or more) document, frozen as the store keeps it
 export function documentOf(fields: Partial<DocumentJson> & { readonly pages: DocumentJson['pages'] }): DocumentJson {
-  return deepFreeze({ version: 1, ...fields } as DocumentJson);
+  return deepFreeze({ version: DOCUMENT_VERSION, ...fields } as DocumentJson);
 }
 
 interface Handler {

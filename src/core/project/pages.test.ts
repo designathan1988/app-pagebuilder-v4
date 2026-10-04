@@ -18,7 +18,7 @@ const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = 
 
 describe('pages.duplicate', () => {
   it('refreshes HTML ids and references in the copied page', () => {
-    const original: DocumentJson = { version: 1, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', {
+    const original: DocumentJson = { version: 2, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', {
       children: [node('Control', 'input', 'input', { attributes: { id: 'control' } }), node('Label', 'label', 'label', { attributes: { labelFor: 'Control' } })],
     }) }] };
     const rules = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
@@ -38,7 +38,7 @@ describe('pages.duplicate', () => {
   // the audit's AUD-27: two copies of a page lined up newest first (Home, Unidade Praia, Unidade Centro)
   it('puts each copy after the copies made before it, in the order they were made', () => {
     const rules = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
-    let document: DocumentJson = { version: 1, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body') }, { id: 'q', name: 'About', file: 'about.html', tree: node('About page', 'page', 'body') }] };
+    let document: DocumentJson = { version: 2, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body') }, { id: 'q', name: 'About', file: 'about.html', tree: node('About page', 'page', 'body') }] };
     const ids = sequentialIds('new');
     for (let copy = 0; copy < 2; copy += 1) {
       const context: HandlerContext<never> = { state: { document, selection: [], history: EMPTY_HISTORY, message: null, ui: undefined as never }, ids, clock: manualClock(), rules, words: (key) => key, layout: noLayout, css: anyCss };

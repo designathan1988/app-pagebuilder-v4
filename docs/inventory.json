@@ -3,10 +3,10 @@
     "features": 214,
     "built": 214,
     "commands": 371,
-    "doors": 1356,
-    "scenarios": 1826,
+    "doors": 1357,
+    "scenarios": 1827,
     "modules": 466,
-    "lines": 81365
+    "lines": 81379
   },
   "features": [
     {
@@ -1142,8 +1142,8 @@
         "page.openProperties",
         "page.setSetting"
       ],
-      "doors": 11,
-      "scenarios": 6,
+      "doors": 12,
+      "scenarios": 7,
       "modules": [
         "src/core/page/settings.ts",
         "src/editor/inspector/page-properties.ts"
@@ -1164,7 +1164,7 @@
         "page.setSetting",
         "project.export"
       ],
-      "doors": 13,
+      "doors": 14,
       "scenarios": 5,
       "modules": [
         "src/core/export/export.ts",
@@ -1880,7 +1880,7 @@
         "grid.toggleDots",
         "page.setSetting"
       ],
-      "doors": 16,
+      "doors": 17,
       "scenarios": 7,
       "modules": [
         "src/core/page/grid.ts",
@@ -2030,7 +2030,7 @@
         "view.setViewportWidth",
         "view.resizeViewport"
       ],
-      "doors": 23,
+      "doors": 24,
       "scenarios": 12,
       "modules": [
         "src/core/page/grid.ts",
@@ -2838,7 +2838,7 @@
         "page.setSetting",
         "project.export"
       ],
-      "doors": 13,
+      "doors": 14,
       "scenarios": 7,
       "modules": [
         "src/core/export/export.ts",
@@ -2885,7 +2885,7 @@
         "files.createFile",
         "files.saveContent"
       ],
-      "doors": 21,
+      "doors": 22,
       "scenarios": 3,
       "modules": [
         "src/core/export/export.ts",
@@ -3585,13 +3585,13 @@
     },
     {
       "path": "src/core/document/migrations.ts",
-      "lines": 46,
+      "lines": 48,
       "commands": [],
       "features": []
     },
     {
       "path": "src/core/document/model.ts",
-      "lines": 319,
+      "lines": 318,
       "commands": [],
       "features": []
     },
@@ -3776,7 +3776,7 @@
     },
     {
       "path": "src/core/export/export.ts",
-      "lines": 528,
+      "lines": 532,
       "commands": [
         "project.export"
       ],
@@ -4014,7 +4014,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1891,
+      "lines": 1893,
       "commands": [
         "project.importHtml"
       ],
@@ -5145,7 +5145,7 @@
     },
     {
       "path": "src/editor/canvas/render/render.ts",
-      "lines": 848,
+      "lines": 852,
       "commands": [],
       "features": []
     },
@@ -6723,7 +6723,7 @@
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6568,
+      "lines": 6571,
       "commands": [],
       "features": []
     },

@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import type { NodeId } from '../../generated/commands.ts';
 import { manifest } from '../../manifest/runtime.ts';
-import type { DocNode, DocumentJson } from '../document/model.ts';
+import { DOCUMENT_VERSION, type DocNode, type DocumentJson } from '../document/model.ts';
 import { rulesFromManifest, validateDocument } from '../document/validate.ts';
 import { applyPatches } from '../history/transaction.ts';
 import { documentPatches, treePatches } from './patches.ts';
@@ -14,7 +14,7 @@ import { deriveData } from './derive.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const tree = node('Page', 'page', 'body', { children: [node('Menu', 'section', 'section', { children: [node('Title', 'heading', 'h2', { text: 'Menu' }), node('Card', 'article', 'article')] })] });
-const doc = (root: DocNode, more: Partial<DocumentJson> = {}): DocumentJson => ({ version: 1, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: root }], ...more }) as DocumentJson;
+const doc = (root: DocNode, more: Partial<DocumentJson> = {}): DocumentJson => ({ version: DOCUMENT_VERSION, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: root }], ...more }) as DocumentJson;
 
 describe('the patches between two documents', () => {
   it('patches only the keys that changed, node by node, while the children stay the same nodes', () => {
@@ -110,7 +110,7 @@ describe('the derivation after any change', () => {
   it("drops the item mark of a page that copies another page's item", () => {
     const collections = [{ name: 'Menu', fields: [{ key: 'nome', label: 'nome', type: 'text' }], items: [{ id: 'i1', values: { nome: 'Moka' } }] }];
     const page = (id: string, file: string) => ({ id, name: id, file, tree: node(`${id}-root`, 'page', 'body', { dataItem: { collection: 'Menu', item: 'i1' } }) });
-    const before = { version: 1, pages: [page('a', 'a.html')], collections } as unknown as DocumentJson;
+    const before = { version: DOCUMENT_VERSION, pages: [page('a', 'a.html')], collections } as unknown as DocumentJson;
     const after = { ...before, pages: [page('a', 'a.html'), page('b', 'b.html')] } as DocumentJson;
     expect(deriveData(before, after, context)).toEqual({ patches: [{ op: 'remove', path: ['pages', 1, 'tree', 'dataItem'] }] });
   });

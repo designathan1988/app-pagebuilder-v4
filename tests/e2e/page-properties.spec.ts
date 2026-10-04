@@ -22,6 +22,7 @@ const PAGE_PROPERTIES = 'page.openProperties#inspector-page-properties-button';
 const TITLE = 'page.setSetting#inspector-page-title';
 const LANGUAGE = 'page.setSetting#inspector-page-language';
 const DIRECTION = 'page.setSetting#inspector-page-direction';
+const ROOT_CLASSES = 'page.setSetting#inspector-page-html-classes';
 const DESCRIPTION = 'page.setSetting#inspector-page-description';
 const CANONICAL = 'page.setSetting#inspector-page-canonical';
 const OG_TITLE = 'page.setSetting#inspector-page-og-title';
@@ -149,6 +150,41 @@ test('Page properties selects the page root from any selection and shows the fie
   await runDoor(page, PAGE_PROPERTIES);
   expect((await port(page)).selection).toEqual(['n-page']);
   await expect(input(page, TITLE)).toBeVisible();
+});
+
+test('an authored page can edit its HTML root classes and undo the change', runs(OPEN, PAGE_PROPERTIES, ROOT_CLASSES, UNDO, EXPORT), async ({ page }) => {
+  await openAurora(page);
+  await openPageProperties(page);
+  fs.mkdirSync('.cache/logs/qa268', { recursive: true });
+  await page.screenshot({ path: '.cache/logs/qa268/root-classes-before.png' });
+  await typeInto(page, ROOT_CLASSES, 'font-brand');
+  await page.keyboard.press('Enter');
+  await expect.poll(() => settingOf(page, 'pageHtmlClasses')).toBe('font-brand');
+  await expect.poll(() => page.frameLocator('.frame__page').locator('html').evaluate((html) => html.className)).toBe('font-brand');
+  await page.screenshot({ path: '.cache/logs/qa268/root-classes-after.png' });
+  const downloading = page.waitForEvent('download');
+  await runDoor(page, EXPORT);
+  const files = unzip(fs.readFileSync(await (await downloading).path()));
+  const html = String(files.get('index.html'));
+  expect(html).toMatch(/<html\b[^>]*\bclass="font-brand"/);
+  expect(html).toMatch(/<html\b[^>]*\blang="en"/);
+  await runDoor(page, UNDO);
+  await expect.poll(() => settingOf(page, 'pageHtmlClasses')).toBeNull();
+  await expect.poll(() => page.frameLocator('.frame__page').locator('html').evaluate((html) => html.className)).toBe('');
+  await page.screenshot({ path: '.cache/logs/qa268/root-classes-undone.png' });
+});
+
+test('a saved version-one page opens with its authored content in version two', runs(OPEN), async ({ page }) => {
+  const legacy = JSON.parse(fs.readFileSync(FIXTURE, 'utf8')) as Record<string, unknown>;
+  legacy.version = 1;
+  await openMenu(page, 'file');
+  const chooser = page.waitForEvent('filechooser');
+  await page.locator(`[data-door="${OPEN}"]`).click();
+  await (await chooser).setFiles({ name: 'aurora-v1.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(legacy)) });
+  await expect(drawn(page, 'n-intro')).toHaveCount(1);
+  expect((await root(page)).name).toBe('Page');
+  const version = await page.evaluate(() => (window as unknown as { __builderTestPort: { document(): { version: number } } }).__builderTestPort.document().version);
+  expect(version).toBe(2);
 });
 
 test('a setting kept with Enter is stored on the page root, never renames it, and undo gives back the value and the selection', runs(OPEN, PAGE_PROPERTIES, TITLE, SELECT, UNDO, REDO), async ({ page }) => {

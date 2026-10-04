@@ -4529,6 +4529,12 @@ None in Pager beyond Tab to the top bar's Page and Enter.
 3. **A wrong language silently becomes `en`** at render and export, so the page ends up declared English without anyone having chosen it. Required: the language must have BCP 47 syntax and a known language subtag, or be a valid private-use tag (`x-private`). `banana` is refused even though its letters fit the syntax. The status bar and the field beside the input say which value and setting were refused (`status.page.settingInvalid`); the document keeps its value, nothing is recorded, and the field shows the document's value again. The same holds for a direction other than `ltr`, `rtl` or `auto` (the keywords `elements.json` gives `pageDirection`; Pager drops `auto`).
 4. **The canvas gets the language but not the direction**, which only arrives as a CSS declaration, so the edited page does not show what the exported one does (form controls and the bidi algorithm follow `dir`, not only `direction`). Required: the canvas frame's `<html>` carries `lang` and `dir` from the page settings as soon as they change, so a right-to-left page is drawn right-to-left in the editor (the page root's computed `direction` is `rtl`), and the settings are saved with the document (they survive an immediate reload). The export writes them on `<html>` (feature export-zip).
 5. **An emptied field has no meaning** in Pager (there is no field). Required: emptying a field and keeping it removes the setting from the page root; the page then has no title, language or direction of its own (the export decides what it writes then, feature export-zip).
+6. **Classes on the HTML root are editable page settings.** `pageHtmlClasses` keeps the space-separated `class` text of
+   `<html>` apart from the page root's body classes. The Settings field writes it through `page.setSetting`, with the
+   same Enter, undo and removal rules as the other fields. The canvas and export write it on `<html>`; a captured page
+   also keeps matching `data-capture-class` there for its residual CSS. Capturing no longer copies root classes onto
+   `<body>`. The saved project format is version 2: opening a version-1 project migrates it without changing its old
+   body classes or authored content. This preserves the class's inherited custom properties and fonts on the root.
 
 ## page-seo-meta
 
@@ -9061,6 +9067,8 @@ instance (`status.locked.edit`).
   prefix), in the page's residual stylesheet (`<page>.capture.css`). The canvas draws it and the export links it before
   the project's own stylesheet, so the page looks as it did and what the person edits in the inspector wins over it. A
   page that is no capture keeps none.
+- The `<html>` element's source classes belong to `pageHtmlClasses` on the page root and render back on `<html>`, not
+  on `<body>`. This keeps root selectors and inherited CSS variables effective in both the canvas and export.
 - A linked or embedded stylesheet's `media` condition remains attached to its rules when the Companion localizes it;
   the same address under different media conditions gets separate local sheets. A print-only sheet therefore stays
   inactive on screen, including through the import and export, instead of adding print-only link text or hiding page

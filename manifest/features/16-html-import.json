@@ -3521,6 +3521,7 @@
         ],
         "expected": [
           "The page as its scripts left it arrives through Import HTML: its destinations, then a page with its classes, images and fonts.",
+          "Classes from the source HTML root remain on the HTML root so its inherited CSS variables and fonts keep their effect.",
           "Inline layout values produced at the reference viewport widths remain responsive on the canvas and in the exported page.",
           "Picture sources chosen at the reference viewport widths use captured local assets on the canvas and in the exported page.",
           "The captured page keeps the site's own resets and browser defaults while authored pages keep Builder defaults.",

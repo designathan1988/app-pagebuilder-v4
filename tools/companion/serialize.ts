@@ -90,19 +90,10 @@ export function serializePage(origin: string): PageRead {
     return copy;
   };
   const clone = flat(document.documentElement) as HTMLElement;
-  // The theme a page sets on its <html> (class="dark", data-theme…) reaches its body too: the project holds no
-  // attribute of the <html> but its language and direction, and the rules that read the theme from an ancestor
-  // (.dark .card) and the variables it defines (inherited) still apply from the body
+  // Keep root classes on <html>; a variable defined there cannot be inherited upward from <body>.
   const body = clone.querySelector('body');
   if (body !== null) {
-    const themed = (document.documentElement.getAttribute('class') ?? '').split(/\s+/).filter((one) => one !== '');
-    if (themed.length > 0) {
-      const own = (body.getAttribute('class') ?? '').split(/\s+/).filter((one) => one !== '');
-      const classes = [...new Set([...own, ...themed])].join(' ');
-      body.setAttribute('class', classes);
-      body.setAttribute('data-capture-class', classes);
-    }
-    for (const attribute of document.documentElement.attributes) if (attribute.name.startsWith('data-') && !body.hasAttribute(attribute.name)) body.setAttribute(attribute.name, attribute.value);
+    for (const attribute of document.documentElement.attributes) if (attribute.name.startsWith('data-') && attribute.name !== 'data-capture-class' && !body.hasAttribute(attribute.name)) body.setAttribute(attribute.name, attribute.value);
   }
   for (const el of clone.querySelectorAll('script, noscript, link[rel~="stylesheet"], style, link[rel="preload"], link[rel="modulepreload"]')) el.remove();
   // an image with no source keeps none (its mark is cleared once the sources are written)

@@ -696,7 +696,11 @@ export class PageRenderer {
     writeAttributes(element, wanted);
     if (root) {
       const shown = this.doc?.pages[this.page];
-      if (shown !== undefined && this.doc?.files?.some(file => file.path === capturedPageStylePath(shown))) page.set('data-builder-capture', '');
+      if (shown !== undefined && this.doc?.files?.some(file => file.path === capturedPageStylePath(shown))) {
+        page.set('data-builder-capture', '');
+        const rootClasses = page.get('class');
+        if (rootClasses !== undefined && rootClasses !== '') page.set('data-capture-class', rootClasses);
+      }
       writeAttributes(this.target.documentElement, page);
     }
     if (tag === SVG_TAG) this.drawSvgMarkup(element, node);

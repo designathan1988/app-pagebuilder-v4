@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en" class="font-brand">
+<head>
+  <meta charset="utf-8">
+  <title>Root class capture</title>
+  <style>
+    :root { --brand-font: Arial, sans-serif; }
+    html.font-brand { --brand-font: "Courier New", monospace; }
+    html { font-family: var(--brand-font); }
+  </style>
+</head>
+<body><p id="root-font-sample">The root class sets this font.</p></body>
+</html>

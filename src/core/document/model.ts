@@ -13,7 +13,7 @@ import type { ProjectBreakpoint } from './breakpoint-rules.ts';
 export type { NodeId };
 
 // The version of the saved format; it is carried from the first save (autosave-restore).
-export const DOCUMENT_VERSION = 1;
+export const DOCUMENT_VERSION = 2;
 
 // One layer of a structured value (a shadow): its typed fields, by the ids of its structure (properties.json
 // structures: a length or a colour as CSS text, a flag as a boolean).
@@ -315,4 +315,3 @@ export function lineage(doc: DocumentJson, id: NodeId): DocNode[] {
   for (let at = locate(doc, id); at !== null; at = at.parent === null ? null : locate(doc, at.parent.id)) chain.unshift(at.node);
   return chain;
 }
-

@@ -15,7 +15,7 @@ import { isPageSetting, setPageSettingCommand } from './settings.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const withRoot = (attributes: Record<string, string>): DocumentJson => ({
-  version: 1,
+  version: 2,
   pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { attributes: attributes as DocNode['attributes'], children: [node('Intro', 'paragraph', 'p', { text: 'Hi' })] }) }],
 });
 const contextOf = (document: DocumentJson): HandlerContext<never> => ({

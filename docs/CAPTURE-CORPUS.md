@@ -13,21 +13,21 @@ Sites at the target: 1 of 20. Measured: 20.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 609 | 93.2 ✗ | 92.9 ✗ | 92.0 ✗ | 86.2 ✗ |  |
 | [govuk](https://www.gov.uk/) | documentation | 11 | 483 | 87.6 ✗ | 86.2 ✗ | 82.9 ✗ | 78.6 ✗ |  |
-| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 91.5 ✗ | 89.8 ✗ | 75.1 ✗ | 62.3 ✗ |  |
-| [react](https://react.dev/) | React application | 54 | 730 | 88.2 ✗ | 87.7 ✗ | 86.7 ✗ | 82.9 ✗ |  |
+| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 80.5 ✗ | 89.1 ✗ | 74.2 ✗ | 61.1 ✗ |  |
+| [react](https://react.dev/) | React application | 53 | 730 | 88.2 ✗ | 87.7 ✗ | 87.0 ✗ | 82.9 ✗ |  |
 | [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 98.3 | 98.2 | 96.5 ✗ | 94.2 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 47 | 537 | 89.0 ✗ | 90.0 ✗ | 82.3 ✗ | 84.7 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 47 | 537 | 91.0 ✗ | 90.0 ✗ | 84.2 ✗ | 84.7 ✗ |  |
 | [nuxt](https://nuxt.com/) | Vue application | 74 | 1107 | 89.5 ✗ | 88.0 ✗ | 87.9 ✗ | 84.2 ✗ |  |
 | [svelte](https://svelte.dev/) | landing | 26 | 233 | 59.4 ✗ | 52.3 ✗ | 62.1 ✗ | 72.8 ✗ |  |
 | [astro](https://astro.build/) | landing | 26 | 1004 | 83.1 ✗ | 81.9 ✗ | 84.6 ✗ | 87.6 ✗ |  |
-| [bootstrap](https://getbootstrap.com/) | landing | 10 | 424 | 88.0 ✗ | 85.6 ✗ | 83.1 ✗ | 79.5 ✗ |  |
-| [tailwind](https://tailwindcss.com/) | landing | 52 | 1384 | 64.2 ✗ | 64.5 ✗ | 61.3 ✗ | 56.1 ✗ |  |
+| [bootstrap](https://getbootstrap.com/) | landing | 10 | 416 | 90.0 ✗ | 87.6 ✗ | 84.9 ✗ | 81.4 ✗ |  |
+| [tailwind](https://tailwindcss.com/) | landing | 52 | 1384 | 63.9 ✗ | 64.1 ✗ | 61.4 ✗ | 57.0 ✗ |  |
 | [overreacted](https://overreacted.io/) | blog | 9 | 304 | 85.7 ✗ | 84.8 ✗ | 82.6 ✗ | 70.4 ✗ |  |
 | [csstricks](https://css-tricks.com/) | blog | 66 | 646 | 67.0 ✗ | 69.0 ✗ | 75.0 ✗ | 60.1 ✗ |  |
-| [smashing](https://www.smashingmagazine.com/) | blog | 29 | 565 | 75.0 ✗ | 72.9 ✗ | 74.0 ✗ | 71.8 ✗ |  |
-| [bellroy](https://bellroy.com/) | shop | 115 | 1573 | 66.7 ✗ | 20.2 ✗ | 29.0 ✗ | 26.4 ✗ |  |
-| [allbirds](https://www.allbirds.com/) | shop | 362 | 1290 | 83.2 ✗ | 83.9 ✗ | 87.0 ✗ | 49.0 ✗ |  |
-| [typewolf](https://www.typewolf.com/) | web fonts | 60 | 630 | 65.5 ✗ | 61.8 ✗ | 56.4 ✗ | 49.5 ✗ |  |
+| [smashing](https://www.smashingmagazine.com/) | blog | 29 | 552 | 75.5 ✗ | 74.1 ✗ | 74.4 ✗ | 72.0 ✗ |  |
+| [bellroy](https://bellroy.com/) | shop | 119 | 1583 | 66.7 ✗ | 20.2 ✗ | 28.9 ✗ | 26.4 ✗ |  |
+| [allbirds](https://www.allbirds.com/) | shop | 362 | 1290 | 83.3 ✗ | 84.0 ✗ | 87.0 ✗ | 49.0 ✗ |  |
+| [typewolf](https://www.typewolf.com/) | web fonts | 60 | 629 | 65.3 ✗ | 61.6 ✗ | 56.4 ✗ | 49.7 ✗ |  |
 | [gridbyexample](https://gridbyexample.com/) | grid | 8 | 93 | 99.4 | 99.2 | 99.1 | 99.0 |  |
-| [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 48.9 ✗ | 57.1 ✗ | 56.3 ✗ | 57.3 ✗ |  |
+| [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 48.9 ✗ | 57.1 ✗ | 56.3 ✗ | 57.5 ✗ |  |
 | [animatestyle](https://animate.style/) | animation | 13 | 656 | 67.9 ✗ | 69.7 ✗ | 60.5 ✗ | 63.0 ✗ |  |

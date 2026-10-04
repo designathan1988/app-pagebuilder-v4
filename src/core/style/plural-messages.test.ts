@@ -18,7 +18,7 @@ import { setSpacingCommand } from './spacing.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const styled = { desktop: { base: { 'padding-top': '4px', color: 'red' } } };
 const node = (id: string): DocNode => ({ id: id as NodeId, type: 'div' as DocNode['type'], name: id, tag: 'div', attributes: {}, classes: [], styles: styled as DocNode['styles'], text: null, children: [] });
-const doc: DocumentJson = { version: 1, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('Page'), type: 'page' as DocNode['type'], tag: 'body', styles: {}, children: [node('A'), node('B'), node('C')] } }] } as DocumentJson;
+const doc: DocumentJson = { version: 2, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('Page'), type: 'page' as DocNode['type'], tag: 'body', styles: {}, children: [node('A'), node('B'), node('C')] } }] } as DocumentJson;
 const context = (selection: readonly string[]): HandlerContext<never> =>
   ({ state: { document: doc, selection, history: EMPTY_HISTORY, message: null, ui: undefined as never }, clock: manualClock(), ids: sequentialIds('x'), rules: RULES, words: (key: string) => key, layout: noLayout, css: anyCss, styleClass: null }) as unknown as HandlerContext<never>;
 const said = (outcome: Outcome<never>) => (outcome.kind === 'change' ? outcome.message : null);
