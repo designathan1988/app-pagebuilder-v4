@@ -52,7 +52,7 @@ import { parseDeclarations } from '../style/custom.ts';
 import { shadowLayersFromCss } from '../style/shadows.ts';
 import { matches, readSelector, type Compound, type Facts, type Selector } from './selectors.ts';
 import { readDeclarations, readStylesheet, type CssRule, type CssSheet } from './stylesheet.ts';
-import { baseCss, CAPTURE_BASE_LAYER } from '../render/base.ts';
+import { baseCss, capturedBaseCss, CAPTURE_BASE_LAYER } from '../render/base.ts';
 import { ELEMENTS_HEADING, underClassesHeading } from '../export/sheet-headings.ts';
 // reading markup (core/import/markup.ts): the DOM walk and the source lines, moved out of this file
 import { lineOf, lineOfNode, parseMarkup, parsePage, textOf, type MarkupChild, type MarkupNode } from './markup.ts';
@@ -542,8 +542,9 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   // the editor's two types of the same tag are meant (elements.json)
   // A styled image wrapper needs a children-bearing model element. Keep its classes and attributes on a Div so its
   // layout rules and the image remain editable; the model's span variant is text-only.
-  const type = visualSpan ? 'div' : child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
-  const tag = visualSpan ? 'div' : child.tag;
+  const timeText = builder.mode === 'import' && child.tag === 'time';
+  const type = visualSpan ? 'div' : timeText ? 'paragraph' : child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
+  const tag = visualSpan ? 'div' : timeText ? 'span' : child.tag;
   if (type === null) {
     // A script and a style are no elements of the page: the import reads them itself (a page keeps its script's code,
     // a linked sheet's rules land on the elements), the code pane's reader drops them as anything else it has no
@@ -717,7 +718,8 @@ function buildChildren(children: readonly MarkupChild[], parentTag: string, ance
       if (grand.trim() !== '' || parentTag === 'pre') phrasing.push(grand);
       continue;
     }
-    if (holdsInline(grand, rules)) {
+    const standaloneTime = builder.mode === 'import' && grand.tag === 'time' && children.every((one) => typeof one !== 'string' || one.trim() === '');
+    if (holdsInline(grand, rules) && !standaloneTime) {
       phrasing.push(grand);
       continue;
     }
@@ -1300,7 +1302,7 @@ function keyframesIn(builder: Builder, sources: readonly SheetSource[]): Readonl
 // A base rule exported by this editor, identified by selector and all its declarations rather than by values alone.
 // The stylesheet reader splits a selector list into rules, so this comparison also handles the grouped :where rules.
 const normalizedBaseText = (text: string): string => text.replace(/\s+/g, ' ').trim().toLowerCase();
-const BASE_RULES = readStylesheet(baseCss()).rules;
+const BASE_RULES = [...readStylesheet(baseCss()).rules, ...readStylesheet(capturedBaseCss()).rules];
 function isBaseRule(rule: CssRule): boolean {
   if (rule.media.length > 0 || rule.declarations.some((declaration) => declaration.important)) return false;
   const selector = normalizedBaseText(rule.selector);
@@ -1814,10 +1816,14 @@ export function residualCss(text: string, from: string, at: string, context: Han
         const selectors = node.prelude.children.toArray().map((one) => generateCssTree(one));
         const declarations = node.block.children.toArray().filter((one) => one.type === 'Declaration').map((one) => generateCssTree(one));
         const unmapped = selectors.filter((one) => !mapsSelector(one, rules));
-        const mapped = selectors.filter((one) => mapsSelector(one, rules));
+        // A site's universal reset also styles nodes the model does not hold. Keep it as written on captured pages;
+        // the Builder base is scoped away there, so dropping a reset such as box-sizing changes their layout.
+        const universal = selectors.filter((one) => one.trim() === '*');
+        const mapped = selectors.filter((one) => one.trim() !== '*' && mapsSelector(one, rules));
         const left = declarations.filter((one) => !storesDeclaration(context, rules, one) || storedProperties(one, context, rules).some((property) => deferred.has(property)));
         return [
           ...(unmapped.length > 0 && declarations.length > 0 ? [`${unmapped.join(',')}{${declarations.join(';')}}`] : []),
+          ...(universal.length > 0 && declarations.length > 0 ? [`*{${declarations.join(';')}}`] : []),
           ...(mapped.length > 0 && left.length > 0 ? [`${mapped.join(',')}{${left.join(';')}}`] : []),
         ];
       }

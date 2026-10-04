@@ -12,6 +12,8 @@
 // use :where() so a class or an element's own declaration wins without extra specificity.
 // A function, not a constant: the tooth proof switches a module off by stubbing its exports (tools/runner/
 // tooth-plugin.ts), and only a function can be stubbed.
+import { generate as generateCssTree, parse as parseCssTree } from 'css-tree';
+
 export function baseCss(): string {
   return `*, *::before, *::after { box-sizing: border-box; }
 :where(body) { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.5; }
@@ -44,9 +46,18 @@ export function baseCss(): string {
 `;
 }
 
-// A captured site's own cascade layers must outrank the Builder's neutral starting rules. This layer is declared
-// before the captured sheet's layers by its residual CSS, including when that sheet loads before the export CSS.
+// Captured pages retain the site's own user-agent and author defaults. In a project containing both captured and
+// authored pages, the shared stylesheet still gives the authored pages the Builder base, with zero added specificity.
+// The captured page itself carries data-builder-capture on <html> in canvas and export.
 export const CAPTURE_BASE_LAYER = '__builder_base';
 export function capturedBaseCss(): string {
-  return `@layer ${CAPTURE_BASE_LAYER} {\n${baseCss()}}\n`;
+  const scope = ':where(html:not([data-builder-capture]))';
+  const lines = baseCss().split('\n').map((line) => {
+    const brace = line.indexOf('{');
+    if (brace < 0) return line;
+    const selectors = parseCssTree(line.slice(0, brace).trim(), { context: 'selectorList' });
+    if (selectors.type !== 'SelectorList') throw new Error('The Builder base has an invalid selector list');
+    return `${selectors.children.toArray().map((selector) => `${scope} ${generateCssTree(selector)}`).join(', ')} ${line.slice(brace)}`;
+  });
+  return `${scope} { box-sizing: border-box; }\n${lines.join('\n')}`;
 }

@@ -6,7 +6,7 @@
     "doors": 1356,
     "scenarios": 1826,
     "modules": 466,
-    "lines": 81316
+    "lines": 81340
   },
   "features": [
     {
@@ -3776,7 +3776,7 @@
     },
     {
       "path": "src/core/export/export.ts",
-      "lines": 526,
+      "lines": 528,
       "commands": [
         "project.export"
       ],
@@ -4014,7 +4014,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1861,
+      "lines": 1867,
       "commands": [
         "project.importHtml"
       ],
@@ -4363,7 +4363,7 @@
     },
     {
       "path": "src/core/render/base.ts",
-      "lines": 53,
+      "lines": 64,
       "commands": [],
       "features": []
     },
@@ -5145,7 +5145,7 @@
     },
     {
       "path": "src/editor/canvas/render/render.ts",
-      "lines": 843,
+      "lines": 848,
       "commands": [],
       "features": []
     },

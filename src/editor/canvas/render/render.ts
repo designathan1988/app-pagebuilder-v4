@@ -694,7 +694,11 @@ export class PageRenderer {
     // a text element with no text (editor-only, the audit's A3.38), but the one being edited in place
     if (!edited && this.model.elements.get(node.type)?.content === 'text' && (node.text ?? '') === '') wanted.set(EMPTY_TEXT_ATTRIBUTE, '');
     writeAttributes(element, wanted);
-    if (root) writeAttributes(this.target.documentElement, page);
+    if (root) {
+      const shown = this.doc?.pages[this.page];
+      if (shown !== undefined && this.doc?.files?.some(file => file.path === capturedPageStylePath(shown))) page.set('data-builder-capture', '');
+      writeAttributes(this.target.documentElement, page);
+    }
     if (tag === SVG_TAG) this.drawSvgMarkup(element, node);
     // editor-only (feature embed-html): an embed's markup is shown inside a sandboxed frame, where its scripts never
     // run; the document and the export keep the markup as it is
@@ -779,6 +783,7 @@ export class PageRenderer {
     const hasCapture = page !== undefined && doc.files?.some(file => file.path === capturedPageStylePath(page));
     const starting = hasCapture ? capturedBaseCss() : baseCss();
     if (base !== null && base.textContent !== starting) base.textContent = starting;
+    this.target.documentElement.toggleAttribute('data-builder-capture', hasCapture === true);
     if (sheet !== null && sheet.textContent !== css) sheet.textContent = css;
   }
 

@@ -2,15 +2,16 @@
 import fs from 'node:fs';
 import { expect, test } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
-import { runDoor, runs } from './door.ts';
+import { openExplorer, runDoor, runs } from './door.ts';
 import { unzip } from '../../tools/runner/unzip.ts';
 
 const IMPORT = 'project.importHtml#menu-file';
 const EXPORT = 'project.export#toolbar-top-bar-export';
+const ADD = 'pages.add#explorer-add-page';
 
-test('a captured min-width rule keeps its wide and narrow heights after export', runs(IMPORT, EXPORT), async ({ page, context }) => {
-  const html = '<!doctype html><html><head><meta name="builder-capture" content="https://source.test/"><link rel="stylesheet" href="site.css"></head><body><section class="hero" data-capture-class="hero"><img class="h-full" data-capture-class="h-full" src="pixel.svg" width="200" height="200" alt="Pixel"><a href="https://source.test/">Link</a></section><svg width="83" height="24" viewBox="0 0 83 24" role="img" aria-label="Vector logo"><rect width="83" height="24" fill="black"/></svg><svg class="conditional-svg" data-capture-class="conditional-svg" width="83" height="24" viewBox="0 0 83 24" role="img" aria-label="Conditional logo"><rect width="83" height="24" fill="black"/></svg><img src="pixel.svg" width="83" height="24" alt="Unstyled image"><p class="break-test" data-capture-class="break-test">One<span style="display:block"></span>Two</p><span class="mobile-visual" data-capture-class="mobile-visual"><img src="pixel.svg" alt="Mobile visual"></span><div class="hidden md:block" data-capture-class="hidden md:block">Wide only</div><div class="range" data-capture-class="range">Range</div></body></html>';
-  const css = '.hero{height:16px;color:white}.h-full{height:100%}.break-test{line-height:30px}.hidden{display:none}.range{width:36px}.mobile-visual{display:none}@layer base{a{color:inherit}}@media(min-width:768px){.hero{height:250px}.conditional-svg{width:120px}.md\\:block{display:block}}@media(max-width:834px){.mobile-visual{display:block}}@media(width >= 50rem){.range{width:70px}}';
+test('a captured min-width rule keeps its wide and narrow heights after export', runs(IMPORT, EXPORT, ADD), async ({ page, context }) => {
+  const html = '<!doctype html><html><head><meta name="builder-capture" content="https://source.test/"><link rel="stylesheet" href="site.css"></head><body><section class="hero" data-capture-class="hero"><img class="h-full" data-capture-class="h-full" src="pixel.svg" width="200" height="200" alt="Pixel"><a href="https://source.test/">Link</a></section><svg width="83" height="24" viewBox="0 0 83 24" role="img" aria-label="Vector logo"><rect width="83" height="24" fill="black"/></svg><svg class="conditional-svg" data-capture-class="conditional-svg" width="83" height="24" viewBox="0 0 83 24" role="img" aria-label="Conditional logo"><rect width="83" height="24" fill="black"/></svg><img src="pixel.svg" width="83" height="24" alt="Unstyled image"><p class="break-test" data-capture-class="break-test">One<span style="display:block"></span>Two</p><div class="dark" data-capture-class="dark"><blockquote>Quote</blockquote></div><div class="sized" style="width:100px;padding:20px">Box</div><article><a href="https://source.test/">Source</a><time class="date" data-capture-class="date" datetime="2026-06-15">4 months ago</time></article><span class="mobile-visual" data-capture-class="mobile-visual"><img src="pixel.svg" alt="Mobile visual"></span><div class="hidden md:block" data-capture-class="hidden md:block">Wide only</div><div class="range" data-capture-class="range">Range</div></body></html>';
+  const css = '*{box-sizing:border-box}.hero{height:16px;color:white}.h-full{height:100%}.break-test{line-height:30px}.dark{background:#202020;color:white}.date{display:block;line-height:20px}.hidden{display:none}.range{width:36px}.mobile-visual{display:none}@layer base{a{color:inherit}}@media(min-width:768px){.hero{height:250px}.conditional-svg{width:120px}.md\\:block{display:block}}@media(max-width:834px){.mobile-visual{display:block}}@media(width >= 50rem){.range{width:70px}}';
   await openEditor(page);
   const choosing = page.waitForEvent('filechooser');
   await runDoor(page, IMPORT);
@@ -35,6 +36,10 @@ test('a captured min-width rule keeps its wide and narrow heights after export',
   for (const [width, height] of [[1440, 250], [390, 16]] as const) {
     await exported.setViewportSize({ width, height: 900 });
     await exported.goto('https://made.test/index.html');
+    expect(await exported.locator('body').evaluate(el => getComputedStyle(el).marginLeft), `${width}px captured body margin`).toBe('8px');
+    expect(await exported.locator('blockquote').evaluate(el => getComputedStyle(el).backgroundColor), `${width}px quote background`).toBe('rgba(0, 0, 0, 0)');
+    expect(await exported.locator('.sized').evaluate(el => Math.round(el.getBoundingClientRect().width)), `${width}px site box sizing`).toBe(100);
+    expect(await exported.locator('[data-capture-class="date"]').evaluate(el => ({ tag: el.tagName, height: Math.round(el.getBoundingClientRect().height), date: el.getAttribute('datetime') })), `${width}px date`).toEqual({ tag: 'SPAN', height: 20, date: '2026-06-15' });
     expect(await exported.locator('section').evaluate(el => Math.round(el.getBoundingClientRect().height)), `${width}px`).toBe(height);
     expect(await exported.getByRole('img', { name: 'Pixel' }).evaluate(el => Math.round(el.getBoundingClientRect().height)), `${width}px image`).toBe(height);
     expect(await exported.getByRole('img', { name: 'Vector logo' }).evaluate(el => [Math.round(el.getBoundingClientRect().width), Math.round(el.getBoundingClientRect().height)]), `${width}px SVG size`).toEqual([83, 24]);
@@ -51,4 +56,21 @@ test('a captured min-width rule keeps its wide and narrow heights after export',
     expect(await exported.locator('[data-capture-class="range"]').evaluate(el => Math.round(el.getBoundingClientRect().width)), `${width}px range`).toBe(width === 1440 ? 70 : 36);
   }
   await exported.close();
+  await openExplorer(page);
+  await runDoor(page, ADD);
+  await page.keyboard.press('Enter');
+  const secondDownload = page.waitForEvent('download');
+  await runDoor(page, EXPORT);
+  const mixed = unzip(fs.readFileSync(await (await secondDownload).path()));
+  const mixedPage = await context.newPage();
+  await mixedPage.route('https://mixed.test/**', route => {
+    const path = new URL(route.request().url()).pathname.slice(1);
+    const bytes = mixed.get(path);
+    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType: path.endsWith('.css') ? 'text/css' : path.endsWith('.svg') ? 'image/svg+xml' : 'text/html', body: bytes });
+  });
+  await mixedPage.goto('https://mixed.test/index.html');
+  expect(await mixedPage.locator('body').evaluate(el => getComputedStyle(el).marginLeft)).toBe('8px');
+  await mixedPage.goto('https://mixed.test/page.html');
+  expect(await mixedPage.locator('body').evaluate(el => getComputedStyle(el).marginLeft)).toBe('0px');
+  await mixedPage.close();
 });

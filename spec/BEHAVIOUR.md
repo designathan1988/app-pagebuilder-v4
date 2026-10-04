@@ -495,10 +495,10 @@ Not applicable.
 - It holds `box-sizing: border-box` for every element and its pseudo-elements. Its neutral presentation defaults cover
   the body font and margin, heading hierarchy, text spacing, links, lists, quotes, code, tables, form controls and media.
   The presentation selectors use `:where()` so an element's or class's own styles take precedence.
-- A captured page's base text is placed in the first `__builder_base` cascade layer in both canvas and export; its
-  residual sheet declares that layer before the captured site's own layers. Thus a site's layered normal rules outrank
-  neutral Builder defaults, while the person's generated element and class rules remain later unlayered rules. Adding
-  or removing the capture sheet updates the canvas base layer as well.
+- A captured page keeps the site's own browser defaults and author CSS, so the Builder's neutral base does not style
+  that page. In a project containing both captured and authored pages, the shared base stylesheet uses zero-specificity
+  selectors scoped to pages without `data-builder-capture` on `<html>`; authored pages still receive the same defaults.
+  The canvas changes that marker when a captured sheet is added or removed.
 
 ## breakpoint-overrides
 
@@ -9055,9 +9055,9 @@ instance (`status.locked.edit`).
   prefix), in the page's residual stylesheet (`<page>.capture.css`). The canvas draws it and the export links it before
   the project's own stylesheet, so the page looks as it did and what the person edits in the inspector wins over it. A
   page that is no capture keeps none.
-- The residual sheet declares the Builder's base layer before the site's own layers. The exported and canvas base
-  styles use that lower-priority layer, so a captured site's layered rules such as an inherited link colour outrank
-  Builder defaults, following the normal cascade order.
+- The residual sheet declares `__builder_base` before the site's own layers for captured presentation hints. Builder
+  neutral base rules are scoped away from captured pages; the site's own universal resets stay in the residual sheet.
+  Author CSS therefore keeps its original priority and browser defaults apply where the site declares nothing.
 - When a captured sheet uses a width condition the project's breakpoints cannot represent (such as `min-width`, a
   non-pixel threshold or a width range), the properties used by that condition remain in the captured stylesheet at
   every width. The importer does not write competing base values for those properties into the project's later sheet;
@@ -9089,6 +9089,10 @@ instance (`status.locked.edit`).
   HTML whitespace in text runs collapses to spaces, while an actual `<br>` remains a line break and preformatted text
   keeps its whitespace. An empty `<span style="display:block">` between two pieces of text creates a visible line
   break in the browser and becomes a text line break on import.
+- A standalone `<time>` among a container's element children keeps its text, author classes and `datetime` attribute
+  as an editable Paragraph using a `span` tag, so its layout class still applies without an invented paragraph margin.
+  An inline `<time>` within surrounding text stays in that text run. This representation preserves the visual date
+  and its machine-readable value as an attribute, while exact `<time>` semantics require a model tag extension.
 - A plain, attribute-free `<span>` containing only visual media or a visual link releases its wrapper and keeps each
   child, including the link and its image, editable. Image width and height attributes remain lower-priority hints:
   when a captured responsive stylesheet controls

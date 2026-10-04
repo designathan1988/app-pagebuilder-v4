@@ -51,6 +51,14 @@ describe('the residual stylesheet of a captured page', () => {
     if (home === undefined) throw new Error('no page');
     expect(capturedPageCss(document, home)).toBe('');
   });
+  it('keeps an author universal reset for every captured element', () => {
+    const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>*,:before{box-sizing:border-box}</style></head><body><div>Card</div></body></html>';
+    const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });
+    if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
+    const home = ran.document.pages[0];
+    if (home === undefined) throw new Error('no page');
+    expect(capturedPageCss(ran.document, home)).toContain('*{box-sizing:border-box}');
+  });
 
   it('keeps rules targeting the drawing inside an opaque SVG', () => {
     const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>.mandala svg > text { fill: #51565d; }</style></head><body><div class="mandala"><svg viewBox="0 0 10 10"><text>x</text></svg></div></body></html>';

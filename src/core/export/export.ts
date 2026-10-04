@@ -339,6 +339,8 @@ export function pageLines(document: DocumentJson, pageIndex: number, manifestRul
   const title = typeof stored === 'string' && stored !== '' ? stored : page.name;
   // a page that uses interactions links the script (spec export-events-js); one that does not, does not
   const usesInteractions = pageNeedsScript(page.tree);
+  const capturedStyle = fileAt(document, capturedPageStylePath(page));
+  if (capturedStyle !== null) pageAttributes.set('data-builder-capture', '');
   const head: CodeLine[] = [
     '<!DOCTYPE html>',
     `<html${attributesHtml(pageAttributes)}>`,
@@ -347,7 +349,7 @@ export function pageLines(document: DocumentJson, pageIndex: number, manifestRul
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
     `  <title>${escapeText(title)}</title>`,
     ...headLines(document, page.tree, rules, from),
-    ...(fileAt(document, capturedPageStylePath(page)) === null ? [] : [`  <link rel="stylesheet" href="${escapeAttribute(relativePath(from, capturedPageStylePath(page)))}">`]),
+    ...(capturedStyle === null ? [] : [`  <link rel="stylesheet" href="${escapeAttribute(relativePath(from, capturedPageStylePath(page)))}">`]),
     `  <link rel="stylesheet" href="${escapeAttribute(relativePath(from, STYLESHEET))}">`,
     ...(usesInteractions || linksScript(page.tree, INTERACTIONS_SCRIPT) ? [`  <script defer src="${escapeAttribute(relativePath(from, INTERACTIONS_SCRIPT))}"></script>`] : []),
     ...(pageUsesForms(page.tree) || linksScript(page.tree, FORMS_SCRIPT) ? [`  <script defer src="${escapeAttribute(relativePath(from, FORMS_SCRIPT))}"></script>`] : []),
