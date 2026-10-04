@@ -28,7 +28,6 @@ const KIND_ORDER: readonly EntryKind[] = ['command', 'insert', 'open-panel', 'se
 // a scope typed before the query keeps one kind of entry (PRODUCT.md §5.3: Commands >, Insert +, Panels /, Properties
 // #) and @ the project's own things: its pages to go to, the open page's layers to select, its classes to apply (J12)
 const SCOPES: Readonly<Record<string, readonly EntryKind[]>> = { '>': ['command'], '+': ['insert'], '/': ['open-panel'], '#': ['set-property', 'edit-property'], '@': ['go-to-page', 'select-layer', 'apply-class'] };
-export const SCOPE_PREFIXES = Object.keys(SCOPES);
 // the title of the group an entry is listed under (the canonical palette: Commands, Panels), by the scope that keeps it
 const GROUP_TITLES: Readonly<Record<string, string>> = { '>': 'commandBar.group.commands', '+': 'commandBar.group.insert', '/': 'commandBar.group.panels', '#': 'commandBar.group.properties', '@': 'commandBar.group.find' };
 export function groupTitleOf(kind: EntryKind): string {

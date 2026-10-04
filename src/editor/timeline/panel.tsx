@@ -6,7 +6,6 @@
 // animation.moveKeyframe, addKeyframe, setKeyframeEasing and deleteKeyframe). The two drags (the playhead along the
 // ruler, a keyframe along the track) are the pointer owner's; this panel only draws them and runs their doors' clicks.
 import { useState, type CSSProperties } from 'react';
-import type { DoorId } from '../../generated/ids.ts';
 import { animationsOf, defaultSetting, SETTINGS, settingLabel } from '../../core/animation/animation.ts';
 import { locate, type Animation } from '../../core/document/model.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';
@@ -218,7 +217,3 @@ export function TimelinePanel() {
     </div>
   );
 }
-
-// the door ref a keyframe marker stands for (the pointer owner reads it at a press, the runner at a step)
-export const keyframeDragRef: DoorId | null = KEYFRAME?.ref ?? null;
-export const playheadDragRef: DoorId | null = RULER?.ref ?? null;

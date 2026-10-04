@@ -15,7 +15,7 @@
 //    setting's door offers (its adapter.offers names the CSS property; the generated list of that property gives the
 //    keywords and units) and refused with status.animation.invalidSetting naming the setting and the text.
 import { message, registerHandler, type HandlerContext, type Outcome } from '../commands/registry.ts';
-import { locate, type Animation, type DocNode, type DocumentJson, type Keyframe, type NodeId, type StoredValue } from '../document/model.ts';
+import { locate, type Animation, type DocNode, type DocumentJson, type Keyframe, type NodeId } from '../document/model.ts';
 import type { Patch } from '../history/transaction.ts';
 import { firstLockRefusal } from '../nodes/flags.ts';
 import { readValue } from '../style/set.ts';
@@ -163,19 +163,6 @@ export function previewDeclarations(animation: Animation, time: number, playing:
   if (fill !== null) overrides[fill] = 'both';
   if (playState !== null) overrides[playState] = playing ? 'running' : 'paused';
   return animationDeclarations(animation, overrides);
-}
-
-// The nodes of a document that hold an animation; used by the export and the canvas to write the keyframes.
-export function nodesWithAnimations(document: DocumentJson): readonly { readonly node: DocNode; readonly animations: readonly Animation[] }[] {
-  const found: { node: DocNode; animations: readonly Animation[] }[] = [];
-  for (const page of document.pages) {
-    const walk = (node: DocNode): void => {
-      if (animationsOf(node).length > 0) found.push({ node, animations: animationsOf(node) });
-      for (const child of node.children) walk(child);
-    };
-    walk(page.tree);
-  }
-  return found;
 }
 
 // the animation a name refers to on a node, refused when the node holds none of that name
@@ -354,14 +341,4 @@ export const setAnimationSettingsCommand = registerHandler('animation.setSetting
 // message names a setting as the field does.
 export function settingLabel(setting: string): MessageId {
   return (SETTING_DOORS.find((door) => door.setting === setting)?.entry.door.labelKey ?? setting) as MessageId;
-}
-
-// The keyframe a node holds by its animation's name and the offset it sits at; null when it holds none.
-export function keyframeOf(node: DocNode, animation: string, offset: number): Keyframe | null {
-  return findAnimation(node, animation)?.keyframes.find((k) => k.offset === offset) ?? null;
-}
-
-// A keyframe's value of a property as CSS text, for a field that shows what the playhead's keyframe holds.
-export function keyframeValue(keyframe: Keyframe, property: string): StoredValue | undefined {
-  return keyframe.declarations[property as keyof typeof keyframe.declarations];
 }

@@ -13,7 +13,6 @@ import type { EditorUi } from '../state.ts';
 import { styleSource } from './style-target.ts';
 
 export type SpacingBox = 'padding' | 'margin';
-export const SPACING_BOXES: readonly SpacingBox[] = ['padding', 'margin'];
 
 // Whether a box is linked for the element the Style tab edits: the person's own choice for that element, else whether
 // its four sides hold one value there.

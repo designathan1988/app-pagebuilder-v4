@@ -1,7 +1,7 @@
 // Structural edits of the gesture algebra that the canvas and the panel both reach (spec "Constraint Painting",
 // "Pattern Recognition" → Repeat, "Ambiguity Engine", "Structural Suggestions", "Topological Editing", "Seleção"): each
 // returns one operation, so the store records it as one undo step.
-import type { Axis, Constraint, ConstraintKind, LayoutIntent, Point, Region } from '../intent/model.ts';
+import type { Axis, Constraint, LayoutIntent, Point, Region } from '../intent/model.ts';
 import { findRegion, preferenceKey } from '../intent/model.ts';
 import { nextConstraintId } from '../intent/ids.ts';
 import { refuse } from '../intent/problems.ts';
@@ -13,7 +13,6 @@ import { suggestions, type Interpretation, type Suggestion } from '../intent/ana
 import { topology } from '../topology/topology.ts';
 
 export type PaintedConstraint = 'equal-size' | 'gap' | 'ratio' | 'align-start' | 'align-center' | 'align-end' | 'fill-available' | 'fixed' | 'fluid' | 'hug' | 'min' | 'max';
-export const PAINTED_CONSTRAINTS: readonly PaintedConstraint[] = ['equal-size', 'gap', 'ratio', 'align-start', 'align-center', 'align-end', 'fill-available', 'fixed', 'fluid', 'hug', 'min', 'max'];
 
 function requireRegion(graph: LayoutIntent, id: string): Region {
   return findRegion(graph, id) ?? refuse('unknown-region', { region: id });
@@ -70,9 +69,6 @@ export function paintConstraint(graph: LayoutIntent, kind: PaintedConstraint, id
   }
   return { kind: 'constraint', constraint };
 }
-
-// The kind a painted constraint is stored as, for the inspector's list.
-export const storedKind = (painted: PaintedConstraint): ConstraintKind | 'sizing' => (painted.startsWith('align') ? 'align' : painted === 'equal-size' || painted === 'gap' || painted === 'ratio' ? painted : 'sizing');
 
 // A repeated group changed to another count (spec "Pattern Recognition": "4 → 6"): extra items are removed from the
 // end, missing ones are copies of the first at the same stride, and every item takes the first one's length.

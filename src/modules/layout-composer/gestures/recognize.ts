@@ -36,7 +36,6 @@ import { closed, pieces, runsAlong, travelled, type Piece } from './sequences.ts
 import { responsiveEdit } from '../responsive/continuum.ts';
 
 export type StrokeMode = 'auto' | 'draw' | 'cut' | 'merge' | 'subtract' | 'move' | 'nest' | 'select' | 'relate' | 'group';
-export const STROKE_MODES: readonly StrokeMode[] = ['auto', 'draw', 'cut', 'merge', 'subtract', 'move', 'nest', 'select', 'relate', 'group'];
 
 export type HandleKind = 'boundary' | 'vertex' | 'gap' | 'repeat' | 'edge' | 'move';
 export const HANDLE_KINDS: readonly HandleKind[] = ['boundary', 'vertex', 'gap', 'repeat', 'edge', 'move'];

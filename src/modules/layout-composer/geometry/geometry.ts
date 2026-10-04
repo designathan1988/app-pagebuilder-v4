@@ -23,8 +23,6 @@ export function bounds(boxes: readonly Box[]): Box {
   return { x, y, width: Math.max(...boxes.map((b) => end(b, 'x'))) - x, height: Math.max(...boxes.map((b) => end(b, 'y'))) - y };
 }
 
-export const pointBox = (p: Point): Box => ({ x: p.x, y: p.y, width: 0, height: 0 });
-
 // the box two corners span, whichever way the pointer went
 export function spanned(a: Point, b: Point): Box {
   return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(b.x - a.x), height: Math.abs(b.y - a.y) };

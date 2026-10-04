@@ -33,8 +33,6 @@ export const stateOf = (args: Readonly<Record<string, unknown>>): (typeof STATES
 
 // The states the menu offers for an element of this type
 
-export const statesFor = (type: string): readonly (typeof STATES)[number][] => STATES.filter((s) => stateAppliesTo(s, type));
-
 // The first selected element a state does not stand on, or null (the state stands on all of them)
 function standsApart(state: Pick<StoreState<EditorUi>, 'document' | 'selection'>, chosen: (typeof STATES)[number]): DocNode | null {
   for (const id of state.selection) {

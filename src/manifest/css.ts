@@ -110,22 +110,6 @@ function partsOf(tree: MatchNode | null): CssParts & { types: string[] } {
   return parts;
 }
 
-// The identifiers a value is made of, lower-cased, in order: "x mandatory" → ["x", "mandatory"].
-// Function names are not identifiers; identifiers inside a function's arguments are.
-export function valueIdentifiers(value: string): string[] {
-  let ast;
-  try {
-    ast = parse(value, { context: 'value' });
-  } catch {
-    return [];
-  }
-  const found: string[] = [];
-  walk(ast, (node) => {
-    if (node.type === 'Identifier') found.push(node.name.toLowerCase());
-  });
-  return found;
-}
-
 export interface SyntaxMentions {
   // every keyword the syntax names, lower-cased → each path the definition reaches it through: the types
   // and functions around it, outermost first ("rgb()" for a type function or an inline function)

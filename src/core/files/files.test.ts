@@ -57,6 +57,21 @@ describe('files.rename and files.move take every user of the path with them', ()
     expect(ran.document.pages[0]?.tree.children[0]?.styles.desktop?.base?.['font-family']).toBe("'Brand Sans', 'Segoe UI', sans-serif");
   });
 
+  it('refuses a page file or a file renamed or moved onto a path that is taken, before any patch (the invariant probe, seed 33)', () => {
+    const about = { id: 'a', name: 'About', file: 'about.html', tree: node('AboutPage', 'page', 'body') };
+    const contact = { id: 'c', name: 'Contact', file: 'contact.html', tree: node('ContactPage', 'page', 'body') };
+    const site = documentOf({ pages: [home(), about, contact], files: [png('img/a.png'), png('img/b.png'), png('media/a.png')], folders: ['img', 'media'] });
+    for (const [command, args] of [
+      [renameFileCommand, { path: 'contact.html', name: 'about.html' }],
+      [renameFileCommand, { path: 'img/a.png', name: 'b.png' }],
+      [moveFileCommand, { path: 'img/a.png', to: 'media' }],
+    ] as const) {
+      const ran = runHandler(command, site, args);
+      expect(ran.outcome.kind, JSON.stringify(args)).toBe('refused');
+      expect(ran.problems).toEqual([]);
+    }
+  });
+
   it('refuses a page file renamed without its .html (the validator refused it silently)', () => {
     const pages = documentOf({ pages: [home(), { id: 'q', name: 'About', file: 'about.html', tree: node('About', 'page', 'body') }] });
     const ran = runHandler(renameFileCommand, pages, { path: 'about.html', name: 'about' });

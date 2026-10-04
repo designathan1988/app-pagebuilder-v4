@@ -16,7 +16,7 @@ import type { Message } from '../commands/registry.ts';
 import type { MessageId } from '../../generated/ids.ts';
 import type { Patch } from '../history/transaction.ts';
 import type { ModelRules } from '../document/validate.ts';
-import { filesOf, walk } from '../document/model.ts';
+import { filesOf } from '../document/model.ts';
 import { familyOf, fontFiles } from './fonts.ts';
 import { followPaths, movedPath } from './references.ts';
 import { argumentRefused } from '../store/args.ts';
@@ -193,17 +193,6 @@ export function typeOfFile(name: string, fallback = 'application/octet-stream'):
   const extension = name.slice(name.lastIndexOf('.') + 1).toLowerCase();
   return FILE_TYPES.find((row) => row.extensions.includes(extension))?.type ?? fallback;
 }
-// Every path a page's elements point at: so a file in use is known (spec explorer-assets: deleting one in use asks
-// first) and a renamed file's users can follow.
-export function usedPaths(document: DocumentJson): ReadonlySet<string> {
-  const used = new Set<string>();
-  for (const page of document.pages) {
-    for (const node of walk(page.tree)) {
-      for (const value of Object.values(node.attributes)) if (typeof value === 'string' && isProjectPath(document, value)) used.add(value);
-    }
-  }
-  return used;
-}
 
 // A data file a collection imports (spec content-data): by its name, whatever type the browser gave it (a CSV often
 // comes as application/vnd.ms-excel or with no type at all), or by its type.
@@ -353,6 +342,9 @@ function renameRefusal(document: DocumentJson, from: string, to: string): Messag
   if (to === from) return null;
   const fixed = (path: string): boolean => pathGenerated(path) || holdsGenerated(path);
   if (fixed(from) || fixed(to)) return message('status.files.generatedPath', { path: pathGenerated(from) || holdsGenerated(from) ? from : to });
+  // the destination itself: another file, folder or page file already there (the checks below look at what moves
+  // with it, which leaves the destination out)
+  if (!to.startsWith(`${from}/`) && pathTaken(document, to)) return message('status.files.nameTaken', { path: to, name: nameOfPath(to) });
   const moves = movedPaths(document, from, to);
   const before = new Set([...folderPaths(document), ...filesOf(document).map((file) => file.path), ...document.pages.map((page) => page.file)]);
   const clashes = (path: string): boolean => !before.has(path) && pathTaken(document, path);

@@ -2,7 +2,7 @@
 // store and the editor need. Nothing here re-lists manifest data; nothing writes it.
 // The files come through import.meta.glob typed as unknown, so TypeScript never infers types from the large JSON
 // files; the schemas give them their types.
-import type { CommandId, DoorId, KeyContextId, MenuId, RegionId } from '../generated/ids.ts';
+import type { CommandId, DoorId, KeyContextId, RegionId } from '../generated/ids.ts';
 import {
   checksFileSchema,
   commandsFileSchema,
@@ -122,11 +122,6 @@ export function doorsIn(region: RegionId): readonly DoorEntry[] {
 
 function order(door: Door): number {
   return typeof door.placement === 'object' ? door.placement.order : 0;
-}
-
-// The menus whose button is drawn in a region, with the button's order there.
-export function menuAnchorsIn(region: RegionId): readonly { menu: MenuId; order: number; labelKey: string }[] {
-  return manifest.layout.menus.flatMap((m) => m.anchors.filter((a) => a.region === region).map((a) => ({ menu: m.id as MenuId, order: a.order, labelKey: m.labelKey })));
 }
 
 // The key contexts a context inherits from, itself first.

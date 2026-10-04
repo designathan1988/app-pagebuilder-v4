@@ -28,7 +28,6 @@ function range(id: string): readonly [number, number] {
   if (!Array.isArray(value) || value.length !== 2 || typeof value[0] !== 'number' || typeof value[1] !== 'number') throw new Error(`interactions.json has no range ${id}`);
   return [value[0], value[1]];
 }
-export const PANEL_DRAG_THRESHOLD = constant('drag.threshold');
 const EDGE = constant('panels.dockEdgeZone');
 const TABS_FRACTION = constant('panels.combineTabsFraction');
 const WINDOW_WIDTH = range('floating.width')[0];

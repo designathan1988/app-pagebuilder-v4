@@ -4,7 +4,7 @@
 // (gestures/structural.ts).
 import type { Axis, LayoutIntent, Region, ResponsiveRule } from './model.ts';
 import { childrenOf, findRegion, preferenceKey } from './model.ts';
-import { bounds, end, length, precision } from '../geometry/geometry.ts';
+import { end, length, precision } from '../geometry/geometry.ts';
 
 export type PatternKind = 'repeated-row' | 'repeated-column' | 'grid' | 'sidebar' | 'split' | 'masonry' | 'alternating-sections' | 'dashboard' | 'holy-grail' | 'master-detail';
 
@@ -381,9 +381,4 @@ export function canonicalize(graph: LayoutIntent): LayoutIntent {
     responsive: [...graph.responsive].sort((a, b) => b.maxWidth - a.maxWidth),
     regions: graph.regions.map((r) => ({ ...r, provenance: [...new Set(r.provenance)] })),
   };
-}
-
-// The extent of a set of regions along an axis.
-export function groupExtent(graph: LayoutIntent, ids: readonly string[], axis: Axis): number {
-  return length(bounds(graph.regions.filter((r) => ids.includes(r.id)).map((r) => r.box)), axis);
 }

@@ -15,7 +15,6 @@ import type { Effect, Marker, MotionKeyframe, MotionTimeline, PropertyTrack, Tim
 // the repeats an action plays; an infinite action is drawn and sequenced as one cycle
 const cycles = (action: TimelineAction): number => (action.repeat === 'infinite' ? 1 : (action.repeat ?? 1));
 export const actionEnd = (action: TimelineAction): number => action.start + action.duration * cycles(action);
-export const isInfinite = (action: TimelineAction): boolean => action.repeat === 'infinite' && action.duration > 0;
 
 // The length of a timeline: where its last action ends or its last marker sits (an empty timeline lasts 0).
 export function timelineDuration(timeline: MotionTimeline): number {

@@ -23,7 +23,6 @@ export interface GridSetting {
   readonly byDefault: string;
   readonly range: string;
 }
-export const GRID_NAMES = Object.keys(GRID_SETTINGS) as GridName[];
 // a grid's settings, in order, by name
 export const settingsOf = (grid: string): readonly (readonly [string, GridSetting])[] => (grid in GRID_SETTINGS ? Object.entries(GRID_SETTINGS[grid as GridName]) : []);
 export const settingOf = (grid: string, setting: string): GridSetting | undefined => settingsOf(grid).find(([name]) => name === setting)?.[1];

@@ -77,9 +77,6 @@ export function withTrackSet(value: string | undefined, index: number, track: st
   return tracksToValue(tracks.map((held, at) => (at === index ? track : held)));
 }
 
-// the default track a grid's first column starts with (elements.json templates write it too)
-export const FIRST_TRACK = DEFAULT_TRACK;
-
 // The tracks a grid that lays one equal track per child writes, and the overrides by breakpoint (the user's real-use
 // audit, item A1.4): one track per child at the base breakpoint and, per breakpoint, the number interactions.json
 // names (layout.gridTracks.<breakpoint>: two at Tablet while it holds more, one at Phone), never more than it holds

@@ -52,11 +52,6 @@ export function isSafeHref(href: string): boolean {
   return readAddress(href).ok;
 }
 
-// The addresses a resource attribute may have (an image's src, a form's action, a video's poster): the same rule.
-export function isSafeSource(source: string): boolean {
-  return readAddress(source).ok;
-}
-
 // The marked characters of a tree, in order, empty stretches left out; an inner link's address wins over an outer one.
 export function segmentsOf(runs: readonly InlineRun[], marks: Omit<Segment, 'text'> = PLAIN): Segment[] {
   const out: Segment[] = [];
