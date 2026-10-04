@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82563
+    "lines": 82574
   },
   "features": [
     {
@@ -5547,7 +5547,7 @@
     },
     {
       "path": "src/editor/input/file-drop.ts",
-      "lines": 176,
+      "lines": 187,
       "commands": [],
       "features": []
     },

@@ -119,7 +119,15 @@ export function installOsFileDrop(store: EditorStore, win: Window, inside: boole
   if (door === null) return stopFolder;
   const inserting: Inserting = { tile: door, args: {}, drop: door };
   const over = (event: DragEvent): void => {
-    if (!carriesImage(event)) return;
+    // a file that lands nowhere it is taken is refused, never opened: the browser's default navigates the editor (or
+    // the canvas frame) to the file (the audit's DR1). The Explorer's folder zone takes any file (installFolderDrop).
+    if (!carriesImage(event)) {
+      if (carriesFiles(event) && zoneOf(event.target) === null) {
+        event.preventDefault();
+        if (event.dataTransfer !== null) event.dataTransfer.dropEffect = 'none';
+      }
+      return;
+    }
     event.preventDefault();
     const at = overCanvas(event, inside);
     if (at === null) {
@@ -133,7 +141,10 @@ export function installOsFileDrop(store: EditorStore, win: Window, inside: boole
   };
   const leave = (): void => hideFileDrag(store);
   const drop = (event: DragEvent): void => {
-    if (!carriesImage(event)) return;
+    if (!carriesImage(event)) {
+      if (carriesFiles(event) && zoneOf(event.target) === null) event.preventDefault();
+      return;
+    }
     event.preventDefault();
     const at = overCanvas(event, inside);
     hideFileDrag(store);
