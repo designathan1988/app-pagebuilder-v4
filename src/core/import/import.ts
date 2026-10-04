@@ -522,10 +522,10 @@ function htmlNames(node: DocNode, rules: ModelRules): ReadonlyMap<string, string
 function build(child: MarkupChild, builder: Builder, ancestors: readonly string[]): Raw {
   if (typeof child === 'string') return child.trim() === '' && ancestors[ancestors.length - 1] !== 'pre' ? { nothing: true } : { text: child };
   const { rules, make } = builder;
-  const imageSpan = builder.mode === 'import' && child.tag === 'span' && child.children.some((one) => typeof one !== 'string' && one.tag === 'img') && child.children.every((one) => typeof one === 'string' ? one.trim() === '' : one.tag === 'img');
-  // A plain span around only images is HTML phrasing content, but the model's span is a text-only Paragraph.
+  const visualSpan = builder.mode === 'import' && child.tag === 'span' && holdsLinkedMedia(child) && visualOnlyChildren(child.children);
+  // A plain span around only visual media is HTML phrasing content, but the model's span is a text-only Paragraph.
   // Release the wrapper so its visual children remain editable rather than turning the span into empty text.
-  if (imageSpan && child.attributes.size === 0) {
+  if (visualSpan && child.attributes.size === 0) {
     builder.report.unwrapped.push(lineOfNode(builder.markup, child));
     return { nodes: child.children.flatMap((one) => {
       const made = build(one, builder, ancestors);
@@ -536,8 +536,8 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   // the editor's two types of the same tag are meant (elements.json)
   // A styled image wrapper needs a children-bearing model element. Keep its classes and attributes on a Div so its
   // layout rules and the image remain editable; the model's span variant is text-only.
-  const type = imageSpan ? 'div' : child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
-  const tag = imageSpan ? 'div' : child.tag;
+  const type = visualSpan ? 'div' : child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
+  const tag = visualSpan ? 'div' : child.tag;
   if (type === null) {
     // A script and a style are no elements of the page: the import reads them itself (a page keeps its script's code,
     // a linked sheet's rules land on the elements), the code pane's reader drops them as anything else it has no
@@ -747,6 +747,10 @@ function holdsBlock(node: MarkupNode, rules: ModelRules): boolean {
 // The Link Block owns children, so the image stays editable and exportable inside the anchor.
 function holdsLinkedMedia(node: MarkupNode): boolean {
   return node.children.some((child) => typeof child !== 'string' && (['img', 'svg', 'video'].includes(child.tag) || holdsLinkedMedia(child)));
+}
+
+function visualOnlyChildren(children: readonly MarkupChild[]): boolean {
+  return children.every((child) => typeof child === 'string' ? child.trim() === '' : ['img', 'svg', 'video'].includes(child.tag) || (['a', 'picture'].includes(child.tag) && visualOnlyChildren(child.children)));
 }
 
 // the Paragraph a run of text directly inside a container becomes: built as any text element, some of its runs marked

@@ -9088,10 +9088,11 @@ instance (`status.locked.edit`).
   capture. An anchor with an image, SVG or video becomes a Link Block, retaining its editable visual child. Ordinary
   HTML whitespace in text runs collapses to spaces, while an actual `<br>` remains a line break and preformatted text
   keeps its whitespace.
-- A plain, attribute-free `<span>` containing only images releases its wrapper and keeps each image as an editable
-  child. Image width and height attributes remain lower-priority hints: when a captured responsive stylesheet controls
+- A plain, attribute-free `<span>` containing only visual media or a visual link releases its wrapper and keeps each
+  child, including the link and its image, editable. Image width and height attributes remain lower-priority hints:
+  when a captured responsive stylesheet controls
   either dimension, the hint does not become a later generated rule that overrides it.
-- An image-only `<span>` with classes or other attributes remains a children-bearing editable wrapper. Because the
+- A visual-only `<span>` with classes or other attributes remains a children-bearing editable wrapper. Because the
   model's `span` is text-only, the wrapper uses the Div element's tag while retaining its author classes and attributes;
   its images and responsive class rules remain visible in the canvas and export.
 - A runtime style on the page's `<html>` is kept as a last sheet when the capture reads it, since the project model has

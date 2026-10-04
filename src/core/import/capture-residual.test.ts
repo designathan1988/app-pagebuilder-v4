@@ -91,6 +91,12 @@ describe('what the importer keeps of a page', () => {
       expect.objectContaining({ src: 'shoe-hover.png', alt: 'Hover' }),
     ]);
   });
+  it('keeps a visual link inside an unstyled inline wrapper', () => {
+    const tree = run('<!doctype html><html><body><div><span><a href="https://example.com/"><img src="logo.svg" alt="Logo"></a></span></div></body></html>');
+    const container = tree?.children[0];
+    expect(container?.children.map((child) => child.type)).toEqual(['linkBlock']);
+    expect(container?.children[0]?.children.map((child) => child.type)).toEqual(['image']);
+  });
   it('takes the hidden attribute as the element hidden', () => {
     const tree = run('<!doctype html><html><body><div hidden><p>Closed</p></div></body></html>');
     expect(tree?.children[0]?.hidden).toBe(true);
