@@ -35,6 +35,9 @@ export interface Box {
 // what never stays in an SVG's markup: elements that run code or hold HTML, with everything inside them
 const DROPPED = new Set(['script', 'foreignobject']);
 const LINK_ATTRIBUTES = new Set(['href', 'xlink:href']);
+// the attributes of an animation element that write a value at run time: a javascript: one there is a link that runs
+// code once played (<set attributeName="href" to="javascript:…">: the audit's S1)
+const ANIMATED_VALUES = new Set(['to', 'from', 'values', 'by']);
 // an address that runs code, whatever its case and the spaces or control characters in it (a browser skips them)
 const SCRIPT_SCHEME = 'javascript:';
 const scripted = (value: string) =>
@@ -137,7 +140,8 @@ export function sanitizedSvgMarkup(text: string): Parsed {
         }
       }
       const lower = attribute.toLowerCase();
-      if (lower.startsWith('on') || (LINK_ATTRIBUTES.has(lower) && scripted(value))) continue;
+      if (lower.startsWith('on') || ((LINK_ATTRIBUTES.has(lower) || ANIMATED_VALUES.has(lower)) && scripted(value))) continue;
+      if (lower === 'values' && value.split(';').some(scripted)) continue;
       attributes.push(` ${attribute}="${value.replaceAll('"', '&quot;').replaceAll('<', '&lt;')}"`);
     }
     at = i + 1;

@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82555
+    "lines": 82559
   },
   "features": [
     {
@@ -3726,7 +3726,7 @@
     },
     {
       "path": "src/core/elements/svg.ts",
-      "lines": 278,
+      "lines": 282,
       "commands": [
         "element.setSvgMarkup"
       ],
