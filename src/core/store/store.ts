@@ -447,22 +447,34 @@ export function createStore<Ui>(options: StoreOptions<Ui>): Store<Ui> {
       if (restored === null || tx === undefined) return { status: 'done', changed: false };
       // the step names what it undoes or redoes: what its command said, else "the last change"
       const action = tx.message ?? LAST_CHANGE;
-      publish(commit({ ...state, ...restored, message: outcome.kind === 'undo' ? undone(action) : redone(action), refused: false }, id), outcome.kind === 'undo' ? tx.inverses : tx.patches);
+      publish(commit({ ...state, ...restored, message: outcome.kind === 'undo' ? undone(action) : redone(action), refusal: null, refused: false }, id), outcome.kind === 'undo' ? tx.inverses : tx.patches);
       return { status: 'done', changed: true };
     }
     if (outcome.kind === 'load') {
       if (gesture) throw new Error(`${id} cannot run inside a gesture`);
-      const loaded = commit({ ...state, document: outcome.document, selection: [], history: EMPTY_HISTORY, message: outcome.message ?? (state.refused === true ? null : state.message), refused: false }, id);
+      const loaded = commit({ ...state, document: outcome.document, selection: [], history: EMPTY_HISTORY, message: outcome.message ?? (state.refused === true ? null : state.message), refusal: null, refused: false }, id);
       publish(loaded, [{ op: 'replace', path: ['pages'], value: outcome.document.pages }]);
       return { status: 'done', changed: true };
     }
 
     const before = state;
-    const own = applyPatches(before.document, outcome.patches ?? []);
-    // what follows the change (options.derive) is computed from the document the handler's patches make and joins
-    // them in one transaction, before the whole is validated and recorded: one undo takes both back. A refusal there
-    // is the command's own, said before anything changes.
-    const derived = own.applied.length > 0 && options.derive !== undefined ? options.derive(before.document, own.document, handlerContext(confirmed)) : null;
+    // a patch that does not fit the document, or a derivation that throws, is a failure of the command as a handler
+    // that throws is (the audit's ST2: it escaped dispatch into the control that asked, with no word said)
+    let own: ReturnType<typeof applyPatches>;
+    let derived: ReturnType<NonNullable<StoreOptions<Ui>['derive']>> | null;
+    try {
+      own = applyPatches(before.document, outcome.patches ?? []);
+      // what follows the change (options.derive) is computed from the document the handler's patches make and joins
+      // them in one transaction, before the whole is validated and recorded: one undo takes both back. A refusal there
+      // is the command's own, said before anything changes.
+      derived = own.applied.length > 0 && options.derive !== undefined ? options.derive(before.document, own.document, handlerContext(confirmed)) : null;
+    } catch (error) {
+      const failed = message('status.change.failed', { command: nameOf(command) });
+      publish(commit({ ...state, message: failed, refused: true }, id));
+      if (options.freeze) throw error;
+      reportError(`${id} produced patches that do not fit the document`, error instanceof Error ? (error.stack ?? error.message) : String(error));
+      return { status: 'refused', message: failed };
+    }
     if (derived !== null && 'refused' in derived) {
       publish(commit({ ...state, message: derived.refused, refusal: { command: id, args, message: derived.refused }, refused: true }, id));
       return { status: 'refused', message: derived.refused };

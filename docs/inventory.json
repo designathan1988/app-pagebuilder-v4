@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82535
+    "lines": 82547
   },
   "features": [
     {
@@ -4459,7 +4459,7 @@
     },
     {
       "path": "src/core/store/store.ts",
-      "lines": 712,
+      "lines": 724,
       "commands": [],
       "features": []
     },

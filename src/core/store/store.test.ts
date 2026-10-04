@@ -756,3 +756,16 @@ describe('the command table', () => {
     expect(COMMANDS['history.redo']).not.toBe(NOT_AVAILABLE_YET);
   });
 });
+
+// Family ST2 of the code audit (2026-10-04): patches that do not fit the document are a failure of the command, said in
+// the status bar and recorded, as a handler that throws is; they escaped dispatch instead.
+describe('a command whose patches do not fit the document', () => {
+  it('fails with words in production, nothing changed', () => {
+    const misfit = registerHandler('element.rename', () => ({ kind: 'change', patches: [{ op: 'replace', path: ['pages', 9, 'name'], value: 'x' }] }));
+    const { store } = testStore({ ...TEST_COMMANDS, 'element.rename': misfit } as CommandTable<EditorUi>, TEST_PREDICATES, false);
+    const before = store.getState().document;
+    const result = store.dispatch('element.rename', { target: store.getState().document.pages[0]?.tree.id ?? '', name: 'x' } as never);
+    expect(result).toMatchObject({ status: 'refused', message: { key: 'status.change.failed' } });
+    expect(store.getState().document).toBe(before);
+  });
+});
