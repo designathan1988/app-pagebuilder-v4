@@ -1,5 +1,6 @@
 // The editor opens in the browser's language when the person chose none (jornada03 J26): a Portuguese Chrome shows a
 // Portuguese editor and a Portuguese empty project, and the person's choice wins after a reload.
+import fs from 'node:fs';
 import { expect, test } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
 import { openMenu, runs } from './door.ts';
@@ -27,6 +28,29 @@ test('a fresh editor opens on the Insert panel, which the View menu names Insert
   await expect(page.locator('[data-door="workspace.setPanelOpen#toolbar-activity-bar-insert"]')).toHaveAttribute('aria-pressed', 'true');
   await openMenu(page, 'view');
   await expect(page.locator('[data-door="workspace.setPanelOpen#menu-view-elements"]')).toContainText('Inserir');
+});
+
+test('the Export ZIP label fits the top bar in both languages at 1280 pixels', runs('preferences.setLanguage#menu-language-en'), async ({ page }) => {
+  fs.mkdirSync('.cache/logs/j28-copy', { recursive: true });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await openEditor(page);
+  const exportButton = page.locator('[data-door="project.export#toolbar-top-bar-export"]');
+  const fits = () => exportButton.evaluate((button) => {
+    const label = button.querySelector('.door__label');
+    if (label === null) return false;
+    const outer = button.getBoundingClientRect();
+    const inner = label.getBoundingClientRect();
+    return inner.left >= outer.left && inner.right <= outer.right && label.scrollWidth <= label.clientWidth;
+  });
+  await expect(exportButton).toContainText('Exportar ZIP');
+  expect(await fits()).toBe(true);
+  await page.screenshot({ path: '.cache/logs/j28-copy/export-pt-BR.png' });
+  await openMenu(page, 'view');
+  await page.getByRole('menuitem', { name: 'Idioma', exact: true }).hover();
+  await page.locator('[data-door="preferences.setLanguage#menu-language-en"]').click();
+  await expect(exportButton).toContainText('Export ZIP');
+  expect(await fits()).toBe(true);
+  await page.screenshot({ path: '.cache/logs/j28-copy/export-en.png' });
 });
 
 // The audit's AUD-24: a write IndexedDB cannot take said "Não salvo: IndexedDB is not available", the editor's own

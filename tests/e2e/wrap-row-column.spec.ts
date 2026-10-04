@@ -139,6 +139,9 @@ test(
     // Title and Actions are not next to each other, so wrapping them moves Intro past them: the command tells the
     // person the order changes and asks first (the user's real-use audit, A3.13). Answering wraps them, in the
     // document's order.
+    await expect(page.getByRole('alertdialog')).toContainText('Putting these elements together may change their position on the page. Continue?');
+    fs.mkdirSync('.cache/logs/j28-copy', { recursive: true });
+    await page.screenshot({ path: '.cache/logs/j28-copy/wrap-en.png' });
     await page.locator('[data-confirmation="confirm"]').click();
     expect(await read(page)).toEqual({ tree: `Page(Hero(Row(Title Actions) Intro) ${REST})`, selection: ['Row'], undoSteps: 1 });
     expect(await childIds(page, 'Row'), 'the Row holds Title and Actions themselves, with their ids').toEqual(['n-title', 'n-actions']);
@@ -154,6 +157,18 @@ test(
     expect(await read(page)).toEqual(before);
   },
 );
+
+test.describe('Portuguese wrap copy', () => {
+  test.use({ locale: 'pt-BR' });
+  test('the confirmation explains the layout change without technical wording', runs('element.wrapRow#key-r-in-canvas'), async ({ page }) => {
+    await clickNode(page, 'n-actions');
+    await clickNode(page, 'n-title', 'Shift');
+    await runDoor(page, 'element.wrapRow#key-r-in-canvas');
+    await expect(page.getByRole('alertdialog')).toContainText('Colocar estes elementos juntos pode mudar a posição deles na página. Continuar?');
+    fs.mkdirSync('.cache/logs/j28-copy', { recursive: true });
+    await page.screenshot({ path: '.cache/logs/j28-copy/wrap-pt-BR.png' });
+  });
+});
 
 test(
   'a parent that accepts no <div> refuses the wrapper, and nothing changes',

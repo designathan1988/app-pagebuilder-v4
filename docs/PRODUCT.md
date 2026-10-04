@@ -151,7 +151,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | STG-5.14 | Bottom dock with the canonical strip | done | QA 96 (DEC-02) |
 | STG-5.15 | Keyboard: F6 includes canvas and Layers, arrows start at the root, roving focus (J12) | done | QA 95, 103, 105, 162 |
 | STG-5.16 | 1280 × 720: canvas ≥ 55 % (J25) | done | QA 155: the stage 932 × 537 px, 54.3 % of the window as an area, 72.8 % of its width; the width splitters QA 156 |
-| STG-5.17 | Language and texts: browser language, gender-neutral Portuguese, singular forms (J26, J28) | partial | QA 87, 93, 171; AUD-23 |
+| STG-5.17 | Language and texts: browser language, gender-neutral Portuguese, singular forms (J26, J28) | partial | QA 87, 93, 171; AUD-23; QA 248: plain wrap confirmation, neutral property/reset wording, count labels and fitting Export ZIP in both languages; remaining count-dependent messages need a full singular/plural pass |
 | STG-5.18 | Image picker with thumbnails and search (M4) | done | QA 94 |
 | STG-5.19 | Status bar parity, never an incident without a message (J1) | done | QA 149, 151 (`refusal-never-blanks.spec.ts`) |
 | STG-5.20 | Stage closure: `PAIRING-2.md` with zero open divergence | done | QA 220: `docs/PAIRING.md` generated with zero open divergence (kept: DEC-03, DEC-21, DEC-41-44) |
@@ -258,7 +258,7 @@ The problems of the usability study (`jornada03/REPORT.md` section 3), re-checke
 | J25 | 45 % canvas at 1280 × 720 | done | 54.3 % (QA 155; `narrow-window.spec.ts`) |
 | J26 | First contact (language, labels, Explorer first, naming) | done | QA 87, 171 |
 | J27 | Padding link global; longhand only | done | QA 54, 71 |
-| J28 | Copy glitches | partial | QA 76, 93; AUD-23, AUD-28 |
+| J28 | Copy glitches | partial | QA 76, 93; AUD-23, AUD-28; QA 248: wrap copy, reset agreement, count labels and top-bar export label fixed; the other count-dependent messages and imported-page naming still to audit |
 
 ### 2.5 Journey 03 hypotheses (H1–H17)
 

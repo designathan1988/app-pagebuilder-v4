@@ -7880,6 +7880,7 @@ None.
 2. **The choice is not stored.** Required: the language is kept in the preferences (the one preferences store, `src/editor/preferences/preferences.ts`) and restored after a reload; a fresh profile shows English.
 3. **Nothing proves the two catalogues agree.** Required: a unit test proves that `en.json` and `pt-BR.json` have the same keys and, for every key, the same placeholders; a key missing from a catalogue throws, never falls back to another language.
 4. **The page's own language is not the editor's.** Required: switching the editor's language never changes the page being edited (its content and the document's language settings are user content).
+5. **Copy fits and agrees in both languages (J28, STG-5.17).** A warning about wrapping elements describes its visible effect in plain words, without a technical wrapper noun. Portuguese reset messages name the value of a property so the sentence does not guess the property's gender. Counts displayed as labels before their numbers do not imply a plural noun after `1`. The top bar says `Export ZIP` / `Exportar ZIP`, fitting at 1280 px without clipping. The catalogues own every phrase; the browser-language and wrap flows verify their rendered text.
 
 ## undo-redo
 

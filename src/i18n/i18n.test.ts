@@ -62,6 +62,23 @@ describe('the i18n runtime', () => {
     expect(translate('pt-BR', 'canvas.pickTarget', { name: 'Card' })).toBe('Alvo: Card · clique para escolher');
   });
 
+  it('uses plain wrap copy, neutral property messages and count labels in both languages', () => {
+    expect(translate('en', 'dialog.wrap.message')).toBe('Putting these elements together may change their position on the page. Continue?');
+    expect(translate('pt-BR', 'dialog.wrap.message')).toBe('Colocar estes elementos juntos pode mudar a posição deles na página. Continuar?');
+    expect(translate('en', 'status.style.reset', { property: 'Width', name: 'Section' })).toBe('Reset Width on Section to its default.');
+    expect(translate('pt-BR', 'status.style.reset', { property: 'Largura', name: 'Seção' })).toBe('Valor de Largura em Seção voltou ao padrão.');
+    expect(translate('pt-BR', 'status.style.resetMany', { property: 'Largura', count: 2 })).toBe('Valor de Largura voltou ao padrão em 2 elementos.');
+    expect(translate('pt-BR', 'status.regions.stopped', { name: 'Menu' })).toBe('Compartilhamento de Menu encerrado; cada página mantém sua cópia.');
+    expect(translate('en', 'palette.search.matchCount', { count: 1, total: 1 })).toBe('Element matches: 1 / 1');
+    expect(translate('pt-BR', 'palette.search.matchCount', { count: 1, total: 1 })).toBe('Elementos encontrados: 1 / 1');
+    expect(translate('en', 'data.previewRows', { count: 1, columns: 1 })).toBe("Rows: 1; columns: 1. Check each column's type before importing.");
+    expect(translate('pt-BR', 'data.previewRows', { count: 1, columns: 1 })).toBe('Linhas: 1; colunas: 1. Confira o tipo de cada coluna antes de importar.');
+    expect(translate('en', 'dialog.deleteCollection.message', { name: 'Menu', count: 1 })).toBe('Delete the Menu collection? Connected pages and lists: 1. Their current content stays as it is.');
+    expect(translate('pt-BR', 'dialog.deleteCollection.message', { name: 'Menu', count: 1 })).toBe('Excluir a coleção Menu? Páginas e listas ligadas a ela: 1. O conteúdo delas fica como está.');
+    expect(translate('en', 'command.exportPage')).toBe('Export ZIP');
+    expect(translate('pt-BR', 'command.exportPage')).toBe('Exportar ZIP');
+  });
+
   it('has the same keys in both catalogues, and for every key the same placeholders (spec ui-language, Problem 3)', () => {
     const placeholders = (text: string) => [...new Set([...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
     expect(Object.keys(ptBR).sort()).toEqual(Object.keys(en).sort());
