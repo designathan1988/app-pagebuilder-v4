@@ -522,9 +522,10 @@ function htmlNames(node: DocNode, rules: ModelRules): ReadonlyMap<string, string
 function build(child: MarkupChild, builder: Builder, ancestors: readonly string[]): Raw {
   if (typeof child === 'string') return child.trim() === '' && ancestors[ancestors.length - 1] !== 'pre' ? { nothing: true } : { text: child };
   const { rules, make } = builder;
+  const imageSpan = builder.mode === 'import' && child.tag === 'span' && child.children.some((one) => typeof one !== 'string' && one.tag === 'img') && child.children.every((one) => typeof one === 'string' ? one.trim() === '' : one.tag === 'img');
   // A plain span around only images is HTML phrasing content, but the model's span is a text-only Paragraph.
   // Release the wrapper so its visual children remain editable rather than turning the span into empty text.
-  if (builder.mode === 'import' && child.tag === 'span' && child.attributes.size === 0 && child.children.some((one) => typeof one !== 'string' && one.tag === 'img') && child.children.every((one) => typeof one === 'string' ? one.trim() === '' : one.tag === 'img')) {
+  if (imageSpan && child.attributes.size === 0) {
     builder.report.unwrapped.push(lineOfNode(builder.markup, child));
     return { nodes: child.children.flatMap((one) => {
       const made = build(one, builder, ancestors);
@@ -533,7 +534,10 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   }
   // an <a> is the Link Block when it holds a block of its own (a card made of one link) and the Link otherwise, as
   // the editor's two types of the same tag are meant (elements.json)
-  const type = child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
+  // A styled image wrapper needs a children-bearing model element. Keep its classes and attributes on a Div so its
+  // layout rules and the image remain editable; the model's span variant is text-only.
+  const type = imageSpan ? 'div' : child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
+  const tag = imageSpan ? 'div' : child.tag;
   if (type === null) {
     // A script and a style are no elements of the page: the import reads them itself (a page keeps its script's code,
     // a linked sheet's rules land on the elements), the code pane's reader drops them as anything else it has no
@@ -586,7 +590,7 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
     id: make.ids.next(),
     type: type as ElementType,
     name,
-    tag: child.tag,
+    tag,
     attributes: {},
     classes: kept.names,
     styles: {},
@@ -680,8 +684,8 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
     const drawn = svgDrawing(parsed.markup, svgSize);
     return { node: { ...made, attributes: { ...attributes, ...(drawn === '' ? {} : { svgMarkup: drawn }) } as DocNode['attributes'] } };
   }
-  const below = [...ancestors, child.tag];
-  return { node: { ...made, children: buildChildren(child.children, child.tag, below, builder, line) } };
+  const below = [...ancestors, tag];
+  return { node: { ...made, children: buildChildren(child.children, tag, below, builder, line) } };
 }
 
 // The children of an element that holds elements (or of the page's body): each built, each placed by the content

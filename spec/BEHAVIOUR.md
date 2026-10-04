@@ -9086,6 +9086,9 @@ instance (`status.locked.edit`).
 - A plain, attribute-free `<span>` containing only images releases its wrapper and keeps each image as an editable
   child. Image width and height attributes remain lower-priority hints: when a captured responsive stylesheet controls
   either dimension, the hint does not become a later generated rule that overrides it.
+- An image-only `<span>` with classes or other attributes remains a children-bearing editable wrapper. Because the
+  model's `span` is text-only, the wrapper uses the Div element's tag while retaining its author classes and attributes;
+  its images and responsive class rules remain visible in the canvas and export.
 - A runtime style on the page's `<html>` is kept as a last sheet when the capture reads it, since the project model has
   no root style attribute. A declaration of an author class still competes in the imported cascade (including its
   `!important` priority); if it wins, a lower-priority rule is not copied onto the element as its own style.
