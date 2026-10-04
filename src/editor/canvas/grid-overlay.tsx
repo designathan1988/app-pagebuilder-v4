@@ -3,7 +3,7 @@
 // a band `width` wide, `gutter` apart, inset by max(margin, (page width − grid width) ÷ 2)), the row grid's bands
 // (`height` tall, `gutter` apart) and the dot grid (`spacing` apart), all in page px from the page's top-left corner,
 // translucent so the page shows through, in the canvas chrome, never in the page.
-import { pageShown } from '../../core/project/pages.ts';
+import { openedPage, pageShown } from '../../core/project/pages.ts';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { columnBands, columnsOf, dotsOf, foldLines, gridShown, rowBands, rowsOf } from '../../core/page/grid.ts';
 import { useEditorState } from '../store.ts';
@@ -31,7 +31,8 @@ export function GridOverlay() {
   const root = useEditorState((s) => pageShown(s)?.tree.id ?? null);
   // each grid's settings now (one text, so the hook's answer is stable)
   const breakpoint = useEditorState((s) => activeBreakpoint(s).id);
-  const settings = useEditorState((s) => JSON.stringify({ columns: columnsOf(s.document, breakpoint), rows: rowsOf(s.document, breakpoint), dots: dotsOf(s.document, breakpoint) }));
+  // the open page's settings (the audit's PG2: the first page's were drawn on every page)
+  const settings = useEditorState((s) => JSON.stringify({ columns: columnsOf(s.document, breakpoint, openedPage(s)), rows: rowsOf(s.document, breakpoint, openedPage(s)), dots: dotsOf(s.document, breakpoint, openedPage(s)) }));
   const { columns: grid, rows: bands, dots: spots } = JSON.parse(settings) as { columns: ReturnType<typeof columnsOf>; rows: ReturnType<typeof rowsOf>; dots: ReturnType<typeof dotsOf> };
   const { height: rowHeight, gutter: rowGutter } = bands;
   const dotSpacing = spots.spacing;

@@ -4,6 +4,7 @@
 // and takes the focus: the guide key context's keys (arrows, Delete, Backspace, L) act on the focused guide alone
 // (Problems in Pager 3).
 import { useEffect, useState } from 'react';
+import { openedPage } from '../../core/project/pages.ts';
 import { guidesOf } from '../../core/page/guides.ts';
 import { manifest } from '../../manifest/runtime.ts';
 import { useEditorState } from '../store.ts';
@@ -16,7 +17,7 @@ const NONE: readonly never[] = [];
 
 export function Guides({ overlay }: { readonly overlay: { readonly current: HTMLDivElement | null } }) {
   // none drawn while hidden by View › Guides & Grids (guides.toggleVisible, a preference)
-  const guides = useEditorState((s) => (s.ui.preferences.guidesHidden === true ? NONE : guidesOf(s.document)));
+  const guides = useEditorState((s) => (s.ui.preferences.guidesHidden === true ? NONE : guidesOf(s.document, openedPage(s))));
   // the overlay point of the page's origin and the zoom, measured at every frame while there are guides
   const [origin, setOrigin] = useState<{ readonly x: number; readonly y: number; readonly zoom: number } | null>(null);
   useEffect(() => {

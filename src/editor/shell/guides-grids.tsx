@@ -13,6 +13,7 @@
 // the control that opened it, or the button of the menu whose item did. Opening a field or the list is not a command
 // (archive/DESIGN.md "What is not a command").
 import { useState, type FormEvent, type ReactNode } from 'react';
+import { openedPage } from '../../core/project/pages.ts';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { gridSetting } from '../../core/page/grid.ts';
 import { settingsOf, type GridName } from '../../core/page/grid-settings.ts';
@@ -106,7 +107,7 @@ function AddGuide({ entry, axis }: { readonly entry: DoorEntry; readonly axis: s
 
 function GuideList({ entry }: { readonly entry: DoorEntry }) {
   const t = useT();
-  const guides = useEditorState((s) => guidesOf(s.document));
+  const guides = useEditorState((s) => guidesOf(s.document, openedPage(s)));
   if (guides.length === 0) return <p className="guides-grids__none">{t('guidesGrids.none')}</p>;
   return (
     <ul className="guides-grids__guides">
@@ -126,7 +127,8 @@ function GridField({ entry, grid, setting, labelKey }: { readonly entry: DoorEnt
   const run = useRun();
   const label = t(labelKey as MessageId);
   // the field shows the setting at the breakpoint in force (A1.6), which its write also lands at
-  const value = useEditorState((s) => gridSetting(s.document, grid, setting, activeBreakpoint(s).id));
+  // the open page's own settings, the page grid.setSettings writes (the audit's PG2: the first page's were shown)
+  const value = useEditorState((s) => gridSetting(s.document, grid, setting, activeBreakpoint(s).id, openedPage(s)));
   const door = useDoor(entry, { grid, setting }, label, ready(entry));
   // what is typed, until Enter keeps it or the field is left (a field's draft, not editor state)
   const [draft, setDraft] = useState<string | null>(null);

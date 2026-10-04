@@ -3,6 +3,7 @@
 // is what the export writes for it (core/export/export.ts, never a second serializer), a project file's is its stored
 // bytes — so the pane, Copy and Download all read the same text. Which file is open is explorer/file-tabs.ts's.
 import { message, registerHandler } from '../../core/commands/registry.ts';
+import { pageShown } from '../../core/project/pages.ts';
 import { siteScripts } from '../forms/script.ts';
 import type { DocumentJson } from '../../core/document/model.ts';
 import { fileAt, fileBytes } from '../../core/files/files.ts';
@@ -111,7 +112,7 @@ export function paneLines(ui: EditorUi, document: DocumentJson, rules: ModelRule
 // page's own file for the kind the pane's tabs chose. Null when there is nothing to show (the JS pane before the
 // interactions group exists).
 export function shownPane(ui: EditorUi, document: DocumentJson, rules: ModelRules): { readonly path: string; readonly kind: FileKind; readonly generated: boolean; readonly text: string | null } | null {
-  const path = activeFile(ui) ?? paneFile(paneKind(ui), document);
+  const path = activeFile(ui) ?? paneFile(paneKind(ui), document, ui);
   if (path === null) return null;
   return { path, kind: kindOf(path), generated: isGenerated(path, document), text: paneText(path, document, rules) };
 }
@@ -133,8 +134,9 @@ export const setPane = registerHandler<'codePanel.setPane', EditorUi>(
 
 // The file the pane shows for a kind: the page's own file, the stylesheet, the interactions script. The JS pane needs
 // the interactions group (export-events-js writes the file), so it shows nothing until then.
-export function paneFile(kind: PaneKind, document: DocumentJson): string | null {
-  if (kind === 'html') return document.pages[0]?.file ?? null;
+export function paneFile(kind: PaneKind, document: DocumentJson, ui: EditorUi): string | null {
+  // the page the canvas shows (openedPage, its one owner: the audit's PG2, the first page's code showed for every page)
+  if (kind === 'html') return pageShown({ document, ui })?.file ?? null;
   if (kind === 'css') return STYLESHEET;
   return null;
 }

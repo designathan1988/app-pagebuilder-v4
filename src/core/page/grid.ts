@@ -57,7 +57,7 @@ export function foldLines(pageHeight: number, screen: number): readonly number[]
 // the others take their defaults of interactions.json. grid.setSettings keeps one setting of one grid, a number
 // within its range (whole, for a count of columns); outside it, refused naming the setting and its range, and nothing
 // changes (Problems in Pager 1: Pager clamped it silently). One undo step.
-export function gridSetting(document: DocumentJson, grid: GridName, setting: string, breakpoint: string, page = 0): number {
+export function gridSetting(document: DocumentJson, grid: GridName, setting: string, breakpoint: string, page: number): number {
   const facts = settingOf(grid, setting);
   if (facts === undefined) throw new Error(`grid: the ${grid} grid has no setting ${setting}`);
   return heldIn(document, page, grid, setting, breakpoint) ?? defaultOf(facts.byDefault, breakpoint);
@@ -122,10 +122,10 @@ export function columnBands(pageWidth: number, grid: Columns): { readonly x: num
 }
 
 // each grid's settings now, by name (the defaults where the page sets none)
-const settingsNow = (document: DocumentJson, grid: GridName, breakpoint: string, page = 0): Readonly<Record<string, number>> => Object.fromEntries(settingsOf(grid).map(([name]) => [name, gridSetting(document, grid, name, breakpoint, page)]));
-export const columnsOf = (document: DocumentJson, breakpoint: string, page = 0): Columns => settingsNow(document, 'columns', breakpoint, page) as unknown as Columns;
-export const rowsOf = (document: DocumentJson, breakpoint: string): { readonly height: number; readonly gutter: number } => settingsNow(document, 'rows', breakpoint) as unknown as { height: number; gutter: number };
-export const dotsOf = (document: DocumentJson, breakpoint: string): { readonly spacing: number } => settingsNow(document, 'dots', breakpoint) as unknown as { spacing: number };
+const settingsNow = (document: DocumentJson, grid: GridName, breakpoint: string, page: number): Readonly<Record<string, number>> => Object.fromEntries(settingsOf(grid).map(([name]) => [name, gridSetting(document, grid, name, breakpoint, page)]));
+export const columnsOf = (document: DocumentJson, breakpoint: string, page: number): Columns => settingsNow(document, 'columns', breakpoint, page) as unknown as Columns;
+export const rowsOf = (document: DocumentJson, breakpoint: string, page: number): { readonly height: number; readonly gutter: number } => settingsNow(document, 'rows', breakpoint, page) as unknown as { height: number; gutter: number };
+export const dotsOf = (document: DocumentJson, breakpoint: string, page: number): { readonly spacing: number } => settingsNow(document, 'dots', breakpoint, page) as unknown as { spacing: number };
 
 // the row bands down a page this tall: each band's top
 export function rowBands(pageHeight: number, height: number, gutter: number): number[] {

@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82433
+    "lines": 82449
   },
   "features": [
     {
@@ -4232,7 +4232,7 @@
     },
     {
       "path": "src/core/page/guides.ts",
-      "lines": 86,
+      "lines": 95,
       "commands": [
         "guides.create",
         "guides.move",
@@ -5125,13 +5125,13 @@
     },
     {
       "path": "src/editor/canvas/grid-overlay.tsx",
-      "lines": 87,
+      "lines": 88,
       "commands": [],
       "features": []
     },
     {
       "path": "src/editor/canvas/guides.tsx",
-      "lines": 68,
+      "lines": 69,
       "commands": [],
       "features": []
     },
@@ -5286,7 +5286,7 @@
     },
     {
       "path": "src/editor/code-panel/code-panel.ts",
-      "lines": 155,
+      "lines": 157,
       "commands": [
         "codePanel.setPane",
         "codePanel.copyPane",
@@ -5595,7 +5595,7 @@
     },
     {
       "path": "src/editor/input/pointer/events.ts",
-      "lines": 564,
+      "lines": 565,
       "commands": [],
       "features": []
     },
@@ -6233,7 +6233,7 @@
     },
     {
       "path": "src/editor/shell/guides-grids.tsx",
-      "lines": 192,
+      "lines": 194,
       "commands": [],
       "features": []
     },

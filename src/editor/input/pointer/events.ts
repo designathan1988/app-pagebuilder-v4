@@ -1,6 +1,7 @@
 // The window's pointer events, each turned into the machine's events (plan I.12): press, move, release, cancel, the
 // lost capture, the browser's own gestures, the context menu and the double click.
 import { locate, type NodeId } from '../../../core/document/model.ts';
+import { openedPage } from '../../../core/project/pages.ts';
 import type { CommandId, DoorId } from '../../../generated/ids.ts';
 import { manifest } from '../../../manifest/runtime.ts';
 import { canvasFrame, geometryOf, nodeAt, nodeBox, pageLayout, resizeBasis, screenToPage } from '../../canvas/coordinates.ts';
@@ -324,7 +325,7 @@ export function pointerEvents(p: PointerOwner): Pick<PointerOwner, 'onDoubleClic
       const create = GUIDE_CREATES[ps.guiding.axis];
       if (ps.guiding.guide === null && create) {
         ps.guiding.gesture.dispatch(create.command.id as CommandId, { ...create.door.args, axis: ps.guiding.axis, at } as never);
-        ps.guiding.guide = [...guidesOf(store.getState().document)].reverse().find((guide) => guide.axis === ps.guiding?.axis)?.id ?? null;
+        ps.guiding.guide = [...guidesOf(store.getState().document, openedPage(store.getState()))].reverse().find((guide) => guide.axis === ps.guiding?.axis)?.id ?? null;
       } else if (ps.guiding.guide !== null && GUIDE_MOVE !== null) ps.guiding.gesture.dispatch(GUIDE_MOVE.command.id as CommandId, { ...GUIDE_MOVE.door.args, guide: ps.guiding.guide, at } as never);
       return;
     }

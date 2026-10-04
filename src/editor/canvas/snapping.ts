@@ -76,7 +76,7 @@ function targetLines(state: EditorState, node: NodeId): SnapLine[] {
   const pageBox = pageLayout.box(page.id);
   if (pageBox !== null && targets.includes(PAGE)) lines.push(...boxLines(pageBox, 'page', page.id, targets));
   if (targets.includes(GUIDES) && state.ui.preferences.guidesHidden !== true)
-    for (const guide of guidesOf(state.document)) lines.push({ axis: guide.axis === 'vertical' ? 'x' : 'y', at: guide.at, source: 'guide', target: guide.id, span: null });
+    for (const guide of guidesOf(state.document, openedPage(state))) lines.push({ axis: guide.axis === 'vertical' ? 'x' : 'y', at: guide.at, source: 'guide', target: guide.id, span: null });
   if (targets.includes(GRID) && pageBox !== null) {
     const breakpoint = activeBreakpoint(state).id;
     if (gridShown(state, 'gridColumns')) {
@@ -84,7 +84,7 @@ function targetLines(state: EditorState, node: NodeId): SnapLine[] {
         for (const at of [band.x, band.x + band.width]) lines.push({ axis: 'x', at: pageBox.x + at, source: 'grid', target: null, span: null });
     }
     if (gridShown(state, 'gridRows')) {
-      const rows = rowsOf(state.document, breakpoint);
+      const rows = rowsOf(state.document, breakpoint, openedPage(state));
       for (const top of rowBands(pageBox.height, rows.height, rows.gutter))
         for (const at of [top, top + rows.height]) lines.push({ axis: 'y', at: pageBox.y + at, source: 'grid', target: null, span: null });
     }
