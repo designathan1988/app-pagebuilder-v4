@@ -8,6 +8,27 @@ import { importHtmlCommand } from './import.ts';
 
 const page = (id: string, name: string, file: string, children: ReturnType<typeof node>[] = []) => ({ id, name, file, tree: node(`${name}Root`, 'page', 'body', { children }) });
 describe('export then import keeps the project’s classes (B-04)', () => {
+  it('keeps a single author class on an element with no own styles through two exports', () => {
+    const base64 = (text: string) => btoa(String.fromCharCode(...new TextEncoder().encode(text)));
+    const document = documentOf({
+      pages: [page('p', 'Home', 'index.html', [node('Only', 'article', 'article', { classes: ['brand'] })])],
+      classes: [{ name: 'brand', styles: { desktop: { base: { color: 'red' } } } }],
+    });
+    const first = siteFiles(document, RULES);
+    const files = [
+      { name: 'index.html', type: 'text/html', bytes: base64(first.pages[0]?.html ?? '') },
+      { name: 'css/styles.css', type: 'text/css', bytes: base64(first.css) },
+    ];
+    const ran = runHandler(importHtmlCommand, documentOf({ pages: [page('p', 'Home', 'index.html')] }), { files }, { confirmed: true });
+    expect(ran.problems).toEqual([]);
+    expect(ran.document.classes?.find((one) => one.name === 'brand')?.styles.desktop?.base?.color).toBe('red');
+    expect(ran.document.pages[0]?.tree.children[0]?.classes).toEqual(['brand']);
+    expect(ran.document.pages[0]?.tree.children[0]?.styles).toEqual({});
+    const second = siteFiles(ran.document, RULES);
+    expect(second.pages[0]?.html).toBe(first.pages[0]?.html);
+    expect(second.css).toBe(first.css);
+  });
+
   it('a class two elements list comes back as a class definition, and its styles are not copied onto them', () => {
     const base64 = (text: string) => btoa(String.fromCharCode(...new TextEncoder().encode(text)));
     const card = (name: string) => node(name, 'article', 'article', { classes: ['card'], children: [node(`${name}Title`, 'heading', 'h3', { text: name })] });
