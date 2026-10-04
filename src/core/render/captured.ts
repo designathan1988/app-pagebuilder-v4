@@ -1,6 +1,6 @@
 // Captured pages keep the browser's ordered DOM as project JSON. Both the editing canvas and the
 // exported file read this tree; neither maps it through the authored element vocabulary.
-import type { CapturedElement, CapturedNode, CapturedPage } from '../document/captured.ts';
+import { unsafeCapturedElement, type CapturedElement, type CapturedNode, type CapturedPage } from '../document/captured.ts';
 
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 const RAW_TEXT = new Set(['style']);
@@ -22,6 +22,8 @@ export function capturedHtml(root: CapturedElement): string {
   const write = (node: CapturedNode, parent = ''): string => {
     if (node.kind === 'comment') return `<!--${node.value.replaceAll('-->', '--&gt;')}-->`;
     if (node.kind === 'text') return RAW_TEXT.has(parent) ? node.value : escapeText(node.value);
+    // an element that acts on the page instead of drawing (a refresh, a <base>) is never written
+    if (unsafeCapturedElement(node.tag, node.attributes)) return '';
     const attributes = node.attributes.map((one) => ` ${one.name}="${escapeAttribute(one.value)}"`).join('');
     const open = `<${node.tag}${attributes}>`;
     if (node.namespace === 'http://www.w3.org/1999/xhtml' && VOID.has(node.tag)) return open;

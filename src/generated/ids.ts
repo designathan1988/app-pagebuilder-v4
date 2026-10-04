@@ -427,6 +427,7 @@ export const DOOR_IDS = [
   "capture.edit#captured-apply",
   "capture.edit#key-enter-in-captured-value",
   "capture.select#captured-inspector-node",
+  "capture.select#canvas-click-captured-element",
   "checks.applyFix#checks-fix-form-submit",
   "checks.applyFix#checks-fix-heading-level",
   "checks.applyFix#checks-fix-image-alt",

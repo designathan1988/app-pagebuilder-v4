@@ -3,10 +3,10 @@
     "features": 214,
     "built": 214,
     "commands": 373,
-    "doors": 1361,
-    "scenarios": 1830,
+    "doors": 1362,
+    "scenarios": 1831,
     "modules": 473,
-    "lines": 82153
+    "lines": 82236
   },
   "features": [
     {
@@ -2527,8 +2527,8 @@
         "capture.select",
         "workspace.openDialog"
       ],
-      "doors": 10,
-      "scenarios": 6,
+      "doors": 11,
+      "scenarios": 7,
       "modules": [
         "src/core/capture/edits.ts",
         "src/editor/capture/selection.ts",
@@ -3593,7 +3593,7 @@
     },
     {
       "path": "src/core/document/captured.ts",
-      "lines": 135,
+      "lines": 144,
       "commands": [],
       "features": []
     },
@@ -4395,7 +4395,7 @@
     },
     {
       "path": "src/core/render/captured.ts",
-      "lines": 198,
+      "lines": 200,
       "commands": [],
       "features": []
     },
@@ -5063,13 +5063,13 @@
     },
     {
       "path": "src/editor/canvas/chrome.tsx",
-      "lines": 1068,
+      "lines": 1113,
       "commands": [],
       "features": []
     },
     {
       "path": "src/editor/canvas/coordinates.ts",
-      "lines": 641,
+      "lines": 654,
       "commands": [],
       "features": []
     },
@@ -5171,7 +5171,7 @@
     },
     {
       "path": "src/editor/canvas/render/captured.ts",
-      "lines": 111,
+      "lines": 113,
       "commands": [],
       "features": []
     },
@@ -5577,7 +5577,7 @@
     },
     {
       "path": "src/editor/input/pointer/common.ts",
-      "lines": 560,
+      "lines": 563,
       "commands": [],
       "features": []
     },
@@ -5589,7 +5589,7 @@
     },
     {
       "path": "src/editor/input/pointer/effects.ts",
-      "lines": 297,
+      "lines": 299,
       "commands": [],
       "features": []
     },
@@ -5601,7 +5601,7 @@
     },
     {
       "path": "src/editor/input/pointer/machine.ts",
-      "lines": 90,
+      "lines": 92,
       "commands": [],
       "features": []
     },
@@ -5619,7 +5619,7 @@
     },
     {
       "path": "src/editor/input/pointer/press.ts",
-      "lines": 98,
+      "lines": 100,
       "commands": [],
       "features": []
     },
@@ -6293,7 +6293,7 @@
     },
     {
       "path": "src/editor/shell/panel-field.tsx",
-      "lines": 176,
+      "lines": 178,
       "commands": [],
       "features": []
     },
@@ -6777,7 +6777,7 @@
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6605,
+      "lines": 6606,
       "commands": [],
       "features": []
     },

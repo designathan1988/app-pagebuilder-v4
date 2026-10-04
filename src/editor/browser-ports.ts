@@ -3,7 +3,7 @@
 // before the editor starts (src/main.tsx) and by the unit tests over happy-dom (tools/test/setup-browser.ts).
 import type { MarkupChild, MarkupNode, MarkupPage, PageHead } from '../core/import/markup.ts';
 import type { BrowserPorts } from '../core/ports/browser.ts';
-import { unsafeCapturedAttribute, type CapturedNode, type CapturedElement } from '../core/document/captured.ts';
+import { unsafeCapturedAttribute, unsafeCapturedElement, type CapturedNode, type CapturedElement } from '../core/document/captured.ts';
 import type { IdGenerator } from '../core/ports/ids.ts';
 
 const ELEMENT_NODE = 1;
@@ -77,7 +77,7 @@ function capturedTree(markup: string, ids: IdGenerator): CapturedElement {
     if (node.nodeType === COMMENT_NODE) return { kind: 'comment', id: ids.next(), value: node.nodeValue ?? '' };
     if (node.nodeType !== ELEMENT_NODE) return null;
     const element = node as Element;
-    if (element.localName === 'script') return null;
+    if (unsafeCapturedElement(element.localName, [...element.attributes])) return null;
     const parent = element.localName === 'template' ? (element as HTMLTemplateElement).content : element;
     return {
       kind: 'element', id: ids.next(), namespace: element.namespaceURI ?? 'http://www.w3.org/1999/xhtml',

@@ -43,7 +43,7 @@ import { type DragView, type GhostReturn, type Inserting, type SideView } from '
 import { MODEL_RULES, useEditorState, useStore } from '../store.ts';
 import { openedPage } from '../../core/project/pages.ts';
 import { useT } from '../text.ts';
-import { canvasFrame, contentBoxes, flowAxis, flowReversed, holdsNode, innerBox, nodeBox, nodeSize, pageAnimating, resizeBasis, elementRotation, type Point } from './coordinates.ts';
+import { canvasFrame, capturedBox, contentBoxes, flowAxis, flowReversed, holdsNode, innerBox, nodeBox, nodeSize, pageAnimating, resizeBasis, elementRotation, type Point } from './coordinates.ts';
 import { onPageChange } from './page-clock.ts';
 import { TextToolbar } from './text-toolbar.tsx';
 import { GridEditor } from './grid-editor.tsx';
@@ -596,6 +596,50 @@ function DropFlash() {
   );
 }
 
+// The element of a captured page the captured inspector or a press on the canvas selected (ui.capturedNode, spec
+// capture-url): its outline and a label with its tag, in the selection's colours, measured on every animation frame
+// (the page scrolls, zooms and lays out under it).
+function CapturedSelection() {
+  const id = useEditorState((s) => s.ui.capturedNode ?? null);
+  const [shown, setShown] = useState<{ readonly id: string; readonly box: Box; readonly tag: string; readonly inside: boolean } | null>(null);
+  const layer = useRef<HTMLDivElement>(null);
+  const tag = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (id === null) return;
+    let request = 0;
+    const measure = () => {
+      const iframe = canvasFrame();
+      const origin = layer.current?.parentElement?.getBoundingClientRect();
+      const found = iframe && origin ? capturedBox(iframe, id) : null;
+      setShown((was) => {
+        if (found === null || !origin) return null;
+        const next = { x: found.box.x - origin.x, y: found.box.y - origin.y, width: found.box.width, height: found.box.height };
+        // the label above the element where it has the room, else inside its top-left corner (the label rule)
+        const inside = next.y < (tag.current?.offsetHeight ?? 0);
+        const same = was !== null && was.id === id && was.tag === found.tag && was.inside === inside;
+        return same && was.box.x === next.x && was.box.y === next.y && was.box.width === next.width && was.box.height === next.height ? was : { id, box: next, tag: found.tag, inside };
+      });
+      request = requestAnimationFrame(measure);
+    };
+    request = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(request);
+  }, [id]);
+  // what was measured for another selection (or none) is not drawn
+  const drawn = shown !== null && shown.id === id ? shown : null;
+  return (
+    <div ref={layer} className="chrome__captured">
+      {drawn === null ? null : (
+        <>
+          <div className="chrome__selection" data-chrome="captured-selection" style={{ left: drawn.box.x, top: drawn.box.y, width: drawn.box.width, height: drawn.box.height }} />
+          <div ref={tag} className={`chrome__label is-target${drawn.inside ? ' is-inside' : ''}`} data-chrome="captured-label" style={{ left: drawn.box.x, top: drawn.box.y }}>
+            <span className="chrome__name">{drawn.tag}</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // The ghost of a creation drag Escape cancelled (pointer.ts, ghostReturn) goes back to the tile it came from and fades
 // out over GHOST_RETURN_MS (spec drag-level-keys-escape, Problems in Pager 4), then is drawn no more; at once when the
 // person asks for reduced motion.
@@ -1042,6 +1086,7 @@ export function CanvasChrome() {
         />
       ) : null}
       <DropFlash />
+      <CapturedSelection />
       {returning !== null && dragging === null ? <ReturningGhost key={returning.id} view={returning} /> : null}
       {shown.union && selection.length > 1 ? <div className="chrome__union" data-chrome="union" style={at(shown.union)} /> : null}
       {/* the handles of the Edit on canvas mode on the one selected element (edit-handles.tsx), and the spacing and gap

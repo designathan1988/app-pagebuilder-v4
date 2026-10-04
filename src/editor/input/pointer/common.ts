@@ -6,7 +6,7 @@ import { isFeatureBuilt } from '../../../core/commands/registry.ts';
 import type { DispatchResult, Gesture } from '../../../core/store/store.ts';
 import type { CommandId, DoorId, FeatureId, KeyContextId } from '../../../generated/ids.ts';
 import { manifest, numberConstant, pairConstant, type DoorEntry } from '../../../manifest/runtime.ts';
-import { canvasFrame, nodeAt, type Point } from '../../canvas/coordinates.ts';
+import { canvasFrame, capturedNodeAt, nodeAt, type Point } from '../../canvas/coordinates.ts';
 import { PANELS, type Panel } from '../../workspace/panel-catalogue.ts';
 import type { DropProposal } from '../../drag/drop.ts';
 import type { EditorStore } from '../../store.ts';
@@ -452,6 +452,9 @@ export function pressAt(event: MouseEvent, isRoot: (node: string) => boolean, un
   if (named !== null) return { on: 'node', node: named, root: isRoot(named), label: true };
   if (target?.closest('[data-canvas-overlay]')) {
     const frame = canvasFrame();
+    // a captured page's element (its canvas copy wears data-capture-node): the captured node, not the page root
+    const captured = frame ? capturedNodeAt(frame, { x: event.clientX, y: event.clientY }) : null;
+    if (captured !== null) return { on: 'captured', node: captured };
     const hit = frame ? nodeAt(frame, { x: event.clientX, y: event.clientY }) : null;
     return hit === null ? null : { on: 'node', node: hit.node, root: hit.root };
   }

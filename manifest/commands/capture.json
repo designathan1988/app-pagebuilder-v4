@@ -76,8 +76,16 @@
           "faceLabelKey": null,
           "icon": null,
           "disabledReasonKey": "common.notAvailableYet",
-          "placement": { "region": "captured-inspector", "order": 7 },
-          "adapter": { "selection": "none", "offers": null, "writes": [], "fields": [] },
+          "placement": {
+            "region": "captured-inspector",
+            "order": 7
+          },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
           "args": {}
         },
         {
@@ -118,7 +126,12 @@
           "icon": null,
           "disabledReasonKey": "common.notAvailableYet",
           "placement": "none",
-          "adapter": { "selection": "none", "offers": null, "writes": [], "fields": [] },
+          "adapter": {
+            "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
           "args": {}
         }
       ]
@@ -167,6 +180,28 @@
           },
           "adapter": {
             "selection": "none",
+            "offers": null,
+            "writes": [],
+            "fields": []
+          },
+          "args": {}
+        },
+        {
+          "id": "canvas-click-captured-element",
+          "kind": "canvas-click",
+          "feature": "capture-url",
+          "target": "captured-element",
+          "button": "primary",
+          "count": 1,
+          "modifier": null,
+          "gesture": "canvas-click",
+          "labelKey": "command.capture.select",
+          "faceLabelKey": null,
+          "icon": null,
+          "disabledReasonKey": "common.notAvailableYet",
+          "placement": "none",
+          "adapter": {
+            "selection": "target",
             "offers": null,
             "writes": [],
             "fields": []

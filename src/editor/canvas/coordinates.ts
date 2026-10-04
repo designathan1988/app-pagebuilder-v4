@@ -121,6 +121,19 @@ export function nodeAt(iframe: HTMLIFrameElement, point: Point): { readonly node
   return node === null ? null : { node, root: owner === body };
 }
 
+// A captured page's element under a screen point (its canvas copy wears data-capture-node, spec capture-url): its
+// captured id, or null where the point is on no captured element.
+export function capturedNodeAt(iframe: HTMLIFrameElement, point: Point): string | null {
+  return elementAt(iframe, point)?.closest('[data-capture-node]')?.getAttribute('data-capture-node') ?? null;
+}
+
+// The screen box and tag of a captured element by its captured id, or null when the canvas does not draw it.
+export function capturedBox(iframe: HTMLIFrameElement, id: string): { readonly box: { x: number; y: number; width: number; height: number }; readonly tag: string } | null {
+  const element = iframe.contentDocument?.querySelector(`[data-capture-node="${CSS.escape(id)}"]`) ?? null;
+  const box = element === null ? null : screenBox(iframe, element);
+  return element === null || box === null ? null : { box, tag: element.localName };
+}
+
 // Every node under a screen point, the deepest first, the page root last (a drag looks past the dragged element to
 // what lies under it); empty outside the frame's viewport.
 export function nodesUnder(iframe: HTMLIFrameElement, point: Point): string[] {

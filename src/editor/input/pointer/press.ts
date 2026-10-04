@@ -53,6 +53,8 @@ function takes(target: string, press: Press, facts: PressFacts, picking: Picking
   // a motion action's target being picked (spec motion-timeline)
   if (target === 'pick-motion-target') return press.on === 'node' && picking.motion !== null;
   if (target === 'grid-container') return press.on === 'node' && !press.root && facts.grid === true;
+  // an element of a captured page (spec capture-url): its captured node, never an authored one
+  if (target === 'captured-element') return press.on === 'captured';
   // a press on a palette tile or on a field's label is no press on the canvas: it keeps no text
   if (target === OUTSIDE_EDIT) return (press.on === 'node' || press.on === 'stage' || press.on === 'row') && facts.edited !== null && !(press.on === 'node' && press.node === facts.edited);
   return false;
@@ -79,7 +81,7 @@ export function argsFor(entry: DoorEntry, press: Press, picking: Picking): Recor
   if (entry.door.kind === 'canvas-click' && entry.door.target === 'pick-motion-target' && press.on === 'node') {
     return picking.motion === null ? { ...entry.door.args } : { ...entry.door.args, timeline: picking.motion.timeline, action: picking.motion.action, value: { kind: 'element', node: press.node } };
   }
-  return entry.door.adapter.selection === 'target' && press.on === 'node' ? { ...entry.door.args, target: press.node } : { ...entry.door.args };
+  return entry.door.adapter.selection === 'target' && (press.on === 'node' || press.on === 'captured') ? { ...entry.door.args, target: press.node } : { ...entry.door.args };
 }
 
 const MODIFIERS = [

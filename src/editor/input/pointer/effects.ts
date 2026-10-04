@@ -99,6 +99,8 @@ export function pointerEffects(p: PointerOwner): Pick<PointerOwner, 'factsOf' | 
       }
     } else if (effect === 'drag' && ps.machine.phase === 'dragging' && ps.buttons?.button === 'primary') {
       const press = ps.machine.press;
+      // a captured page's element is not dragged on the canvas: the captured inspector moves it (capture.edit)
+      if (press.on === 'captured') return;
       if (press.on === 'tile') {
         // a tile's creation drag: nothing is dragged; what the tile stands for is inserted where it is dropped. It
         // starts over the palette, outside the page: no proposal yet

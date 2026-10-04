@@ -5,7 +5,7 @@ the last complete browser run on a clean tree (`docs/feature-results.json`, writ
 hand. `npm run inventory:check` fails while this file is out of step. The requirements these features answer, and the
 open problems, are in `docs/PRODUCT.md`.
 
-214 features (214 built), 373 commands, 1361 doors, 1830 scenarios.
+214 features (214 built), 373 commands, 1362 doors, 1831 scenarios.
 
 Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests passed; 214 features passed every scenario test.
 
@@ -259,7 +259,7 @@ Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests pas
 | `html-import-states` | Import pseudo-class rules as state styles | yes | 2 | 2 | [html-import-states](../spec/BEHAVIOUR.md#html-import-states) | 1 | passes 4/4 |
 | `html-import-roundtrip` | Exported pages import back unchanged | yes | 2 | 2 | [html-import-roundtrip](../spec/BEHAVIOUR.md#html-import-roundtrip) | 1 | passes 4/4 |
 | `clipboard-paste-external` | Paste HTML and text copied from outside the app | yes | 2 | 2 | [clipboard-paste-external](../spec/BEHAVIOUR.md#clipboard-paste-external) | 2 | passes 4/4 |
-| `capture-url` | Open any web address as a page of the project | yes | 6 | 5 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 2 | passes 3/3 |
+| `capture-url` | Open any web address as a page of the project | yes | 7 | 6 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 4 | passes 3/3 |
 
 ## 17-code-panel
 

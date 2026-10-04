@@ -22,6 +22,8 @@ export const DRAG_HYSTERESIS = hysteresis;
 export type Press =
   | { readonly on: 'node'; readonly node: string; readonly root: boolean; readonly label?: boolean }
   | { readonly on: 'stage' }
+  // a press on an element of a captured page (Page.capture, spec capture-url): the captured node it lands on
+  | { readonly on: 'captured'; readonly node: string }
   | { readonly on: 'tile'; readonly entry: DoorEntry; readonly args: Readonly<Record<string, unknown>> }
   // a press on a Layers row: it selects on its click (shell/sidebar/layers.tsx) and arms the row's drag (spec
   // layers-drag)

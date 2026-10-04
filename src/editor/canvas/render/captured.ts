@@ -1,4 +1,4 @@
-import type { CapturedElement, CapturedNode } from '../../../core/document/captured.ts';
+import { unsafeCapturedElement, type CapturedElement, type CapturedNode } from '../../../core/document/captured.ts';
 import type { DocumentJson, Page, ProjectFile } from '../../../core/document/model.ts';
 import { dataUrl, fileAt, objectUrl } from '../../../core/files/files.ts';
 import { rewriteSrcsetUrls } from '../../../core/files/srcset.ts';
@@ -49,6 +49,8 @@ function attributes(target: Element, node: CapturedElement, document: DocumentJs
 function makeNode(target: Document, document: DocumentJson, page: Page, node: CapturedNode, elements: Map<string, Element>): Node {
   if (node.kind === 'text') return target.createTextNode(node.value);
   if (node.kind === 'comment') return target.createComment(node.value);
+  // an element that acts on the page instead of drawing (a refresh, a <base>) is never put on the canvas
+  if (unsafeCapturedElement(node.tag, node.attributes)) return target.createComment('');
   const element = node.namespace === HTML ? target.createElement(node.tag) : target.createElementNS(node.namespace, node.tag);
   attributes(element, node, document, page);
   element.setAttribute('data-capture-node', node.id);

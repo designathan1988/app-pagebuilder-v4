@@ -1295,10 +1295,20 @@
 }
 
 /* the elements a drop placed flash (drag-layout, row 10) */
-.chrome__flashes {
+.chrome__flashes,
+.chrome__captured {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+/* a captured element's label stands above its element, or inside its top-left corner where no room is above */
+.chrome__captured .chrome__label {
+  transform: translateY(-100%);
+}
+
+.chrome__captured .chrome__label.is-inside {
+  transform: none;
 }
 
 .chrome__flash {

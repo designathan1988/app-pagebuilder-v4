@@ -662,8 +662,9 @@ async function nodePoint(page: Page, id: string, root: boolean, nodePath: string
 // A screen point inside a node's box that the canvas shows, whichever element lies under it: what a pan needs, since
 // the middle button pans wherever it presses. The page's own free band (its root's only own point) lies below what a
 // zoomed canvas shows, and a pan over a child travels exactly the same way.
-async function nodeInsidePoint(page: Page, id: string): Promise<Point | string> {
-  return page.evaluate((nodeId) => {
+// A captured page's element is named by its data-capture-node (spec capture-url), an authored node by its data-node.
+async function nodeInsidePoint(page: Page, id: string, attribute: 'data-node' | 'data-capture-node' = 'data-node'): Promise<Point | string> {
+  return page.evaluate(([nodeId, named]) => {
     const iframe = document.querySelector<HTMLIFrameElement>('.frame__page');
     const doc = iframe?.contentDocument;
     if (!iframe || !doc || !(iframe.currentCSSZoom > 0)) return 'the canvas has no page';
@@ -673,7 +674,7 @@ async function nodeInsidePoint(page: Page, id: string): Promise<Point | string> 
     const left = box.left + (parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft)) * zoom;
     const top = box.top + (parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop)) * zoom;
     const screen = (x: number, y: number) => ({ x: left + x * zoom, y: top + y * zoom });
-    const el = doc.querySelector(`[data-node="${CSS.escape(nodeId)}"]`);
+    const el = doc.querySelector(`[${named}="${CSS.escape(nodeId)}"]`);
     if (!el) return 'the canvas does not draw it';
     const vw = doc.documentElement.clientWidth;
     const vh = doc.documentElement.clientHeight;
@@ -682,7 +683,7 @@ async function nodeInsidePoint(page: Page, id: string): Promise<Point | string> 
     if (x1 - x0 < 1 || y1 - y0 < 1) return 'it is outside the visible page';
     const at = screen((x0 + x1) / 2, (y0 + y1) / 2);
     return document.elementFromPoint(at.x, at.y)?.closest('.frame__overlay') != null ? at : 'the canvas does not show it';
-  }, id);
+  }, [id, attribute] as const);
 }
 
 // A screen point of the stage outside the page: in the gap around the frame, where the stage itself is hit.
@@ -1227,6 +1228,13 @@ async function runStep(page: Page, step: Step, ref: string, held: { current: Hel
   } else if ((d.kind === 'canvas-click' || d.kind === 'canvas-drag' || d.kind === 'canvas-handle') && LAYOUT_GESTURES.includes(d.gesture ?? '')) {
     // a door of the Layout Composer: a stroke on its stage, a handle of it, a region of it (layout-composer.ts)
     await driveLayout(page, ref, d.gesture ?? '', d.kind === 'canvas-click' ? (d.modifier ?? null) : null, args);
+  } else if (d.kind === 'canvas-click' && d.target === 'captured-element') {
+    // an element of a captured page, pressed where the canvas shows it (its captured id is the step's target argument)
+    if (typeof args.target !== 'string') throw new Error(`step ${ref}: a captured element is named by its target argument`);
+    await page.locator('.frame__page').evaluate((iframe: HTMLIFrameElement, id) => iframe.contentDocument?.querySelector(`[data-capture-node="${CSS.escape(id)}"]`)?.scrollIntoView({ block: 'center' }), args.target);
+    const at = await nodeInsidePoint(page, args.target, 'data-capture-node');
+    if (typeof at === 'string') throw new Error(`step ${ref}: ${args.target}: ${at}`);
+    await page.mouse.click(at.x, at.y);
   } else if (d.kind === 'canvas-click' && d.target !== 'stage-outside-page' && step.target !== null && (await rowInsteadOfCanvas(page, ref, document, step.target, action))) {
     // reached through the node's Layers row
   } else if (d.kind === 'canvas-click') {

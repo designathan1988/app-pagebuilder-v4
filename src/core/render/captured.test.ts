@@ -30,3 +30,19 @@ it('gives the page of several observed widths the first width’s language and t
   const html = capturedResponsiveHtml({ viewports: [{ width: 1440, root: wide }, { width: 390, root: narrow }] }, HEAD);
   expect(html.startsWith('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="builder-capture" content="exported variants"><title>Loja</title><script>')).toBe(true);
 });
+
+// A captured element that acts on the page instead of drawing: a refresh (sites put one in <noscript>, whose content
+// the editor's parser reads as elements), a <base>, an object whose data is a script address (document/captured.ts).
+it('leaves out a refresh, a base and a script address from a new capture, and never writes one a saved page holds', () => {
+  const source = '<!doctype html><html><head><base href="https://elsewhere.test/"><meta http-equiv="refresh" content="0; url=/nojs"></head><body><noscript><meta http-equiv="refresh" content="0; url=/nojs"></noscript><object data="javascript:alert(1)"></object><p>Kept</p></body></html>';
+  const html = capturedHtml(captureTree(source, sequentialIds('c')));
+  expect(html).not.toMatch(/<base|http-equiv|javascript:/);
+  expect(html).toContain('<p>Kept</p>');
+  const saved = { kind: 'element', id: 'r', namespace: 'http://www.w3.org/1999/xhtml', tag: 'html', attributes: [], children: [
+    { kind: 'element', id: 'h', namespace: 'http://www.w3.org/1999/xhtml', tag: 'head', attributes: [], children: [
+      { kind: 'element', id: 'm', namespace: 'http://www.w3.org/1999/xhtml', tag: 'meta', attributes: [{ name: 'http-equiv', namespace: null, value: 'refresh' }, { name: 'content', namespace: null, value: '0' }], children: [] },
+      { kind: 'element', id: 'b', namespace: 'http://www.w3.org/1999/xhtml', tag: 'base', attributes: [{ name: 'href', namespace: null, value: 'https://elsewhere.test/' }], children: [] },
+    ] },
+  ] } as const;
+  expect(capturedHtml(saved)).toBe('<!DOCTYPE html>\n<html><head></head></html>');
+});

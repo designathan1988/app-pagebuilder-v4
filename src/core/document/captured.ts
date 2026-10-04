@@ -48,7 +48,7 @@ export interface CapturedProblem {
 
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 const NAMESPACES = new Set([HTML_NAMESPACE, 'http://www.w3.org/2000/svg', 'http://www.w3.org/1998/Math/MathML']);
-const URL_ATTRIBUTES = new Set(['href', 'src', 'action', 'formaction', 'poster', 'xlink:href', 'data-capture-paint']);
+const URL_ATTRIBUTES = new Set(['href', 'src', 'action', 'formaction', 'poster', 'xlink:href', 'data', 'data-capture-paint']);
 const NAME = /^[A-Za-z][A-Za-z0-9._:-]*$/;
 const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 
@@ -58,6 +58,15 @@ function unsafeAddress(value: string, image: boolean): boolean {
   if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:' || protocol === 'tel:') return false;
   if (protocol === 'data:' && image && /^data:image\/[a-z0-9.+-]+(?:;[a-z0-9=+-]+)*,/i.test(value)) return false;
   return true;
+}
+
+// An element that acts on the document it stands in instead of drawing: a script; a <base>, which re-points every
+// relative address of the page; a <meta http-equiv> pragma, whose refresh navigates the page away (the editor's parser
+// reads a <noscript>'s content as elements, and sites commonly put a refresh there). The browser reader leaves them out
+// of a new capture, and the canvas and the export never draw one a saved project still holds.
+export function unsafeCapturedElement(tag: string, attributes: readonly Pick<CapturedAttribute, 'name'>[]): boolean {
+  const name = tag.toLowerCase();
+  return name === 'script' || name === 'base' || (name === 'meta' && attributes.some((one) => one.name.toLowerCase() === 'http-equiv'));
 }
 
 // Shared by the browser reader and saved-project validator: a parsed DOM is inert only until it is rendered.
