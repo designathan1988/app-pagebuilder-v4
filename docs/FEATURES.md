@@ -7,7 +7,7 @@ open problems, are in `docs/PRODUCT.md`.
 
 214 features (214 built), 371 commands, 1350 doors, 1820 scenarios.
 
-No complete browser run on a clean tree has been recorded yet: the next one writes `docs/feature-results.json`.
+Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests passed; 214 features passed every scenario test.
 
 "Required" counts the `Required:` items of the feature's section of `spec/BEHAVIOUR.md`; "none" means the feature has no section.
 
@@ -15,342 +15,342 @@ No complete browser run on a clean tree has been recorded yet: the next one writ
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `editor-shell` | Editor layout: top bar, left dock, canvas, inspector and status bar | yes | 3 | 2 | [editor-shell](../spec/BEHAVIOUR.md#editor-shell) | 1 | — |
-| `canvas-page-iframe` | The page renders from the document JSON inside a zoomed iframe | yes | 2 | 3 | [canvas-page-iframe](../spec/BEHAVIOUR.md#canvas-page-iframe) | 1 | — |
+| `editor-shell` | Editor layout: top bar, left dock, canvas, inspector and status bar | yes | 3 | 2 | [editor-shell](../spec/BEHAVIOUR.md#editor-shell) | 1 | passes 3/3 |
+| `canvas-page-iframe` | The page renders from the document JSON inside a zoomed iframe | yes | 2 | 3 | [canvas-page-iframe](../spec/BEHAVIOUR.md#canvas-page-iframe) | 1 | passes 3/3 |
 
 ## 02-structure-editing
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `palette-click-insert` | Insert Section, Container, Heading and Paragraph by clicking the Insert panel | yes | 7 | 3 | [palette-click-insert](../spec/BEHAVIOUR.md#palette-click-insert) | 5 | — |
-| `select-click` | Select an element by clicking it on the canvas | yes | 7 | 5 | [select-click](../spec/BEHAVIOUR.md#select-click) | 6 | — |
-| `layers-tree` | Layers panel shows the document tree and selects in sync with the canvas | yes | 5 | 5 | [layers-tree](../spec/BEHAVIOUR.md#layers-tree) | 5 | — |
-| `undo-redo` | Undo and redo every document change | yes | 5 | 5 | [undo-redo](../spec/BEHAVIOUR.md#undo-redo) | 3 | — |
-| `delete-element` | Delete the selected element with Delete or Backspace | yes | 6 | 3 | [delete-element](../spec/BEHAVIOUR.md#delete-element) | 2 | — |
-| `drag-reorder-canvas` | Drag an element before or after a sibling on the canvas | yes | 4 | 1 | [drag-reorder-canvas](../spec/BEHAVIOUR.md#drag-reorder-canvas) | 12 | — |
-| `drag-drop-inside` | Drop an element inside a container and move it across parents | yes | 3 | 1 | [drag-drop-inside](../spec/BEHAVIOUR.md#drag-drop-inside) | 5 | — |
-| `drag-level-keys-escape` | Change the drop level with arrow keys and cancel a drag with Escape | yes | 4 | 3 | [drag-level-keys-escape](../spec/BEHAVIOUR.md#drag-level-keys-escape) | 4 | — |
-| `palette-drag-insert` | Drag an element type from the Insert panel to a position on the canvas | yes | 10 | 2 | [palette-drag-insert](../spec/BEHAVIOUR.md#palette-drag-insert) | 4 | — |
-| `layers-drag` | Reorder and nest by dragging rows in the Layers panel | yes | 3 | 2 | [layers-drag](../spec/BEHAVIOUR.md#layers-drag) | 5 | — |
-| `move-up-down` | Move the selection up or down among its siblings with Alt+ArrowUp and Alt+ArrowDown | yes | 4 | 2 | [move-up-down](../spec/BEHAVIOUR.md#move-up-down) | 2 | — |
-| `wrap-row-column` | Wrap the selection in a Row or a Column with R and C | yes | 4 | 4 | [wrap-row-column](../spec/BEHAVIOUR.md#wrap-row-column) | 5 | — |
-| `drag-side-wrap` | Drop beside an element to put both side by side | yes | 3 | 2 | [drag-layout](../spec/BEHAVIOUR.md#drag-layout) | 4 | — |
-| `context-menu` | Right-click context menu on the canvas and in Layers | yes | 7 | 8 | [context-menu](../spec/BEHAVIOUR.md#context-menu) | 7 | — |
-| `nest-into-previous` | Nest the selection into its previous sibling | yes | 5 | 3 | [nest-into-previous](../spec/BEHAVIOUR.md#nest-into-previous) | 4 | — |
-| `promote-out` | Move the selection out of its parent with P | yes | 4 | 3 | [promote-out](../spec/BEHAVIOUR.md#promote-out) | 3 | — |
-| `duplicate` | Duplicate the selection with Ctrl+D | yes | 4 | 2 | [duplicate](../spec/BEHAVIOUR.md#duplicate) | 3 | — |
-| `drag-duplicate` | Alt at the release drops a copy and leaves the original | yes | 2 | 1 | [drag-duplicate](../spec/BEHAVIOUR.md#drag-duplicate) | 2 | — |
-| `clipboard-copy-paste` | Copy and paste elements through the system clipboard with Ctrl+C and Ctrl+V | yes | 6 | 3 | [clipboard-copy-paste](../spec/BEHAVIOUR.md#clipboard-copy-paste) | 4 | — |
-| `keyboard-tree-walk` | Walk the tree with the arrow keys | yes | 10 | 4 | [keyboard-tree-walk](../spec/BEHAVIOUR.md#keyboard-tree-walk) | 3 | — |
-| `hand-keyboard-move` | Take the selection into the hand with M and place it with the keyboard | yes | 8 | 10 | [hand-keyboard-move](../spec/BEHAVIOUR.md#hand-keyboard-move) | 2 | — |
-| `text-edit-inline` | Edit text in place with double-click or Enter | yes | 6 | 6 | [text-edit-inline](../spec/BEHAVIOUR.md#text-edit-inline) | 6 | — |
-| `text-inline-formatting` | Bold, italic and links inside text with Ctrl+B, Ctrl+I and Ctrl+K | yes | 5 | 7 | [text-inline-formatting](../spec/BEHAVIOUR.md#text-inline-formatting) | 3 | — |
-| `rename-element` | Rename an element with F2 or inline in Layers | yes | 4 | 5 | [rename-element](../spec/BEHAVIOUR.md#rename-element) | 2 | — |
-| `multi-select-click` | Select several elements with Shift+click and Ctrl+click | yes | 7 | 4 | [multi-select-click](../spec/BEHAVIOUR.md#multi-select-click) | 4 | — |
-| `unwrap` | Remove a wrapper and lift its children into its place | yes | 2 | 1 | [unwrap](../spec/BEHAVIOUR.md#unwrap) | 4 | — |
-| `marquee-select` | Select elements by dragging a marquee on the page | yes | 6 | 2 | [marquee-select](../spec/BEHAVIOUR.md#marquee-select) | 4 | — |
-| `multi-select-actions` | Delete, move and duplicate several selected elements at once | yes | 8 | 11 | [multi-select-actions](../spec/BEHAVIOUR.md#multi-select-actions) | 3 | — |
-| `select-container-children` | Select every element in the current container with Ctrl+A | yes | 4 | 3 | [select-container-children](../spec/BEHAVIOUR.md#select-container-children) | 4 | — |
-| `lock-element` | Lock an element so it cannot be moved, edited or deleted | yes | 5 | 5 | [lock-element](../spec/BEHAVIOUR.md#lock-element) | 5 | — |
-| `hide-element` | Hide and show an element | yes | 4 | 2 | [hide-element](../spec/BEHAVIOUR.md#hide-element) | 3 | — |
-| `drag-autoscroll` | A drag at the edge scrolls the page and the Layers | yes | 1 | 1 | [drag-autoscroll](../spec/BEHAVIOUR.md#drag-autoscroll) | 3 | — |
+| `palette-click-insert` | Insert Section, Container, Heading and Paragraph by clicking the Insert panel | yes | 7 | 3 | [palette-click-insert](../spec/BEHAVIOUR.md#palette-click-insert) | 5 | passes 19/19 |
+| `select-click` | Select an element by clicking it on the canvas | yes | 7 | 5 | [select-click](../spec/BEHAVIOUR.md#select-click) | 6 | passes 10/10 |
+| `layers-tree` | Layers panel shows the document tree and selects in sync with the canvas | yes | 5 | 5 | [layers-tree](../spec/BEHAVIOUR.md#layers-tree) | 5 | passes 5/5 |
+| `undo-redo` | Undo and redo every document change | yes | 5 | 5 | [undo-redo](../spec/BEHAVIOUR.md#undo-redo) | 3 | passes 9/9 |
+| `delete-element` | Delete the selected element with Delete or Backspace | yes | 6 | 3 | [delete-element](../spec/BEHAVIOUR.md#delete-element) | 2 | passes 11/11 |
+| `drag-reorder-canvas` | Drag an element before or after a sibling on the canvas | yes | 4 | 1 | [drag-reorder-canvas](../spec/BEHAVIOUR.md#drag-reorder-canvas) | 12 | passes 4/4 |
+| `drag-drop-inside` | Drop an element inside a container and move it across parents | yes | 3 | 1 | [drag-drop-inside](../spec/BEHAVIOUR.md#drag-drop-inside) | 5 | passes 3/3 |
+| `drag-level-keys-escape` | Change the drop level with arrow keys and cancel a drag with Escape | yes | 4 | 3 | [drag-level-keys-escape](../spec/BEHAVIOUR.md#drag-level-keys-escape) | 4 | passes 4/4 |
+| `palette-drag-insert` | Drag an element type from the Insert panel to a position on the canvas | yes | 10 | 2 | [palette-drag-insert](../spec/BEHAVIOUR.md#palette-drag-insert) | 4 | passes 10/10 |
+| `layers-drag` | Reorder and nest by dragging rows in the Layers panel | yes | 3 | 2 | [layers-drag](../spec/BEHAVIOUR.md#layers-drag) | 5 | passes 3/3 |
+| `move-up-down` | Move the selection up or down among its siblings with Alt+ArrowUp and Alt+ArrowDown | yes | 4 | 2 | [move-up-down](../spec/BEHAVIOUR.md#move-up-down) | 2 | passes 4/4 |
+| `wrap-row-column` | Wrap the selection in a Row or a Column with R and C | yes | 4 | 4 | [wrap-row-column](../spec/BEHAVIOUR.md#wrap-row-column) | 5 | passes 8/8 |
+| `drag-side-wrap` | Drop beside an element to put both side by side | yes | 3 | 2 | [drag-layout](../spec/BEHAVIOUR.md#drag-layout) | 4 | passes 3/3 |
+| `context-menu` | Right-click context menu on the canvas and in Layers | yes | 7 | 8 | [context-menu](../spec/BEHAVIOUR.md#context-menu) | 7 | passes 8/8 |
+| `nest-into-previous` | Nest the selection into its previous sibling | yes | 5 | 3 | [nest-into-previous](../spec/BEHAVIOUR.md#nest-into-previous) | 4 | passes 8/8 |
+| `promote-out` | Move the selection out of its parent with P | yes | 4 | 3 | [promote-out](../spec/BEHAVIOUR.md#promote-out) | 3 | passes 7/7 |
+| `duplicate` | Duplicate the selection with Ctrl+D | yes | 4 | 2 | [duplicate](../spec/BEHAVIOUR.md#duplicate) | 3 | passes 4/4 |
+| `drag-duplicate` | Alt at the release drops a copy and leaves the original | yes | 2 | 1 | [drag-duplicate](../spec/BEHAVIOUR.md#drag-duplicate) | 2 | passes 2/2 |
+| `clipboard-copy-paste` | Copy and paste elements through the system clipboard with Ctrl+C and Ctrl+V | yes | 6 | 3 | [clipboard-copy-paste](../spec/BEHAVIOUR.md#clipboard-copy-paste) | 4 | passes 6/6 |
+| `keyboard-tree-walk` | Walk the tree with the arrow keys | yes | 10 | 4 | [keyboard-tree-walk](../spec/BEHAVIOUR.md#keyboard-tree-walk) | 3 | passes 10/10 |
+| `hand-keyboard-move` | Take the selection into the hand with M and place it with the keyboard | yes | 8 | 10 | [hand-keyboard-move](../spec/BEHAVIOUR.md#hand-keyboard-move) | 2 | passes 12/12 |
+| `text-edit-inline` | Edit text in place with double-click or Enter | yes | 6 | 6 | [text-edit-inline](../spec/BEHAVIOUR.md#text-edit-inline) | 6 | passes 7/7 |
+| `text-inline-formatting` | Bold, italic and links inside text with Ctrl+B, Ctrl+I and Ctrl+K | yes | 5 | 7 | [text-inline-formatting](../spec/BEHAVIOUR.md#text-inline-formatting) | 3 | passes 9/9 |
+| `rename-element` | Rename an element with F2 or inline in Layers | yes | 4 | 5 | [rename-element](../spec/BEHAVIOUR.md#rename-element) | 2 | passes 5/5 |
+| `multi-select-click` | Select several elements with Shift+click and Ctrl+click | yes | 7 | 4 | [multi-select-click](../spec/BEHAVIOUR.md#multi-select-click) | 4 | passes 9/9 |
+| `unwrap` | Remove a wrapper and lift its children into its place | yes | 2 | 1 | [unwrap](../spec/BEHAVIOUR.md#unwrap) | 4 | passes 2/2 |
+| `marquee-select` | Select elements by dragging a marquee on the page | yes | 6 | 2 | [marquee-select](../spec/BEHAVIOUR.md#marquee-select) | 4 | passes 6/6 |
+| `multi-select-actions` | Delete, move and duplicate several selected elements at once | yes | 8 | 11 | [multi-select-actions](../spec/BEHAVIOUR.md#multi-select-actions) | 3 | passes 13/13 |
+| `select-container-children` | Select every element in the current container with Ctrl+A | yes | 4 | 3 | [select-container-children](../spec/BEHAVIOUR.md#select-container-children) | 4 | passes 4/4 |
+| `lock-element` | Lock an element so it cannot be moved, edited or deleted | yes | 5 | 5 | [lock-element](../spec/BEHAVIOUR.md#lock-element) | 5 | passes 6/6 |
+| `hide-element` | Hide and show an element | yes | 4 | 2 | [hide-element](../spec/BEHAVIOUR.md#hide-element) | 3 | passes 4/4 |
+| `drag-autoscroll` | A drag at the edge scrolls the page and the Layers | yes | 1 | 1 | [drag-autoscroll](../spec/BEHAVIOUR.md#drag-autoscroll) | 3 | passes 1/1 |
 
 ## 03-app-and-persistence
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `app-menu` | Application menu: File, Edit, Arrange, View, Help, Theme and Language | yes | 21 | 21 | [app-menu](../spec/BEHAVIOUR.md#app-menu) | 8 | — |
-| `ui-language` | UI language: Brazilian Portuguese by default, English available | yes | 2 | 2 | [ui-language](../spec/BEHAVIOUR.md#ui-language) | 4 | — |
-| `autosave-restore` | Autosave to IndexedDB and restore the work after a reload | yes | 4 | 6 | [autosave-restore](../spec/BEHAVIOUR.md#autosave-restore) | 4 | — |
-| `unsaved-work-guard` | Never lose an edit that is not yet saved | yes | 2 | 2 | [unsaved-work-guard](../spec/BEHAVIOUR.md#unsaved-work-guard) | 3 | — |
-| `autosave-crash-recovery` | Keep saved versions and restore the work after a crash | yes | 2 | 2 | [autosave-crash-recovery](../spec/BEHAVIOUR.md#autosave-crash-recovery) | 3 | — |
-| `new-blank-page` | Start over with a new blank page | yes | 3 | 1 | [new-blank-page](../spec/BEHAVIOUR.md#new-blank-page) | 2 | — |
-| `autosave-corruption-recovery` | Recover from a corrupted saved project | yes | 1 | 1 | [autosave-corruption-recovery](../spec/BEHAVIOUR.md#autosave-corruption-recovery) | 3 | — |
-| `multi-tab-guard` | Only one tab edits the project at a time | yes | 2 | 2 | [multi-tab-guard](../spec/BEHAVIOUR.md#multi-tab-guard) | 3 | — |
-| `project-save-json` | Save the project as one archive file | yes | 2 | 1 | [project-save-json](../spec/BEHAVIOUR.md#project-save-json) | 4 | — |
-| `project-open-json` | Open a project archive | yes | 5 | 1 | [project-open-json](../spec/BEHAVIOUR.md#project-open-json) | 5 | — |
+| `app-menu` | Application menu: File, Edit, Arrange, View, Help, Theme and Language | yes | 21 | 21 | [app-menu](../spec/BEHAVIOUR.md#app-menu) | 8 | passes 21/21 |
+| `ui-language` | UI language: Brazilian Portuguese by default, English available | yes | 2 | 2 | [ui-language](../spec/BEHAVIOUR.md#ui-language) | 4 | passes 2/2 |
+| `autosave-restore` | Autosave to IndexedDB and restore the work after a reload | yes | 4 | 6 | [autosave-restore](../spec/BEHAVIOUR.md#autosave-restore) | 4 | passes 6/6 |
+| `unsaved-work-guard` | Never lose an edit that is not yet saved | yes | 2 | 2 | [unsaved-work-guard](../spec/BEHAVIOUR.md#unsaved-work-guard) | 3 | passes 2/2 |
+| `autosave-crash-recovery` | Keep saved versions and restore the work after a crash | yes | 2 | 2 | [autosave-crash-recovery](../spec/BEHAVIOUR.md#autosave-crash-recovery) | 3 | passes 2/2 |
+| `new-blank-page` | Start over with a new blank page | yes | 3 | 1 | [new-blank-page](../spec/BEHAVIOUR.md#new-blank-page) | 2 | passes 3/3 |
+| `autosave-corruption-recovery` | Recover from a corrupted saved project | yes | 1 | 1 | [autosave-corruption-recovery](../spec/BEHAVIOUR.md#autosave-corruption-recovery) | 3 | passes 1/1 |
+| `multi-tab-guard` | Only one tab edits the project at a time | yes | 2 | 2 | [multi-tab-guard](../spec/BEHAVIOUR.md#multi-tab-guard) | 3 | passes 2/2 |
+| `project-save-json` | Save the project as one archive file | yes | 2 | 1 | [project-save-json](../spec/BEHAVIOUR.md#project-save-json) | 4 | passes 2/2 |
+| `project-open-json` | Open a project archive | yes | 5 | 1 | [project-open-json](../spec/BEHAVIOUR.md#project-open-json) | 5 | passes 5/5 |
 
 ## 04-inspector
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `inspector-panel` | Inspector shows the selection's identity and collapsible property sections | yes | 16 | 10 | [inspector-panel](../spec/BEHAVIOUR.md#inspector-panel) | 12 | — |
-| `inspector-number-fields` | Numeric property fields, built with the Size section's Width and Height: typing, units, steppers and scrubbing | yes | 21 | 12 | [inspector-number-fields](../spec/BEHAVIOUR.md#inspector-number-fields) | 6 | — |
-| `props-display` | Edit display with every keyword | yes | 11 | 1 | [props-display](../spec/BEHAVIOUR.md#props-display) | 4 | — |
-| `props-flex-container` | Flex container controls: direction, wrap, alignment matrix and gap | yes | 20 | 11 | [props-flex-container](../spec/BEHAVIOUR.md#props-flex-container) | 3 | — |
-| `props-grid-container` | Grid container controls: column and row tracks, gap and auto flow | yes | 21 | 16 | [props-grid-container](../spec/BEHAVIOUR.md#props-grid-container) | 3 | — |
-| `props-layout-item` | Child-of-flex and child-of-grid controls (In parent) | yes | 10 | 8 | [props-layout-item](../spec/BEHAVIOUR.md#props-layout-item) | 3 | — |
-| `props-spacing` | Margin and padding with the box model editor | yes | 18 | 14 | [props-spacing](../spec/BEHAVIOUR.md#props-spacing) | 7 | — |
-| `props-size-overflow` | Size, min/max, box sizing, aspect ratio and overflow | yes | 13 | 9 | [props-size-overflow](../spec/BEHAVIOUR.md#props-size-overflow) | 8 | — |
-| `props-position` | Position mode, offsets, z-index, float and clear | yes | 15 | 8 | [props-position](../spec/BEHAVIOUR.md#props-position) | 3 | — |
-| `color-picker` | Colour picker: area, sliders, HSB/RGB/Hex fields, preview, Apply and Cancel | yes | 22 | 16 | [color-picker](../spec/BEHAVIOUR.md#color-picker) | 5 | — |
-| `color-picker-oklch` | Colour picker: OKLCH and OKLab formats and CSS colour text | yes | 5 | 2 | [color-picker-oklch](../spec/BEHAVIOUR.md#color-picker-oklch) | 4 | — |
-| `color-swatches-eyedropper` | Saved and recent colours and the eyedropper | yes | 5 | 5 | [color-swatches-eyedropper](../spec/BEHAVIOUR.md#color-swatches-eyedropper) | 4 | — |
-| `props-typography` | Text properties: font, size, weight, style, spacing, alignment, colour and decoration | yes | 23 | 17 | [props-typography](../spec/BEHAVIOUR.md#props-typography) | 8 | — |
-| `props-typography-advanced` | Advanced text properties | yes | 15 | 10 | [props-typography-advanced](../spec/BEHAVIOUR.md#props-typography-advanced) | 4 | — |
-| `props-background` | Background colour, image, size, position, repeat and more | yes | 16 | 8 | [props-background](../spec/BEHAVIOUR.md#props-background) | 5 | — |
-| `gradient-editor` | Gradient editor: linear, radial and conic gradients with stops | yes | 23 | 17 | [gradient-editor](../spec/BEHAVIOUR.md#gradient-editor) | 5 | — |
-| `props-border-outline` | Borders per side, radius per corner and outline | yes | 27 | 20 | [props-border-outline](../spec/BEHAVIOUR.md#props-border-outline) | 3 | — |
-| `props-effects-basic` | Opacity, visibility, cursor, pointer events, selection and blend mode | yes | 9 | 7 | [props-effects-basic](../spec/BEHAVIOUR.md#props-effects-basic) | 3 | — |
-| `shadow-editor` | Box shadow and text shadow editor | yes | 35 | 28 | [shadow-editor](../spec/BEHAVIOUR.md#shadow-editor) | 5 | — |
-| `props-filters-clip` | Filters, backdrop filter, clip path and mask | yes | 16 | 12 | [props-filters-clip](../spec/BEHAVIOUR.md#props-filters-clip) | 4 | — |
-| `props-transforms` | Move, rotate, scale, skew, origin and 3D transform properties | yes | 15 | 12 | [props-transforms](../spec/BEHAVIOUR.md#props-transforms) | 2 | — |
-| `props-transition` | Transition and will-change | yes | 6 | 2 | [props-transition](../spec/BEHAVIOUR.md#props-transition) | 2 | — |
-| `props-more` | Remaining advanced properties | yes | 20 | 17 | [props-more](../spec/BEHAVIOUR.md#props-more) | 3 | — |
-| `props-attributes` | ID, classes, title and custom declarations of an element | yes | 11 | 6 | [props-attributes](../spec/BEHAVIOUR.md#props-attributes) | 1 | — |
-| `inspector-provenance-reset` | Mark set values and reset one property or all of them | yes | 4 | 2 | [inspector-provenance-reset](../spec/BEHAVIOUR.md#inspector-provenance-reset) | 6 | — |
-| `inspector-property-search` | Search the inspector for a property | yes | 3 | 1 | [inspector-property-search](../spec/BEHAVIOUR.md#inspector-property-search) | 1 | — |
-| `inspector-advanced-mode` | Switch the inspector between all properties and essentials only | yes | 2 | 2 | [inspector-advanced-mode](../spec/BEHAVIOUR.md#inspector-advanced-mode) | 2 | — |
-| `inspector-add-property` | Add a property that is not shown yet | yes | 2 | 2 | [inspector-add-property](../spec/BEHAVIOUR.md#inspector-add-property) | 5 | — |
-| `semantic-tag-switch` | Switch an element between equivalent semantic tags | yes | 12 | 1 | [semantic-tag-switch](../spec/BEHAVIOUR.md#semantic-tag-switch) | 6 | — |
-| `quick-panel` | Floating quick panel over the selection | yes | 36 | 37 | [quick-panel](../spec/BEHAVIOUR.md#quick-panel) | 16 | — |
-| `multi-select-edit` | Edit a property on several selected elements at once | yes | 3 | 4 | [multi-select-edit](../spec/BEHAVIOUR.md#multi-select-edit) | 4 | — |
-| `value-presets` | Ready-made values with a preview | yes | 4 | 2 | [value-presets](../spec/BEHAVIOUR.md#value-presets) | 0 | — |
+| `inspector-panel` | Inspector shows the selection's identity and collapsible property sections | yes | 16 | 10 | [inspector-panel](../spec/BEHAVIOUR.md#inspector-panel) | 12 | passes 16/16 |
+| `inspector-number-fields` | Numeric property fields, built with the Size section's Width and Height: typing, units, steppers and scrubbing | yes | 21 | 12 | [inspector-number-fields](../spec/BEHAVIOUR.md#inspector-number-fields) | 6 | passes 21/21 |
+| `props-display` | Edit display with every keyword | yes | 11 | 1 | [props-display](../spec/BEHAVIOUR.md#props-display) | 4 | passes 11/11 |
+| `props-flex-container` | Flex container controls: direction, wrap, alignment matrix and gap | yes | 20 | 11 | [props-flex-container](../spec/BEHAVIOUR.md#props-flex-container) | 3 | passes 20/20 |
+| `props-grid-container` | Grid container controls: column and row tracks, gap and auto flow | yes | 21 | 16 | [props-grid-container](../spec/BEHAVIOUR.md#props-grid-container) | 3 | passes 21/21 |
+| `props-layout-item` | Child-of-flex and child-of-grid controls (In parent) | yes | 10 | 8 | [props-layout-item](../spec/BEHAVIOUR.md#props-layout-item) | 3 | passes 10/10 |
+| `props-spacing` | Margin and padding with the box model editor | yes | 18 | 14 | [props-spacing](../spec/BEHAVIOUR.md#props-spacing) | 7 | passes 18/18 |
+| `props-size-overflow` | Size, min/max, box sizing, aspect ratio and overflow | yes | 13 | 9 | [props-size-overflow](../spec/BEHAVIOUR.md#props-size-overflow) | 8 | passes 13/13 |
+| `props-position` | Position mode, offsets, z-index, float and clear | yes | 15 | 8 | [props-position](../spec/BEHAVIOUR.md#props-position) | 3 | passes 15/15 |
+| `color-picker` | Colour picker: area, sliders, HSB/RGB/Hex fields, preview, Apply and Cancel | yes | 22 | 16 | [color-picker](../spec/BEHAVIOUR.md#color-picker) | 5 | passes 22/22 |
+| `color-picker-oklch` | Colour picker: OKLCH and OKLab formats and CSS colour text | yes | 5 | 2 | [color-picker-oklch](../spec/BEHAVIOUR.md#color-picker-oklch) | 4 | passes 5/5 |
+| `color-swatches-eyedropper` | Saved and recent colours and the eyedropper | yes | 5 | 5 | [color-swatches-eyedropper](../spec/BEHAVIOUR.md#color-swatches-eyedropper) | 4 | passes 5/5 |
+| `props-typography` | Text properties: font, size, weight, style, spacing, alignment, colour and decoration | yes | 23 | 17 | [props-typography](../spec/BEHAVIOUR.md#props-typography) | 8 | passes 23/23 |
+| `props-typography-advanced` | Advanced text properties | yes | 15 | 10 | [props-typography-advanced](../spec/BEHAVIOUR.md#props-typography-advanced) | 4 | passes 15/15 |
+| `props-background` | Background colour, image, size, position, repeat and more | yes | 16 | 8 | [props-background](../spec/BEHAVIOUR.md#props-background) | 5 | passes 16/16 |
+| `gradient-editor` | Gradient editor: linear, radial and conic gradients with stops | yes | 23 | 17 | [gradient-editor](../spec/BEHAVIOUR.md#gradient-editor) | 5 | passes 25/25 |
+| `props-border-outline` | Borders per side, radius per corner and outline | yes | 27 | 20 | [props-border-outline](../spec/BEHAVIOUR.md#props-border-outline) | 3 | passes 27/27 |
+| `props-effects-basic` | Opacity, visibility, cursor, pointer events, selection and blend mode | yes | 9 | 7 | [props-effects-basic](../spec/BEHAVIOUR.md#props-effects-basic) | 3 | passes 9/9 |
+| `shadow-editor` | Box shadow and text shadow editor | yes | 35 | 28 | [shadow-editor](../spec/BEHAVIOUR.md#shadow-editor) | 5 | passes 35/35 |
+| `props-filters-clip` | Filters, backdrop filter, clip path and mask | yes | 16 | 12 | [props-filters-clip](../spec/BEHAVIOUR.md#props-filters-clip) | 4 | passes 16/16 |
+| `props-transforms` | Move, rotate, scale, skew, origin and 3D transform properties | yes | 15 | 12 | [props-transforms](../spec/BEHAVIOUR.md#props-transforms) | 2 | passes 15/15 |
+| `props-transition` | Transition and will-change | yes | 6 | 2 | [props-transition](../spec/BEHAVIOUR.md#props-transition) | 2 | passes 6/6 |
+| `props-more` | Remaining advanced properties | yes | 20 | 17 | [props-more](../spec/BEHAVIOUR.md#props-more) | 3 | passes 20/20 |
+| `props-attributes` | ID, classes, title and custom declarations of an element | yes | 11 | 6 | [props-attributes](../spec/BEHAVIOUR.md#props-attributes) | 1 | passes 11/11 |
+| `inspector-provenance-reset` | Mark set values and reset one property or all of them | yes | 4 | 2 | [inspector-provenance-reset](../spec/BEHAVIOUR.md#inspector-provenance-reset) | 6 | passes 4/4 |
+| `inspector-property-search` | Search the inspector for a property | yes | 3 | 1 | [inspector-property-search](../spec/BEHAVIOUR.md#inspector-property-search) | 1 | passes 3/3 |
+| `inspector-advanced-mode` | Switch the inspector between all properties and essentials only | yes | 2 | 2 | [inspector-advanced-mode](../spec/BEHAVIOUR.md#inspector-advanced-mode) | 2 | passes 2/2 |
+| `inspector-add-property` | Add a property that is not shown yet | yes | 2 | 2 | [inspector-add-property](../spec/BEHAVIOUR.md#inspector-add-property) | 5 | passes 3/3 |
+| `semantic-tag-switch` | Switch an element between equivalent semantic tags | yes | 12 | 1 | [semantic-tag-switch](../spec/BEHAVIOUR.md#semantic-tag-switch) | 6 | passes 12/12 |
+| `quick-panel` | Floating quick panel over the selection | yes | 36 | 37 | [quick-panel](../spec/BEHAVIOUR.md#quick-panel) | 16 | passes 44/44 |
+| `multi-select-edit` | Edit a property on several selected elements at once | yes | 3 | 4 | [multi-select-edit](../spec/BEHAVIOUR.md#multi-select-edit) | 4 | passes 6/6 |
+| `value-presets` | Ready-made values with a preview | yes | 4 | 2 | [value-presets](../spec/BEHAVIOUR.md#value-presets) | 0 | passes 4/4 |
 
 ## 05-canvas-handles
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `resize-handles` | Resize an element with its eight handles | yes | 11 | 13 | [resize-handles](../spec/BEHAVIOUR.md#resize-handles) | 8 | — |
-| `spacing-handles` | Edit padding and margin by dragging on the canvas | yes | 15 | 10 | [spacing-handles](../spec/BEHAVIOUR.md#spacing-handles) | 7 | — |
-| `radius-border-gap-handles` | Edit radius, border width and gaps by dragging on the canvas | yes | 11 | 12 | [radius-border-gap-handles](../spec/BEHAVIOUR.md#radius-border-gap-handles) | 5 | — |
-| `shadow-handles` | Edit shadow offset and blur by dragging on the canvas | yes | 4 | 2 | [shadow-handles](../spec/BEHAVIOUR.md#shadow-handles) | 4 | — |
+| `resize-handles` | Resize an element with its eight handles | yes | 11 | 13 | [resize-handles](../spec/BEHAVIOUR.md#resize-handles) | 8 | passes 17/17 |
+| `spacing-handles` | Edit padding and margin by dragging on the canvas | yes | 15 | 10 | [spacing-handles](../spec/BEHAVIOUR.md#spacing-handles) | 7 | passes 15/15 |
+| `radius-border-gap-handles` | Edit radius, border width and gaps by dragging on the canvas | yes | 11 | 12 | [radius-border-gap-handles](../spec/BEHAVIOUR.md#radius-border-gap-handles) | 5 | passes 13/13 |
+| `shadow-handles` | Edit shadow offset and blur by dragging on the canvas | yes | 4 | 2 | [shadow-handles](../spec/BEHAVIOUR.md#shadow-handles) | 4 | passes 4/4 |
 
 ## 06-page-and-export
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `page-properties` | Page properties: title, language, direction and page styles | yes | 6 | 4 | [page-properties](../spec/BEHAVIOUR.md#page-properties) | 5 | — |
-| `base-style` | The project's base style | yes | 2 | 2 | [base-style](../spec/BEHAVIOUR.md#base-style) | 2 | — |
-| `export-zip` | Export the page as a ZIP with HTML and a separate CSS file | yes | 5 | 2 | [export-zip](../spec/BEHAVIOUR.md#export-zip) | 8 | — |
-| `css-variables-tokens` | Design tokens as CSS variables | yes | 16 | 12 | [css-variables-tokens](../spec/BEHAVIOUR.md#css-variables-tokens) | 8 | — |
-| `export-bem-css` | Exported CSS uses readable BEM classes and is deterministic | yes | 3 | 1 | [export-bem-css](../spec/BEHAVIOUR.md#export-bem-css) | 5 | — |
-| `project-language` | The project’s languages | yes | 4 | 3 | [project-language](../spec/BEHAVIOUR.md#project-language) | 0 | — |
-| `site-colours` | Colours in use, replaced or made a variable across the site | yes | 3 | 2 | [site-colours](../spec/BEHAVIOUR.md#site-colours) | 0 | — |
-| `style-suggestions` | Repeated styles offered as one class | yes | 2 | 1 | [style-suggestions](../spec/BEHAVIOUR.md#style-suggestions) | 0 | — |
+| `page-properties` | Page properties: title, language, direction and page styles | yes | 6 | 4 | [page-properties](../spec/BEHAVIOUR.md#page-properties) | 5 | passes 6/6 |
+| `base-style` | The project's base style | yes | 2 | 2 | [base-style](../spec/BEHAVIOUR.md#base-style) | 2 | passes 2/2 |
+| `export-zip` | Export the page as a ZIP with HTML and a separate CSS file | yes | 5 | 2 | [export-zip](../spec/BEHAVIOUR.md#export-zip) | 8 | passes 6/6 |
+| `css-variables-tokens` | Design tokens as CSS variables | yes | 16 | 12 | [css-variables-tokens](../spec/BEHAVIOUR.md#css-variables-tokens) | 8 | passes 17/17 |
+| `export-bem-css` | Exported CSS uses readable BEM classes and is deterministic | yes | 3 | 1 | [export-bem-css](../spec/BEHAVIOUR.md#export-bem-css) | 5 | passes 3/3 |
+| `project-language` | The project’s languages | yes | 4 | 3 | [project-language](../spec/BEHAVIOUR.md#project-language) | 0 | passes 4/4 |
+| `site-colours` | Colours in use, replaced or made a variable across the site | yes | 3 | 2 | [site-colours](../spec/BEHAVIOUR.md#site-colours) | 0 | passes 3/3 |
+| `style-suggestions` | Repeated styles offered as one class | yes | 2 | 1 | [style-suggestions](../spec/BEHAVIOUR.md#style-suggestions) | 0 | passes 2/2 |
 
 ## 07-elements
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `elements-structure` | Structure elements: Container, Header, Navigation, Main, Section, Article, Aside, Footer, Link Block | yes | 12 | 6 | [elements-structure](../spec/BEHAVIOUR.md#elements-structure) | 6 | — |
-| `elements-text` | Text elements: Heading, Paragraph, Link, Blockquote, Preformatted, Divider | yes | 6 | 3 | [elements-text](../spec/BEHAVIOUR.md#elements-text) | 1 | — |
-| `elements-lists` | List elements: Unordered, Ordered and Definition lists with their items | yes | 11 | 6 | [elements-lists](../spec/BEHAVIOUR.md#elements-lists) | 6 | — |
-| `nesting-grammar` | HTML nesting rules for inserting, dragging and pasting | yes | 2 | 4 | [nesting-grammar](../spec/BEHAVIOUR.md#nesting-grammar) | 3 | — |
-| `nesting-grammar-structure` | HTML nesting rules for wrap, unwrap, promote, tag switch and hand | yes | 6 | 6 | [nesting-grammar-structure](../spec/BEHAVIOUR.md#nesting-grammar-structure) | 3 | — |
-| `elements-tables` | Table elements: Table, Caption, Head, Body, Footer, Row, Header cell, Cell | yes | 4 | 4 | [elements-tables](../spec/BEHAVIOUR.md#elements-tables) | 1 | — |
-| `table-commands` | Add and remove table rows and columns | yes | 5 | 5 | [table-commands](../spec/BEHAVIOUR.md#table-commands) | 2 | — |
-| `elements-form-structure` | Form structure elements: Form, Fieldset, Legend, Label, Button, Output | yes | 10 | 4 | [elements-form-structure](../spec/BEHAVIOUR.md#elements-form-structure) | 1 | — |
-| `element-attributes-aria` | Custom attributes and accessibility fields | yes | 8 | 6 | [element-attributes-aria](../spec/BEHAVIOUR.md#element-attributes-aria) | 1 | — |
-| `shared-style-classes` | Reusable style classes | yes | 10 | 4 | [shared-style-classes](../spec/BEHAVIOUR.md#shared-style-classes) | 5 | — |
-| `elements-form-inputs` | Input elements: the 14 input types and their attributes | yes | 26 | 13 | [elements-form-inputs](../spec/BEHAVIOUR.md#elements-form-inputs) | 1 | — |
-| `elements-form-inputs-rules` | Per-type input attributes, type switching, label targets and canvas focus | yes | 3 | 3 | [elements-form-inputs-rules](../spec/BEHAVIOUR.md#elements-form-inputs-rules) | 2 | — |
-| `elements-form-controls` | Textarea, Select, Option group, Option, Progress and Meter | yes | 13 | 9 | [elements-form-controls](../spec/BEHAVIOUR.md#elements-form-controls) | 1 | — |
-| `elements-media-images` | Image, Picture, Source, Figure and Caption | yes | 9 | 6 | [media-embed-rules](../spec/BEHAVIOUR.md#media-embed-rules) | 0 | — |
-| `elements-media-embeds` | Video, Audio, Track, Embedded frame and Canvas | yes | 14 | 11 | [media-embed-rules](../spec/BEHAVIOUR.md#media-embed-rules) | 0 | — |
-| `elements-svg-shapes` | SVG/Icon, Rectangle, Ellipse and Line | yes | 14 | 11 | [elements-svg-shapes](../spec/BEHAVIOUR.md#elements-svg-shapes) | 5 | — |
-| `elements-interactive` | Details, Summary and Dialog | yes | 4 | 2 | [elements-interactive](../spec/BEHAVIOUR.md#elements-interactive) | 1 | — |
-| `natural-child-command` | Create the natural child inside a container | yes | 4 | 1 | [natural-child-command](../spec/BEHAVIOUR.md#natural-child-command) | 3 | — |
-| `props-element-specific` | List, table, form and media properties shown only where they apply | yes | 10 | 9 | [props-element-specific](../spec/BEHAVIOUR.md#props-element-specific) | 7 | — |
-| `settings-class-management` | Manage Settings classes and attributes | yes | 6 | 5 | [settings-class-management](../spec/BEHAVIOUR.md#settings-class-management) | 0 | — |
-| `settings-audit` | Organised Settings | yes | 26 | 26 | [settings-audit](../spec/BEHAVIOUR.md#settings-audit) | 1 | — |
-| `forms-masks-validation` | Form masks and validation | yes | 75 | 74 | [forms-masks-validation](../spec/BEHAVIOUR.md#forms-masks-validation) | 0 | — |
-| `class-moves` | Move styles into a class; apply a class to every similar element | yes | 4 | 3 | [class-moves](../spec/BEHAVIOUR.md#class-moves) | 1 | — |
+| `elements-structure` | Structure elements: Container, Header, Navigation, Main, Section, Article, Aside, Footer, Link Block | yes | 12 | 6 | [elements-structure](../spec/BEHAVIOUR.md#elements-structure) | 6 | passes 28/28 |
+| `elements-text` | Text elements: Heading, Paragraph, Link, Blockquote, Preformatted, Divider | yes | 6 | 3 | [elements-text](../spec/BEHAVIOUR.md#elements-text) | 1 | passes 6/6 |
+| `elements-lists` | List elements: Unordered, Ordered and Definition lists with their items | yes | 11 | 6 | [elements-lists](../spec/BEHAVIOUR.md#elements-lists) | 6 | passes 19/19 |
+| `nesting-grammar` | HTML nesting rules for inserting, dragging and pasting | yes | 2 | 4 | [nesting-grammar](../spec/BEHAVIOUR.md#nesting-grammar) | 3 | passes 4/4 |
+| `nesting-grammar-structure` | HTML nesting rules for wrap, unwrap, promote, tag switch and hand | yes | 6 | 6 | [nesting-grammar-structure](../spec/BEHAVIOUR.md#nesting-grammar-structure) | 3 | passes 6/6 |
+| `elements-tables` | Table elements: Table, Caption, Head, Body, Footer, Row, Header cell, Cell | yes | 4 | 4 | [elements-tables](../spec/BEHAVIOUR.md#elements-tables) | 1 | passes 4/4 |
+| `table-commands` | Add and remove table rows and columns | yes | 5 | 5 | [table-commands](../spec/BEHAVIOUR.md#table-commands) | 2 | passes 5/5 |
+| `elements-form-structure` | Form structure elements: Form, Fieldset, Legend, Label, Button, Output | yes | 10 | 4 | [elements-form-structure](../spec/BEHAVIOUR.md#elements-form-structure) | 1 | passes 10/10 |
+| `element-attributes-aria` | Custom attributes and accessibility fields | yes | 8 | 6 | [element-attributes-aria](../spec/BEHAVIOUR.md#element-attributes-aria) | 1 | passes 8/8 |
+| `shared-style-classes` | Reusable style classes | yes | 10 | 4 | [shared-style-classes](../spec/BEHAVIOUR.md#shared-style-classes) | 5 | passes 10/10 |
+| `elements-form-inputs` | Input elements: the 14 input types and their attributes | yes | 26 | 13 | [elements-form-inputs](../spec/BEHAVIOUR.md#elements-form-inputs) | 1 | passes 26/26 |
+| `elements-form-inputs-rules` | Per-type input attributes, type switching, label targets and canvas focus | yes | 3 | 3 | [elements-form-inputs-rules](../spec/BEHAVIOUR.md#elements-form-inputs-rules) | 2 | passes 3/3 |
+| `elements-form-controls` | Textarea, Select, Option group, Option, Progress and Meter | yes | 13 | 9 | [elements-form-controls](../spec/BEHAVIOUR.md#elements-form-controls) | 1 | passes 13/13 |
+| `elements-media-images` | Image, Picture, Source, Figure and Caption | yes | 9 | 6 | [media-embed-rules](../spec/BEHAVIOUR.md#media-embed-rules) | 0 | passes 9/9 |
+| `elements-media-embeds` | Video, Audio, Track, Embedded frame and Canvas | yes | 14 | 11 | [media-embed-rules](../spec/BEHAVIOUR.md#media-embed-rules) | 0 | passes 14/14 |
+| `elements-svg-shapes` | SVG/Icon, Rectangle, Ellipse and Line | yes | 14 | 11 | [elements-svg-shapes](../spec/BEHAVIOUR.md#elements-svg-shapes) | 5 | passes 14/14 |
+| `elements-interactive` | Details, Summary and Dialog | yes | 4 | 2 | [elements-interactive](../spec/BEHAVIOUR.md#elements-interactive) | 1 | passes 4/4 |
+| `natural-child-command` | Create the natural child inside a container | yes | 4 | 1 | [natural-child-command](../spec/BEHAVIOUR.md#natural-child-command) | 3 | passes 4/4 |
+| `props-element-specific` | List, table, form and media properties shown only where they apply | yes | 10 | 9 | [props-element-specific](../spec/BEHAVIOUR.md#props-element-specific) | 7 | passes 10/10 |
+| `settings-class-management` | Manage Settings classes and attributes | yes | 6 | 5 | [settings-class-management](../spec/BEHAVIOUR.md#settings-class-management) | 0 | passes 6/6 |
+| `settings-audit` | Organised Settings | yes | 26 | 26 | [settings-audit](../spec/BEHAVIOUR.md#settings-audit) | 1 | passes 26/26 |
+| `forms-masks-validation` | Form masks and validation | yes | 75 | 74 | [forms-masks-validation](../spec/BEHAVIOUR.md#forms-masks-validation) | 0 | passes 75/75 |
+| `class-moves` | Move styles into a class; apply a class to every similar element | yes | 4 | 3 | [class-moves](../spec/BEHAVIOUR.md#class-moves) | 1 | passes 4/4 |
 
 ## 08-templates-and-components
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `templates-layout` | Layout templates: Container, Row, Column, Grid | yes | 5 | 1 | [templates-layout](../spec/BEHAVIOUR.md#templates-layout) | 2 | — |
-| `templates-content` | Content templates: lists, table, form, select and figure | yes | 7 | 1 | [templates-content](../spec/BEHAVIOUR.md#templates-content) | 1 | — |
-| `templates-sections` | Section templates: Card, Hero, Navbar, Sidebar, Gallery | yes | 5 | 1 | [templates-sections](../spec/BEHAVIOUR.md#templates-sections) | 1 | — |
-| `reusable-components` | Reusable components with instances | yes | 10 | 9 | [reusable-components](../spec/BEHAVIOUR.md#reusable-components) | 4 | — |
-| `repeat-element` | Repeat an element | yes | 6 | 6 | [repeat-element](../spec/BEHAVIOUR.md#repeat-element) | 0 | — |
-| `templates-components` | Component templates: Form group, Button group, Tabs, Accordion, Modal | yes | 5 | 1 | [templates-components](../spec/BEHAVIOUR.md#templates-components) | 1 | — |
-| `component-master-edit` | An instance edited in place updates its component and every instance | yes | 2 | 1 | [component-master-edit](../spec/BEHAVIOUR.md#component-master-edit) | 0 | — |
-| `component-variants` | Variants of a component, chosen per instance | yes | 3 | 1 | [component-variants](../spec/BEHAVIOUR.md#component-variants) | 0 | — |
+| `templates-layout` | Layout templates: Container, Row, Column, Grid | yes | 5 | 1 | [templates-layout](../spec/BEHAVIOUR.md#templates-layout) | 2 | passes 5/5 |
+| `templates-content` | Content templates: lists, table, form, select and figure | yes | 7 | 1 | [templates-content](../spec/BEHAVIOUR.md#templates-content) | 1 | passes 7/7 |
+| `templates-sections` | Section templates: Card, Hero, Navbar, Sidebar, Gallery | yes | 5 | 1 | [templates-sections](../spec/BEHAVIOUR.md#templates-sections) | 1 | passes 5/5 |
+| `reusable-components` | Reusable components with instances | yes | 10 | 9 | [reusable-components](../spec/BEHAVIOUR.md#reusable-components) | 4 | passes 11/11 |
+| `repeat-element` | Repeat an element | yes | 6 | 6 | [repeat-element](../spec/BEHAVIOUR.md#repeat-element) | 0 | passes 8/8 |
+| `templates-components` | Component templates: Form group, Button group, Tabs, Accordion, Modal | yes | 5 | 1 | [templates-components](../spec/BEHAVIOUR.md#templates-components) | 1 | passes 5/5 |
+| `component-master-edit` | An instance edited in place updates its component and every instance | yes | 2 | 1 | [component-master-edit](../spec/BEHAVIOUR.md#component-master-edit) | 0 | passes 2/2 |
+| `component-variants` | Variants of a component, chosen per instance | yes | 3 | 1 | [component-variants](../spec/BEHAVIOUR.md#component-variants) | 0 | passes 3/3 |
 
 ## 09-panels
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `palette-search-groups` | Search the Insert panel and collapse its groups | yes | 2 | 1 | [palette-search-groups](../spec/BEHAVIOUR.md#palette-search-groups) | 1 | — |
-| `palette-density` | Insert panel view density | yes | 3 | 3 | [palette-density](../spec/BEHAVIOUR.md#palette-density) | 1 | — |
-| `layers-expand-collapse-all` | Collapse and expand every branch in Layers | yes | 3 | 3 | [layers-expand-collapse-all](../spec/BEHAVIOUR.md#layers-expand-collapse-all) | 1 | — |
-| `layers-search` | Search the Layers panel | yes | 4 | 2 | [layers-search](../spec/BEHAVIOUR.md#layers-search) | 1 | — |
-| `layers-row-columns` | Choose what each Layers row shows | yes | 3 | 3 | [layers-row-columns](../spec/BEHAVIOUR.md#layers-row-columns) | 1 | — |
-| `layers-row-colours` | Colour labels on Layers rows | yes | 2 | 1 | [layers-row-colours](../spec/BEHAVIOUR.md#layers-row-colours) | 1 | — |
+| `palette-search-groups` | Search the Insert panel and collapse its groups | yes | 2 | 1 | [palette-search-groups](../spec/BEHAVIOUR.md#palette-search-groups) | 1 | passes 2/2 |
+| `palette-density` | Insert panel view density | yes | 3 | 3 | [palette-density](../spec/BEHAVIOUR.md#palette-density) | 1 | passes 3/3 |
+| `layers-expand-collapse-all` | Collapse and expand every branch in Layers | yes | 3 | 3 | [layers-expand-collapse-all](../spec/BEHAVIOUR.md#layers-expand-collapse-all) | 1 | passes 3/3 |
+| `layers-search` | Search the Layers panel | yes | 4 | 2 | [layers-search](../spec/BEHAVIOUR.md#layers-search) | 1 | passes 4/4 |
+| `layers-row-columns` | Choose what each Layers row shows | yes | 3 | 3 | [layers-row-columns](../spec/BEHAVIOUR.md#layers-row-columns) | 1 | passes 3/3 |
+| `layers-row-colours` | Colour labels on Layers rows | yes | 2 | 1 | [layers-row-colours](../spec/BEHAVIOUR.md#layers-row-colours) | 1 | passes 2/2 |
 
 ## 10-view-and-positioning
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `zoom-keyboard-buttons` | Zoom with the keyboard, the status bar buttons and Fit | yes | 15 | 17 | [zoom-keyboard-buttons](../spec/BEHAVIOUR.md#zoom-keyboard-buttons) | 5 | — |
-| `rotation-handle` | Rotate an element with a handle on the canvas | yes | 3 | 1 | [rotation-handle](../spec/BEHAVIOUR.md#rotation-handle) | 1 | — |
-| `zoom-wheel-pan` | Ctrl+wheel zoom, wheel scroll and Space-drag pan | yes | 6 | 5 | [zoom-wheel-pan](../spec/BEHAVIOUR.md#zoom-wheel-pan) | 2 | — |
-| `rulers` | Rulers along the canvas | yes | 2 | 2 | [rulers](../spec/BEHAVIOUR.md#rulers) | 2 | — |
-| `guides-manual` | Create, move and delete guides from the rulers | yes | 10 | 10 | [guides-manual](../spec/BEHAVIOUR.md#guides-manual) | 4 | — |
-| `canvas-outlines-zones` | Show element outlines and drop zones on the canvas | yes | 3 | 4 | [canvas-outlines-zones](../spec/BEHAVIOUR.md#canvas-outlines-zones) | 4 | — |
-| `layout-grid-overlay` | Column grid, row grid and dot grid overlays | yes | 7 | 4 | [layout-grid-overlay](../spec/BEHAVIOUR.md#layout-grid-overlay) | 3 | — |
-| `workspace-settings-dialog` | Guides & Grids settings dialog | yes | 11 | 10 | [workspace-settings-dialog](../spec/BEHAVIOUR.md#workspace-settings-dialog) | 3 | — |
-| `absolute-free-drag` | Free positioning of absolute children by dragging | yes | 5 | 2 | [absolute-free-drag](../spec/BEHAVIOUR.md#absolute-free-drag) | 3 | — |
-| `absolute-nudge` | Nudge positioned elements with the arrow keys | yes | 5 | 3 | [absolute-nudge](../spec/BEHAVIOUR.md#absolute-nudge) | 1 | — |
-| `absolute-anchors` | Anchor positioned elements to edges and centres | yes | 10 | 9 | [absolute-anchors](../spec/BEHAVIOUR.md#absolute-anchors) | 6 | — |
-| `align-distribute` | Align and distribute positioned elements | yes | 9 | 16 | [align-distribute](../spec/BEHAVIOUR.md#align-distribute) | 2 | — |
-| `snap-toggle-settings` | Snap on/off and snap settings | yes | 9 | 7 | [snap-toggle-settings](../spec/BEHAVIOUR.md#snap-toggle-settings) | 4 | — |
-| `snap-while-moving` | Snapping while resizing and moving positioned elements | yes | 6 | 2 | [snap-while-moving](../spec/BEHAVIOUR.md#snap-while-moving) | 4 | — |
-| `smart-guides` | Smart alignment and equal spacing guides | yes | 3 | 3 | [smart-guides](../spec/BEHAVIOUR.md#smart-guides) | 3 | — |
-| `hover-measure` | Measure sizes and distances on the canvas | yes | 4 | 1 | [hover-measure](../spec/BEHAVIOUR.md#hover-measure) | 5 | — |
+| `zoom-keyboard-buttons` | Zoom with the keyboard, the status bar buttons and Fit | yes | 15 | 17 | [zoom-keyboard-buttons](../spec/BEHAVIOUR.md#zoom-keyboard-buttons) | 5 | passes 20/20 |
+| `rotation-handle` | Rotate an element with a handle on the canvas | yes | 3 | 1 | [rotation-handle](../spec/BEHAVIOUR.md#rotation-handle) | 1 | passes 3/3 |
+| `zoom-wheel-pan` | Ctrl+wheel zoom, wheel scroll and Space-drag pan | yes | 6 | 5 | [zoom-wheel-pan](../spec/BEHAVIOUR.md#zoom-wheel-pan) | 2 | passes 6/6 |
+| `rulers` | Rulers along the canvas | yes | 2 | 2 | [rulers](../spec/BEHAVIOUR.md#rulers) | 2 | passes 2/2 |
+| `guides-manual` | Create, move and delete guides from the rulers | yes | 10 | 10 | [guides-manual](../spec/BEHAVIOUR.md#guides-manual) | 4 | passes 11/11 |
+| `canvas-outlines-zones` | Show element outlines and drop zones on the canvas | yes | 3 | 4 | [canvas-outlines-zones](../spec/BEHAVIOUR.md#canvas-outlines-zones) | 4 | passes 4/4 |
+| `layout-grid-overlay` | Column grid, row grid and dot grid overlays | yes | 7 | 4 | [layout-grid-overlay](../spec/BEHAVIOUR.md#layout-grid-overlay) | 3 | passes 9/9 |
+| `workspace-settings-dialog` | Guides & Grids settings dialog | yes | 11 | 10 | [workspace-settings-dialog](../spec/BEHAVIOUR.md#workspace-settings-dialog) | 3 | passes 11/11 |
+| `absolute-free-drag` | Free positioning of absolute children by dragging | yes | 5 | 2 | [absolute-free-drag](../spec/BEHAVIOUR.md#absolute-free-drag) | 3 | passes 5/5 |
+| `absolute-nudge` | Nudge positioned elements with the arrow keys | yes | 5 | 3 | [absolute-nudge](../spec/BEHAVIOUR.md#absolute-nudge) | 1 | passes 5/5 |
+| `absolute-anchors` | Anchor positioned elements to edges and centres | yes | 10 | 9 | [absolute-anchors](../spec/BEHAVIOUR.md#absolute-anchors) | 6 | passes 10/10 |
+| `align-distribute` | Align and distribute positioned elements | yes | 9 | 16 | [align-distribute](../spec/BEHAVIOUR.md#align-distribute) | 2 | passes 17/17 |
+| `snap-toggle-settings` | Snap on/off and snap settings | yes | 9 | 7 | [snap-toggle-settings](../spec/BEHAVIOUR.md#snap-toggle-settings) | 4 | passes 9/9 |
+| `snap-while-moving` | Snapping while resizing and moving positioned elements | yes | 6 | 2 | [snap-while-moving](../spec/BEHAVIOUR.md#snap-while-moving) | 4 | passes 6/6 |
+| `smart-guides` | Smart alignment and equal spacing guides | yes | 3 | 3 | [smart-guides](../spec/BEHAVIOUR.md#smart-guides) | 3 | passes 3/3 |
+| `hover-measure` | Measure sizes and distances on the canvas | yes | 4 | 1 | [hover-measure](../spec/BEHAVIOUR.md#hover-measure) | 5 | passes 4/4 |
 
 ## 11-responsive-and-states
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `breakpoints-switch` | Switch between Desktop, Laptop, Tablet and Phone breakpoints | yes | 12 | 9 | [breakpoints-switch](../spec/BEHAVIOUR.md#breakpoints-switch) | 2 | — |
-| `breakpoint-overrides` | Style overrides per breakpoint, desktop first | yes | 5 | 5 | [breakpoint-overrides](../spec/BEHAVIOUR.md#breakpoint-overrides) | 2 | — |
-| `state-styles` | Style states: hover, focus, active, disabled, invalid and placeholder shown | yes | 17 | 17 | [state-styles](../spec/BEHAVIOUR.md#state-styles) | 2 | — |
+| `breakpoints-switch` | Switch between Desktop, Laptop, Tablet and Phone breakpoints | yes | 12 | 9 | [breakpoints-switch](../spec/BEHAVIOUR.md#breakpoints-switch) | 2 | passes 12/12 |
+| `breakpoint-overrides` | Style overrides per breakpoint, desktop first | yes | 5 | 5 | [breakpoint-overrides](../spec/BEHAVIOUR.md#breakpoint-overrides) | 2 | passes 5/5 |
+| `state-styles` | Style states: hover, focus, active, disabled, invalid and placeholder shown | yes | 17 | 17 | [state-styles](../spec/BEHAVIOUR.md#state-styles) | 2 | passes 17/17 |
 
 ## 12-preview-embed-theme
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `preview-mode` | Preview the page without editor chrome | yes | 11 | 11 | [preview-mode](../spec/BEHAVIOUR.md#preview-mode) | 6 | — |
-| `embed-html` | Embed custom HTML | yes | 2 | 2 | [embed-html](../spec/BEHAVIOUR.md#embed-html) | 1 | — |
-| `theme-switch` | Light, dark and system theme | yes | 3 | 3 | [theme-switch](../spec/BEHAVIOUR.md#theme-switch) | 1 | — |
+| `preview-mode` | Preview the page without editor chrome | yes | 11 | 11 | [preview-mode](../spec/BEHAVIOUR.md#preview-mode) | 6 | passes 11/11 |
+| `embed-html` | Embed custom HTML | yes | 2 | 2 | [embed-html](../spec/BEHAVIOUR.md#embed-html) | 1 | passes 2/2 |
+| `theme-switch` | Light, dark and system theme | yes | 3 | 3 | [theme-switch](../spec/BEHAVIOUR.md#theme-switch) | 1 | passes 3/3 |
 
 ## 13-workspace
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `dock-toggles` | Show and hide the docks and panels | yes | 15 | 14 | [dock-toggles](../spec/BEHAVIOUR.md#dock-toggles) | 2 | — |
-| `command-bar` | Command bar with Ctrl+K | yes | 56 | 59 | [command-bar](../spec/BEHAVIOUR.md#command-bar) | 8 | — |
-| `command-bar-set-property` | Set a property or jump to it from the command bar | yes | 10 | 10 | [command-bar-set-property](../spec/BEHAVIOUR.md#command-bar-set-property) | 2 | — |
-| `shortcuts-panel` | Keyboard shortcuts panel generated from the keymap | yes | 2 | 1 | [shortcuts-panel](../spec/BEHAVIOUR.md#shortcuts-panel) | 3 | — |
-| `workbench-panel` | Bottom workbench: tabs, collapse, maximise and developer tools | yes | 10 | 6 | [workbench-panel](../spec/BEHAVIOUR.md#workbench-panel) | 4 | — |
-| `panel-resize` | Resize docks and panels with splitters | yes | 6 | 5 | [panel-resize](../spec/BEHAVIOUR.md#panel-resize) | 6 | — |
-| `floating-panels` | Float a panel as a window and dock it again | yes | 5 | 5 | [floating-panels](../spec/BEHAVIOUR.md#floating-panels) | 4 | — |
-| `panel-combine-tabs` | Combine panels as tabs or stack them | yes | 3 | 3 | [panel-combine-tabs](../spec/BEHAVIOUR.md#panel-combine-tabs) | 2 | — |
-| `workspace-persist-reset` | Workspace layout persists and can be reset | yes | 2 | 3 | [workspace-persist-reset](../spec/BEHAVIOUR.md#workspace-persist-reset) | 1 | — |
-| `status-bar` | Status bar: messages, breadcrumb, size, context, count, zoom and save state | yes | 2 | 2 | [status-bar](../spec/BEHAVIOUR.md#status-bar) | 6 | — |
+| `dock-toggles` | Show and hide the docks and panels | yes | 15 | 14 | [dock-toggles](../spec/BEHAVIOUR.md#dock-toggles) | 2 | passes 21/21 |
+| `command-bar` | Command bar with Ctrl+K | yes | 56 | 59 | [command-bar](../spec/BEHAVIOUR.md#command-bar) | 8 | passes 60/60 |
+| `command-bar-set-property` | Set a property or jump to it from the command bar | yes | 10 | 10 | [command-bar-set-property](../spec/BEHAVIOUR.md#command-bar-set-property) | 2 | passes 10/10 |
+| `shortcuts-panel` | Keyboard shortcuts panel generated from the keymap | yes | 2 | 1 | [shortcuts-panel](../spec/BEHAVIOUR.md#shortcuts-panel) | 3 | passes 2/2 |
+| `workbench-panel` | Bottom workbench: tabs, collapse, maximise and developer tools | yes | 10 | 6 | [workbench-panel](../spec/BEHAVIOUR.md#workbench-panel) | 4 | passes 10/10 |
+| `panel-resize` | Resize docks and panels with splitters | yes | 6 | 5 | [panel-resize](../spec/BEHAVIOUR.md#panel-resize) | 6 | passes 7/7 |
+| `floating-panels` | Float a panel as a window and dock it again | yes | 5 | 5 | [floating-panels](../spec/BEHAVIOUR.md#floating-panels) | 4 | passes 5/5 |
+| `panel-combine-tabs` | Combine panels as tabs or stack them | yes | 3 | 3 | [panel-combine-tabs](../spec/BEHAVIOUR.md#panel-combine-tabs) | 2 | passes 3/3 |
+| `workspace-persist-reset` | Workspace layout persists and can be reset | yes | 2 | 3 | [workspace-persist-reset](../spec/BEHAVIOUR.md#workspace-persist-reset) | 1 | passes 3/3 |
+| `status-bar` | Status bar: messages, breadcrumb, size, context, count, zoom and save state | yes | 2 | 2 | [status-bar](../spec/BEHAVIOUR.md#status-bar) | 6 | passes 2/2 |
 
 ## 14-accessibility-and-keyboard
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `accessibility-checks` | Accessibility and structure checks | yes | 8 | 8 | [accessibility-checks](../spec/BEHAVIOUR.md#accessibility-checks) | 5 | — |
-| `keyboard-panel-navigation` | Move between panels and inside them with the keyboard | yes | 8 | 31 | [keyboard-panel-navigation](../spec/BEHAVIOUR.md#keyboard-panel-navigation) | 8 | — |
-| `layers-keyboard-navigation` | Operate the Layers tree with the keyboard | yes | 7 | 8 | [layers-keyboard-navigation](../spec/BEHAVIOUR.md#layers-keyboard-navigation) | 4 | — |
+| `accessibility-checks` | Accessibility and structure checks | yes | 8 | 8 | [accessibility-checks](../spec/BEHAVIOUR.md#accessibility-checks) | 5 | passes 8/8 |
+| `keyboard-panel-navigation` | Move between panels and inside them with the keyboard | yes | 8 | 31 | [keyboard-panel-navigation](../spec/BEHAVIOUR.md#keyboard-panel-navigation) | 8 | passes 31/31 |
+| `layers-keyboard-navigation` | Operate the Layers tree with the keyboard | yes | 7 | 8 | [layers-keyboard-navigation](../spec/BEHAVIOUR.md#layers-keyboard-navigation) | 4 | passes 8/8 |
 
 ## 15-clipboard-and-styles
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `clipboard-cut-system` | Cut, and copy elements as HTML for other applications | yes | 4 | 5 | [clipboard-cut-system](../spec/BEHAVIOUR.md#clipboard-cut-system) | 2 | — |
-| `copy-paste-styles` | Copy and paste styles between elements | yes | 5 | 8 | [copy-paste-styles](../spec/BEHAVIOUR.md#copy-paste-styles) | 1 | — |
+| `clipboard-cut-system` | Cut, and copy elements as HTML for other applications | yes | 4 | 5 | [clipboard-cut-system](../spec/BEHAVIOUR.md#clipboard-cut-system) | 2 | passes 6/6 |
+| `copy-paste-styles` | Copy and paste styles between elements | yes | 5 | 8 | [copy-paste-styles](../spec/BEHAVIOUR.md#copy-paste-styles) | 1 | passes 9/9 |
 
 ## 16-html-import
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `html-import-structure` | Import an HTML file: tags, text, inline marks and attributes | yes | 8 | 6 | [html-import](../spec/BEHAVIOUR.md#html-import) | 5 | — |
-| `html-import-cleaning` | Import cleaning: scripts, unknown elements, broken nesting and the import report | yes | 2 | 2 | [html-import-cleaning](../spec/BEHAVIOUR.md#html-import-cleaning) | 1 | — |
-| `html-import-styles` | Import CSS: style attributes, style blocks and linked stylesheets | yes | 2 | 2 | [html-import-styles](../spec/BEHAVIOUR.md#html-import-styles) | 1 | — |
-| `html-import-media-queries` | Import @media rules as breakpoint overrides | yes | 2 | 2 | [html-import-media-queries](../spec/BEHAVIOUR.md#html-import-media-queries) | 1 | — |
-| `html-import-states` | Import pseudo-class rules as state styles | yes | 2 | 2 | [html-import-states](../spec/BEHAVIOUR.md#html-import-states) | 1 | — |
-| `html-import-roundtrip` | Exported pages import back unchanged | yes | 2 | 2 | [html-import-roundtrip](../spec/BEHAVIOUR.md#html-import-roundtrip) | 1 | — |
-| `clipboard-paste-external` | Paste HTML and text copied from outside the app | yes | 2 | 2 | [clipboard-paste-external](../spec/BEHAVIOUR.md#clipboard-paste-external) | 2 | — |
-| `capture-url` | Open any web address as a page of the project | yes | 3 | 2 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 0 | — |
+| `html-import-structure` | Import an HTML file: tags, text, inline marks and attributes | yes | 8 | 6 | [html-import](../spec/BEHAVIOUR.md#html-import) | 5 | passes 12/12 |
+| `html-import-cleaning` | Import cleaning: scripts, unknown elements, broken nesting and the import report | yes | 2 | 2 | [html-import-cleaning](../spec/BEHAVIOUR.md#html-import-cleaning) | 1 | passes 4/4 |
+| `html-import-styles` | Import CSS: style attributes, style blocks and linked stylesheets | yes | 2 | 2 | [html-import-styles](../spec/BEHAVIOUR.md#html-import-styles) | 1 | passes 4/4 |
+| `html-import-media-queries` | Import @media rules as breakpoint overrides | yes | 2 | 2 | [html-import-media-queries](../spec/BEHAVIOUR.md#html-import-media-queries) | 1 | passes 4/4 |
+| `html-import-states` | Import pseudo-class rules as state styles | yes | 2 | 2 | [html-import-states](../spec/BEHAVIOUR.md#html-import-states) | 1 | passes 4/4 |
+| `html-import-roundtrip` | Exported pages import back unchanged | yes | 2 | 2 | [html-import-roundtrip](../spec/BEHAVIOUR.md#html-import-roundtrip) | 1 | passes 4/4 |
+| `clipboard-paste-external` | Paste HTML and text copied from outside the app | yes | 2 | 2 | [clipboard-paste-external](../spec/BEHAVIOUR.md#clipboard-paste-external) | 2 | passes 4/4 |
+| `capture-url` | Open any web address as a page of the project | yes | 3 | 2 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 0 | passes 3/3 |
 
 ## 17-code-panel
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `code-panel-view` | Code panel shows the generated HTML and CSS | yes | 5 | 6 | [code-panel-view](../spec/BEHAVIOUR.md#code-panel-view) | 1 | — |
-| `code-panel-selection-sync` | Code panel follows the selection | yes | 2 | 1 | [code-panel-selection-sync](../spec/BEHAVIOUR.md#code-panel-selection-sync) | 3 | — |
-| `code-panel-copy-download` | Copy or download what the Code panel shows | yes | 2 | 2 | [code-panel-copy-download](../spec/BEHAVIOUR.md#code-panel-copy-download) | 1 | — |
-| `code-panel-edit-css` | Edit an element's CSS in the Code panel | yes | 6 | 1 | [code-panel-edit-css](../spec/BEHAVIOUR.md#code-panel-edit-css) | 1 | — |
-| `code-panel-edit-html` | Edit HTML in the Code panel | yes | 5 | 1 | [code-panel-edit-html](../spec/BEHAVIOUR.md#code-panel-edit-html) | 1 | — |
+| `code-panel-view` | Code panel shows the generated HTML and CSS | yes | 5 | 6 | [code-panel-view](../spec/BEHAVIOUR.md#code-panel-view) | 1 | passes 6/6 |
+| `code-panel-selection-sync` | Code panel follows the selection | yes | 2 | 1 | [code-panel-selection-sync](../spec/BEHAVIOUR.md#code-panel-selection-sync) | 3 | passes 2/2 |
+| `code-panel-copy-download` | Copy or download what the Code panel shows | yes | 2 | 2 | [code-panel-copy-download](../spec/BEHAVIOUR.md#code-panel-copy-download) | 1 | passes 2/2 |
+| `code-panel-edit-css` | Edit an element's CSS in the Code panel | yes | 6 | 1 | [code-panel-edit-css](../spec/BEHAVIOUR.md#code-panel-edit-css) | 1 | passes 6/6 |
+| `code-panel-edit-html` | Edit HTML in the Code panel | yes | 5 | 1 | [code-panel-edit-html](../spec/BEHAVIOUR.md#code-panel-edit-html) | 1 | passes 5/5 |
 
 ## 18-animation-and-events
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `timeline-animations` | Timeline panel: create animations for an element | yes | 3 | 2 | [timeline-animations](../spec/BEHAVIOUR.md#timeline-animations) | 1 | — |
-| `timeline-keyframes` | Add, edit, move and delete keyframes on the timeline | yes | 4 | 5 | [timeline-keyframes](../spec/BEHAVIOUR.md#timeline-keyframes) | 3 | — |
-| `timeline-animation-settings` | Animation duration, delay, repeat, direction and fill | yes | 2 | 2 | [timeline-animation-settings](../spec/BEHAVIOUR.md#timeline-animation-settings) | 1 | — |
-| `timeline-preview` | Preview animations by playing and scrubbing the timeline | yes | 5 | 5 | [timeline-preview](../spec/BEHAVIOUR.md#timeline-preview) | 2 | — |
-| `export-keyframes` | Export animations as @keyframes | yes | 2 | 1 | [export-keyframes](../spec/BEHAVIOUR.md#export-keyframes) | 1 | — |
-| `events-actions` | Events and actions per element | yes | 10 | 7 | [events-actions](../spec/BEHAVIOUR.md#events-actions) | 6 | — |
-| `export-events-js` | Export interactions as standard JavaScript | yes | 3 | 1 | [export-events-js](../spec/BEHAVIOUR.md#export-events-js) | 1 | — |
+| `timeline-animations` | Timeline panel: create animations for an element | yes | 3 | 2 | [timeline-animations](../spec/BEHAVIOUR.md#timeline-animations) | 1 | passes 3/3 |
+| `timeline-keyframes` | Add, edit, move and delete keyframes on the timeline | yes | 4 | 5 | [timeline-keyframes](../spec/BEHAVIOUR.md#timeline-keyframes) | 3 | passes 5/5 |
+| `timeline-animation-settings` | Animation duration, delay, repeat, direction and fill | yes | 2 | 2 | [timeline-animation-settings](../spec/BEHAVIOUR.md#timeline-animation-settings) | 1 | passes 2/2 |
+| `timeline-preview` | Preview animations by playing and scrubbing the timeline | yes | 5 | 5 | [timeline-preview](../spec/BEHAVIOUR.md#timeline-preview) | 2 | passes 5/5 |
+| `export-keyframes` | Export animations as @keyframes | yes | 2 | 1 | [export-keyframes](../spec/BEHAVIOUR.md#export-keyframes) | 1 | passes 2/2 |
+| `events-actions` | Events and actions per element | yes | 10 | 7 | [events-actions](../spec/BEHAVIOUR.md#events-actions) | 6 | passes 10/10 |
+| `export-events-js` | Export interactions as standard JavaScript | yes | 3 | 1 | [export-events-js](../spec/BEHAVIOUR.md#export-events-js) | 1 | passes 3/3 |
 
 ## 19-pages-files-assets
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `explorer-pages` | File explorer: add, rename, duplicate, delete and switch pages | yes | 11 | 8 | [explorer-pages](../spec/BEHAVIOUR.md#explorer-pages) | 6 | — |
-| `explorer-file-system` | File explorer with a virtual file system | yes | 14 | 11 | [explorer-file-system](../spec/BEHAVIOUR.md#explorer-file-system) | 5 | — |
-| `link-picker` | Link to pages, anchors, email and phone | yes | 2 | 2 | [media-embed-rules](../spec/BEHAVIOUR.md#media-embed-rules) | 0 | — |
-| `export-multi-page` | Export every page of the project | yes | 2 | 1 | [export-multi-page](../spec/BEHAVIOUR.md#export-multi-page) | 1 | — |
-| `explorer-assets` | Upload and manage image and font files | yes | 2 | 2 | [explorer-assets](../spec/BEHAVIOUR.md#explorer-assets) | 2 | — |
-| `explorer-assets-use` | Use assets in Image elements and drop images onto the canvas | yes | 3 | 3 | [explorer-assets-use](../spec/BEHAVIOUR.md#explorer-assets-use) | 3 | — |
-| `export-file-tree` | Export the file tree as a ZIP | yes | 2 | 1 | [export-file-tree](../spec/BEHAVIOUR.md#export-file-tree) | 1 | — |
-| `export-assets` | Export includes every file of the tree | yes | 2 | 1 | [export-assets](../spec/BEHAVIOUR.md#export-assets) | 1 | — |
-| `page-seo-meta` | Page metadata for search and sharing | yes | 7 | 6 | [page-seo-meta](../spec/BEHAVIOUR.md#page-seo-meta) | 1 | — |
-| `custom-fonts` | Use custom font files | yes | 2 | 1 | [custom-fonts](../spec/BEHAVIOUR.md#custom-fonts) | 1 | — |
-| `explorer-open-folder` | Open a whole folder from disk | yes | 4 | 3 | [explorer-open-folder](../spec/BEHAVIOUR.md#explorer-open-folder) | 1 | — |
-| `code-panel-edit-js` | Edit JavaScript files in the Code panel | yes | 3 | 3 | [code-panel-edit-js](../spec/BEHAVIOUR.md#code-panel-edit-js) | 1 | — |
-| `command-bar-find` | Pages, layers and classes in the command bar | yes | 3 | 3 | [command-bar-find](../spec/BEHAVIOUR.md#command-bar-find) | 0 | — |
+| `explorer-pages` | File explorer: add, rename, duplicate, delete and switch pages | yes | 11 | 8 | [explorer-pages](../spec/BEHAVIOUR.md#explorer-pages) | 6 | passes 12/12 |
+| `explorer-file-system` | File explorer with a virtual file system | yes | 14 | 11 | [explorer-file-system](../spec/BEHAVIOUR.md#explorer-file-system) | 5 | passes 14/14 |
+| `link-picker` | Link to pages, anchors, email and phone | yes | 2 | 2 | [media-embed-rules](../spec/BEHAVIOUR.md#media-embed-rules) | 0 | passes 2/2 |
+| `export-multi-page` | Export every page of the project | yes | 2 | 1 | [export-multi-page](../spec/BEHAVIOUR.md#export-multi-page) | 1 | passes 2/2 |
+| `explorer-assets` | Upload and manage image and font files | yes | 2 | 2 | [explorer-assets](../spec/BEHAVIOUR.md#explorer-assets) | 2 | passes 2/2 |
+| `explorer-assets-use` | Use assets in Image elements and drop images onto the canvas | yes | 3 | 3 | [explorer-assets-use](../spec/BEHAVIOUR.md#explorer-assets-use) | 3 | passes 3/3 |
+| `export-file-tree` | Export the file tree as a ZIP | yes | 2 | 1 | [export-file-tree](../spec/BEHAVIOUR.md#export-file-tree) | 1 | passes 2/2 |
+| `export-assets` | Export includes every file of the tree | yes | 2 | 1 | [export-assets](../spec/BEHAVIOUR.md#export-assets) | 1 | passes 2/2 |
+| `page-seo-meta` | Page metadata for search and sharing | yes | 7 | 6 | [page-seo-meta](../spec/BEHAVIOUR.md#page-seo-meta) | 1 | passes 7/7 |
+| `custom-fonts` | Use custom font files | yes | 2 | 1 | [custom-fonts](../spec/BEHAVIOUR.md#custom-fonts) | 1 | passes 2/2 |
+| `explorer-open-folder` | Open a whole folder from disk | yes | 4 | 3 | [explorer-open-folder](../spec/BEHAVIOUR.md#explorer-open-folder) | 1 | passes 7/7 |
+| `code-panel-edit-js` | Edit JavaScript files in the Code panel | yes | 3 | 3 | [code-panel-edit-js](../spec/BEHAVIOUR.md#code-panel-edit-js) | 1 | passes 3/3 |
+| `command-bar-find` | Pages, layers and classes in the command bar | yes | 3 | 3 | [command-bar-find](../spec/BEHAVIOUR.md#command-bar-find) | 0 | passes 3/3 |
 
 ## 20-shortcut-sweep
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `shortcuts-e2e-sweep` | Every listed shortcut works in its context | yes | 2 | 2 | [shortcuts-e2e-sweep](../spec/BEHAVIOUR.md#shortcuts-e2e-sweep) | 3 | — |
+| `shortcuts-e2e-sweep` | Every listed shortcut works in its context | yes | 2 | 2 | [shortcuts-e2e-sweep](../spec/BEHAVIOUR.md#shortcuts-e2e-sweep) | 3 | passes 2/2 |
 
 ## 21-layout-and-structure
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `layout-actions` | Wrap in a container or a grid, swap the direction, stack on the phone, organize the children and divide the columns | yes | 14 | 26 | [layout-actions](../spec/BEHAVIOUR.md#layout-actions) | 3 | — |
-| `canvas-grid-editor` | Edit a grid on the canvas: its tracks, its cells and the items in them | yes | 6 | 6 | [canvas-grid-editor](../spec/BEHAVIOUR.md#canvas-grid-editor) | 3 | — |
-| `batch-rename` | Renaming in batch | yes | 3 | 2 | [batch-rename](../spec/BEHAVIOUR.md#batch-rename) | 0 | — |
+| `layout-actions` | Wrap in a container or a grid, swap the direction, stack on the phone, organize the children and divide the columns | yes | 14 | 26 | [layout-actions](../spec/BEHAVIOUR.md#layout-actions) | 3 | passes 30/30 |
+| `canvas-grid-editor` | Edit a grid on the canvas: its tracks, its cells and the items in them | yes | 6 | 6 | [canvas-grid-editor](../spec/BEHAVIOUR.md#canvas-grid-editor) | 3 | passes 6/6 |
+| `batch-rename` | Renaming in batch | yes | 3 | 2 | [batch-rename](../spec/BEHAVIOUR.md#batch-rename) | 0 | passes 3/3 |
 
 ## 22-assistant
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `assistant-chat` | Assistant chat and MCP | yes | 15 | 16 | [assistant-chat](../spec/BEHAVIOUR.md#assistant-chat) | 1 | — |
+| `assistant-chat` | Assistant chat and MCP | yes | 15 | 16 | [assistant-chat](../spec/BEHAVIOUR.md#assistant-chat) | 1 | passes 16/16 |
 
 ## 23-layout-composer
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `layout-composer` | Compose a layout by drawing it | yes | 40 | 45 | [layout-composer](../spec/BEHAVIOUR.md#layout-composer) | 0 | — |
+| `layout-composer` | Compose a layout by drawing it | yes | 40 | 45 | [layout-composer](../spec/BEHAVIOUR.md#layout-composer) | 0 | passes 45/45 |
 
 ## 24-motion
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `motion-interactions` | Interactions: a trigger plays a timeline | yes | 64 | 22 | [motion-interactions](../spec/BEHAVIOUR.md#motion-interactions) | 2 | — |
-| `motion-timeline` | Timeline in seconds: tracks, actions and markers | yes | 57 | 34 | [motion-timeline](../spec/BEHAVIOUR.md#motion-timeline) | 1 | — |
-| `motion-keyframes` | Keyframes: add, edit, move, copy, paste and record | yes | 12 | 10 | [motion-keyframes](../spec/BEHAVIOUR.md#motion-keyframes) | 1 | — |
-| `motion-preview` | Preview a timeline and run the interactions on the canvas | yes | 4 | 4 | [motion-preview](../spec/BEHAVIOUR.md#motion-preview) | 1 | — |
-| `motion-behaviours` | Behaviours: sticky, scroll snap, smooth scroll, parallax, marquee, cursor follow | yes | 10 | 10 | [motion-behaviours](../spec/BEHAVIOUR.md#motion-behaviours) | 1 | — |
-| `export-motion-js` | Motion exported as plain JavaScript | yes | 2 | 1 | [export-motion-js](../spec/BEHAVIOUR.md#export-motion-js) | 0 | — |
+| `motion-interactions` | Interactions: a trigger plays a timeline | yes | 64 | 22 | [motion-interactions](../spec/BEHAVIOUR.md#motion-interactions) | 2 | passes 64/64 |
+| `motion-timeline` | Timeline in seconds: tracks, actions and markers | yes | 57 | 34 | [motion-timeline](../spec/BEHAVIOUR.md#motion-timeline) | 1 | passes 58/58 |
+| `motion-keyframes` | Keyframes: add, edit, move, copy, paste and record | yes | 12 | 10 | [motion-keyframes](../spec/BEHAVIOUR.md#motion-keyframes) | 1 | passes 12/12 |
+| `motion-preview` | Preview a timeline and run the interactions on the canvas | yes | 4 | 4 | [motion-preview](../spec/BEHAVIOUR.md#motion-preview) | 1 | passes 4/4 |
+| `motion-behaviours` | Behaviours: sticky, scroll snap, smooth scroll, parallax, marquee, cursor follow | yes | 10 | 10 | [motion-behaviours](../spec/BEHAVIOUR.md#motion-behaviours) | 1 | passes 10/10 |
+| `export-motion-js` | Motion exported as plain JavaScript | yes | 2 | 1 | [export-motion-js](../spec/BEHAVIOUR.md#export-motion-js) | 0 | passes 2/2 |
 
 ## 25-content
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `data-collections` | Collections: fields, items and queries | yes | 25 | 21 | [data-collections](../spec/BEHAVIOUR.md#data-collections) | 0 | — |
-| `data-import` | Import CSV, TSV, JSON and XLSX | yes | 10 | 8 | [data-import](../spec/BEHAVIOUR.md#data-import) | 0 | — |
-| `data-binding` | Connect fields and fill lists | yes | 6 | 4 | [data-binding](../spec/BEHAVIOUR.md#data-binding) | 0 | — |
-| `data-pages` | Pages from a page | yes | 3 | 2 | [data-pages](../spec/BEHAVIOUR.md#data-pages) | 0 | — |
-| `shared-regions` | Shared regions | yes | 5 | 5 | [shared-regions](../spec/BEHAVIOUR.md#shared-regions) | 0 | — |
+| `data-collections` | Collections: fields, items and queries | yes | 25 | 21 | [data-collections](../spec/BEHAVIOUR.md#data-collections) | 0 | passes 25/25 |
+| `data-import` | Import CSV, TSV, JSON and XLSX | yes | 10 | 8 | [data-import](../spec/BEHAVIOUR.md#data-import) | 0 | passes 10/10 |
+| `data-binding` | Connect fields and fill lists | yes | 6 | 4 | [data-binding](../spec/BEHAVIOUR.md#data-binding) | 0 | passes 6/6 |
+| `data-pages` | Pages from a page | yes | 3 | 2 | [data-pages](../spec/BEHAVIOUR.md#data-pages) | 0 | passes 3/3 |
+| `shared-regions` | Shared regions | yes | 5 | 5 | [shared-regions](../spec/BEHAVIOUR.md#shared-regions) | 0 | passes 5/5 |
 
 ## 26-project-breakpoints
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `project-breakpoints` | The project's own breakpoints | yes | 15 | 10 | [project-breakpoints](../spec/BEHAVIOUR.md#project-breakpoints) | 0 | — |
-| `side-by-side-view` | Breakpoints side by side | yes | 2 | 2 | [side-by-side-view](../spec/BEHAVIOUR.md#side-by-side-view) | 0 | — |
+| `project-breakpoints` | The project's own breakpoints | yes | 15 | 10 | [project-breakpoints](../spec/BEHAVIOUR.md#project-breakpoints) | 0 | passes 15/15 |
+| `side-by-side-view` | Breakpoints side by side | yes | 2 | 2 | [side-by-side-view](../spec/BEHAVIOUR.md#side-by-side-view) | 0 | passes 2/2 |
