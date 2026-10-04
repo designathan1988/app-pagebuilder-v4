@@ -9046,6 +9046,11 @@ instance (`status.locked.edit`).
   prefix), in the page's residual stylesheet (`<page>.capture.css`). The canvas draws it and the export links it before
   the project's own stylesheet, so the page looks as it did and what the person edits in the inspector wins over it. A
   page that is no capture keeps none.
+- When a captured sheet uses a width condition the project's breakpoints cannot represent (such as `min-width`, a
+  non-pixel threshold or a width range), the properties used by that condition remain in the captured stylesheet at
+  every width. The importer does not write competing base values for those properties into the project's later sheet;
+  the original responsive cascade remains effective. A class with CSS escapes, such as `md\:block`, matches the
+  unescaped name in the captured element's `data-capture-class` attribute.
 - A link or a label that names no element of the captured page (one a script removed) is released, and the report
   says so (`status.import.released`), so the import is always a valid document.
 - Shadow DOM is flattened: a host's open shadow root stands in its place, a slot holds the nodes assigned to it, and

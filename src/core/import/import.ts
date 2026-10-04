@@ -853,6 +853,28 @@ function storedDeclarations(builder: Builder, text: string, line: number, file: 
   return [...parsed.declarations].map(([name, value]) => [name, value] as const);
 }
 
+// A captured width condition that the project's breakpoint model cannot express keeps its declarations in the
+// original sheet. Keep the same properties in that sheet at every width, or a later generated base rule would beat
+// the conditional rule. Parsed longhands cover shorthand declarations as well.
+function storedProperties(text: string, context: HandlerContext<never>, rules: ModelRules): readonly string[] {
+  const colon = text.indexOf(':');
+  const property = colon <= 0 ? '' : text.slice(0, colon).trim().toLowerCase();
+  if (property === '' || property.startsWith('--')) return [];
+  if (rules.structures.has(property)) return storesDeclaration(context, rules, text) ? [property] : [];
+  const parsed = parseDeclarations(`${property}: ${text.slice(colon + 1).replace(/!\s*important\s*$/i, '').trim()};`, context);
+  return 'refused' in parsed ? [] : [...parsed.declarations].map(([name]) => name);
+}
+
+function capturedWidthProperties(sources: readonly SheetSource[], context: HandlerContext<never>, rules: ModelRules): ReadonlySet<string> {
+  const properties = new Set<string>();
+  for (const source of sources) for (const rule of source.css.rules) {
+    if (!rule.media.some((condition) => /\b(?:min-width|max-width)\b|\bwidth\s*[<>]=?\s*[\d.]+(?:px|rem|em)\b|\b[\d.]+(?:px|rem|em)\s*[<>]=?\s*width\b/i.test(condition))) continue;
+    if (!mediaPlace(rule.media, rules).unmappable) continue;
+    for (const declaration of rule.declarations) for (const property of storedProperties(declaration.text, context, rules)) properties.add(property);
+  }
+  return properties;
+}
+
 // the declarations of a style attribute, with the line they are on
 function styleDeclarations(builder: Builder, text: string, line: number): readonly (readonly [string, StoredValue])[] {
   return readDeclarations(text, line, text).flatMap((declaration) => storedDeclarations(builder, declaration.text, declaration.line, builder.file));
@@ -1003,7 +1025,7 @@ interface Cascaded {
   readonly animated: Animated;
 }
 
-function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: ReadyRules, authors: ReadonlySet<string>): Cascaded {
+function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: ReadyRules, authors: ReadonlySet<string>, deferred: ReadonlySet<string>): Cascaded {
   const { rules } = builder;
   const winners = new Map<string, Map<string, Layer>>();
   const kept = new Map<string, readonly string[]>();
@@ -1063,6 +1085,7 @@ function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: 
           continue;
         }
         for (const [property, value] of storedDeclarations(builder, declaration.text, declaration.line, one.source)) {
+          if (deferred.has(property)) continue;
           // importance, the style attribute, then ids, classes and types, each counted apart (as CSS ranks them: one
           // class outweighs any number of types), then source order
           const rank = [declaration.important ? 1 : 0, 0, one.bare.specificity[0], one.bare.specificity[1], one.bare.specificity[2], one.order];
@@ -1091,7 +1114,7 @@ function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: 
 
 // the definitions of the person's own classes: each class's rules, by breakpoint and state, the later or !important
 // declaration winning as CSS has it (the audit's B-04: they were copied onto every element and the class was lost)
-function classDefinitions(builder: Builder, ready: readonly Ready[], authors: ReadonlySet<string>): ReadonlyMap<string, Styles> {
+function classDefinitions(builder: Builder, ready: readonly Ready[], authors: ReadonlySet<string>, deferred: ReadonlySet<string>): ReadonlyMap<string, Styles> {
   const { rules } = builder;
   const definitions = new Map<string, Styles>();
   const ranked = new Map<string, Map<string, Map<string, Candidate>>>();
@@ -1104,6 +1127,7 @@ function classDefinitions(builder: Builder, ready: readonly Ready[], authors: Re
     byLayer.set(layerKey, own);
     for (const declaration of one.rule.declarations) {
       for (const [property, value] of storedDeclarations(builder, declaration.text, declaration.line, one.source)) {
+        if (deferred.has(property)) continue;
         const rank = [declaration.important ? 1 : 0, 0, 0, 0, 0, one.order];
         const held = own.get(property);
         if (held === undefined || higher(rank, held.rank)) own.set(property, { value, rank });
@@ -1161,10 +1185,10 @@ function writeStyles(tree: DocNode, builder: Builder, sources: readonly SheetSou
 // that lists it — that is what a class is for, and it is what makes an exported page import back as it was.
 // `authors`: the classes of the person's own (authorClasses): their rules are the project's class definitions, never
 // values of the elements that list them; `definitions`, when given empty, receives those definitions (one pass).
-function applyStyles(tree: DocNode, builder: Builder, sources: readonly SheetSource[], authors: ReadonlySet<string> = new Set(), definitions: Map<string, Styles> | null = null): void {
+function applyStyles(tree: DocNode, builder: Builder, sources: readonly SheetSource[], authors: ReadonlySet<string> = new Set(), definitions: Map<string, Styles> | null = null, deferred: ReadonlySet<string> = new Set()): void {
   const ready = readyRules(builder, sources);
-  const cascaded = cascade(tree, builder, ready, authors);
-  if (definitions !== null && definitions.size === 0) for (const [name, styles] of classDefinitions(builder, ready.ready, authors)) definitions.set(name, styles);
+  const cascaded = cascade(tree, builder, ready, authors, deferred);
+  if (definitions !== null && definitions.size === 0) for (const [name, styles] of classDefinitions(builder, ready.ready, authors, deferred)) definitions.set(name, styles);
   writeStyles(tree, builder, sources, cascaded);
 }
 
@@ -1599,7 +1623,9 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
   }
   const authors = authorClasses(pages, sources);
   const definitions = new Map<string, Styles>();
-  for (const one of built) applyStyles(one.page.tree, one.builder, sources, authors, definitions);
+  const captured = markup.some((file) => isCapturedPage(textOfFile(file)));
+  const deferred = captured ? capturedWidthProperties(sources, context as HandlerContext<never>, rules) : new Set<string>();
+  for (const one of built) applyStyles(one.page.tree, one.builder, sources, authors, definitions, isCapturedPage(one.builder.markup) ? deferred : new Set());
   const tokens = rootTokens(context, sources, report, markup.some((file) => isCapturedPage(textOfFile(file))));
   report.tokens.push(...tokens.map((token) => token.name));
   report.unusedClasses.push(...unusedClasses(pages, authors).filter((name) => definitions.has(name)));
@@ -1646,7 +1672,7 @@ export const importHtmlCommand = registerHandler('project.importHtml', (context,
     const source = markup.find((file) => file.name === one.builder.file);
     if (source === undefined || !isCapturedPage(textOfFile(source))) continue;
     const at = capturedPageStylePath(one.page);
-    const css = one.builder.sheets.map((sheet) => residualCss(sheet.text, sheet.file, at, context as HandlerContext<never>, rules)).filter((part) => part !== '').join('\n');
+    const css = one.builder.sheets.map((sheet) => residualCss(sheet.text, sheet.file, at, context as HandlerContext<never>, rules, deferred)).filter((part) => part !== '').join('\n');
     if (css === '') continue;
     const index = held.findIndex((file) => file.path === at);
     const record: ProjectFile = { path: at, type: 'text/css', bytes: base64(new TextEncoder().encode(css)) };
@@ -1734,7 +1760,7 @@ function movedUrl(value: string, from: string, at: string): string {
 }
 
 // The part of one sheet the model does not hold, as CSS, its addresses written from the residual stylesheet's place.
-export function residualCss(text: string, from: string, at: string, context: HandlerContext<never>, rules: ModelRules): string {
+export function residualCss(text: string, from: string, at: string, context: HandlerContext<never>, rules: ModelRules, deferred: ReadonlySet<string> = new Set()): string {
   let ast: CssTreeNode;
   try {
     ast = parseCssTree(text, { parseValue: true, parseCustomProperty: false });
@@ -1752,7 +1778,7 @@ export function residualCss(text: string, from: string, at: string, context: Han
         const declarations = node.block.children.toArray().filter((one) => one.type === 'Declaration').map((one) => generateCssTree(one));
         const unmapped = selectors.filter((one) => !mapsSelector(one, rules));
         const mapped = selectors.filter((one) => mapsSelector(one, rules));
-        const left = declarations.filter((one) => !storesDeclaration(context, rules, one));
+        const left = declarations.filter((one) => !storesDeclaration(context, rules, one) || storedProperties(one, context, rules).some((property) => deferred.has(property)));
         return [
           ...(unmapped.length > 0 && declarations.length > 0 ? [`${unmapped.join(',')}{${declarations.join(';')}}`] : []),
           ...(mapped.length > 0 && left.length > 0 ? [`${mapped.join(',')}{${left.join(';')}}`] : []),
@@ -1786,7 +1812,8 @@ function byCaptureClass(css: string): string {
     visit: 'ClassSelector',
     enter(node, item, list) {
       if (list === null || item === null) return;
-      list.replace(item, list.createItem({ type: 'AttributeSelector', name: { type: 'Identifier', name: 'data-capture-class' }, matcher: '~=', value: { type: 'String', value: node.name }, flags: null }));
+      const name = node.name.replace(/\\([0-9a-fA-F]{1,6})\s?|\\(.)/g, (_escape, hex: string | undefined, character: string | undefined) => hex === undefined ? character ?? '' : String.fromCodePoint(Math.min(parseInt(hex, 16), 0x10ffff)));
+      list.replace(item, list.createItem({ type: 'AttributeSelector', name: { type: 'Identifier', name: 'data-capture-class' }, matcher: '~=', value: { type: 'String', value: name }, flags: null }));
     },
   });
   return generateCssTree(ast);
