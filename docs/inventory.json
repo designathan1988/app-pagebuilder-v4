@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82547
+    "lines": 82555
   },
   "features": [
     {
@@ -4002,7 +4002,7 @@
     },
     {
       "path": "src/core/import/apply-html.ts",
-      "lines": 78,
+      "lines": 86,
       "commands": [
         "element.applyHtml"
       ],

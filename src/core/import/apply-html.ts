@@ -22,13 +22,21 @@ function reconciled(before: DocNode, made: DocNode): DocNode {
     const held = before.children[at];
     return held !== undefined && held.type === child.type && held.tag === child.tag ? reconciled(held, child) : child;
   });
+  // what the markup says replaces what the node held, its absence too: a mark taken away, an aria-* or data-* attribute
+  // removed, a hidden flag gone (the audit's AH1: the held marks stayed, and a text changed with them was refused)
+  const { inline: _inline, customAttributes: _custom, hidden: _hidden, ...held } = before;
+  void _inline;
+  void _custom;
+  void _hidden;
   return {
-    ...before,
+    ...held,
     tag: made.tag,
     attributes: made.attributes,
     classes: made.classes.length > 0 ? made.classes : before.classes,
     text: made.text,
     ...(made.inline === undefined ? {} : { inline: made.inline }),
+    ...(made.customAttributes === undefined ? {} : { customAttributes: made.customAttributes }),
+    ...(made.hidden === true ? { hidden: true as const } : {}),
     children,
   };
 }
