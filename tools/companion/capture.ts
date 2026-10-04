@@ -7,9 +7,13 @@
 // address (index.html, about/index.html), css/, img/, fonts/ — every reference rewritten to them, and a link between
 // two captured pages written from one file to the other: the files File › Import HTML takes
 // (src/core/import/import.ts).
+import fs from 'node:fs';
 import type { Browser, Page } from '@playwright/test';
 import { chromium } from '@playwright/test';
 import { generate as generateCss, parse as parseCss, walk as walkCss, type CssNode } from 'css-tree';
+import { serializePage, type PageRead } from './serialize.ts';
+
+export { serializePage, type PageRead } from './serialize.ts';
 
 export interface CapturedFile {
   readonly path: string;
@@ -43,7 +47,7 @@ export async function closeBrowser(): Promise<void> {
 }
 
 // scrolls the page to its end and back, so lazy images and sections load, then stops every animation and transition
-async function settle(page: Page): Promise<void> {
+export async function settle(page: Page): Promise<void> {
   await page.evaluate(async () => {
     const step = Math.max(200, Math.floor(window.innerHeight * 0.8));
     for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
@@ -115,66 +119,168 @@ function between(from: string, to: string): string {
   return '../'.repeat(base.length) + parts.join('/');
 }
 
-export async function capture(address: string, options: { readonly width?: number; readonly timeout?: number; readonly pages?: number } = {}): Promise<Capture> {
+// a file the site serves: whether it answered, its type and its bytes
+export interface Fetched {
+  readonly ok: boolean;
+  readonly type: string;
+  readonly body: Buffer;
+}
+type Fetcher = (url: string) => Promise<Fetched | null>;
+
+// The files of a static copy, built page by page from what each page held (serializePage) and the files the site
+// serves, through a fetcher: the network, a HAR record, or what the browser extension read in the person's tab.
+function siteBuilder(fetched: Fetcher) {
+  const files: CapturedFile[] = [];
+  const assets = new Map<string, string>();
+  const sheetPaths = new Map<string, string>();
+  // the custom elements the pages met so far (each a div wearing ce-<tag>)
+  const customTags = new Set<string>();
+  let inline = 0;
+  // one asset of the site downloaded once, under its folder, by the order it was met
+  const fetchAsset = async (url: string, folder: string): Promise<string | null> => {
+    const known = assets.get(url);
+    if (known !== undefined) return known;
+    if (url.startsWith('data:')) return null;
+    const response = await fetched(url);
+    if (response === null || !response.ok) return null;
+    const type = response.type;
+    const path = `${folder}/${folder}-${assets.size + 1}.${extensionOf(url, type)}`;
+    assets.set(url, path);
+    files.push({ path, type: TYPES[extensionOf(url, type)] ?? (type.split(';')[0] ?? 'application/octet-stream'), base64: response.body.toString('base64') });
+    return path;
+  };
+  // a sheet with every url() it names downloaded (fonts to fonts/, the rest to img/), written from css/
+  const localSheet = async (text: string, sheetUrl: string): Promise<string> => {
+    let out = text;
+    for (const match of text.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g)) {
+      const raw = match[2] ?? '';
+      if (raw.startsWith('data:') || raw.startsWith('#')) continue;
+      const absolute = new URL(raw, sheetUrl).href;
+      const font = /\.(woff2?|ttf|otf|eot)(\?|#|$)/i.test(absolute);
+      const local = await fetchAsset(absolute, font ? 'fonts' : 'img');
+      if (local !== null) out = out.split(match[0]).join(`url("../${local}")`);
+    }
+    // an @import is fetched and laid in its place
+    for (const match of out.matchAll(/@import\s+(?:url\()?\s*['"]?([^'")\s;]+)['"]?\s*\)?[^;]*;/g)) {
+      const absolute = new URL(match[1] ?? '', sheetUrl).href;
+      const response = await fetched(absolute);
+      const inner = response !== null && response.ok ? await localSheet(response.body.toString('utf8'), absolute) : '';
+      out = out.split(match[0]).join(inner);
+    }
+    return out;
+  };
+  // a page's file: its markup with its sheets linked, its images and backgrounds downloaded, and the capture's mark
+  const pageOf = async (read: PageRead, base: string): Promise<{ readonly path: string; html: string }> => {
+    const path = pagePath(base);
+    const sheetLinks: string[] = [];
+    for (const tag of read.custom) customTags.add(tag);
+    // a custom element is inline unless a rule says otherwise, as the browser draws one; the div it became is not
+    if (read.custom.length > 0) {
+      inline += 1;
+      const at = `css/inline-${inline}.css`;
+      files.push({ path: at, type: 'text/css', base64: Buffer.from(read.custom.map((tag) => `.ce-${tag}{display:inline}`).join('\n'), 'utf8').toString('base64') });
+      sheetLinks.push(`<link rel="stylesheet" href="${fromPage(path, at)}">`);
+    }
+    for (const sheet of read.sheets) {
+      let at: string | undefined;
+      if (sheet.href !== null) {
+        at = sheetPaths.get(sheet.href);
+        if (at === undefined) {
+          const got = await fetched(sheet.href);
+          if (got === null || !got.ok) continue;
+          at = `css/style-${sheetPaths.size + 1}.css`;
+          sheetPaths.set(sheet.href, at);
+          files.push({ path: at, type: 'text/css', base64: Buffer.from(await localSheet(scopeCss(got.body.toString('utf8'), null, customTags), sheet.href), 'utf8').toString('base64') });
+        }
+      } else if (sheet.text !== null) {
+        inline += 1;
+        at = `css/inline-${inline}.css`;
+        files.push({ path: at, type: 'text/css', base64: Buffer.from(await localSheet(scopeCss(sheet.text, sheet.scope, customTags), base), 'utf8').toString('base64') });
+      }
+      if (at !== undefined) sheetLinks.push(`<link rel="stylesheet" href="${fromPage(path, at)}">`);
+    }
+    let html = read.html;
+    for (const image of read.images) {
+      const local = await fetchAsset(image.src, 'img');
+      html = html.split(`__capture_image_${image.index}__`).join(local === null ? image.src : fromPage(path, local));
+    }
+    // an image that named no source keeps none
+    html = html.replace(/__capture_image_\d+__/g, '');
+    // inline style="background-image:url(…)" of the markup, downloaded too
+    for (const match of html.matchAll(/url\(\s*(?:&quot;|['"])?([^'")&]+)(?:&quot;|['"])?\s*\)/g)) {
+      const raw = match[1] ?? '';
+      if (raw.startsWith('data:') || raw.startsWith('__capture')) continue;
+      const local = await fetchAsset(new URL(raw, base).href, 'img');
+      if (local !== null) html = html.split(match[0]).join(`url(${fromPage(path, local)})`);
+    }
+    // the mark of a captured page: the import keeps what the model does not hold of its sheets (spec capture-url)
+    const mark = `<meta name="builder-capture" content="${base.replaceAll('"', '&quot;')}">`;
+    html = html.replace(/<head([^>]*)>/i, `<head$1>\n${mark}\n${sheetLinks.join('\n')}`);
+    return { path, html };
+  };
+  return { files, pageOf };
+}
+
+// the pages' files, a link to a page the crawl took written to that page's file and any other keeping its address
+function pageFiles(captured: ReadonlyMap<string, { readonly path: string; html: string }>): CapturedFile[] {
+  for (const [, one] of captured) {
+    one.html = one.html.replace(/__capture_link__(.*?)__(#[^"]*?)?__/g, (_all, url: string, hash: string | undefined) => {
+      const target = captured.get(url);
+      return `${target === undefined ? url : between(one.path, target.path)}${hash ?? ''}`;
+    });
+  }
+  return [...captured.values()].map((one): CapturedFile => ({ path: one.path, type: 'text/html', base64: Buffer.from(one.html, 'utf8').toString('base64') }));
+}
+
+// A recorded site (a HAR file with its contents embedded, Playwright's recordHar): the capture reads the page and every
+// file it fetches from the record instead of the network, so a capture of the corpus is the same every run
+// (tools/capture/corpus.capture.ts; Playwright, "Mock APIs: replaying from HAR").
+interface Recorded {
+  readonly status: number;
+  readonly type: string;
+  readonly body: Buffer;
+}
+function harEntries(file: string): Map<string, Recorded> {
+  const har = JSON.parse(fs.readFileSync(file, 'utf8')) as { log: { entries: { request: { url: string }; response: { status: number; content: { mimeType?: string; text?: string; encoding?: string } } }[] } };
+  const out = new Map<string, Recorded>();
+  for (const { request, response } of har.log.entries) {
+    const text = response.content.text ?? '';
+    out.set(request.url, { status: response.status, type: response.content.mimeType ?? '', body: Buffer.from(text, response.content.encoding === 'base64' ? 'base64' : 'utf8') });
+  }
+  return out;
+}
+
+export async function capture(address: string, options: { readonly width?: number; readonly timeout?: number; readonly pages?: number; readonly har?: string } = {}): Promise<Capture> {
   const start = new URL(address);
   if (!isHttp(start.href)) throw new Error(`${address} is no http or https address`);
   const limit = Math.max(1, Math.min(options.pages ?? 1, MOST_PAGES));
-  const context = await (await browser()).newContext({ viewport: { width: options.width ?? 1440, height: 900 }, locale: 'en-US' });
+  // (a page's Content Security Policy is bypassed: it would refuse the style that stops the animations, settle)
+  const context = await (await browser()).newContext({ viewport: { width: options.width ?? 1440, height: 900 }, locale: 'en-US', bypassCSP: true });
   try {
+    const recorded = options.har === undefined ? null : harEntries(options.har);
+    if (options.har !== undefined) await context.routeFromHAR(options.har, { notFound: 'abort' });
+    // a file of the site: from the record when the capture replays one, else from the network
+    const fetched = async (url: string, timeout = 20_000): Promise<{ readonly ok: boolean; readonly type: string; readonly body: Buffer } | null> => {
+      if (recorded !== null) {
+        const one = recorded.get(url);
+        return one === undefined ? null : { ok: one.status >= 200 && one.status < 300, type: one.type, body: one.body };
+      }
+      const response = await page.request.get(url, { timeout }).catch(() => null);
+      return response === null ? null : { ok: response.ok(), type: response.headers()['content-type'] ?? '', body: await response.body() };
+    };
     const page = await context.newPage();
-    const files: CapturedFile[] = [];
-    const assets = new Map<string, string>();
-    const sheetPaths = new Map<string, string>();
-    // the custom elements the pages met so far (each a div wearing ce-<tag>)
-    const customTags = new Set<string>();
-    // one asset of the site downloaded once, under its folder, by the order it was met
-    const fetchAsset = async (url: string, folder: string): Promise<string | null> => {
-      const known = assets.get(url);
-      if (known !== undefined) return known;
-      if (url.startsWith('data:')) return null;
-      try {
-        const response = await page.request.get(url, { timeout: 20_000 });
-        if (!response.ok()) return null;
-        const type = response.headers()['content-type'] ?? '';
-        const path = `${folder}/${folder}-${assets.size + 1}.${extensionOf(url, type)}`;
-        assets.set(url, path);
-        files.push({ path, type: TYPES[extensionOf(url, type)] ?? (type.split(';')[0] ?? 'application/octet-stream'), base64: (await response.body()).toString('base64') });
-        return path;
-      } catch {
-        return null;
-      }
-    };
-    // a sheet with every url() it names downloaded (fonts to fonts/, the rest to img/), written from css/
-    const localSheet = async (text: string, sheetUrl: string): Promise<string> => {
-      let out = text;
-      for (const match of text.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g)) {
-        const raw = match[2] ?? '';
-        if (raw.startsWith('data:') || raw.startsWith('#')) continue;
-        const absolute = new URL(raw, sheetUrl).href;
-        const font = /\.(woff2?|ttf|otf|eot)(\?|#|$)/i.test(absolute);
-        const local = await fetchAsset(absolute, font ? 'fonts' : 'img');
-        if (local !== null) out = out.split(match[0]).join(`url("../${local}")`);
-      }
-      // an @import is fetched and laid in its place
-      for (const match of out.matchAll(/@import\s+(?:url\()?\s*['"]?([^'")\s;]+)['"]?\s*\)?[^;]*;/g)) {
-        const absolute = new URL(match[1] ?? '', sheetUrl).href;
-        const response = await page.request.get(absolute).catch(() => null);
-        const inner = response !== null && response.ok() ? await localSheet(await response.text(), absolute) : '';
-        out = out.split(match[0]).join(inner);
-      }
-      return out;
-    };
+    const site = siteBuilder(fetched);
     // the pages captured, by their address, their markup still holding the link marks until the crawl ends
     const captured = new Map<string, { readonly path: string; html: string }>();
     const queue: string[] = [pageKey(start.href)];
     const queued = new Set(queue);
     let title = '';
-    let inline = 0;
     while (queue.length > 0 && captured.size < limit) {
       const url = queue.shift() as string;
       let response;
       try {
-        response = await page.goto(url, { waitUntil: 'load', timeout: options.timeout ?? 45_000 });
+        // the document read, then the network let rest (settle): a page whose load never ends is still captured
+        response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: options.timeout ?? 45_000 });
       } catch (error) {
         // the first page must open; a later one that does not is passed over
         if (captured.size === 0) throw error;
@@ -186,161 +292,36 @@ export async function capture(address: string, options: { readonly width?: numbe
       const base = page.url();
       // a page that answered at an address the crawl already took (a redirect) is that page
       if (captured.has(pageKey(base))) continue;
-      const path = pagePath(base);
-      // what the page holds now: its markup (scripts and the settle style left out), its sheets in order, its images,
-      // and its links to other pages of the site, each marked until the crawl knows which pages it took
-      const read = await page.evaluate((origin) => {
-        const sheets: { readonly href: string | null; readonly text: string | null; readonly scope: string | null }[] = [];
-        for (const el of document.querySelectorAll('link[rel~="stylesheet"][href], style')) {
-          if (el instanceof HTMLLinkElement) sheets.push({ href: el.href, text: null, scope: null });
-          else if (el.textContent !== null && !el.textContent.includes('animation-play-state:paused!important')) sheets.push({ href: null, text: el.textContent, scope: null });
-        }
-        // the custom elements met (a tag with a dash): each becomes a div wearing the class ce-<tag>, which the page's
-        // and the shadow roots' rules are rewritten to (scopeCss), so the import keeps it as an element instead of
-        // unwrapping it, and a shadow root's rules stay within their host
-        const custom = new Set<string>();
-        // The page as it is drawn, shadow DOM flattened (the plan's stage 12): a host's open shadow root stands in its
-        // place, a <slot> holds the nodes assigned to it (its own fallback when none is), and the host's light children
-        // that no slot takes are not drawn, so they go; a shadow root's styles join the page's sheets, :host written as
-        // the host's own tag. An image is marked with the source the browser chose for it (its currentSrc).
-        const images: { readonly index: number; readonly src: string }[] = [];
-        // `shadowed`: the node lies in a shadow tree or is slotted into one, where the rules that hide it (a closed
-        // dropdown's slot, :host(:not([open]))) do not survive the flattening: an element the page does not draw there
-        // comes hidden (kept, not drawn), as the page showed it
-        const flat = (node: Node, shadowed = false): Node | null => {
-          if (!(node instanceof Element)) return node.cloneNode(false);
-          let copy = node.cloneNode(false) as Element;
-          const undrawn = shadowed && getComputedStyle(node).display === 'none';
-          if (node.localName.includes('-')) {
-            custom.add(node.localName);
-            copy = document.createElement('div');
-            for (const attribute of node.attributes) copy.setAttribute(attribute.name, attribute.value);
-            copy.classList.add(`ce-${node.localName}`);
-          }
-          if (undrawn) copy.setAttribute('hidden', '');
-          // the classes the markup gave it, kept apart: the import may make a class the element's own styles and drop
-          // it, and the residual stylesheet's rules name these (core/import residualCss)
-          if (copy.getAttribute('class')) copy.setAttribute('data-capture-class', copy.getAttribute('class') as string);
-          if (node instanceof HTMLImageElement) {
-            const src = node.currentSrc || node.getAttribute('src') || '';
-            const index = images.length;
-            copy.removeAttribute('srcset');
-            copy.removeAttribute('loading');
-            copy.setAttribute('src', `__capture_image_${index}__`);
-            images.push({ index, src: src === '' ? '' : new URL(src, document.baseURI).href });
-            return copy;
-          }
-          const root = node.shadowRoot;
-          if (root !== null) {
-            const tag = node.localName;
-            for (const style of root.querySelectorAll('style')) if (style.textContent !== null) sheets.push({ href: null, text: style.textContent, scope: tag });
-            for (const sheet of root.adoptedStyleSheets) {
-              try {
-                sheets.push({ href: null, text: [...sheet.cssRules].map((rule) => rule.cssText).join('\n'), scope: tag });
-              } catch {
-                // a sheet whose rules cannot be read is left out
-              }
-            }
-          }
-          const children = root === null ? [...node.childNodes] : [...root.childNodes];
-          for (const child of children) {
-            if (child instanceof HTMLStyleElement && root !== null) continue;
-            if (child instanceof HTMLSlotElement) {
-              const assigned = child.assignedNodes({ flatten: true });
-              // a slot the page does not draw draws none of what it holds
-              const shut = getComputedStyle(child).display === 'none';
-              for (const one of assigned.length > 0 ? assigned : [...child.childNodes]) {
-                const made = flat(one, true);
-                if (made instanceof Element && shut) made.setAttribute('hidden', '');
-                if (made !== null && (!shut || made instanceof Element)) copy.append(made);
-              }
-              continue;
-            }
-            const made = flat(child, shadowed || root !== null);
-            if (made !== null) copy.append(made);
-          }
-          return copy;
-        };
-        const clone = flat(document.documentElement) as HTMLElement;
-        for (const el of clone.querySelectorAll('script, noscript, link[rel~="stylesheet"], style, link[rel="preload"], link[rel="modulepreload"]')) el.remove();
-        // an image with no source keeps none (its mark is cleared once the sources are written)
-        const sourced = images.filter((one) => one.src !== '');
-        const links: string[] = [];
-        clone.querySelectorAll('a[href]').forEach((a) => {
-          const raw = a.getAttribute('href') ?? '';
-          if (raw === '' || raw.startsWith('#') || /^(mailto|tel|javascript):/i.test(raw)) return;
-          const at = new URL(raw, document.baseURI);
-          if (at.origin !== origin) {
-            a.setAttribute('href', at.href);
-            return;
-          }
-          a.setAttribute('href', `__capture_link__${at.origin}${at.pathname}__${at.hash}__`);
-          links.push(`${at.origin}${at.pathname}`);
-        });
-        return { title: document.title, html: `<!doctype html>\n${clone.outerHTML}`, sheets, images: sourced, links, custom: [...custom] };
-      }, start.origin);
+      // what the page holds now (serializePage), built into its file and the site's files
+      const read = await page.evaluate(serializePage, start.origin);
       if (title === '') title = read.title;
-      const sheetLinks: string[] = [];
-      for (const tag of read.custom) customTags.add(tag);
-      // a custom element is inline unless a rule says otherwise, as the browser draws one; the div it became is not
-      if (read.custom.length > 0) {
-        inline += 1;
-        const at = `css/inline-${inline}.css`;
-        files.push({ path: at, type: 'text/css', base64: Buffer.from(read.custom.map((tag) => `.ce-${tag}{display:inline}`).join('\n'), 'utf8').toString('base64') });
-        sheetLinks.push(`<link rel="stylesheet" href="${fromPage(path, at)}">`);
-      }
-      for (const sheet of read.sheets) {
-        let at: string | undefined;
-        if (sheet.href !== null) {
-          at = sheetPaths.get(sheet.href);
-          if (at === undefined) {
-            const got = await page.request.get(sheet.href, { timeout: 20_000 }).catch(() => null);
-            if (got === null || !got.ok()) continue;
-            at = `css/style-${sheetPaths.size + 1}.css`;
-            sheetPaths.set(sheet.href, at);
-            files.push({ path: at, type: 'text/css', base64: Buffer.from(await localSheet(scopeCss(await got.text(), null, customTags), sheet.href), 'utf8').toString('base64') });
-          }
-        } else if (sheet.text !== null) {
-          inline += 1;
-          at = `css/inline-${inline}.css`;
-          files.push({ path: at, type: 'text/css', base64: Buffer.from(await localSheet(scopeCss(sheet.text, sheet.scope, customTags), base), 'utf8').toString('base64') });
-        }
-        if (at !== undefined) sheetLinks.push(`<link rel="stylesheet" href="${fromPage(path, at)}">`);
-      }
-      let html = read.html;
-      for (const image of read.images) {
-        const local = await fetchAsset(image.src, 'img');
-        html = html.split(`__capture_image_${image.index}__`).join(local === null ? image.src : fromPage(path, local));
-      }
-      // an image that named no source keeps none
-      html = html.replace(/__capture_image_\d+__/g, '');
-      // inline style="background-image:url(…)" of the markup, downloaded too
-      for (const match of html.matchAll(/url\(\s*(?:&quot;|['"])?([^'")&]+)(?:&quot;|['"])?\s*\)/g)) {
-        const raw = match[1] ?? '';
-        if (raw.startsWith('data:') || raw.startsWith('__capture')) continue;
-        const local = await fetchAsset(new URL(raw, base).href, 'img');
-        if (local !== null) html = html.split(match[0]).join(`url(${fromPage(path, local)})`);
-      }
-      // the mark of a captured page: the import keeps what the model does not hold of its sheets (spec capture-url)
-      const mark = `<meta name="builder-capture" content="${base.replaceAll('"', '&quot;')}">`;
-      html = html.replace(/<head([^>]*)>/i, `<head$1>\n${mark}\n${sheetLinks.join('\n')}`);
-      captured.set(pageKey(base), { path, html });
+      captured.set(pageKey(base), await site.pageOf(read, base));
       for (const link of read.links) {
         if (queued.has(link)) continue;
         queued.add(link);
         queue.push(link);
       }
     }
-    // a link to a page the crawl took is written to that page's file; any other keeps its address
-    for (const [, one] of captured) {
-      one.html = one.html.replace(/__capture_link__(.*?)__(#[^"]*?)?__/g, (_all, url: string, hash: string | undefined) => {
-        const target = captured.get(url);
-        return `${target === undefined ? url : between(one.path, target.path)}${hash ?? ''}`;
-      });
-    }
-    const pages = [...captured.values()].map((one): CapturedFile => ({ path: one.path, type: 'text/html', base64: Buffer.from(one.html, 'utf8').toString('base64') }));
-    return { title, files: [...pages, ...files] };
+    return { title, files: [...pageFiles(captured), ...site.files] };
   } finally {
     await context.close();
   }
+}
+
+// A capture the browser extension made in the person's own tab (companion/extension: a page behind a login): what the
+// page held (serializePage) and the files the tab read with the person's credentials, by address. Built into files
+// as the Companion's own capture builds them; a file the tab could not read is left out, as one a site refuses.
+export interface Snapshot {
+  readonly url: string;
+  readonly read: PageRead;
+  readonly resources: Readonly<Record<string, { readonly status: number; readonly type: string; readonly base64: string }>>;
+}
+export async function captureSnapshot(snapshot: Snapshot): Promise<Capture> {
+  if (!isHttp(snapshot.url)) throw new Error(`${snapshot.url} is no http or https address`);
+  const site = siteBuilder(async (url) => {
+    const one = snapshot.resources[url];
+    return one === undefined ? null : { ok: one.status >= 200 && one.status < 300, type: one.type, body: Buffer.from(one.base64, 'base64') };
+  });
+  const captured = new Map([[pageKey(snapshot.url), await site.pageOf(snapshot.read, snapshot.url)]]);
+  return { title: snapshot.read.title, files: [...pageFiles(captured), ...site.files] };
 }

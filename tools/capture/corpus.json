@@ -1,0 +1,25 @@
+{
+  "$comment": "The capture corpus (the plan's stage 12, STG-12.6): twenty public sites of the kinds a person captures — documentation, landing pages, blogs, shops, React and Vue applications, web fonts, grid layouts and animation. Each is recorded once into .cache/corpus/har/<id>.har and replayed from it (tools/capture/corpus.capture.ts).",
+  "sites": [
+    { "id": "mdn", "url": "https://developer.mozilla.org/en-US/", "kind": "documentation" },
+    { "id": "govuk", "url": "https://www.gov.uk/", "kind": "documentation" },
+    { "id": "w3c", "url": "https://www.w3.org/", "kind": "documentation" },
+    { "id": "react", "url": "https://react.dev/", "kind": "React application" },
+    { "id": "nextjs", "url": "https://nextjs.org/", "kind": "React application" },
+    { "id": "vue", "url": "https://vuejs.org/", "kind": "Vue application" },
+    { "id": "nuxt", "url": "https://nuxt.com/", "kind": "Vue application" },
+    { "id": "svelte", "url": "https://svelte.dev/", "kind": "landing" },
+    { "id": "astro", "url": "https://astro.build/", "kind": "landing" },
+    { "id": "bootstrap", "url": "https://getbootstrap.com/", "kind": "landing" },
+    { "id": "tailwind", "url": "https://tailwindcss.com/", "kind": "landing" },
+    { "id": "overreacted", "url": "https://overreacted.io/", "kind": "blog" },
+    { "id": "csstricks", "url": "https://css-tricks.com/", "kind": "blog" },
+    { "id": "smashing", "url": "https://www.smashingmagazine.com/", "kind": "blog" },
+    { "id": "bellroy", "url": "https://bellroy.com/", "kind": "shop" },
+    { "id": "allbirds", "url": "https://www.allbirds.com/", "kind": "shop" },
+    { "id": "typewolf", "url": "https://www.typewolf.com/", "kind": "web fonts" },
+    { "id": "gridbyexample", "url": "https://gridbyexample.com/", "kind": "grid" },
+    { "id": "everylayout", "url": "https://every-layout.dev/", "kind": "grid" },
+    { "id": "animatestyle", "url": "https://animate.style/", "kind": "animation" }
+  ]
+}

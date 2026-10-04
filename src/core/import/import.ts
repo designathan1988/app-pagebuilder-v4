@@ -395,6 +395,12 @@ function runsOf(children: readonly MarkupChild[], builder: Builder): InlineRun[]
       out.push('\n');
       continue;
     }
+    // an element the page does not draw (hidden: a captured page's short label of a wide one) is no part of the line
+    // the text shows: dropped, and the report names its line (a text holds no hidden piece of its own)
+    if (child.attributes.has('hidden')) {
+      if (builder.mode === 'import') builder.report.dropped.push(lineOfNode(builder.markup, child));
+      continue;
+    }
     const inner = runsOf(child.children, builder);
     if (child.tag === 'a') {
       const href = (child.attributes.get('href') ?? '').trim();

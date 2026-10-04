@@ -210,7 +210,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | STG-12.3 | Assets downloaded, links rewritten, several pages of a site | done | QA 118 |
 | STG-12.4 | Pages behind a login (Chrome extension) | missing | AUD-15 |
 | STG-12.5 | Copyright notice in the dialog | done | the capture dialog's text |
-| STG-12.6 | Corpus of 20 sites at ≥ 98 % pixel fidelity per breakpoint | missing | AUD-15 |
+| STG-12.6 | Corpus of 20 sites at ≥ 98 % pixel fidelity per breakpoint | partial | QA 234: `npm run capture:corpus` measures the 20 sites from HAR records (`docs/CAPTURE-CORPUS.md`); 0 of 20 at 98 % (desktop 7.7–86.3 %, one site not captured: css-tricks); AUD-15 |
 | STG-13.1 | Publish: a single preview file (every page, CSS, images and fonts inside) | out | DEC-08 |
 | STG-13.2 | Publish: a hosted link (GitHub Pages or Netlify) to send to the client | out | DEC-08 |
 | STG-13.3 | Publish: site (ZIP) and PWA (manifest, icons, offline service worker) | out | DEC-08 |
@@ -384,7 +384,7 @@ commit closes it with its proof; the Status column then names the commit's QA-LO
 | AUD-12 | 2 | The uploaded font only behind "More values" | audit; J15 | done (QA 161) |
 | AUD-13 | 2 | F6 never focuses the canvas page | audit; J12 | done (QA 162) |
 | AUD-14 | 2 | Export class names partly Portuguese and numbered | audit; J14 | done (QA 163) |
-| AUD-15 | 2 | Capture: 98 % corpus never measured, login capture absent, MDN logo missing | audit; QA 117, 119; QA 233: the logo (an imported svg keeps its size and viewBox) | open (the corpus and the login capture remain) |
+| AUD-15 | 2 | Capture: 98 % corpus never measured, login capture absent, MDN logo missing | audit; QA 117, 119; QA 233: the logo; QA 234: the corpus measured (0 of 20 at 98 %) | open (the corpus below its target; the login capture remains) |
 | AUD-16 | 2 | Plan items dropped without a user decision (steppers, auto-fix) | audit | done (QA 164 the steppers, QA 166 the Checks fixes) |
 | AUD-17 | 2 | `hover-measure` not available in the contract while its code runs | audit | done (QA 167) |
 | AUD-18 | 2 | 39 features without a behaviour section | audit | done (QA 168) |
@@ -638,6 +638,7 @@ tools, events, owner).
 | `node tools/parity/pair.ts <state> [light]` | The app against `design/final/index.html` in one of 12 states, region by region, crops and a report in `.cache/logs/parity-<time>/`; `node tools/parity/join.ts <dir>` joins each pair (needs the canonical served on 5394: `node tools/parity/serve-design.ts`) | ~10 s each |
 | `npm run journey [-- <task>…]` | The jornada03 tasks (M1…M5, M3R, D1…D4, C1…C5, P2…P4, H2) replayed in Chrome on the e2e build, a photo per step, then the scoreboard of H1–H17 (`tools/journey/`; records and photos in `.cache/logs/journey/`) | ~3 min |
 | `npm run fidelity -- <site> <target.html>` | The study's fidelity measure of an exported site against the original at 1440, 1180, 834 and 390 | ~20 s |
+| `npm run capture:corpus` | The capture corpus: 20 public sites recorded once into HAR files (`.cache/corpus/har`, `CORPUS_RECORD=1` records again), captured from the record, imported and exported through the editor, compared with the original at every breakpoint; writes `docs/CAPTURE-CORPUS.md` (`CORPUS_SITES=a,b` measures some) | ~15 min |
 | `npm run journey:offline`, `npm run journey:check` | The study's offline scorer and its tests | seconds |
 
 Rules of proof: tests enter through doors with the real mouse and keyboard and assert end artifacts (the document

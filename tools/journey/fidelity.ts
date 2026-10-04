@@ -34,41 +34,47 @@ export async function measure(page: Page, site: string, target: string, out: str
       await page.screenshot({ path: png, fullPage: true });
       shots[kind] = fs.readFileSync(png).toString('base64');
     }
-    const compared = await page.evaluate(
-      async ([a, b, tolerance]) => {
-        const load = (src: string) =>
-          new Promise<HTMLImageElement>((resolve) => {
-            const image = new Image();
-            image.onload = () => resolve(image);
-            image.src = `data:image/png;base64,${src}`;
-          });
-        const [exported, original] = await Promise.all([load(a), load(b)]);
-        const w = Math.min(exported.width, original.width);
-        const h = Math.min(exported.height, original.height);
-        const pixels = (image: HTMLImageElement) => {
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const context = canvas.getContext('2d') as CanvasRenderingContext2D;
-          context.drawImage(image, 0, 0);
-          return context.getImageData(0, 0, w, h).data;
-        };
-        const da = pixels(exported);
-        const db = pixels(original);
-        let same = 0;
-        for (let i = 0; i < da.length; i += 4) {
-          if (Math.abs((da[i] ?? 0) - (db[i] ?? 0)) <= tolerance && Math.abs((da[i + 1] ?? 0) - (db[i + 1] ?? 0)) <= tolerance && Math.abs((da[i + 2] ?? 0) - (db[i + 2] ?? 0)) <= tolerance) same += 1;
-        }
-        return { match: Math.round((same / (w * h)) * 1000) / 10, exportHeight: exported.height, targetHeight: original.height };
-      },
-      [shots.export ?? '', shots.target ?? '', TOLERANCE] as const,
-    );
+    const compared = await comparePictures(page, shots.export ?? '', shots.target ?? '');
     const longer = Math.max(compared.exportHeight, compared.targetHeight);
     const adjusted = Math.round(((compared.match * Math.min(compared.exportHeight, compared.targetHeight)) / longer) * 10) / 10;
     results.push({ width, pixelMatchCommon: compared.match, pixelMatchAdjusted: adjusted, exportHeight: compared.exportHeight, targetHeight: compared.targetHeight });
   }
   fs.writeFileSync(path.join(out, `${name}.json`), `${JSON.stringify({ name, site, target, tolerance: TOLERANCE, results }, null, 2)}\n`);
   return results;
+}
+
+// Two pictures (PNG, base64) compared in the page: the share of pixels alike over the height both have, and each
+// picture's height (the study's method: a pixel alike when each channel differs by TOLERANCE of 255 at most).
+export async function comparePictures(page: Page, made: string, original: string): Promise<{ readonly match: number; readonly exportHeight: number; readonly targetHeight: number }> {
+  return page.evaluate(
+    async ([a, b, tolerance]) => {
+      const load = (src: string) =>
+        new Promise<HTMLImageElement>((resolve) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.src = `data:image/png;base64,${src}`;
+        });
+      const [exported, original] = await Promise.all([load(a), load(b)]);
+      const w = Math.min(exported.width, original.width);
+      const h = Math.min(exported.height, original.height);
+      const pixels = (image: HTMLImageElement) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+        context.drawImage(image, 0, 0);
+        return context.getImageData(0, 0, w, h).data;
+      };
+      const da = pixels(exported);
+      const db = pixels(original);
+      let same = 0;
+      for (let i = 0; i < da.length; i += 4) {
+        if (Math.abs((da[i] ?? 0) - (db[i] ?? 0)) <= tolerance && Math.abs((da[i + 1] ?? 0) - (db[i + 1] ?? 0)) <= tolerance && Math.abs((da[i + 2] ?? 0) - (db[i + 2] ?? 0)) <= tolerance) same += 1;
+      }
+      return { match: Math.round((same / (w * h)) * 1000) / 10, exportHeight: exported.height, targetHeight: original.height };
+    },
+    [made, original, TOLERANCE] as const,
+  );
 }
 
 // the command line: an extracted site folder against the original page
