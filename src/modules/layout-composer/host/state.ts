@@ -14,8 +14,10 @@ export interface ComposerState {
   // the Layers were open when the tool came on and folded to give its panel the column: putting the tool away (Done,
   // Escape, the Select tool) opens them again
   readonly layers?: boolean;
-  // the sidebar view its options are drawn in: putting the tool away gives the sidebar back to the Explorer
+  // the sidebar view its options are drawn in: putting the tool away gives the sidebar back to the view it showed
+  // before the tool came on (`back`: the Assistant whose turn used the tool, AV2), else to the Explorer
   readonly shows?: string;
+  readonly back?: string;
 }
 
 export const composerOf = (ui: EditorUi): ComposerState | null => (ui.modules?.[NAMESPACE] as ComposerState | undefined) ?? null;

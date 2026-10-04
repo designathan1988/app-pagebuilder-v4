@@ -397,7 +397,10 @@ export const enterLayout = registerHandler<'layout.enter', EditorUi>('layout.ent
       patches: [{ op: 'replace', path: [...at.path], value: entered }],
       ui: (() => {
         const layers = composerOf(context.state.ui)?.layers ?? isPanelOpen(context.state.ui, LAYERS);
-        return hidePanel(showPanel(withComposer(context.state.ui, { target: id, selection: [], lens: 'spatial', tool: 'auto', shows: PANEL, ...(layers ? { layers } : {}) }), PANEL), LAYERS);
+        // the view the sidebar showed before the tool (kept when the tool comes on again over itself)
+        const before = composerOf(context.state.ui)?.back ?? context.state.ui.panels.sidebarView;
+        const back = before === PANEL ? BACK : before;
+        return hidePanel(showPanel(withComposer(context.state.ui, { target: id, selection: [], lens: 'spatial', tool: 'auto', shows: PANEL, back, ...(layers ? { layers } : {}) }), PANEL), LAYERS);
       })(),
       message: message('layout.status.entered', { name: at.node.name }),
     };
@@ -410,11 +413,13 @@ export const enterLayout = registerHandler<'layout.enter', EditorUi>('layout.ent
 
 // layout.leave: the composer closes; the page keeps the structure it was compiled to, and the container its intent.
 export const leaveLayout = registerHandler<'layout.leave', EditorUi>('layout.leave', ({ state }) => {
-  const folded = composerOf(state.ui)?.layers === true;
+  const composer = composerOf(state.ui);
+  const folded = composer?.layers === true;
   const left = withComposer(state.ui, null);
   const ui = folded ? showPanel(left, LAYERS) : left;
-  // the sidebar gives back the Explorer when it was showing the tool's options
-  return { kind: 'change', ui: ui.panels.sidebarView === PANEL ? showPanel(ui, BACK) : ui, message: message('layout.status.closed') };
+  // the sidebar gives back the view it showed before the tool when it was showing the tool's options (AV2: the
+  // Assistant whose turn used the tool), else the Explorer
+  return { kind: 'change', ui: ui.panels.sidebarView === PANEL ? showPanel(ui, (composer?.back ?? BACK) as typeof BACK) : ui, message: message('layout.status.closed') };
 });
 
 // The hit radius in the container's px: the screen radius over the zoom the person set (the fitted view: 1). The

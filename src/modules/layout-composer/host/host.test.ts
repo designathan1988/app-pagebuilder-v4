@@ -102,6 +102,20 @@ describe('Layout Composer host (host/handlers.ts)', () => {
     expect(root()).toBe(before);
   });
 
+  it('gives the sidebar back to the view it showed before the tool: the Assistant whose turn used it (AV2)', () => {
+    const { store } = composer();
+    store.dispatch('workspace.setPanelOpen', { panel: 'assistant', open: 'open' } as never);
+    expect(store.getState().ui.panels.sidebarView).toBe('assistant');
+    store.dispatch('layout.enter', {});
+    expect(store.getState().ui.panels.sidebarView).toBe('layout-composer');
+    store.dispatch('layout.leave', {});
+    expect(store.getState().ui.panels.sidebarView).toBe('assistant');
+    // and through the Select tool too
+    store.dispatch('layout.enter', {});
+    store.dispatch('view.selectTool', {});
+    expect(store.getState().ui.panels.sidebarView).toBe('assistant');
+  });
+
   it('leaves: the page keeps its structure and the composer closes', () => {
     const { store, root } = composer();
     store.dispatch('layout.enter', {});

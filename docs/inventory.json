@@ -6,7 +6,7 @@
     "doors": 1350,
     "scenarios": 1820,
     "modules": 466,
-    "lines": 81089
+    "lines": 81098
   },
   "features": [
     {
@@ -6565,7 +6565,7 @@
     },
     {
       "path": "src/editor/view/select-tool.ts",
-      "lines": 27,
+      "lines": 29,
       "commands": [
         "view.selectTool"
       ],
@@ -6957,7 +6957,7 @@
     },
     {
       "path": "src/modules/layout-composer/host/handlers.ts",
-      "lines": 859,
+      "lines": 864,
       "commands": [
         "layout.enter",
         "layout.leave",
@@ -6993,7 +6993,7 @@
     },
     {
       "path": "src/modules/layout-composer/host/state.ts",
-      "lines": 31,
+      "lines": 33,
       "commands": [],
       "features": []
     },

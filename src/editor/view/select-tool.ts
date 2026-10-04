@@ -12,9 +12,11 @@ import { showPanel } from '../workspace/panels.ts';
 function selecting(ui: EditorUi): EditorUi {
   const { modules, gridEdit: _gridEdit, ...rest } = ui;
   void _gridEdit;
-  const states = Object.values(modules ?? {}).filter((state): state is { layers?: unknown; shows?: unknown } => typeof state === 'object' && state !== null);
+  const states = Object.values(modules ?? {}).filter((state): state is { layers?: unknown; shows?: unknown; back?: unknown } => typeof state === 'object' && state !== null);
   const opened = states.some((state) => state.layers === true) ? showPanel(rest, 'layers') : rest;
-  return states.some((state) => state.shows === opened.panels.sidebarView) ? showPanel(opened, 'explorer') : opened;
+  // the view the sidebar showed before the tool came on (`back`), else the Explorer
+  const showing = states.find((state) => state.shows === opened.panels.sidebarView);
+  return showing === undefined ? opened : showPanel(opened, (typeof showing.back === 'string' ? showing.back : 'explorer') as Parameters<typeof showPanel>[1]);
 }
 
 const otherTool = (ui: EditorUi): boolean => Object.keys(ui.modules ?? {}).length > 0 || ui.gridEdit !== undefined;
