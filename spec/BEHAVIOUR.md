@@ -9051,6 +9051,9 @@ instance (`status.locked.edit`).
   properties that differ are moved from the desktop style attributes into a captured stylesheet with width-specific
   media rules. Stable body paths tie an element's observations together; a changed or missing element is not guessed.
   The original site's scripts do not run in the exported page, but their measured layout values do at those widths.
+- For an image inside `<picture>`, the Companion also records the image the browser selected at each reference width.
+  It replaces source candidates that still point to the original site with local assets and width conditions, so the
+  canvas and export use the captured artwork when the original page's scripts and network are absent.
 - The Companion marks the captured page (`<meta name="builder-capture">`), and the import keeps, beside the classes and
   values it maps, what the model does not hold of its sheets: a rule whose selector it does not read (a descendant with
   a state, `:has()`, an attribute), an at-rule other than a media query a breakpoint takes (`@font-face`, `@keyframes`,

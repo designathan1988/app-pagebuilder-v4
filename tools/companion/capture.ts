@@ -286,7 +286,7 @@ export async function replayHar(context: BrowserContext, file: string): Promise<
   if (failed.size > 0) await context.route((url) => failed.has(url.href), (route) => route.abort());
 }
 
-interface InlineSnapshot { readonly id: string; readonly tag: string; readonly style: string }
+interface InlineSnapshot { readonly id: string; readonly tag: string; readonly style: string; readonly src: string | null }
 
 async function markRuntime(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -308,6 +308,7 @@ async function responsiveInline(page: Page, read: PageRead, url: string, timeout
   const snapshots: InlineSnapshot[][] = [];
   const readSnapshot = () => page.evaluate(() => [...document.body.querySelectorAll<HTMLElement>('[data-capture-runtime]')].map((el) => ({
     id: el.getAttribute('data-capture-runtime') ?? '', tag: el.localName, style: el.getAttribute('style') ?? '',
+    src: el instanceof HTMLImageElement ? el.currentSrc : null,
   })));
   snapshots.push(await readSnapshot());
   for (const width of [1180, 834, 390]) {
@@ -318,10 +319,14 @@ async function responsiveInline(page: Page, read: PageRead, url: string, timeout
     await markRuntime(page);
     snapshots.push(await readSnapshot());
   }
-  const merged = await page.evaluate(({ html, snapshots }) => {
+  const merged = await page.evaluate(({ html, snapshots, images }) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const byWidth = snapshots.map((rows) => new Map(rows.map((row) => [row.id, row])));
     const rules: string[][] = [[], [], [], []];
+    const conditions = ['(min-width:1181px)', '(min-width:835px) and (max-width:1180px)', '(min-width:391px) and (max-width:834px)', '(max-width:390px)'];
+    const imageAssets = [...images];
+    const assetByUrl = new Map(imageAssets.map((one) => [one.src, one.index]));
+    let nextImage = Math.max(-1, ...imageAssets.map((one) => one.index)) + 1;
     let changed = false;
     for (const element of doc.querySelectorAll<HTMLElement>('[data-capture-runtime]')) {
       const id = element.getAttribute('data-capture-runtime') ?? '';
@@ -329,6 +334,27 @@ async function responsiveInline(page: Page, read: PageRead, url: string, timeout
       if (rows.some((one) => one === undefined || one.tag !== element.localName)) {
         element.removeAttribute('data-capture-runtime');
         continue;
+      }
+      if (element instanceof HTMLImageElement && element.parentElement?.localName === 'picture') {
+        const picture = element.parentElement;
+        for (const source of [...picture.children]) if (source.localName === 'source') source.remove();
+        const selected = rows.map((one) => one?.src ?? '');
+        if (selected.some((src) => src !== selected[0])) {
+          for (const [at, src] of selected.entries()) {
+            if (src === '') continue;
+            let index = assetByUrl.get(src);
+            if (index === undefined) {
+              index = nextImage++;
+              assetByUrl.set(src, index);
+              imageAssets.push({ index, src });
+            }
+            const source = doc.createElement('source');
+            source.setAttribute('media', conditions[at] ?? 'all');
+            source.setAttribute('srcset', `__capture_image_${index}__`);
+            picture.insertBefore(source, element);
+          }
+        }
+        changed = true;
       }
       const styles = rows.map((one) => {
         const holder = document.createElement('span');
@@ -353,12 +379,11 @@ async function responsiveInline(page: Page, read: PageRead, url: string, timeout
         if (declarations.length > 0) rules[at]?.push(`[data-capture-runtime="${id}"]{${declarations.join('')}}`);
       }
     }
-    if (!changed) return { html, css: '' };
-    const conditions = ['(min-width:1181px)', '(min-width:835px) and (max-width:1180px)', '(min-width:391px) and (max-width:834px)', '(max-width:390px)'];
+    if (!changed) return { html, css: '', images };
     const css = rules.map((parts, at) => parts.length === 0 ? '' : `@media ${conditions[at]}{${parts.join('')}}`).filter((one) => one !== '').join('\n');
-    return { html: `<!doctype html>\n${doc.documentElement.outerHTML}`, css };
-  }, { html: read.html, snapshots });
-  return merged.css === '' ? read : { ...read, html: merged.html, sheets: [...read.sheets, { href: null, text: merged.css, scope: null }] };
+    return { html: `<!doctype html>\n${doc.documentElement.outerHTML}`, css, images: imageAssets };
+  }, { html: read.html, snapshots, images: read.images });
+  return merged.html === read.html && merged.css === '' ? read : { ...read, html: merged.html, images: merged.images, sheets: merged.css === '' ? read.sheets : [...read.sheets, { href: null, text: merged.css, scope: null }] };
 }
 
 export async function capture(address: string, options: { readonly width?: number; readonly timeout?: number; readonly pages?: number; readonly har?: string } = {}): Promise<Capture> {

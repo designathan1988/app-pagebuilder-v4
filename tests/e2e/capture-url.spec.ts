@@ -108,6 +108,38 @@ test('a script-driven width survives capture and export at every project viewpor
   await exported.close();
 });
 
+test('picture sources keep the selected artwork in the exported desktop and phone pages', runs('project.captureUrl#capture-url-run', 'project.export#menu-file'), async ({ page, context }) => {
+  test.setTimeout(120_000);
+  await openEditor(page);
+  await runDoor(page, 'workspace.openDialog#menu-file-capture-url');
+  const dialog = page.locator('[data-region="capture-url-dialog"]');
+  await dialog.locator('input[name="url"]').fill(`127.0.0.1:${SITE_PORT}/responsive-picture.html`);
+  await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
+  const destination = page.locator('[data-door="project.importHtml#destination-page"]');
+  await expect(destination).toBeVisible({ timeout: 60_000 });
+  await destination.click();
+  const downloading = page.waitForEvent('download');
+  await runDoor(page, 'project.export#menu-file');
+  const files = unzip(fs.readFileSync(await (await downloading).path()));
+  const exported = await context.newPage();
+  await exported.route('http://made.capture.test/**', route => {
+    const name = new URL(route.request().url()).pathname.slice(1);
+    const bytes = files.get(name);
+    if (bytes === undefined) return route.fulfill({ status: 404, body: '' });
+    const contentType = name.endsWith('.svg') ? 'image/svg+xml' : name.endsWith('.css') ? 'text/css' : 'text/html';
+    return route.fulfill({ contentType, body: bytes });
+  });
+  for (const [width, colour] of [[1440, '#123456'], [390, '#abcdef']] as const) {
+    await exported.setViewportSize({ width, height: 900 });
+    await exported.goto('http://made.capture.test/responsive-picture.html');
+    const picture = exported.locator('#responsive-picture');
+    await expect.poll(() => picture.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBe(120);
+    const source = await picture.evaluate(async (img) => (await fetch((img as HTMLImageElement).currentSrc)).text());
+    expect(source, `${width}px uses its captured local picture source`).toContain(colour);
+  }
+  await exported.close();
+});
+
 test('two pages of the site are captured, the link between them written from one file to the other', runs('project.captureUrl#capture-url-run'), async ({ page }) => {
   test.setTimeout(120_000);
   await openEditor(page);

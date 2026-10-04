@@ -13,12 +13,12 @@ Sites at the target: 1 of 20. Measured: 20.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 609 | 93.2 ✗ | 92.9 ✗ | 92.0 ✗ | 86.2 ✗ |  |
 | [govuk](https://www.gov.uk/) | documentation | 11 | 483 | 87.6 ✗ | 86.2 ✗ | 82.9 ✗ | 78.6 ✗ |  |
-| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 91.5 ✗ | 89.9 ✗ | 75.1 ✗ | 62.2 ✗ |  |
+| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 91.5 ✗ | 89.8 ✗ | 75.1 ✗ | 62.3 ✗ |  |
 | [react](https://react.dev/) | React application | 54 | 730 | 88.2 ✗ | 87.7 ✗ | 86.7 ✗ | 82.9 ✗ |  |
 | [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 98.3 | 98.2 | 96.5 ✗ | 94.2 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 91.0 ✗ | 90.0 ✗ | 82.3 ✗ | 86.0 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 47 | 537 | 91.2 ✗ | 90.0 ✗ | 82.3 ✗ | 84.7 ✗ |  |
 | [nuxt](https://nuxt.com/) | Vue application | 74 | 1107 | 89.5 ✗ | 88.0 ✗ | 87.9 ✗ | 84.2 ✗ |  |
-| [svelte](https://svelte.dev/) | landing | 25 | 238 | 59.7 ✗ | 66.7 ✗ | 67.2 ✗ | 70.4 ✗ |  |
+| [svelte](https://svelte.dev/) | landing | 26 | 233 | 58.3 ✗ | 51.1 ✗ | 60.9 ✗ | 68.2 ✗ |  |
 | [astro](https://astro.build/) | landing | 26 | 1004 | 83.1 ✗ | 81.9 ✗ | 84.6 ✗ | 87.6 ✗ |  |
 | [bootstrap](https://getbootstrap.com/) | landing | 10 | 424 | 88.0 ✗ | 85.6 ✗ | 83.1 ✗ | 79.5 ✗ |  |
 | [tailwind](https://tailwindcss.com/) | landing | 52 | 1384 | 64.2 ✗ | 64.5 ✗ | 61.3 ✗ | 56.1 ✗ |  |
@@ -26,8 +26,8 @@ Sites at the target: 1 of 20. Measured: 20.
 | [csstricks](https://css-tricks.com/) | blog | 66 | 646 | 67.0 ✗ | 69.0 ✗ | 75.0 ✗ | 60.1 ✗ |  |
 | [smashing](https://www.smashingmagazine.com/) | blog | 29 | 565 | 75.0 ✗ | 72.9 ✗ | 74.0 ✗ | 71.8 ✗ |  |
 | [bellroy](https://bellroy.com/) | shop | 115 | 1573 | 66.7 ✗ | 20.2 ✗ | 29.0 ✗ | 26.4 ✗ |  |
-| [allbirds](https://www.allbirds.com/) | shop | 362 | 1290 | 83.1 ✗ | 84.0 ✗ | 87.0 ✗ | 48.9 ✗ |  |
+| [allbirds](https://www.allbirds.com/) | shop | 362 | 1290 | 83.2 ✗ | 83.9 ✗ | 87.0 ✗ | 49.0 ✗ |  |
 | [typewolf](https://www.typewolf.com/) | web fonts | 60 | 630 | 65.5 ✗ | 61.8 ✗ | 56.4 ✗ | 49.5 ✗ |  |
 | [gridbyexample](https://gridbyexample.com/) | grid | 8 | 93 | 99.4 | 99.2 | 99.1 | 99.0 |  |
-| [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 48.9 ✗ | 57.1 ✗ | 56.3 ✗ | 57.5 ✗ |  |
+| [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 48.9 ✗ | 57.1 ✗ | 56.3 ✗ | 57.3 ✗ |  |
 | [animatestyle](https://animate.style/) | animation | 13 | 656 | 67.9 ✗ | 69.7 ✗ | 60.5 ✗ | 63.0 ✗ |  |
