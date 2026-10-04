@@ -15,8 +15,8 @@ Sites at the target: 0 of 20. Measured: 20.
 | [govuk](https://www.gov.uk/) | documentation | 11 | 477 | 67.9 ✗ | 66.6 ✗ | 67.7 ✗ | 74.7 ✗ |  |
 | [w3c](https://www.w3.org/) | documentation | 16 | 304 | 58.5 ✗ | 60.1 ✗ | 62.4 ✗ | 68.1 ✗ |  |
 | [react](https://react.dev/) | React application | 53 | 730 | 89.4 ✗ | 88.9 ✗ | 82.6 ✗ | 83.6 ✗ |  |
-| [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 96.9 ✗ | 96.5 ✗ | 95.9 ✗ | 94.1 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 91.6 ✗ | 88.1 ✗ | 84.5 ✗ | 85.2 ✗ |  |
+| [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 98.3 | 98.1 | 95.9 ✗ | 94.1 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 91.6 ✗ | 88.1 ✗ | 82.6 ✗ | 86.6 ✗ |  |
 | [nuxt](https://nuxt.com/) | Vue application | 73 | 1095 | 90.1 ✗ | 85.7 ✗ | 86.7 ✗ | 82.1 ✗ |  |
 | [svelte](https://svelte.dev/) | landing | 25 | 238 | 61.0 ✗ | 65.6 ✗ | 66.1 ✗ | 71.4 ✗ |  |
 | [astro](https://astro.build/) | landing | 26 | 1004 | 72.9 ✗ | 70.7 ✗ | 74.0 ✗ | 81.5 ✗ |  |

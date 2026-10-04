@@ -394,7 +394,7 @@ type Raw = { readonly node: DocNode } | { readonly text: string } | { readonly n
 // the inline runs of a text element's markup: its elements' marks, its texts as they are (a <br> is a line break)
 function runsOf(children: readonly MarkupChild[], builder: Builder, preserveWhitespace = false): InlineRun[] {
   const out: InlineRun[] = [];
-  for (const child of children) {
+  for (const [index, child] of children.entries()) {
     if (typeof child === 'string') {
       if (child !== '') out.push(preserveWhitespace ? child : child.replace(/\s+/g, ' '));
       continue;
@@ -407,6 +407,12 @@ function runsOf(children: readonly MarkupChild[], builder: Builder, preserveWhit
     // the text shows: dropped, and the report names its line (a text holds no hidden piece of its own)
     if (child.attributes.has('hidden')) {
       if (builder.mode === 'import') builder.report.dropped.push(lineOfNode(builder.markup, child));
+      continue;
+    }
+    // An empty block-level span separates the inline boxes before and after it in the browser. The text model
+    // expresses that visible break as a line break, without retaining an empty text-only element.
+    if (child.tag === 'span' && child.children.length === 0 && /(?:^|;)\s*display\s*:\s*block(?:\s*!important)?\s*(?:;|$)/i.test(child.attributes.get('style') ?? '') && plainOf(out).trim() !== '' && children.slice(index + 1).some((next) => (typeof next === 'string' ? next.trim() !== '' : !next.attributes.has('hidden') && textOf(next).trim() !== ''))) {
+      out.push('\n');
       continue;
     }
     const inner = runsOf(child.children, builder, preserveWhitespace);

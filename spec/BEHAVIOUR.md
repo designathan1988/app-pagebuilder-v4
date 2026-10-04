@@ -9087,7 +9087,8 @@ instance (`status.locked.edit`).
   `<html>` (its classes and `data-` attributes) reaches its body; a page's Content Security Policy does not stop the
   capture. An anchor with an image, SVG or video becomes a Link Block, retaining its editable visual child. Ordinary
   HTML whitespace in text runs collapses to spaces, while an actual `<br>` remains a line break and preformatted text
-  keeps its whitespace.
+  keeps its whitespace. An empty `<span style="display:block">` between two pieces of text creates a visible line
+  break in the browser and becomes a text line break on import.
 - A plain, attribute-free `<span>` containing only visual media or a visual link releases its wrapper and keeps each
   child, including the link and its image, editable. Image width and height attributes remain lower-priority hints:
   when a captured responsive stylesheet controls
