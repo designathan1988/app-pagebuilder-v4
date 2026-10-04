@@ -149,9 +149,9 @@ remains, explain the blocker and the decision needed from the user.
 ## Implementation rules
 
 - Complete means working behaviour, never a stub, placeholder, TODO or "first version".
-- Do not change public interfaces, libraries, schemas, migrations or unrelated code merely to make the current item
-  easier. Ask before deleting files or data, adding a dependency, changing a schema or migration, or running a
-  destructive git operation.
+- Do not change public interfaces, schemas, migrations or unrelated code merely to make the current item easier. Add
+  any dependency or tool the work needs without asking (the user, 2026-10-04: "você deve adicionar o que precisar");
+  record it in the commit. Ask before deleting the user's files or data or running a destructive git operation.
 - Never edit, skip or loosen a test or scenario to make it pass; if one looks wrong, stop and say why. A legitimate
   test change for an intentional behaviour change states its reason in the commit and the QA-LOG row.
 - Never hardcode expected output, mock the behaviour under test, silence an error or bypass a check. Never fake a
