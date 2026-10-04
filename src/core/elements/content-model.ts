@@ -256,6 +256,10 @@ export function placementRefusal(document: DocumentJson, rules: ModelRules, rece
   const host = chain.at(-1);
   if (host === undefined) throw new Error(`placementRefusal: the document has no node ${receiver}`);
   if (rules.elements.get(host.type)?.content !== 'children') return message('status.refused.noChildren', { parent: host.name });
+  // a captured page keeps its content in its snapshots, its root holds no element (validate.ts): nothing goes there
+  // (the audit's CA1: an insert with nothing selected on a captured page was refused as an invalid document)
+  const page = chain.length === 1 ? document.pages[locate(document, receiver)?.page ?? -1] : undefined;
+  if (page?.capture !== undefined) return message('status.capture.noElements', { page: page.name });
   const arrivingIds = new Set(arriving.map((node) => node.id));
   for (const node of arriving) {
     if (node.tag === null) continue;

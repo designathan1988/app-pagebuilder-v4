@@ -6582,6 +6582,7 @@ export const MESSAGE_IDS = [
   "capture.editor.index",
   "status.capture.nodeMissing",
   "status.capture.invalidEdit",
+  "status.capture.noElements",
   "status.capture.unsafeEdit",
   "status.capture.edited",
   "status.capture.invalidUrl",

@@ -3544,6 +3544,7 @@
   "capture.editor.index": "Position",
   "status.capture.nodeMissing": "The captured element is no longer in this page.",
   "status.capture.invalidEdit": "This edit does not apply to the captured element.",
+  "status.capture.noElements": "{page} is a captured page: its content is edited in the captured inspector, and new elements go on another page.",
   "status.capture.unsafeEdit": "This captured attribute could run unsafe code and was refused.",
   "status.capture.edited": "Captured content kept.",
   "status.capture.invalidUrl": "{url} is no web address (http or https).",
