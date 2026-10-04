@@ -1,119 +1,202 @@
-# AGENTS.md — the entry for Codex
+# AGENTS.md — the rules of work for every agent
 
-> **Rule zero — research on the internet first, always.** Before
-> implementing anything that is not trivial, search the official
-> documentation (MDN, W3.org and other relevant primary sources).
-> Do this before editing code. If internet access is unavailable,
-> report the blocker; do not treat memory or an unverified assumption
-> as a substitute.
-
-> **No trial and error.** Before changing code for a defect, establish the observed
-> failure, trace it to its root cause across the affected boundaries, research the
-> relevant official sources, and record a causal implementation plan. Implement
-> the shared cause rather than a site-specific symptom or a speculative tweak.
-> When verification fails, inspect the new evidence and revise the hypothesis
-> before editing again; do not cycle through ungrounded variations or tune tests,
-> references, or metrics to make the result appear successful.
+Builder is a desktop pagebuilder that runs in recent Chrome only, for professionals who build websites. This file is
+the one rulebook: Codex reads it directly, Claude Code reads it through `CLAUDE.md` (which imports it and adds only
+what is Claude-specific). What the product is and must do, its status, open problems and decisions live in
+[`docs/PRODUCT.md`](docs/PRODUCT.md); this file holds the rules of work only.
 
 ## Priority
 
 1. The user's current explicit request and restrictions.
-2. This file and `CLAUDE.md`.
+2. This file.
 3. The scope and decisions in `docs/PRODUCT.md`.
-4. The agent's judgment about implementation.
+4. The agent's own judgment.
 
-The standing backlog does not override a narrower current request. If the user asks for analysis only, do not edit, test, commit or push. Do not expand a task to unrelated work.
+The standing goal below does not override a narrower current request. If the user asks for analysis only, do not edit,
+test, commit or push. Two rules of this file that disagree are a defect: say so and record it in `docs/PRODUCT.md`
+section 3; do not pick one silently.
 
-## Sources of truth
+## Finishing a task
 
-- `CLAUDE.md` contains the repository's working rules.
-- `docs/PRODUCT.md` contains requirements, statuses, open problems, decisions, architecture and proof criteria.
-- `spec/BEHAVIOUR.md` and `manifest/` define the behavior contract.
-- `docs/QA-LOG.md` records completed changes and their commits.
-- `.memory/builder.md` is working memory, limited to 60 lines. Read it at the start of a session and after context compaction.
-- `.memory/review.md` contains the reviewer's findings. Never delete a finding.
+**IMPORTANT.** An order is finished when every one of its criteria is met with evidence, never when the work merely
+looks done.
 
-Read only the material needed for the current item. Do not map the whole repository before a small change.
+1. At the start of an order, copy its "done when" into `.memory/task.md`, one criterion a line, word for word, as
+   `- [ ] <criterion>`. When the order states no criteria, write down the outcomes it asks for.
+2. Never narrow the order. A criterion that cannot be met stays listed as `- [ ] blocked: <why> — <criterion>`; the
+   task is never renamed to a smaller one (an "audit" does not become a "code audit").
+3. A criterion is ticked only with evidence from this session: `- [x] <criterion> — evidence: <log or photo>`, the log
+   being the command's complete output in `.cache/logs/`.
+4. The final message lists every criterion as done, partial, blocked or not run, each with its evidence. No commit
+   message, QA-LOG row, `docs/PRODUCT.md` status or memory note says "closes", "complete" or "nothing pending" while a
+   line is open.
+5. Claude Code enforces this with the Stop check (`tools/gate/stop-check.ts`, configured in `.claude/settings.json`):
+   a turn cannot end while `.memory/task.md` has an open line or a line ticked without evidence. Codex has no such
+   hook: it reads its task list before ending a turn. For a long order, the user can also set `/goal <criteria>` in
+   Claude Code, which has a separate model check the criteria after every turn.
+
+## Rule zero: research first
+
+Before implementing anything that is not trivial, a bug fix included, search the official documentation of the
+technology involved (MDN, the W3C and WHATWG specifications, the tool's own documentation) and how shipped products
+solve the same problem. Record the source that informed the change (QA-LOG row, decision, comment). Reuse a source
+already checked in the same investigation. If internet access is unavailable, report the blocker; memory or an
+unverified assumption is not a substitute. Web research does not replace the repository's own evidence: its code, tests
+and the real app.
+
+**No trial and error.** Before changing code for a defect, establish the observed failure, trace it to its root cause
+across the affected boundaries and plan the change from the cause. Implement the shared cause, not a site-specific
+symptom. When verification fails, read the new evidence and revise the hypothesis before editing again; never cycle
+through ungrounded variations, and never tune tests, references or metrics to make a result look better.
+
+## One tree, one copy
+
+- One working tree (this root), branch `main`, one copy of the application: no worktrees, branches, parallel copies or
+  code waiting to be merged. A change that is not finished stays in the working tree; the gate sets it aside while it
+  checks a commit.
+- No git hooks. Two checks block, both versioned here: the gate (`npm run gate`) and the Stop check.
+- One agent writes at a time, without subagents (DEC-11); one Playwright run uses Chrome at a time.
+- The old application (the Pager) at `../builder-5/reference/` is read-only reference for behaviour, never for code.
+  Never write inside it.
+
+## The documents
+
+- `docs/PRODUCT.md` — scope, requirements and their status, open problems, decisions, architecture, how to prove. A new
+  requirement, problem or decision goes there in the same commit as the work it concerns.
+- `spec/BEHAVIOUR.md` — the behaviour specs, one section per feature, anchored by the feature's id; the manifest points
+  at a section (`spec/BEHAVIOUR.md#<id>`) and `manifest:check` fails when it is missing.
+- `manifest/` — the contract itself; `src/manifest/schema.ts` is its schema.
+- `docs/FEATURES.md`, `docs/INVENTORY.md`, `docs/inventory.json` — generated by `npm run inventory` from the manifest,
+  the source, the spec and the last complete browser run on a clean tree (`docs/feature-results.json`). Never edited by
+  hand.
+- `docs/QA-LOG.md` — the history: one row per change and one change per commit, so any change can be reverted alone.
+  A new row's commit cell says `(this commit)`; the gate of the next commit writes the hash in.
+- `docs/AUDIT-<date>.md` — dated snapshots of quality, frozen once written. `docs/archive/` — superseded documents,
+  each with a first line saying where its content went.
+- `.memory/` (ignored by git) — the session's working memory only, never requirements or the plan:
+  `builder.md` (at most 60 lines: where the work stands, what comes next; rewritten whole after every commit),
+  `task.md` (the current order's criteria) and `review.md` (the reviewer's findings, never deleted; the implementer
+  marks them `FIXED <hash>` or `DISPUTED: <reason>`).
+
+At the start of a session and after a context compaction, read `.memory/builder.md`, `.memory/task.md`, then
+`docs/PRODUCT.md` sections 2–4, then the last rows of `docs/QA-LOG.md`. Read only the material the current item needs.
 
 ## Standing goal
 
-Work through every in-scope requirement in `docs/PRODUCT.md` section 2 that is not `done` or `out`, and every open problem in section 3. Start with the most severe actionable item. Continue to the next independent item after completing one, unless the current user request narrows or stops this work.
-
-The existing acceptance criteria remain in force. Do not lower the 20-site, 98% fidelity target or mark it complete because progress is slow. A partial result remains `partial` or `open`.
-
-No subagents are used (DEC-11). One agent writes in the single working tree, and only one Playwright run uses Chrome at a time.
+When the user gives no narrower order: every in-scope requirement of `docs/PRODUCT.md` section 2 that is not `done` or
+`out`, and every open problem of section 3, most severe actionable first. The acceptance criteria stay in force: the
+20-site corpus at 98 % fidelity is not lowered or marked complete because progress is slow; partial work stays
+`partial` or `open`.
 
 ## Unit of work
 
-Choose one bounded, observable outcome at a time. Before editing, identify:
+Choose one bounded, observable outcome at a time. Before editing, know the exact requirement or problem, the observed
+failure and its evidence, the cause and the change, and the test (and for interface work the real gesture) that will
+prove it. One cause may close several requirements; do not split a coherent fix into micro-fixes, and do not bundle
+unrelated changes into one commit.
 
-1. The exact requirement or problem being addressed.
-2. The observed failure and the evidence for it.
-3. The likely cause and the smallest relevant change.
-4. The test and, for interface work, the real-app gesture that will prove the outcome.
+For the capture corpus, compare the affected sites and widths before changing code, record the measured result after
+each fix (regressions included), and never claim that progress on one site completes the corpus.
 
-A single cause may resolve several requirements. Do not split a coherent fix into artificial micro-fixes, and do not combine unrelated changes merely to reduce the number of commits.
+**When an approach fails.** If the same approach fails twice, change the hypothesis. After three attempts without
+concrete progress, record the attempts, exact errors or measurements, best hypothesis and remaining dependency in
+`.memory/builder.md`, keep the item open in `.memory/task.md`, and move to an independent item. Never mark it complete,
+weaken its criterion, edit a test to hide the failure or keep making speculative variations. If no independent work
+remains, explain the blocker and the decision needed from the user.
 
-For the capture corpus, compare the affected sites and viewport sizes before changing code. Prefer a shared cause when the evidence supports one. Record the measured result after each fix, including regressions. Do not claim that improvement on one site completes the corpus requirement.
+## The contract is the manifest
 
-## When an approach fails
+- A change of behaviour starts in the manifest (and in `spec/BEHAVIOUR.md` when it needs words), in the same commit as
+  the code, and `npm run manifest:check` stays green.
+- A door is one way a person reaches a command: a button, menu item, field, handle or shortcut. The interface registers
+  doors only from the manifest (`manifest/commands/*.json`); a door whose feature is not registered is drawn disabled
+  with "not available yet"; the context menu draws only what applies. A door's adapter data is read from the manifest,
+  never re-listed in code.
+- Status comes only from the runner: a feature passes when every scenario passes through every door it names. Never
+  write a status or `passes` field.
+- The owner of a concept is the module that registers its commands; the inventory names it. A second implementation of
+  a concept that has an owner is a defect.
 
-Investigate the failure before changing code again.
+## Architecture and stack
 
-- If the same approach fails twice, change the hypothesis or stop using that approach.
-- After three attempts without concrete progress on an item, record the attempts, exact errors or measurements, best current hypothesis and remaining dependency in `.memory/builder.md`.
-- Do not mark the item complete, weaken its acceptance criterion, edit a test to hide the failure or continue making speculative variations.
-- Continue with another independent item when the working tree permits it. Do not mix unfinished work with an unrelated change in one commit.
-- If no useful independent work remains, explain the blocker and the decision needed from the user.
-
-Credentials, service tokens, API keys and signing certificates must come from the user. Build the field or step they need, record the dependency under “Waiting on the user”, and continue with independent work.
-
-## Research
-
-Rule zero applies to every non-trivial implementation, including a bug fix. Search the relevant official documentation before editing. Keep the search focused on the behavior or application programming interface involved, and record the source that informed the change. Reuse a source already checked in the current investigation; search again when a new question or new evidence requires it.
-
-Repository behavior must also be established from its code, tests and real-app evidence. Web research does not replace those checks.
+- `src/core/` is the document core in plain TypeScript (no React, no DOM; its ports are injected), `src/editor/` the
+  React editor, `src/app/` the wiring, `src/manifest/` the contract's reader, `src/generated/` and
+  `manifest/generated/` written by `npm run gen` alone.
+- One store. State changes only through `dispatch(command)`; handlers are pure and return JSON patches, applied in
+  `src/core/store/store.ts` with the tree's invariants owned by `src/core/document/tree.ts`. No document or selection
+  state in `useState` or `useRef`. Pointer input belongs to its owner module (`src/editor/input/pointer.ts`).
+- A commit the validator refuses after a command produced patches is a bug: nothing of the change is published, the
+  status bar says it was refused, the incident feed records it, and development and tests throw. Predictable invalid
+  operations are refused before any patch exists.
+- The document JSON is the source of truth, never the DOM; the page renders in an iframe scaled with CSS `zoom`.
+- npm (never pnpm), TypeScript strict, Vite, Vitest, Playwright with `channel: 'chrome'`. Colours, spacing, type, radii
+  and shadows come only from the tokens (`src/ui/tokens.css`, generated). UI text only through the i18n catalogues (en
+  is the source, pt-BR ships). Code, comments, documents, file names and commits in English; file names in kebab-case;
+  tools in TypeScript (exceptions in `docs/PRODUCT.md` section 7).
+- Export: a ZIP with HTML plus a separate CSS file, BEM classes, no inline styles. The dev server port comes from
+  `PORT`.
 
 ## Implementation rules
 
-- Complete means working behavior, not a stub, placeholder, TODO or “first version”.
-- Do not change public interfaces, libraries, schemas, migrations or unrelated code merely to make the current item easier.
-- Ask before deleting files or data, adding dependencies, changing a schema or migration, or running destructive Git operations.
-- Never edit, skip or loosen a test or scenario to make a failure disappear. A legitimate test change reflecting an intentional behavior change must state its reason in the commit and QA-LOG row.
-- Never hardcode expected test output, mock the behavior being tested, silence an error or bypass a check.
-- Behavior changes must update the manifest and `spec/BEHAVIOUR.md` with the code. Keep one owner per concept.
-- Code, comments, documentation, filenames and commit messages are in English. Interface text comes from the i18n catalogues.
+- Complete means working behaviour, never a stub, placeholder, TODO or "first version".
+- Do not change public interfaces, libraries, schemas, migrations or unrelated code merely to make the current item
+  easier. Ask before deleting files or data, adding a dependency, changing a schema or migration, or running a
+  destructive git operation.
+- Never edit, skip or loosen a test or scenario to make it pass; if one looks wrong, stop and say why. A legitimate
+  test change for an intentional behaviour change states its reason in the commit and the QA-LOG row.
+- Never hardcode expected output, mock the behaviour under test, silence an error or bypass a check. Never fake a
+  result.
+- Credentials, tokens, API keys and signing certificates come from the user: build the field or step they need, mark
+  the row "(waiting on the user)" in `docs/PRODUCT.md` and continue with independent work.
 
-Follow the architecture and lint rules in `CLAUDE.md`. In particular, use the document store and commands for state changes, keep the core free of DOM dependencies, use design tokens for CSS values, and keep pointer handling in its designated module. `../builder-5/reference/` is read-only behavior reference, never code to copy.
+## The loop and verification
 
-## Verification
-
-Use the smallest relevant verification while developing. For changed behavior, run the affected unit and browser tests. For interface work, use real gestures in installed Chrome through `npm run ui` and inspect the resulting screenshots. An absence of console errors alone is not visual proof.
-
-Run the tests for a completed block at the end of that block. Run the complete suite once when the whole application is ready, unless the user explicitly requests another full run. Do not repeatedly run the full suite to investigate one failure.
-
-Save the complete output of every command whose result is claimed in `.cache/logs/`. Report the command, exit code, failing test names when applicable, and the relevant final output. Never say that something works, compiles or passes without seeing the result in this session.
-
-## Delivery and Git
-
-A completed change includes its behavior, contract updates, relevant verification and one QA-LOG row. Commit and push each completed change to `origin/main` through the existing gate:
-
-For this project, `origin` must be `https://github.com/designathan1988/app-pagebuilder-v3.git`. Verify the remote before each push; do not publish new commits to the older v2 repository.
-
-```powershell
-& "C:\Program Files\Git\bin\bash.exe" .cache/scratch/gate.sh .cache/scratch/msg.txt <short-tag>
+```
+npm run check:fast     # gen:check, manifest:check, inventory:check, typecheck, deps:check, lint, unit (~1-2 minutes)
+npm run ui -- <flow>   # the real app in the installed Chrome, real gestures, a photo per step
+npx playwright test tests/e2e/<spec>.ts    # the browser tests of what a block built (or --grep @feature:<id>)
+npm run e2e            # the complete suite, once, when the whole application is ready
+npm run e2e:diagnose   # the failed tests again, with their trace
+npm run inventory      # regenerate the inventory and docs/FEATURES.md
+npm run gate -- <message-file> <log-name> <path>...   # commit and push (Delivery)
 ```
 
-Write `msg.txt` with a file-editing tool. Use Git Bash at the path above; plain `bash` from PowerShell starts WSL on this machine.
+The other tools (perf, parity, journey, capture corpus, Companion, module removal) are in `docs/PRODUCT.md` section 6.
 
-Use the single working tree on `main`. Do not create a branch or worktree. Never use `--no-verify`, `--amend`, force push, reset-hard or clean to get past a problem. If the gate fails, diagnose and report the failure; do not claim delivery.
+- Every feature is written with its basic test. Every screen is checked with Playwright on the installed Chrome through
+  `npm run ui` (never an embedded preview pane, which cannot press modified keys, drag or read what the app stored):
+  real gestures one at a time, a screenshot per step into `.cache/logs/ui-<flow>-<time>/`, a failure on any console
+  error, incident or unmet expectation. Look at the screenshots: no console error is not visual proof.
+- No suite runs between steps. At the end of a block, run the tests of what the block built by naming their spec files
+  or features. `npm run e2e:affected` selects nearly the whole suite when a shared file changes (it prints why), so it
+  is not the per-block check. The complete suite runs once, at the end, unless the user asks for another run.
+- The complete output of every command whose result is claimed goes to `.cache/logs/`. Never say that something works,
+  compiles or passes without having seen its result in this session.
 
-Keep `.memory/builder.md` current after each commit. Read `.memory/review.md` periodically. Address `OPEN` findings when appropriate, then mark them `FIXED <hash>` or `DISPUTED: <reason>`; never delete them.
+## Delivery
+
+A delivered change is its behaviour, its contract and spec updates, its verification, one QA-LOG row and, when it
+concerns one, its `docs/PRODUCT.md` row — in one commit, pushed to `origin` (`app-pagebuilder-v3`) on `main`:
+
+```
+npm run gate -- .cache/scratch/msg.txt <short-tag> <path>...
+```
+
+Write the message file with a file-editing tool and name every path of the change. The gate
+(`tools/gate/gate.ts`) refuses a branch other than `main` and any other origin, writes the hashes of earlier QA-LOG
+rows, refuses more than one new QA-LOG row, sets aside everything outside the named paths, regenerates the generated
+files, runs `check:fast` on exactly what will be committed, commits, pushes and brings the set-aside work back. Its
+log is `.cache/logs/gate-<short-tag>.txt`. Never use `--no-verify`, `--amend`, a force push, `reset --hard` or `clean`
+to get past a problem; if the gate refuses, read why, fix the cause and run it again. Keep `.memory/builder.md`
+current after each commit.
 
 ## Communication
 
-Tell the user what you are doing in plain Portuguese. Explain acronyms and code terms when they matter.
-
-For each visible interface delivery, describe what a person saw before and what they see now. Include the actual before and after screenshots in the message. For a new capability, show the states needed to understand it. At a stage closing, show the surfaces changed during that stage. For a change with no visible interface effect, report its observable result.
-
-Put the commit and verification result after the user-facing explanation. Distinguish clearly among `done`, `partial`, `blocked` and `not verified`. Never present progress on one part as completion of the entire requirement.
+- Talk to the user in plain Portuguese; spell out every acronym and code (QA, p95, J1, R6…) the first time.
+- Decide technical and product choices yourself, record them as decisions in `docs/PRODUCT.md`, and keep working; stop
+  to ask only when nothing can move without the user (a credential, a choice only the user can make, a destructive
+  step). A one-line status between steps is fine; stopping to wait for an answer you do not need is not.
+- For a visible interface change, say what a person saw before and sees now, with the before and after screenshots.
+  For a change with no visible effect, report its observable result.
+- Put the commit and verification results after the explanation. Keep `done`, `partial`, `blocked` and `not verified`
+  apart; never present progress on one part as completion of the whole.

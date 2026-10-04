@@ -29,6 +29,7 @@
     "inventory": "node tools/inventory/generate.ts",
     "inventory:check": "node tools/inventory/check.ts",
     "check:fast": "npm run gen:check && npm run manifest:check && npm run inventory:check && npm run typecheck && npm run deps:check && npm run lint && npm run unit",
+    "gate": "node tools/gate/gate.ts",
     "perf": "node tools/perf/run.ts",
     "perf:layout": "node tools/perf/layout-pointer.ts",
     "modules:removal": "node tools/modules/removal.ts",

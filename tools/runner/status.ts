@@ -1,4 +1,4 @@
-// The derived status (CLAUDE.md "Status comes only from the runner"): a Playwright reporter that, after a run,
+// The derived status (AGENTS.md "Status comes only from the runner"): a Playwright reporter that, after a run,
 // prints each feature's status from the results of its scenario tests at the current commit: passes (every test of
 // every scenario and door passed), fails, cannot run (it is registered as built, but a scenario of it cannot run: the
 // census names why), or not built (it is not registered in the feature table, so its scenarios did not run). A
