@@ -32,6 +32,41 @@ export function serializePage(origin: string): PageRead {
   // that no slot takes are not drawn, so they go; a shadow root's styles join the page's sheets, :host written as
   // the host's own tag. An image is marked with the source the browser chose for it (its currentSrc).
   const images: { readonly index: number; readonly src: string }[] = [];
+  // HTML's srcset parser treats a comma inside a URL differently from a separator after a descriptor.
+  // Keep the candidate grammar and descriptors, replacing only each candidate URL with a localizable marker.
+  const markedSrcset = (value: string): string => {
+    const replacements: { readonly start: number; readonly end: number; readonly value: string }[] = [];
+    const space = (character: string | undefined): boolean => character !== undefined && /[\t\n\f\r ]/.test(character);
+    let at = 0;
+    while (at < value.length) {
+      while (at < value.length && (space(value[at]) || value[at] === ',')) at += 1;
+      const start = at;
+      while (at < value.length && !space(value[at])) at += 1;
+      let end = at;
+      while (end > start && value[end - 1] === ',') end -= 1;
+      const candidate = value.slice(start, end);
+      if (candidate !== '' && URL.canParse(candidate, document.baseURI)) {
+        const source = new URL(candidate, document.baseURI).href;
+        const index = images.length;
+        images.push({ index, src: source });
+        replacements.push({ start, end, value: `__capture_image_${index}__` });
+      }
+      // After a URL without a trailing comma, descriptors end at a comma outside parentheses.
+      if (end === at) {
+        let depth = 0;
+        while (at < value.length) {
+          const character = value[at];
+          at += 1;
+          if (character === '(') depth += 1;
+          else if (character === ')') depth = Math.max(0, depth - 1);
+          else if (character === ',' && depth === 0) break;
+        }
+      }
+    }
+    let marked = value;
+    for (const replacement of replacements.reverse()) marked = marked.slice(0, replacement.start) + replacement.value + marked.slice(replacement.end);
+    return marked;
+  };
   // `shadowed`: the node lies in a shadow tree or is slotted into one, where the rules that hide it (a closed
   // dropdown's slot, :host(:not([open]))) do not survive the flattening: an element the page does not draw there
   // comes hidden (kept, not drawn), as the page showed it
@@ -52,10 +87,11 @@ export function serializePage(origin: string): PageRead {
     if (node instanceof HTMLImageElement) {
       const src = node.currentSrc || node.getAttribute('src') || '';
       const index = images.length;
-      copy.removeAttribute('srcset');
       copy.removeAttribute('loading');
       copy.setAttribute('src', `__capture_image_${index}__`);
       images.push({ index, src: src === '' ? '' : new URL(src, document.baseURI).href });
+      const srcset = node.getAttribute('srcset');
+      if (srcset !== null) copy.setAttribute('srcset', markedSrcset(srcset));
       return copy;
     }
     const root = node.shadowRoot;

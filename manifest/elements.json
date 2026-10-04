@@ -1106,6 +1106,19 @@
       "valueType": "text",
       "keywords": [],
       "elements": [
+        "image",
+        "source"
+      ],
+      "command": "element.setAttribute"
+    },
+    {
+      "id": "sizes",
+      "html": "sizes",
+      "labelKey": "attribute.sizes.label",
+      "valueType": "text",
+      "keywords": [],
+      "elements": [
+        "image",
         "source"
       ],
       "command": "element.setAttribute"

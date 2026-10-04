@@ -45,6 +45,7 @@ import { childrenRefusal } from '../elements/content-model.ts';
 import { readAddress } from '../elements/address.ts';
 import { sanitizedSvgMarkup } from '../elements/svg.ts';
 import { fileBytes, pickedFilePath, resolveHref, typeOfFile } from '../files/files.ts';
+import { rewriteSrcsetUrls } from '../files/srcset.ts';
 import { ArchiveError, archiveReason, isZip, unzip } from '../project/zip.ts';
 import { canonical, hasMarks } from '../text/inline.ts';
 import { freshName, type NodeMaker } from '../structure/node-maker.ts';
@@ -643,7 +644,7 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
     const id = attributeNamed(html, type, rules);
     if (id !== null) {
       const facts = rules.attributeValues.get(id);
-      const kept = facts?.valueType === 'boolean' ? true : facts?.valueType === 'number' ? Number(value) : facts?.valueType === 'url' ? (importedPath(builder, value) ?? value) : html === 'srcset' ? value.split(',').map(part => part.trim().replace(/^([^\s]+)/, address => importedPath(builder, address) ?? address)).join(', ') : value;
+      const kept = facts?.valueType === 'boolean' ? true : facts?.valueType === 'number' ? Number(value) : facts?.valueType === 'url' ? (importedPath(builder, value) ?? value) : html === 'srcset' ? rewriteSrcsetUrls(value, address => importedPath(builder, address) ?? address) : value;
       if (attributeValueRefusal(id, kept, rules) !== null) {
         if (builder.mode === 'import') builder.report.attributes.push(line);
         else builder.dropped.attributes += 1;

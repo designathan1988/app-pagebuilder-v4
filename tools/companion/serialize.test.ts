@@ -16,3 +16,10 @@ it('ranks a root runtime style above a stylesheet root default', () => {
   const read = serializePage('https://site.test');
   expect(read.sheets.at(-1)?.text ?? '').toContain('html:root{--sk-banner-height: 4.2rem;}');
 });
+
+it('keeps capturing when a site has a malformed srcset candidate', () => {
+  document.body.innerHTML = '<img src="https://site.test/good.svg" srcset="http://[::1 1x, https://site.test/good.svg 2x">';
+  const read = serializePage('https://site.test');
+  expect(read.html).toContain('srcset=');
+  expect(read.images.some((image) => image.src === 'https://site.test/good.svg')).toBe(true);
+});

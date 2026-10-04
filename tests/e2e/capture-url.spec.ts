@@ -140,6 +140,51 @@ test('picture sources keep the selected artwork in the exported desktop and phon
   await exported.close();
 });
 
+test('a standalone responsive image retains the browser-selected local source at each width', runs('project.captureUrl#capture-url-run', 'project.export#menu-file'), async ({ page, context }) => {
+  test.setTimeout(120_000);
+  const original = await context.newPage();
+  for (const [width, colour] of [[1440, '#123456'], [390, '#abcdef']] as const) {
+    await original.setViewportSize({ width, height: 900 });
+    await original.goto(`http://127.0.0.1:${SITE_PORT}/responsive-img.html`);
+    const source = await original.locator('#responsive-img').evaluate(async (img) => (await fetch((img as HTMLImageElement).currentSrc)).text());
+    expect(source, `${width}px original browser selection`).toContain(colour);
+    await original.screenshot({ path: `.cache/logs/qa269-resp-img-original-${width}.png` });
+  }
+  await original.close();
+  await openEditor(page);
+  await runDoor(page, 'workspace.openDialog#menu-file-capture-url');
+  const dialog = page.locator('[data-region="capture-url-dialog"]');
+  await dialog.locator('input[name="url"]').fill(`127.0.0.1:${SITE_PORT}/responsive-img.html`);
+  await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
+  const destination = page.locator('[data-door="project.importHtml#destination-page"]');
+  await expect(destination).toBeVisible({ timeout: 60_000 });
+  await destination.click();
+  const canvasImage = page.frameLocator('.frame__page').locator('#responsive-img');
+  await expect.poll(() => canvasImage.getAttribute('srcset')).toContain('blob:');
+  await expect.poll(() => canvasImage.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBe(120);
+  const downloading = page.waitForEvent('download');
+  await runDoor(page, 'project.export#menu-file');
+  const files = unzip(fs.readFileSync(await (await downloading).path()));
+  const exported = await context.newPage();
+  await exported.route('http://made.capture.test/**', route => {
+    const name = new URL(route.request().url()).pathname.slice(1);
+    const bytes = files.get(name);
+    if (bytes === undefined) return route.fulfill({ status: 404, body: '' });
+    return route.fulfill({ contentType: name.endsWith('.svg') ? 'image/svg+xml' : name.endsWith('.css') ? 'text/css' : 'text/html', body: bytes });
+  });
+  for (const [width, colour] of [[1440, '#123456'], [390, '#abcdef']] as const) {
+    await exported.setViewportSize({ width, height: 900 });
+    await exported.goto('http://made.capture.test/responsive-img.html');
+    const image = exported.locator('#responsive-img');
+    await expect.poll(() => image.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBe(120);
+    expect(await image.getAttribute('srcset'), `${width}px retains candidate selection`).not.toBeNull();
+    const source = await image.evaluate(async (img) => (await fetch((img as HTMLImageElement).currentSrc)).text());
+    await exported.screenshot({ path: `.cache/logs/qa269-resp-img-after-${width}.png` });
+    expect(source, `${width}px uses its browser-selected local image candidate`).toContain(colour);
+  }
+  await exported.close();
+});
+
 test('the captured html root class keeps its inherited font in canvas and export', runs('project.captureUrl#capture-url-run', 'project.export#menu-file'), async ({ page, context }) => {
   test.setTimeout(120_000);
   await openEditor(page);

@@ -105,6 +105,7 @@
   "attribute.shapeY.label": "Y",
   "attribute.src.label": "Origem",
   "attribute.srcset.label": "Conjunto de origens",
+  "attribute.sizes.label": "Tamanhos de origem",
   "attribute.start.label": "Número inicial",
   "attribute.step.label": "Passo",
   "attribute.svgMarkup.label": "Marcação SVG",

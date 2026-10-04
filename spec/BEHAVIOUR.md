@@ -9060,6 +9060,11 @@ instance (`status.locked.edit`).
 - For an image inside `<picture>`, the Companion also records the image the browser selected at each reference width.
   It replaces source candidates that still point to the original site with local assets and width conditions, so the
   canvas and export use the captured artwork when the original page's scripts and network are absent.
+- A standalone `<img>` keeps its `srcset` candidates and `sizes` expression as HTML defines them. The Companion
+  localizes every available candidate without changing its width or density descriptor; the canvas resolves each
+  candidate to its project file, and export writes each path relative to the page. A malformed candidate does not
+  prevent the other images or the page from being captured. This rule also applies when a person edits the image's
+  Source set or Source sizes field; it is not limited to a particular site or screenshot width.
 - The Companion marks the captured page (`<meta name="builder-capture">`), and the import keeps, beside the classes and
   values it maps, what the model does not hold of its sheets: a rule whose selector it does not read (a descendant with
   a state, `:has()`, an attribute), an at-rule other than a media query a breakpoint takes (`@font-face`, `@keyframes`,

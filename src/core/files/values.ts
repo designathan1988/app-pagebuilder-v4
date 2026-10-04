@@ -10,6 +10,7 @@
 import type { DocumentJson } from '../document/model.ts';
 import { resolvedReference } from '../elements/references.ts';
 import { fileAt, pageAtPath, relativePath, resolvedSource } from './files.ts';
+import { rewriteSrcsetUrls } from './srcset.ts';
 
 // whether a stored value is a reference to another element (elements.json: the label's `for`, an anchored link)
 const isReference = (name: string, value: string): boolean => name === 'for' || (name === 'href' && value.startsWith('#'));
@@ -20,6 +21,7 @@ const isReference = (name: string, value: string): boolean => name === 'for' || 
 // export-file-tree), so a page in a folder reaches the stylesheet and its neighbours.
 export function exportValue(document: DocumentJson, name: string, value: string, from = ''): string | null {
   if (isReference(name, value)) return resolvedReference(document, value);
+  if (name === 'srcset') return rewriteSrcsetUrls(value, (url) => exportPath(document, url, from));
   return exportPath(document, value, from);
 }
 
@@ -35,5 +37,6 @@ export function exportPath(document: DocumentJson, value: string, from = ''): st
 // What the canvas writes: the same, except that a source naming a project file draws through the file's object URL.
 export function canvasValue(document: DocumentJson, name: string, value: string): string | null {
   if (isReference(name, value)) return resolvedReference(document, value);
+  if (name === 'srcset') return rewriteSrcsetUrls(value, (url) => resolvedSource(document, url) ?? url);
   return resolvedSource(document, value) ?? value;
 }

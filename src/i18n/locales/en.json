@@ -105,6 +105,7 @@
   "attribute.shapeY.label": "Y",
   "attribute.src.label": "Source",
   "attribute.srcset.label": "Source set",
+  "attribute.sizes.label": "Source sizes",
   "attribute.start.label": "Starting number",
   "attribute.step.label": "Step",
   "attribute.svgMarkup.label": "SVG markup",
