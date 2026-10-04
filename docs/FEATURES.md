@@ -7,7 +7,7 @@ open problems, are in `docs/PRODUCT.md`.
 
 214 features (214 built), 373 commands, 1362 doors, 1831 scenarios.
 
-Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests passed; 214 features passed every scenario test.
+Last complete browser run: commit `4e059f3` (2026-10-04), 2044 of 2044 tests passed; 214 features passed every scenario test.
 
 "Required" counts the `Required:` items of the feature's section of `spec/BEHAVIOUR.md`; "none" means the feature has no section.
 
@@ -120,7 +120,7 @@ Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests pas
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `page-properties` | Page properties: title, language, direction and page styles | yes | 7 | 5 | [page-properties](../spec/BEHAVIOUR.md#page-properties) | 5 | passes 6/6 |
+| `page-properties` | Page properties: title, language, direction and page styles | yes | 7 | 5 | [page-properties](../spec/BEHAVIOUR.md#page-properties) | 5 | passes 7/7 |
 | `base-style` | The project's base style | yes | 2 | 2 | [base-style](../spec/BEHAVIOUR.md#base-style) | 2 | passes 2/2 |
 | `export-zip` | Export the page as a ZIP with HTML and a separate CSS file | yes | 5 | 2 | [export-zip](../spec/BEHAVIOUR.md#export-zip) | 8 | passes 6/6 |
 | `css-variables-tokens` | Design tokens as CSS variables | yes | 16 | 12 | [css-variables-tokens](../spec/BEHAVIOUR.md#css-variables-tokens) | 8 | passes 17/17 |
@@ -227,7 +227,7 @@ Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests pas
 | `command-bar-set-property` | Set a property or jump to it from the command bar | yes | 10 | 10 | [command-bar-set-property](../spec/BEHAVIOUR.md#command-bar-set-property) | 2 | passes 10/10 |
 | `shortcuts-panel` | Keyboard shortcuts panel generated from the keymap | yes | 2 | 1 | [shortcuts-panel](../spec/BEHAVIOUR.md#shortcuts-panel) | 3 | passes 2/2 |
 | `workbench-panel` | Bottom workbench: tabs, collapse, maximise and developer tools | yes | 10 | 6 | [workbench-panel](../spec/BEHAVIOUR.md#workbench-panel) | 4 | passes 10/10 |
-| `panel-resize` | Resize docks and panels with splitters | yes | 12 | 11 | [panel-resize](../spec/BEHAVIOUR.md#panel-resize) | 7 | passes 7/7 |
+| `panel-resize` | Resize docks and panels with splitters | yes | 12 | 11 | [panel-resize](../spec/BEHAVIOUR.md#panel-resize) | 7 | passes 13/13 |
 | `floating-panels` | Float a panel as a window and dock it again | yes | 5 | 5 | [floating-panels](../spec/BEHAVIOUR.md#floating-panels) | 4 | passes 5/5 |
 | `panel-combine-tabs` | Combine panels as tabs or stack them | yes | 3 | 3 | [panel-combine-tabs](../spec/BEHAVIOUR.md#panel-combine-tabs) | 2 | passes 3/3 |
 | `workspace-persist-reset` | Workspace layout persists and can be reset | yes | 2 | 3 | [workspace-persist-reset](../spec/BEHAVIOUR.md#workspace-persist-reset) | 1 | passes 3/3 |
@@ -259,7 +259,7 @@ Last complete browser run: commit `428231d` (2026-10-03), 2033 of 2033 tests pas
 | `html-import-states` | Import pseudo-class rules as state styles | yes | 2 | 2 | [html-import-states](../spec/BEHAVIOUR.md#html-import-states) | 1 | passes 4/4 |
 | `html-import-roundtrip` | Exported pages import back unchanged | yes | 2 | 2 | [html-import-roundtrip](../spec/BEHAVIOUR.md#html-import-roundtrip) | 1 | passes 4/4 |
 | `clipboard-paste-external` | Paste HTML and text copied from outside the app | yes | 2 | 2 | [clipboard-paste-external](../spec/BEHAVIOUR.md#clipboard-paste-external) | 2 | passes 4/4 |
-| `capture-url` | Open any web address as a page of the project | yes | 7 | 6 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 4 | passes 3/3 |
+| `capture-url` | Open any web address as a page of the project | yes | 7 | 6 | [capture-url](../spec/BEHAVIOUR.md#capture-url) | 4 | passes 7/7 |
 
 ## 17-code-panel
 

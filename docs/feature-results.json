@@ -1,9 +1,9 @@
 {
-  "commit": "428231d",
-  "date": "2026-10-03",
+  "commit": "4e059f3",
+  "date": "2026-10-04",
   "tests": {
-    "passed": 2033,
-    "total": 2033
+    "passed": 2044,
+    "total": 2044
   },
   "features": {
     "editor-shell": {
@@ -327,8 +327,8 @@
       "total": 4
     },
     "page-properties": {
-      "passed": 6,
-      "total": 6
+      "passed": 7,
+      "total": 7
     },
     "base-style": {
       "passed": 2,
@@ -615,8 +615,8 @@
       "total": 10
     },
     "panel-resize": {
-      "passed": 7,
-      "total": 7
+      "passed": 13,
+      "total": 13
     },
     "floating-panels": {
       "passed": 5,
@@ -683,8 +683,8 @@
       "total": 4
     },
     "capture-url": {
-      "passed": 3,
-      "total": 3
+      "passed": 7,
+      "total": 7
     },
     "code-panel-view": {
       "passed": 6,
