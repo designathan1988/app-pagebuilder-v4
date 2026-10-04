@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82449
+    "lines": 82477
   },
   "features": [
     {
@@ -3629,7 +3629,7 @@
     },
     {
       "path": "src/core/elements/address.ts",
-      "lines": 65,
+      "lines": 80,
       "commands": [],
       "features": []
     },
@@ -3890,7 +3890,7 @@
     },
     {
       "path": "src/core/files/values.ts",
-      "lines": 43,
+      "lines": 45,
       "commands": [],
       "features": []
     },
@@ -4040,7 +4040,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1919,
+      "lines": 1930,
       "commands": [
         "project.importHtml"
       ],

@@ -345,7 +345,18 @@ function importedPath(builder: Builder, address: string, from = builder.file): s
   const path = cut < 0 ? address : address.slice(0, cut);
   if (path === '') return null;
   const resolved = resolveHref(from, path);
-  const found = builder.picked.find(file => file.name === resolved) ?? builder.picked.find(file => file.name === path);
+  // a page writes a file's name percent-encoded ("My%20photo.jpg"); the picked file carries its own ("My photo.jpg"):
+  // both are tried, so the element keeps the file it shows (the audit's AD1)
+  const decoded = (text: string | null): string | null => {
+    if (text === null) return null;
+    try {
+      return decodeURI(text);
+    } catch {
+      return text;
+    }
+  };
+  const names = [resolved, path, decoded(resolved), decoded(path)];
+  const found = names.map((name) => builder.picked.find(file => file.name === name)).find((file) => file !== undefined);
   return found ? found.name + (cut < 0 ? '' : address.slice(cut)) : null;
 }
 

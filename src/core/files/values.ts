@@ -31,7 +31,9 @@ export function exportPath(document: DocumentJson, value: string, from = ''): st
   const cut = value.search(/[#?]/);
   const path = cut < 0 ? value : value.slice(0, cut);
   const known = fileAt(document, path) !== null || pageAtPath(document, path) !== null;
-  return known ? relativePath(from, path) + (cut < 0 ? '' : value.slice(cut)) : value;
+  // a file's name is written as a URL holds it: a space or an accented letter percent-encoded, a srcset's candidates
+  // never split by one (the audit's AD1)
+  return known ? encodeURI(relativePath(from, path)) + (cut < 0 ? '' : value.slice(cut)) : value;
 }
 
 // What the canvas writes: the same, except that a source naming a project file draws through the file's object URL.

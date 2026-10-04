@@ -26,6 +26,15 @@ const SCHEME = /^([a-z][a-z0-9+.-]*):/i;
 // a domain typed without a scheme: its first segment looks like one (a dot, no slash before it)
 const BARE_DOMAIN = /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/|$|\?|#)/i;
 
+// A relative address that names a file: a path of folders ("img/a b.png") or a name with the extension of a file a
+// site holds (an image, a medium, a font, a document, code). A top-level domain is no such extension, so "example
+// .com" stays a typo.
+const FILE_EXTENSION = /\.(png|jpe?g|gif|webp|avif|svg|bmp|ico|tiff?|mp4|webm|mov|m4v|ogv|mp3|wav|ogg|oga|m4a|flac|woff2?|ttf|otf|eot|pdf|txt|csv|tsv|json|xml|xlsx?|docx?|pptx?|zip|css|m?js|html?)$/i;
+const filePath = (value: string): boolean => {
+  const path = value.replace(/[?#].*$/, '');
+  return path.includes('/') || FILE_EXTENSION.test(path);
+};
+
 export type Address =
   | { readonly ok: true; readonly value: string }
   | { readonly ok: false; readonly value: string; readonly refusal: Message };
@@ -46,8 +55,14 @@ export function readAddress(typed: string): Address {
     if (value.slice(scheme.length + 1).replace(/^\/+/, '') === '') return refused(value, message('status.url.malformed', { url: value }));
     return { ok: true, value };
   }
-  if (/\s/.test(value)) return refused(value, message('status.url.malformed', { url: value }));
+  // a space names a file of the site when the address is a path of one ("img/My photo.png", "Logo final.svg"): the
+  // URL parser percent-encodes it in a path (WHATWG URL, the path percent-encode set), and a file a person uploads or
+  // renames keeps its own name (the audit's AD1: such a file was refused once placed). Anywhere else a space is a typo
+  // ("example .com"), and a tab or a line break never belongs to an address.
+  if (/\s/.test(value) && (/[^\S ]/.test(value) || !filePath(value))) return refused(value, message('status.url.malformed', { url: value }));
   if (BARE_DOMAIN.test(value)) {
+    // a web address holds no space (its host and its path are typed as one: "example.com/a b" is a typo)
+    if (/\s/.test(value)) return refused(value, message('status.url.malformed', { url: value }));
     const normalized = `https://${value}`;
     return { ok: true, value: normalized };
   }
