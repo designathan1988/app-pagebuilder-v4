@@ -104,6 +104,8 @@ export function PanelField({
           // an empty value is nothing chosen yet: shown empty, never put into words (the placeholder says what it
           // means)
           value={edited ? draft : display === undefined || value === '' ? value : display(value)}
+          // the value whole in the field's tooltip, for a value the field cannot hold (it ends in an ellipsis)
+          title={value === '' ? undefined : display === undefined ? value : display(value)}
           placeholder={placeholder}
           disabled={!ready}
           list={list.length > 0 ? `${id}-list` : undefined}

@@ -331,3 +331,27 @@
 }
 
 /* the Timeline tab holds the motion timeline above the CSS animations of the selected element */
+
+/* a timeline's row: its name, how many play it, and its delete button drawn as its icon (the interaction card's trash,
+   window-overlays.css), the button's words kept as its accessible name and tooltip, so the row stays within its column */
+.motion-timeline__row > .door:last-child .door__label {
+  position: absolute;
+  width: var(--space-1);
+  height: var(--space-1);
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.motion-timeline__row > .motion-timeline__uses {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* the dock's values in the code face of the Timeline's values (window-overlays.css .timeline__side); a value of several
+   parts the field cannot hold ends in an ellipsis, its field's tooltip carrying it whole (panel-field.tsx) */
+.motion-timeline .panel-field__text {
+  font: var(--fw-code) var(--fs-code) / var(--lh-code) var(--font-mono);
+  text-overflow: ellipsis;
+}

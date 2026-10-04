@@ -611,6 +611,16 @@
   grid-template-columns: calc(var(--space-10) * 3 + var(--space-2)) minmax(0, 1fr) auto;
 }
 
+/* a text area holds several lines whatever its class says first: a field's one-line height cut its rows (the Data
+   panel's page names and the assistant's request showed one line and a half); its face stays the field's */
+textarea.input {
+  height: auto;
+  min-height: calc(var(--size-control) * 3);
+  padding: var(--space-2) var(--space-3);
+  line-height: var(--lh-body);
+  resize: vertical;
+}
+
 .input--area {
   height: auto;
   min-height: calc(var(--size-control) * 3);
