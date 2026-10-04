@@ -82,7 +82,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 
 | ID | Request | Status | Proof / problems |
 |---|---|---|---|
-| PLAN-R1 | Fix 100 % of the Journey 03 findings (J1–J28, H1–H17, task gaps, 32 wishes, bets A–F, backlog) | partial | sections 2.4–2.8; QA 249 closes J28 copy, but AUD-36's Undo timing remains intermittent against the performance reference (H16) |
+| PLAN-R1 | Fix 100 % of the Journey 03 findings (J1–J28, H1–H17, task gaps, 32 wishes, bets A–F, backlog) | done | sections 2.4–2.8; QA 249 closes J28 copy and QA 257 closes AUD-36/H16 with five consecutive enforced performance runs |
 | PLAN-R2 | Complete interactions (every trigger and action) and working behaviours | done | stage 10 rows; features `motion-*` |
 | PLAN-R3 | Forms with masks and validation, complete catalogue | done | stage 9; feature `forms-masks-validation` |
 | PLAN-R4 | Animation working and a real timeline | done | stage 10; `motion-timeline` 58/58 |
@@ -405,7 +405,7 @@ commit closes it with its proof; the Status column then names the commit's QA-LO
 | AUD-33 | 1 | 11 controls outside the manifest (`data-local`) | audit | done (QA 187) |
 | AUD-34 | 1 | A test edited per new feature; misfiled manifest group | audit | done (QA 188) |
 | AUD-35 | 1 | Weak tests and thinly covered features | audit | done (QA 191, 193, 195–199: triggers proven, presence proxies read their artifacts, 27 of 29 thin features with scenarios for their doors and showable refusals, drag-autoscroll's Layers rule a browser test; found AN1, RF1, LC1, LP1, PS1, LA1) |
-| AUD-36 | 1 | Undo by keys over its 35 ms per-group reference | audit; QA 44, 80 | partial (QA 190: undo 41.8 → 34.7–36.8 ms; QA 240: undo by keys 31.9 and 29.8 ms p50, within; undo by the button 36.3 then 31.4 ms, --enforce passed on the second run) |
+| AUD-36 | 1 | Undo by keys over its 35 ms per-group reference | audit; QA 44, 80 | done (QA 190: undo 41.8 → 34.7–36.8 ms; QA 240: keys within, button intermittent; QA 257: five consecutive `npm run perf -- --enforce` runs pass on the final code, Undo button p50 33.7 / 33.0 / 33.0 / 33.1 / 32.8 ms) |
 | AUD-38 | 1 | Crash journal silently off for projects over the storage quota (probable) | audit | done (QA 189) |
 | R4 | — | `e2e:affected` selects the whole suite for 80 % of source changes | review R4; QA 221: with the coverage of `npm run e2e:coverage`, the tests that ran a changed line or used a changed rule's selector (`tools/runner/affected-coverage.ts`) | done (QA 221; the coverage is recorded by the complete run of phase Z) |
 | T7 | — | The pointer's module-level singletons matter only with two editors on a page | deferred (DEC-26); QA 231: the pointer's state is each editor's own (`pointerViews(store)`, the pan, open gesture and picker session by store; one pointer owner per window), proven by two editors in two windows that never share a hover or Alt | done (QA 231) |

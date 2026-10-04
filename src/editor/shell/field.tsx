@@ -46,7 +46,7 @@ import { unitMenu } from '../../core/style/units.ts';
 import { cssFamily, familyOf, isFontFile } from '../../core/files/fonts.ts';
 import { afterGesture, registerRepeat, registerSlider } from '../input/pointer.ts';
 import { pointerViews } from '../input/pointer/views.ts';
-import { MODEL_RULES, useEditorState, useStore, type EditorStore, layeredRules } from '../store.ts';
+import { MODEL_RULES, useEditorState, useStore, type EditorState, type EditorStore, layeredRules } from '../store.ts';
 import { styleClassOf, styleSource } from '../inspector/style-target.ts';
 import { useMenuLayer } from '../doors/menu.tsx';
 import { useT, useValueLabel } from '../text.ts';
@@ -55,6 +55,8 @@ import { compactFieldValue, FieldOriginBadge, FieldValueSlot, useFieldAppearance
 import { usePrimarySize } from '../view/selection-size.ts';
 import { restoreFieldDraft } from '../persistence/drafts.ts';
 import { DRAFT_KEPT, markFieldKept, recordFieldInput } from '../input/drafts.ts';
+// A cleared status is still a change for a field with typing pending; one stable value keeps the store snapshot pure.
+const CLEARED_MESSAGE = Symbol('cleared field message');
 import { wordOfKeyword } from '../../core/style/keyword-words.ts';
 import { floatBelow, type Placed } from './float.ts';
 import { onPageChange } from '../canvas/page-clock.ts';
@@ -550,6 +552,7 @@ export interface NumberFieldProps {
 
 export function NumberField({ entry, door, property, label, bare = false, labelled = false, prefix = null, measurement }: NumberFieldProps) {
   const store = useStore();
+  const draft = useRef<{ typed: boolean; message: EditorState['message'] }>({ typed: false, message: store.getState().message });
   const primary = useEditorState((s) => s.selection[0] ?? null);
   const measured = usePrimarySize(measurement === undefined ? null : primary);
   const stored = useEditorState((s) => {
@@ -572,12 +575,11 @@ export function NumberField({ entry, door, property, label, bare = false, labell
   const valueLabel = useValueLabel();
   const variables = useTokenSuggestions(property);
   const tokens = [...variables, ...presetsOf(entry)];
-  const said = useEditorState((s) => s.message);
+  const said = useEditorState((s) => (draft.current.typed && s.message !== draft.current.message ? s.message ?? CLEARED_MESSAGE : null));
   const available = door.available && primary !== null;
   const input = useRef<HTMLInputElement>(null);
   // whether the person typed since the field last showed the document's value: the field's own draft, never document
   // state
-  const draft = useRef({ typed: false });
   const command = entry.command.id;
   useEffect(() => {
     const element = input.current;
@@ -588,9 +590,10 @@ export function NumberField({ entry, door, property, label, bare = false, labell
     draft.current.typed = false;
     markFieldKept(element, face);
     return restoreFieldDraft(element, () => {
+      draft.current.message = store.getState().message;
       draft.current.typed = recordFieldInput(element, new Event('input'));
     });
-  }, [shown, said, t]);
+  }, [shown, said, t, store]);
   useEffect(() => {
     const element = input.current;
     const typing = draft.current;
@@ -607,6 +610,7 @@ export function NumberField({ entry, door, property, label, bare = false, labell
       window.setTimeout(() => keepValue(store, command, property, text, targets), 0);
     };
     const onInput = (event: Event) => {
+      typing.message = store.getState().message;
       typing.typed = recordFieldInput(element, event);
     };
     element.addEventListener('input', onInput);
@@ -906,11 +910,12 @@ export function TextStyleField({
   readonly prefix?: string | null;
 }) {
   const store = useStore();
+  const draft = useRef<{ typed: boolean; message: EditorState['message'] }>({ typed: false, message: store.getState().message });
   const primary = useEditorState((s) => s.selection[0] ?? null);
   const parts = useMemo(() => longhands ?? [property], [longhands, property]);
   const t = useT();
   const { effective, held, mixed, appearance, shown, placeholder, set, anyStored } = useStyleFieldValue(property, parts, part);
-  const said = useEditorState((s) => s.message);
+  const said = useEditorState((s) => (draft.current.typed && s.message !== draft.current.message ? s.message ?? CLEARED_MESSAGE : null));
   // Enter in a field of its own form (a command of its own, or a part) and leaving any field keep the text the same way
   const own = ownCommand || part !== null;
   const keepText = useRef<(text: string, targets: readonly string[]) => void>(() => undefined);
@@ -934,7 +939,6 @@ export function TextStyleField({
   useRevealed(property, input);
   // the slider the door declares beside the field (A3.30; FieldSlider)
   const sliderRange = entry.door.kind === 'inspector-field' ? entry.door.slider : undefined;
-  const draft = useRef({ typed: false });
   // the list of every value the field offers, opened by its own button (A3.33): all of them, whatever the field holds
   // the layer contract of the field values menu: the same owner the menu buttons stand on (doors/menu.tsx)
   const valueScope = useRef<HTMLSpanElement>(null);
@@ -973,9 +977,10 @@ export function TextStyleField({
     draft.current.typed = false;
     markFieldKept(element, face);
     return restoreFieldDraft(element, () => {
+      draft.current.message = store.getState().message;
       draft.current.typed = recordFieldInput(element, new Event('input'));
     });
-  }, [shown, said, t]);
+  }, [shown, said, t, store]);
   useEffect(() => {
     const element = input.current;
     const typing = draft.current;
@@ -993,6 +998,7 @@ export function TextStyleField({
       window.setTimeout(() => keepText.current(text, targets), 0);
     };
     const onInput = (event: Event) => {
+      typing.message = store.getState().message;
       typing.typed = recordFieldInput(element, event);
     };
     keepPending.current = keep;
@@ -1443,12 +1449,12 @@ const TEXT_FIELD_CONTEXT: KeyContextId = 'element-text-field';
 // tab) keeps it, one undo step. The field is drawn once per node (its key), so a node's typing is kept for that node.
 export function TextField({ entry, node, label, keepOnLeave = true }: { readonly entry: DoorEntry; readonly node: DocNode; readonly label: string; readonly keepOnLeave?: boolean }) {
   const store = useStore();
+  const draft = useRef<{ typed: boolean; message: EditorState['message'] }>({ typed: false, message: store.getState().message });
   const door = useDoor(entry, { target: node.id }, label);
   const field = useRef<HTMLTextAreaElement>(null);
   // whether the person typed since the field last showed the document's text: the field's own draft, never document
   // state
-  const draft = useRef({ typed: false });
-  const said = useEditorState((s) => s.message);
+  const said = useEditorState((s) => (draft.current.typed && s.message !== draft.current.message ? s.message ?? CLEARED_MESSAGE : null));
   const stored = node.text ?? '';
   const target = node.id;
   const command = entry.command.id;
@@ -1459,9 +1465,10 @@ export function TextField({ entry, node, label, keepOnLeave = true }: { readonly
     draft.current.typed = false;
     markFieldKept(element, stored);
     return restoreFieldDraft(element, () => {
+      draft.current.message = store.getState().message;
       draft.current.typed = recordFieldInput(element, new Event('input'));
     });
-  }, [stored, said]);
+  }, [stored, said, store]);
   useEffect(() => {
     const element = field.current;
     const typing = draft.current;
@@ -1475,6 +1482,7 @@ export function TextField({ entry, node, label, keepOnLeave = true }: { readonly
       keepTextWith(store, command, target, element.value);
     };
     const onInput = (event: Event) => {
+      typing.message = store.getState().message;
       typing.typed = recordFieldInput(element, event);
     };
     element.addEventListener('input', onInput);

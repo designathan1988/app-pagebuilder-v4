@@ -1,7 +1,7 @@
 // The Layers section (spec layers-tree): the shown page's tree, one row per node, drawn as a window of the rows in
 // view, with its search, the row's name field, colour, details, empty mark and the pick targets of the interactions
 // and the motion panel.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent } from 'react';
 import { walk, type DocNode } from '../../../core/document/model.ts';
 import { layerColourCss } from '../../../core/nodes/flags.ts';
 import { pageShown, openedPage } from '../../../core/project/pages.ts';
@@ -221,7 +221,7 @@ interface InsertAt {
 // the icon an instance of a component wears in its Layers row (the Insert view's components wear it too)
 const COMPONENT_ICON = 'component';
 
-function LayersRow({ node, depth, view }: { readonly node: DocNode; readonly depth: number; readonly view: SearchView | null }) {
+const LayersRow = memo(function LayersRow({ node, depth, view }: { readonly node: DocNode; readonly depth: number; readonly view: SearchView | null }) {
   const t = useT();
   const door = useDoor(LAYERS_SELECT, { target: node.id });
   const rename = useDoor(LAYERS_NAME);
@@ -336,7 +336,7 @@ function LayersRow({ node, depth, view }: { readonly node: DocNode; readonly dep
       </div>
     </>
   );
-}
+});
 
 // The row's pick control (spec events-actions: "the target is picked on the canvas or on a Layers row"): drawn on
 // every row while an interaction's target is being picked, a press gives the row's node through
@@ -399,6 +399,15 @@ function InsertMark({ at, node, depth }: { readonly at: InsertAt | null; readonl
   return under === null ? null : <div className="row__insert" data-insert-line style={{ '--depth': under } as CSSProperties} />;
 }
 
+const LayerSlot = memo(function LayerSlot({ node, depth, index, view, insertAt }: { readonly node: DocNode; readonly depth: number; readonly index: number; readonly view: SearchView | null; readonly insertAt: InsertAt | null }) {
+  return (
+    <div className="layers-tree__slot" style={{ top: index * ROW }}>
+      <LayersRow node={node} depth={depth} view={view} />
+      <InsertMark at={insertAt} node={node} depth={depth} />
+    </div>
+  );
+});
+
 // The Layers search field (spec layers-search): each change runs layers.search with what it holds; Enter keeps it
 function LayersSearch() {
   const field = useDoor(LAYERS_SEARCH);
@@ -447,7 +456,7 @@ export function LayersSection() {
     const at = insertDestination(s);
     return at === null ? null : JSON.stringify({ parent: at.parent.node.id, previous: at.previous?.id ?? null });
   });
-  const insertAt = said === null ? null : (JSON.parse(said) as InsertAt);
+  const insertAt = useMemo(() => (said === null ? null : (JSON.parse(said) as InsertAt)), [said]);
   // every row the panel shows, in draw order
   const rows = useMemo(() => (tree === undefined ? [] : shownRows(tree, (id) => !collapsed.includes(id), view)), [tree, collapsed, view]);
   // the scroll window: which rows are drawn (the window plus an overscan, measured from the scroller)
@@ -547,10 +556,7 @@ export function LayersSection() {
                 board is as tall as every row, so the scrollbar tells the truth */}
             <div className="layers-tree__board" style={{ height: rows.length * ROW }}>
               {drawn.map(({ node, depth, index }) => (
-                <div key={node.id} className="layers-tree__slot" style={{ top: index * ROW }}>
-                  <LayersRow node={node} depth={depth} view={view} />
-                  <InsertMark at={insertAt} node={node} depth={depth} />
-                </div>
+                <LayerSlot key={node.id} node={node} depth={depth} index={index} view={view} insertAt={insertAt} />
               ))}
             </div>
           </div>
