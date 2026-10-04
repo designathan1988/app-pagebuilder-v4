@@ -2,16 +2,59 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "builder-user",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--outDir",
+        ".cache/user-build",
+        "--port",
+        "5400",
+        "--strictPort"
+      ],
+      "port": 5400
+    },
+    {
       "name": "builder-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5320,
       "autoPort": true
     },
     {
+      "name": "builder-audit",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "env": {
+        "PORT": "5393"
+      },
+      "port": 5393
+    },
+    {
+      "name": "design-static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".cache/scratch/j2-serve.mjs"
+      ],
+      "port": 5394
+    },
+    {
       "name": "pager-run",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["vite", ".cache/pager-run", "--port", "5330", "--strictPort"],
+      "runtimeArgs": [
+        "vite",
+        ".cache/pager-run",
+        "--port",
+        "5330",
+        "--strictPort"
+      ],
       "port": 5330
     }
   ]
