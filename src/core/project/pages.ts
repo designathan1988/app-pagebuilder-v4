@@ -22,7 +22,7 @@ import type { Patch } from '../history/transaction.ts';
 import { walk, type NodeId } from '../document/model.ts';
 import { releaseReferencesPatch } from '../document/tree.ts';
 import { addressAttributes } from '../files/references.ts';
-import { pathMovePatches, pathTaken } from '../files/files.ts';
+import { copiedCaptureSheet, pathMovePatches, pathTaken } from '../files/files.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { slug } from '../text/fold.ts';
 import { registerReferenceKind } from '../store/references.ts';
@@ -138,7 +138,9 @@ export function copyPage(document: DocumentJson, source: Page, base: string, nex
   if (tree === undefined) throw new Error('pages: the copied tree is missing');
   const { dataItem: _item, ...root } = tree;
   void _item;
-  return { id: next(), name, file, tree: { ...root, name: rootName(document.pages, name) } };
+  // a captured page's content is its snapshots: the copy holds them too (the audit's CP1: a duplicated capture was an
+  // empty page); its residual stylesheet is copied beside it by the caller (files.ts copiedCaptureSheet)
+  return { id: next(), name, file, tree: { ...root, name: rootName(document.pages, name) }, ...(source.capture === undefined ? {} : { capture: structuredClone(source.capture) }) };
 }
 
 export function duplicatePageCommandFor<Ui extends WithPage>() {
@@ -157,7 +159,9 @@ export function duplicatePageCommandFor<Ui extends WithPage>() {
     while (place < document.pages.length && copyOfBase(document.pages[place]?.name ?? '')) place += 1;
     // the copy opens (the selection goes with the page left), and its name field takes the focus
     // (shell/sidebar/explorer.tsx)
-    return { kind: 'change' as const, patches: [{ op: 'add', path: ['pages', place], value: made }], ui: { ...state.ui, page: made.id }, selection: [], message: message('status.pages.duplicated', { name: source.name, copy: made.name, file: made.file }) };
+    const sheet = copiedCaptureSheet(document, source, made);
+    const sheetPatches: Patch[] = sheet === null ? [] : [document.files === undefined ? { op: 'add', path: ['files'], value: [sheet] } : { op: 'add', path: ['files', document.files.length], value: sheet }];
+    return { kind: 'change' as const, patches: [{ op: 'add', path: ['pages', place], value: made }, ...sheetPatches], ui: { ...state.ui, page: made.id }, selection: [], message: message('status.pages.duplicated', { name: source.name, copy: made.name, file: made.file }) };
   });
 }
 

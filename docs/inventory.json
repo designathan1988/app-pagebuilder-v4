@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82517
+    "lines": 82533
   },
   "features": [
     {
@@ -3400,7 +3400,7 @@
     },
     {
       "path": "src/core/data/commands.ts",
-      "lines": 485,
+      "lines": 489,
       "commands": [
         "data.createCollection",
         "data.renameCollection",
@@ -3850,7 +3850,7 @@
     },
     {
       "path": "src/core/files/files.ts",
-      "lines": 565,
+      "lines": 573,
       "commands": [
         "files.upload",
         "files.createFolder",
@@ -4334,7 +4334,7 @@
     },
     {
       "path": "src/core/project/pages.ts",
-      "lines": 237,
+      "lines": 241,
       "commands": [
         "pages.add",
         "pages.rename",

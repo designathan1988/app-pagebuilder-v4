@@ -348,7 +348,7 @@ function movedPaths(document: DocumentJson, from: string, to: string): { readonl
 
 // A captured page's residual stylesheet at its new place: every relative url() of it resolved from where it stood, that
 // path moved as the tree's paths move, and written again relative to where it stands now.
-function capturedSheetMoved(file: ProjectFile, to: string, rewritten: (path: string) => string): ProjectFile {
+export function capturedSheetMoved(file: ProjectFile, to: string, rewritten: (path: string) => string): ProjectFile {
   const text = new TextDecoder().decode(fileBytes(file));
   const moved = followCssUrls(text, (address) => {
     // an address from the site's root ("/img/a.png") names the same place wherever the sheet stands
@@ -356,6 +356,14 @@ function capturedSheetMoved(file: ProjectFile, to: string, rewritten: (path: str
     return path === null ? address : relativePath(to, rewritten(path));
   });
   return { ...file, path: to, bytes: base64Of(moved) };
+}
+
+// The residual stylesheet a copy of a captured page takes (pages.duplicate, pages made from a page): the source's,
+// at the copy's own path beside its file, its addresses written from there; none for a page that is no capture.
+export function copiedCaptureSheet(document: DocumentJson, source: Page, copy: Page): ProjectFile | null {
+  if (source.capture === undefined) return null;
+  const sheet = fileAt(document, capturedPageStylePath(source));
+  return sheet === null ? null : capturedSheetMoved(sheet, capturedPageStylePath(copy), (path) => path);
 }
 
 // whether moving or renaming `from` to `to` is allowed: every path it gives must be free, nothing generated may be

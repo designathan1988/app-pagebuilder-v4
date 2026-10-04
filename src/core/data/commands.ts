@@ -13,6 +13,7 @@ import { componentName, copied, createRefusal, marked } from '../design/componen
 import { componentHolders } from '../design/instances.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { copyPage, openedPage, type WithPage } from '../project/pages.ts';
+import { copiedCaptureSheet } from '../files/files.ts';
 import type { Patch } from '../history/transaction.ts';
 import { boundIn, targetsOf, type DataContext } from './bindings.ts';
 import {
@@ -415,8 +416,11 @@ export function pagesFromNamesCommand<Ui extends WithPage>() {
       const made: Page[] = [];
       for (const name of wanted) made.push(copyPage(withPageAfter(document, at, made), source, name, () => data.ids.next() as NodeId));
       const first = made[0] as Page;
+      // a captured page's copies take its residual stylesheet too (files.ts copiedCaptureSheet, the audit's CP1)
+      const sheets = made.flatMap((page) => copiedCaptureSheet(document, source, page) ?? []);
+      const withPages = withPageAfter(document, at, made);
       return {
-        document: withPageAfter(document, at, made),
+        document: sheets.length === 0 ? withPages : { ...withPages, files: [...(withPages.files ?? []), ...sheets] },
         message: message('status.pages.madeFromNames', { name: source.name, count: { plural: 'data.pages', count: made.length } }),
         ui: { ...context.state.ui, page: first.id },
         selection: [],
