@@ -53,6 +53,22 @@ test('the Export ZIP label fits the top bar in both languages at 1280 pixels', r
   await page.screenshot({ path: '.cache/logs/j28-copy/export-en.png' });
 });
 
+test('one matching layer is reported in the singular in both languages', runs('layers.search#layers-search-field', 'preferences.setLanguage#menu-language-en'), async ({ page }) => {
+  fs.mkdirSync('.cache/logs/j28-plural', { recursive: true });
+  await openEditor(page);
+  await page.locator('.layers__search input').fill('Pá');
+  await expect(page.getByRole('status')).toHaveText('1 camada corresponde a "Pá".');
+  await page.screenshot({ path: '.cache/logs/j28-plural/one-layer-pt-BR.png' });
+  await openMenu(page, 'view');
+  await page.getByRole('menuitem', { name: 'Idioma', exact: true }).hover();
+  await page.locator('[data-door="preferences.setLanguage#menu-language-en"]').click();
+  await page.locator('.layers__search input').fill('');
+  await page.locator('.layers__search input').fill('Pá');
+  await expect(page.getByRole('status')).toHaveText('1 layer matches "Pá".');
+  await expect(page.locator('[data-door="project.export#toolbar-top-bar-export"]')).toContainText('Export ZIP');
+  await page.screenshot({ path: '.cache/logs/j28-plural/one-layer-en.png' });
+});
+
 // The audit's AUD-24: a write IndexedDB cannot take said "Não salvo: IndexedDB is not available", the editor's own
 // reason in English inside the translated sentence. Without IndexedDB, the reason is the editor's, in Portuguese.
 test('without the browser storage, the save state says why in the editor language', async ({ page }) => {

@@ -82,7 +82,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 
 | ID | Request | Status | Proof / problems |
 |---|---|---|---|
-| PLAN-R1 | Fix 100 % of the Journey 03 findings (J1–J28, H1–H17, task gaps, 32 wishes, bets A–F, backlog) | partial | sections 2.4–2.8; QA 240: J25 and H17 met, H1–H17 hold; J28 (copy) partial |
+| PLAN-R1 | Fix 100 % of the Journey 03 findings (J1–J28, H1–H17, task gaps, 32 wishes, bets A–F, backlog) | partial | sections 2.4–2.8; QA 249 closes J28 copy, but AUD-36's Undo timing remains intermittent against the performance reference (H16) |
 | PLAN-R2 | Complete interactions (every trigger and action) and working behaviours | done | stage 10 rows; features `motion-*` |
 | PLAN-R3 | Forms with masks and validation, complete catalogue | done | stage 9; feature `forms-masks-validation` |
 | PLAN-R4 | Animation working and a real timeline | done | stage 10; `motion-timeline` 58/58 |
@@ -151,7 +151,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | STG-5.14 | Bottom dock with the canonical strip | done | QA 96 (DEC-02) |
 | STG-5.15 | Keyboard: F6 includes canvas and Layers, arrows start at the root, roving focus (J12) | done | QA 95, 103, 105, 162 |
 | STG-5.16 | 1280 × 720: canvas ≥ 55 % (J25) | done | QA 155: the stage 932 × 537 px, 54.3 % of the window as an area, 72.8 % of its width; the width splitters QA 156 |
-| STG-5.17 | Language and texts: browser language, gender-neutral Portuguese, singular forms (J26, J28) | partial | QA 87, 93, 171; AUD-23; QA 248: plain wrap confirmation, neutral property/reset wording, count labels and fitting Export ZIP in both languages; remaining count-dependent messages need a full singular/plural pass |
+| STG-5.17 | Language and texts: browser language, gender-neutral Portuguese, singular forms (J26, J28) | done | QA 87, 93, 171; AUD-23; QA 248: plain wrap confirmation, neutral property/reset wording and fitting Export ZIP in both languages; QA 249: 31 singular forms, nested localized counts and 0/1/2 proofs; the browser language, inspector text-fit and J28 Chrome checks pass |
 | STG-5.18 | Image picker with thumbnails and search (M4) | done | QA 94 |
 | STG-5.19 | Status bar parity, never an incident without a message (J1) | done | QA 149, 151 (`refusal-never-blanks.spec.ts`) |
 | STG-5.20 | Stage closure: `PAIRING-2.md` with zero open divergence | done | QA 220: `docs/PAIRING.md` generated with zero open divergence (kept: DEC-03, DEC-21, DEC-41-44) |
@@ -258,7 +258,7 @@ The problems of the usability study (`jornada03/REPORT.md` section 3), re-checke
 | J25 | 45 % canvas at 1280 × 720 | done | 54.3 % (QA 155; `narrow-window.spec.ts`) |
 | J26 | First contact (language, labels, Explorer first, naming) | done | QA 87, 171 |
 | J27 | Padding link global; longhand only | done | QA 54, 71 |
-| J28 | Copy glitches | partial | QA 76, 93; AUD-23, AUD-28; QA 248: wrap copy, reset agreement, count labels and top-bar export label fixed; the other count-dependent messages and imported-page naming still to audit |
+| J28 | Copy glitches | done | QA 43 preserves existing pages and imported file names; QA 76 fixes multi-selection messages and duplicate arrows; QA 77 fixes the shadow summary; QA 93 removes gender agreement with arbitrary element names; QA 94 fixes picker path overlap; QA 108 fixes overlapping page names; QA 248 fixes wrap copy and a clipped export label; QA 249 gives 31 count messages singular forms and verifies en/pt-BR rendering and text fit |
 
 ### 2.5 Journey 03 hypotheses (H1–H17)
 

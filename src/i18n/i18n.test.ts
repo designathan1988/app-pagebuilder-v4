@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_LOCALE, LOCALES, MESSAGE_IDS, type MessageId } from '../generated/ids.ts';
-import { describeText, formatMessage, isLocale, pluralForm, translate, translator, type Locale, type MessageParams } from './index.ts';
+import { describeText, formatMessage, hasText, isLocale, pluralForm, translate, translator, type Locale, type MessageParams } from './index.ts';
 import en from './locales/en.json';
 import ptBR from './locales/pt-BR.json';
 
@@ -77,6 +77,36 @@ describe('the i18n runtime', () => {
     expect(translate('pt-BR', 'dialog.deleteCollection.message', { name: 'Menu', count: 1 })).toBe('Excluir a coleção Menu? Páginas e listas ligadas a ela: 1. O conteúdo delas fica como está.');
     expect(translate('en', 'command.exportPage')).toBe('Export ZIP');
     expect(translate('pt-BR', 'command.exportPage')).toBe('Exportar ZIP');
+    expect(translate('en', 'status.selection.skipped', { count: 1, skipped: 1 })).toBe('Selected: 1. Excluded because locked or hidden: 1.');
+    expect(translate('pt-BR', 'status.selection.skipped', { count: 1, skipped: 1 })).toBe('Selecionados: 1. Fora da seleção por bloqueio ou ocultação: 1.');
+    expect(translate('en', 'status.interactions.added', { element: 'Card', count: 1 })).toBe('Interaction added to Card. Total: 1.');
+    expect(translate('pt-BR', 'status.interactions.added', { element: 'Card', count: 1 })).toBe('Interação adicionada em Card. Total: 1.');
+    expect(translate('en', 'inspector.valuesSet', { count: 1 })).toBe('Values set: 1');
+    expect(translate('pt-BR', 'inspector.valuesSet', { count: 1 })).toBe('Valores definidos: 1');
+  });
+
+  it('chooses complete singular messages for one in both languages, with zero and two plural', () => {
+    expect(translate('en', 'status.classes.deleted', { name: 'accent', count: 1 })).toBe('Deleted .accent from 1 element.');
+    expect(translate('pt-BR', 'status.classes.deleted', { name: 'accent', count: 1 })).toBe('Classe .accent apagada de 1 elemento.');
+    expect(translate('en', 'status.classes.deleted', { name: 'accent', count: 0 })).toBe('Deleted .accent from 0 elements.');
+    expect(translate('pt-BR', 'status.classes.deleted', { name: 'accent', count: 2 })).toBe('Classe .accent apagada de 2 elementos.');
+    expect(translate('pt-BR', 'status.layers.searchMatches', { count: 1, query: 'Hero' })).toBe('1 camada corresponde a "Hero".');
+    expect(translate('pt-BR', 'status.style.declarationsSet', { count: 1, name: 'Card' })).toBe('Card tem 1 declaração.');
+    expect(translate('pt-BR', 'layout.predict.columns', { count: 1, gap: 12 })).toBe('1 coluna');
+    expect(translate('pt-BR', 'status.motion.timelineInUse', { name: 'Entrada', count: 1 })).toBe('Entrada é reproduzida ou controlada 1 vez: remova esse uso primeiro.');
+    expect(translate('en', 'styles.deleteClassUsedBy', { count: 1 })).toBe('Delete class used by 1 element');
+    expect(translate('pt-BR', 'styles.deleteClassUsedBy', { count: 1 })).toBe('Apagar classe usada por 1 elemento');
+    const keys = [
+      'status.classes.deleted', 'status.layers.searchMatches', 'status.style.declarationsSet', 'status.tokens.inUse',
+      'status.selection.count', 'status.pasted.html', 'status.table.columnCreated', 'status.table.columnRemoved',
+      'layout.predict.columns', 'layout.predict.rows', 'layout.predict.regions', 'layout.status.traced',
+      'status.data.previewed', 'status.data.imported', 'status.data.importedInto', 'status.data.filled',
+      'status.data.itemsDeleted', 'status.data.fieldInUse', 'status.data.fileWide', 'data.itemPagesCount',
+      'status.pages.madeFromNames', 'status.pages.madeFromCollection', 'status.classes.appliedToSimilar',
+      'status.suggest.applied', 'status.components.updated', 'status.import.released', 'status.motion.timelineInUse',
+      'status.motion.copied', 'status.siteColours.replaced', 'status.siteColours.madeVariable', 'styles.deleteClassUsedBy',
+    ];
+    for (const locale of LOCALES) for (const key of keys) expect(hasText(locale, `${key}.one`), `${locale}: ${key}.one`).toBe(true);
   });
 
   it('has the same keys in both catalogues, and for every key the same placeholders (spec ui-language, Problem 3)', () => {

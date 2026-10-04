@@ -18,7 +18,10 @@ function resolve(locale: Locale, params: Readonly<Record<string, MessageParam>>)
 }
 
 export function textOf(locale: Locale, key: MessageId, params: Readonly<Record<string, MessageParam>> = {}): string {
-  return translate(locale, key, resolve(locale, params));
+  const held = params.count;
+  const count = typeof held === 'number' ? held : typeof held === 'object' && held !== null && 'plural' in held ? held.count : null;
+  const form = count === null ? null : `${key}.${pluralForm(locale, count)}`;
+  return translate(locale, form !== null && hasText(locale, form) ? form as MessageId : key, resolve(locale, params));
 }
 
 export function messageText(locale: Locale, message: Message): string {

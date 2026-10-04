@@ -7034,7 +7034,7 @@
                   "key": "status.components.updated",
                   "params": {
                     "name": "Plan",
-                    "count": "1"
+                    "count": 1
                   }
                 }
               ]
@@ -7286,7 +7286,7 @@
                   "key": "status.components.updated",
                   "params": {
                     "name": "Plan",
-                    "count": "1"
+                    "count": 1
                   }
                 }
               ]

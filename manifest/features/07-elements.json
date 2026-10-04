@@ -32456,7 +32456,7 @@
                   "key": "status.classes.appliedToSimilar",
                   "params": {
                     "name": "card",
-                    "count": "1"
+                    "count": 1
                   }
                 }
               ]

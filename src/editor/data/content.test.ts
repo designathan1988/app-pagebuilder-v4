@@ -199,7 +199,7 @@ describe('a bound list follows its collection', () => {
   it('refuses removing a field a binding uses, and releases the lists of a deleted collection', () => {
     const store = storeOf('content-menu-list');
     expect(run(store, 'data.removeField', { collection: 'Cardapio', field: 'nome' }).status).toBe('refused');
-    expect(said(store)).toBe('nome of Cardapio is used in 1 place (bindings, filters or sorts). Remove those first.');
+    expect(said(store)).toBe('nome of Cardapio has 1 use (binding, filter or sort). Remove it first.');
     expect(run(store, 'data.deleteCollection', { collection: 'Cardapio' }).status).toBe('confirm');
     store.answer(true);
     expect(store.getState().document.collections).toBeUndefined();

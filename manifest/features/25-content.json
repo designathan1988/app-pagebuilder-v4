@@ -1546,7 +1546,7 @@
                   "params": {
                     "collection": "Cardapio",
                     "label": "nome",
-                    "count": "1 place"
+                    "count": 1
                   }
                 }
               ]

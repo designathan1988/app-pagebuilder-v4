@@ -44,7 +44,8 @@ export function hasText(locale: Locale, key: string): boolean {
 
 // The text of a key in a locale, with its placeholders filled.
 export function translate(locale: Locale, key: MessageId, params: MessageParams = {}): string {
-  const text = CATALOGUES[locale][key] as string | undefined;
+  const form = typeof params.count === 'number' ? (`${key}.${pluralForm(locale, params.count)}` as MessageId) : null;
+  const text = (form === null ? undefined : CATALOGUES[locale][form]) ?? CATALOGUES[locale][key] as string | undefined;
   if (text === undefined) {
     throw new Error(`The ${locale} catalogue has no text for "${key}".`);
   }

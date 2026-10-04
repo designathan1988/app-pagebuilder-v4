@@ -6,7 +6,7 @@
     "doors": 1356,
     "scenarios": 1826,
     "modules": 466,
-    "lines": 81188
+    "lines": 81223
   },
   "features": [
     {
@@ -6425,7 +6425,7 @@
     },
     {
       "path": "src/editor/text.ts",
-      "lines": 52,
+      "lines": 55,
       "commands": [],
       "features": []
     },
@@ -6723,7 +6723,7 @@
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6537,
+      "lines": 6568,
       "commands": [],
       "features": []
     },
@@ -6735,7 +6735,7 @@
     },
     {
       "path": "src/i18n/index.ts",
-      "lines": 72,
+      "lines": 73,
       "commands": [],
       "features": []
     },
