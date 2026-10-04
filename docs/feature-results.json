@@ -1,0 +1,866 @@
+{
+  "commit": "428231d",
+  "date": "2026-10-03",
+  "tests": {
+    "passed": 2033,
+    "total": 2033
+  },
+  "features": {
+    "editor-shell": {
+      "passed": 3,
+      "total": 3
+    },
+    "canvas-page-iframe": {
+      "passed": 3,
+      "total": 3
+    },
+    "palette-click-insert": {
+      "passed": 19,
+      "total": 19
+    },
+    "select-click": {
+      "passed": 10,
+      "total": 10
+    },
+    "layers-tree": {
+      "passed": 5,
+      "total": 5
+    },
+    "undo-redo": {
+      "passed": 9,
+      "total": 9
+    },
+    "delete-element": {
+      "passed": 11,
+      "total": 11
+    },
+    "drag-reorder-canvas": {
+      "passed": 4,
+      "total": 4
+    },
+    "drag-drop-inside": {
+      "passed": 3,
+      "total": 3
+    },
+    "drag-level-keys-escape": {
+      "passed": 4,
+      "total": 4
+    },
+    "palette-drag-insert": {
+      "passed": 10,
+      "total": 10
+    },
+    "layers-drag": {
+      "passed": 3,
+      "total": 3
+    },
+    "move-up-down": {
+      "passed": 4,
+      "total": 4
+    },
+    "wrap-row-column": {
+      "passed": 8,
+      "total": 8
+    },
+    "drag-side-wrap": {
+      "passed": 3,
+      "total": 3
+    },
+    "context-menu": {
+      "passed": 8,
+      "total": 8
+    },
+    "nest-into-previous": {
+      "passed": 8,
+      "total": 8
+    },
+    "promote-out": {
+      "passed": 7,
+      "total": 7
+    },
+    "duplicate": {
+      "passed": 4,
+      "total": 4
+    },
+    "drag-duplicate": {
+      "passed": 2,
+      "total": 2
+    },
+    "clipboard-copy-paste": {
+      "passed": 6,
+      "total": 6
+    },
+    "keyboard-tree-walk": {
+      "passed": 10,
+      "total": 10
+    },
+    "hand-keyboard-move": {
+      "passed": 12,
+      "total": 12
+    },
+    "text-edit-inline": {
+      "passed": 7,
+      "total": 7
+    },
+    "text-inline-formatting": {
+      "passed": 9,
+      "total": 9
+    },
+    "rename-element": {
+      "passed": 5,
+      "total": 5
+    },
+    "multi-select-click": {
+      "passed": 9,
+      "total": 9
+    },
+    "unwrap": {
+      "passed": 2,
+      "total": 2
+    },
+    "marquee-select": {
+      "passed": 6,
+      "total": 6
+    },
+    "multi-select-actions": {
+      "passed": 13,
+      "total": 13
+    },
+    "select-container-children": {
+      "passed": 4,
+      "total": 4
+    },
+    "lock-element": {
+      "passed": 6,
+      "total": 6
+    },
+    "hide-element": {
+      "passed": 4,
+      "total": 4
+    },
+    "drag-autoscroll": {
+      "passed": 1,
+      "total": 1
+    },
+    "app-menu": {
+      "passed": 21,
+      "total": 21
+    },
+    "ui-language": {
+      "passed": 2,
+      "total": 2
+    },
+    "autosave-restore": {
+      "passed": 6,
+      "total": 6
+    },
+    "unsaved-work-guard": {
+      "passed": 2,
+      "total": 2
+    },
+    "autosave-crash-recovery": {
+      "passed": 2,
+      "total": 2
+    },
+    "new-blank-page": {
+      "passed": 3,
+      "total": 3
+    },
+    "autosave-corruption-recovery": {
+      "passed": 1,
+      "total": 1
+    },
+    "multi-tab-guard": {
+      "passed": 2,
+      "total": 2
+    },
+    "project-save-json": {
+      "passed": 2,
+      "total": 2
+    },
+    "project-open-json": {
+      "passed": 5,
+      "total": 5
+    },
+    "inspector-panel": {
+      "passed": 16,
+      "total": 16
+    },
+    "inspector-number-fields": {
+      "passed": 21,
+      "total": 21
+    },
+    "props-display": {
+      "passed": 11,
+      "total": 11
+    },
+    "props-flex-container": {
+      "passed": 20,
+      "total": 20
+    },
+    "props-grid-container": {
+      "passed": 21,
+      "total": 21
+    },
+    "props-layout-item": {
+      "passed": 10,
+      "total": 10
+    },
+    "props-spacing": {
+      "passed": 18,
+      "total": 18
+    },
+    "props-size-overflow": {
+      "passed": 13,
+      "total": 13
+    },
+    "props-position": {
+      "passed": 15,
+      "total": 15
+    },
+    "color-picker": {
+      "passed": 22,
+      "total": 22
+    },
+    "color-picker-oklch": {
+      "passed": 5,
+      "total": 5
+    },
+    "color-swatches-eyedropper": {
+      "passed": 5,
+      "total": 5
+    },
+    "props-typography": {
+      "passed": 23,
+      "total": 23
+    },
+    "props-typography-advanced": {
+      "passed": 15,
+      "total": 15
+    },
+    "props-background": {
+      "passed": 16,
+      "total": 16
+    },
+    "gradient-editor": {
+      "passed": 25,
+      "total": 25
+    },
+    "props-border-outline": {
+      "passed": 27,
+      "total": 27
+    },
+    "props-effects-basic": {
+      "passed": 9,
+      "total": 9
+    },
+    "shadow-editor": {
+      "passed": 35,
+      "total": 35
+    },
+    "props-filters-clip": {
+      "passed": 16,
+      "total": 16
+    },
+    "props-transforms": {
+      "passed": 15,
+      "total": 15
+    },
+    "props-transition": {
+      "passed": 6,
+      "total": 6
+    },
+    "props-more": {
+      "passed": 20,
+      "total": 20
+    },
+    "props-attributes": {
+      "passed": 11,
+      "total": 11
+    },
+    "inspector-provenance-reset": {
+      "passed": 4,
+      "total": 4
+    },
+    "inspector-property-search": {
+      "passed": 3,
+      "total": 3
+    },
+    "inspector-advanced-mode": {
+      "passed": 2,
+      "total": 2
+    },
+    "inspector-add-property": {
+      "passed": 3,
+      "total": 3
+    },
+    "semantic-tag-switch": {
+      "passed": 12,
+      "total": 12
+    },
+    "quick-panel": {
+      "passed": 44,
+      "total": 44
+    },
+    "multi-select-edit": {
+      "passed": 6,
+      "total": 6
+    },
+    "value-presets": {
+      "passed": 4,
+      "total": 4
+    },
+    "resize-handles": {
+      "passed": 17,
+      "total": 17
+    },
+    "spacing-handles": {
+      "passed": 15,
+      "total": 15
+    },
+    "radius-border-gap-handles": {
+      "passed": 13,
+      "total": 13
+    },
+    "shadow-handles": {
+      "passed": 4,
+      "total": 4
+    },
+    "page-properties": {
+      "passed": 6,
+      "total": 6
+    },
+    "base-style": {
+      "passed": 2,
+      "total": 2
+    },
+    "export-zip": {
+      "passed": 6,
+      "total": 6
+    },
+    "css-variables-tokens": {
+      "passed": 17,
+      "total": 17
+    },
+    "export-bem-css": {
+      "passed": 3,
+      "total": 3
+    },
+    "project-language": {
+      "passed": 4,
+      "total": 4
+    },
+    "site-colours": {
+      "passed": 3,
+      "total": 3
+    },
+    "style-suggestions": {
+      "passed": 2,
+      "total": 2
+    },
+    "elements-structure": {
+      "passed": 28,
+      "total": 28
+    },
+    "elements-text": {
+      "passed": 6,
+      "total": 6
+    },
+    "elements-lists": {
+      "passed": 19,
+      "total": 19
+    },
+    "nesting-grammar": {
+      "passed": 4,
+      "total": 4
+    },
+    "nesting-grammar-structure": {
+      "passed": 6,
+      "total": 6
+    },
+    "elements-tables": {
+      "passed": 4,
+      "total": 4
+    },
+    "table-commands": {
+      "passed": 5,
+      "total": 5
+    },
+    "elements-form-structure": {
+      "passed": 10,
+      "total": 10
+    },
+    "element-attributes-aria": {
+      "passed": 8,
+      "total": 8
+    },
+    "shared-style-classes": {
+      "passed": 10,
+      "total": 10
+    },
+    "elements-form-inputs": {
+      "passed": 26,
+      "total": 26
+    },
+    "elements-form-inputs-rules": {
+      "passed": 3,
+      "total": 3
+    },
+    "elements-form-controls": {
+      "passed": 13,
+      "total": 13
+    },
+    "elements-media-images": {
+      "passed": 9,
+      "total": 9
+    },
+    "elements-media-embeds": {
+      "passed": 14,
+      "total": 14
+    },
+    "elements-svg-shapes": {
+      "passed": 14,
+      "total": 14
+    },
+    "elements-interactive": {
+      "passed": 4,
+      "total": 4
+    },
+    "natural-child-command": {
+      "passed": 4,
+      "total": 4
+    },
+    "props-element-specific": {
+      "passed": 10,
+      "total": 10
+    },
+    "settings-class-management": {
+      "passed": 6,
+      "total": 6
+    },
+    "settings-audit": {
+      "passed": 26,
+      "total": 26
+    },
+    "forms-masks-validation": {
+      "passed": 75,
+      "total": 75
+    },
+    "class-moves": {
+      "passed": 4,
+      "total": 4
+    },
+    "templates-layout": {
+      "passed": 5,
+      "total": 5
+    },
+    "templates-content": {
+      "passed": 7,
+      "total": 7
+    },
+    "templates-sections": {
+      "passed": 5,
+      "total": 5
+    },
+    "reusable-components": {
+      "passed": 11,
+      "total": 11
+    },
+    "repeat-element": {
+      "passed": 8,
+      "total": 8
+    },
+    "templates-components": {
+      "passed": 5,
+      "total": 5
+    },
+    "component-master-edit": {
+      "passed": 2,
+      "total": 2
+    },
+    "component-variants": {
+      "passed": 3,
+      "total": 3
+    },
+    "palette-search-groups": {
+      "passed": 2,
+      "total": 2
+    },
+    "palette-density": {
+      "passed": 3,
+      "total": 3
+    },
+    "layers-expand-collapse-all": {
+      "passed": 3,
+      "total": 3
+    },
+    "layers-search": {
+      "passed": 4,
+      "total": 4
+    },
+    "layers-row-columns": {
+      "passed": 3,
+      "total": 3
+    },
+    "layers-row-colours": {
+      "passed": 2,
+      "total": 2
+    },
+    "zoom-keyboard-buttons": {
+      "passed": 20,
+      "total": 20
+    },
+    "rotation-handle": {
+      "passed": 3,
+      "total": 3
+    },
+    "zoom-wheel-pan": {
+      "passed": 6,
+      "total": 6
+    },
+    "rulers": {
+      "passed": 2,
+      "total": 2
+    },
+    "guides-manual": {
+      "passed": 11,
+      "total": 11
+    },
+    "canvas-outlines-zones": {
+      "passed": 4,
+      "total": 4
+    },
+    "layout-grid-overlay": {
+      "passed": 9,
+      "total": 9
+    },
+    "workspace-settings-dialog": {
+      "passed": 11,
+      "total": 11
+    },
+    "absolute-free-drag": {
+      "passed": 5,
+      "total": 5
+    },
+    "absolute-nudge": {
+      "passed": 5,
+      "total": 5
+    },
+    "absolute-anchors": {
+      "passed": 10,
+      "total": 10
+    },
+    "align-distribute": {
+      "passed": 17,
+      "total": 17
+    },
+    "snap-toggle-settings": {
+      "passed": 9,
+      "total": 9
+    },
+    "snap-while-moving": {
+      "passed": 6,
+      "total": 6
+    },
+    "smart-guides": {
+      "passed": 3,
+      "total": 3
+    },
+    "hover-measure": {
+      "passed": 4,
+      "total": 4
+    },
+    "breakpoints-switch": {
+      "passed": 12,
+      "total": 12
+    },
+    "breakpoint-overrides": {
+      "passed": 5,
+      "total": 5
+    },
+    "state-styles": {
+      "passed": 17,
+      "total": 17
+    },
+    "preview-mode": {
+      "passed": 11,
+      "total": 11
+    },
+    "embed-html": {
+      "passed": 2,
+      "total": 2
+    },
+    "theme-switch": {
+      "passed": 3,
+      "total": 3
+    },
+    "dock-toggles": {
+      "passed": 21,
+      "total": 21
+    },
+    "command-bar": {
+      "passed": 60,
+      "total": 60
+    },
+    "command-bar-set-property": {
+      "passed": 10,
+      "total": 10
+    },
+    "shortcuts-panel": {
+      "passed": 2,
+      "total": 2
+    },
+    "workbench-panel": {
+      "passed": 10,
+      "total": 10
+    },
+    "panel-resize": {
+      "passed": 7,
+      "total": 7
+    },
+    "floating-panels": {
+      "passed": 5,
+      "total": 5
+    },
+    "panel-combine-tabs": {
+      "passed": 3,
+      "total": 3
+    },
+    "workspace-persist-reset": {
+      "passed": 3,
+      "total": 3
+    },
+    "status-bar": {
+      "passed": 2,
+      "total": 2
+    },
+    "accessibility-checks": {
+      "passed": 8,
+      "total": 8
+    },
+    "keyboard-panel-navigation": {
+      "passed": 31,
+      "total": 31
+    },
+    "layers-keyboard-navigation": {
+      "passed": 8,
+      "total": 8
+    },
+    "clipboard-cut-system": {
+      "passed": 6,
+      "total": 6
+    },
+    "copy-paste-styles": {
+      "passed": 9,
+      "total": 9
+    },
+    "html-import-structure": {
+      "passed": 12,
+      "total": 12
+    },
+    "html-import-cleaning": {
+      "passed": 4,
+      "total": 4
+    },
+    "html-import-styles": {
+      "passed": 4,
+      "total": 4
+    },
+    "html-import-media-queries": {
+      "passed": 4,
+      "total": 4
+    },
+    "html-import-states": {
+      "passed": 4,
+      "total": 4
+    },
+    "html-import-roundtrip": {
+      "passed": 4,
+      "total": 4
+    },
+    "clipboard-paste-external": {
+      "passed": 4,
+      "total": 4
+    },
+    "capture-url": {
+      "passed": 3,
+      "total": 3
+    },
+    "code-panel-view": {
+      "passed": 6,
+      "total": 6
+    },
+    "code-panel-selection-sync": {
+      "passed": 2,
+      "total": 2
+    },
+    "code-panel-copy-download": {
+      "passed": 2,
+      "total": 2
+    },
+    "code-panel-edit-css": {
+      "passed": 6,
+      "total": 6
+    },
+    "code-panel-edit-html": {
+      "passed": 5,
+      "total": 5
+    },
+    "timeline-animations": {
+      "passed": 3,
+      "total": 3
+    },
+    "timeline-keyframes": {
+      "passed": 5,
+      "total": 5
+    },
+    "timeline-animation-settings": {
+      "passed": 2,
+      "total": 2
+    },
+    "timeline-preview": {
+      "passed": 5,
+      "total": 5
+    },
+    "export-keyframes": {
+      "passed": 2,
+      "total": 2
+    },
+    "events-actions": {
+      "passed": 10,
+      "total": 10
+    },
+    "export-events-js": {
+      "passed": 3,
+      "total": 3
+    },
+    "explorer-pages": {
+      "passed": 12,
+      "total": 12
+    },
+    "explorer-file-system": {
+      "passed": 14,
+      "total": 14
+    },
+    "link-picker": {
+      "passed": 2,
+      "total": 2
+    },
+    "export-multi-page": {
+      "passed": 2,
+      "total": 2
+    },
+    "explorer-assets": {
+      "passed": 2,
+      "total": 2
+    },
+    "explorer-assets-use": {
+      "passed": 3,
+      "total": 3
+    },
+    "export-file-tree": {
+      "passed": 2,
+      "total": 2
+    },
+    "export-assets": {
+      "passed": 2,
+      "total": 2
+    },
+    "page-seo-meta": {
+      "passed": 7,
+      "total": 7
+    },
+    "custom-fonts": {
+      "passed": 2,
+      "total": 2
+    },
+    "explorer-open-folder": {
+      "passed": 7,
+      "total": 7
+    },
+    "code-panel-edit-js": {
+      "passed": 3,
+      "total": 3
+    },
+    "command-bar-find": {
+      "passed": 3,
+      "total": 3
+    },
+    "shortcuts-e2e-sweep": {
+      "passed": 2,
+      "total": 2
+    },
+    "layout-actions": {
+      "passed": 30,
+      "total": 30
+    },
+    "canvas-grid-editor": {
+      "passed": 6,
+      "total": 6
+    },
+    "batch-rename": {
+      "passed": 3,
+      "total": 3
+    },
+    "assistant-chat": {
+      "passed": 16,
+      "total": 16
+    },
+    "layout-composer": {
+      "passed": 45,
+      "total": 45
+    },
+    "motion-interactions": {
+      "passed": 64,
+      "total": 64
+    },
+    "motion-timeline": {
+      "passed": 58,
+      "total": 58
+    },
+    "motion-keyframes": {
+      "passed": 12,
+      "total": 12
+    },
+    "motion-preview": {
+      "passed": 4,
+      "total": 4
+    },
+    "motion-behaviours": {
+      "passed": 10,
+      "total": 10
+    },
+    "export-motion-js": {
+      "passed": 2,
+      "total": 2
+    },
+    "data-collections": {
+      "passed": 25,
+      "total": 25
+    },
+    "data-import": {
+      "passed": 10,
+      "total": 10
+    },
+    "data-binding": {
+      "passed": 6,
+      "total": 6
+    },
+    "data-pages": {
+      "passed": 3,
+      "total": 3
+    },
+    "shared-regions": {
+      "passed": 5,
+      "total": 5
+    },
+    "project-breakpoints": {
+      "passed": 15,
+      "total": 15
+    },
+    "side-by-side-view": {
+      "passed": 2,
+      "total": 2
+    }
+  }
+}
