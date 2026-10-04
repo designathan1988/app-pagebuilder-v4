@@ -208,19 +208,22 @@ function siteBuilder(fetched: Fetcher) {
     }
     for (const sheet of read.sheets) {
       let at: string | undefined;
+      const media = sheet.media?.trim() ?? '';
+      const conditioned = (css: string): string => media === '' || media.toLowerCase() === 'all' ? css : `@media ${media}{${css}}`;
       if (sheet.href !== null) {
-        at = sheetPaths.get(sheet.href);
+        const key = `${sheet.href}\u0000${media}`;
+        at = sheetPaths.get(key);
         if (at === undefined) {
           const got = await fetched(sheet.href);
           if (got === null || !got.ok) continue;
           at = `css/style-${sheetPaths.size + 1}.css`;
-          sheetPaths.set(sheet.href, at);
-          files.push({ path: at, type: 'text/css', base64: Buffer.from(await localSheet(scopeCss(got.body.toString('utf8'), null, customTags), sheet.href), 'utf8').toString('base64') });
+          sheetPaths.set(key, at);
+          files.push({ path: at, type: 'text/css', base64: Buffer.from(conditioned(await localSheet(scopeCss(got.body.toString('utf8'), null, customTags), sheet.href)), 'utf8').toString('base64') });
         }
       } else if (sheet.text !== null) {
         inline += 1;
         at = `css/inline-${inline}.css`;
-        files.push({ path: at, type: 'text/css', base64: Buffer.from(await localSheet(scopeCss(sheet.text, sheet.scope, customTags), base), 'utf8').toString('base64') });
+        files.push({ path: at, type: 'text/css', base64: Buffer.from(conditioned(await localSheet(scopeCss(sheet.text, sheet.scope, customTags), base)), 'utf8').toString('base64') });
       }
       if (at !== undefined) sheetLinks.push(`<link rel="stylesheet" href="${fromPage(path, at)}">`);
     }

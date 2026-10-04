@@ -101,6 +101,7 @@ test('a script-driven width survives capture and export at every project viewpor
   for (const [width, expected] of [[1440, 480], [1180, 400], [834, 300], [390, 180]] as const) {
     await exported.setViewportSize({ width, height: 900 });
     await exported.goto('http://made.capture.test/responsive.html');
+    expect(await exported.locator('body').evaluate(el => getComputedStyle(el).backgroundColor), `${width}px print stylesheet stays off screen`).toBe('rgba(0, 0, 0, 0)');
     expect(await exported.locator('#responsive-rail').evaluate(el => Math.round(el.getBoundingClientRect().width)), `${width}px`).toBe(expected);
     expect(await exported.locator('#responsive-rail').evaluate(el => Math.round(parseFloat(getComputedStyle(el).borderTopLeftRadius))), `${width}px initial layout`).toBe(width === 390 ? 30 : 4);
   }

@@ -7,16 +7,17 @@
 export interface PageRead {
   readonly title: string;
   readonly html: string;
-  readonly sheets: readonly { readonly href: string | null; readonly text: string | null; readonly scope: string | null }[];
+  readonly sheets: readonly { readonly href: string | null; readonly text: string | null; readonly scope: string | null; readonly media?: string | null }[];
   readonly images: readonly { readonly index: number; readonly src: string }[];
   readonly links: readonly string[];
   readonly custom: readonly string[];
 }
 export function serializePage(origin: string): PageRead {
-  const sheets: { readonly href: string | null; readonly text: string | null; readonly scope: string | null }[] = [];
+  const sheets: { readonly href: string | null; readonly text: string | null; readonly scope: string | null; readonly media?: string | null }[] = [];
   for (const el of document.querySelectorAll('link[rel~="stylesheet"][href], style')) {
-    if (el instanceof HTMLLinkElement) sheets.push({ href: el.href, text: null, scope: null });
-    else if (el.textContent !== null && !el.textContent.includes('animation-play-state:paused!important')) sheets.push({ href: null, text: el.textContent, scope: null });
+    const media = el.getAttribute('media')?.trim() || null;
+    if (el instanceof HTMLLinkElement) sheets.push({ href: el.href, text: null, scope: null, media });
+    else if (el.textContent !== null && !el.textContent.includes('animation-play-state:paused!important')) sheets.push({ href: null, text: el.textContent, scope: null, media });
   }
   // Scripts often set layout variables on <html> itself. The document model keeps no root style attribute, so
   // retain its declarations as the last sheet: the residual capture CSS keeps the html rule on canvas and export.
@@ -60,7 +61,7 @@ export function serializePage(origin: string): PageRead {
     const root = node.shadowRoot;
     if (root !== null) {
       const tag = node.localName;
-      for (const style of root.querySelectorAll('style')) if (style.textContent !== null) sheets.push({ href: null, text: style.textContent, scope: tag });
+      for (const style of root.querySelectorAll('style')) if (style.textContent !== null) sheets.push({ href: null, text: style.textContent, scope: tag, media: style.getAttribute('media')?.trim() || null });
       for (const sheet of root.adoptedStyleSheets) {
         try {
           sheets.push({ href: null, text: [...sheet.cssRules].map((rule) => rule.cssText).join('\n'), scope: tag });

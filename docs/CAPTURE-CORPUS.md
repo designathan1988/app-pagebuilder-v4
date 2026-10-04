@@ -12,22 +12,22 @@ Sites at the target: 0 of 20. Measured: 20.
 | Site | Kind | Files | Elements | 1440px | 1180px | 834px | 390px | Problem |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 609 | 93.2 ✗ | 92.9 ✗ | 92.0 ✗ | 86.2 ✗ |  |
-| [govuk](https://www.gov.uk/) | documentation | 11 | 477 | 67.9 ✗ | 66.6 ✗ | 67.7 ✗ | 74.7 ✗ |  |
-| [w3c](https://www.w3.org/) | documentation | 16 | 304 | 58.5 ✗ | 60.1 ✗ | 62.4 ✗ | 68.1 ✗ |  |
-| [react](https://react.dev/) | React application | 53 | 730 | 89.4 ✗ | 88.9 ✗ | 82.6 ✗ | 83.6 ✗ |  |
+| [govuk](https://www.gov.uk/) | documentation | 11 | 483 | 87.6 ✗ | 86.2 ✗ | 82.9 ✗ | 78.6 ✗ |  |
+| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 76.6 ✗ | 89.7 ✗ | 74.9 ✗ | 62.0 ✗ |  |
+| [react](https://react.dev/) | React application | 54 | 730 | 88.2 ✗ | 87.7 ✗ | 86.7 ✗ | 82.9 ✗ |  |
 | [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 98.3 | 98.2 | 96.5 ✗ | 94.2 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 91.2 ✗ | 87.8 ✗ | 84.2 ✗ | 84.7 ✗ |  |
-| [nuxt](https://nuxt.com/) | Vue application | 73 | 1095 | 90.1 ✗ | 85.7 ✗ | 86.7 ✗ | 82.1 ✗ |  |
-| [svelte](https://svelte.dev/) | landing | 25 | 238 | 61.0 ✗ | 65.6 ✗ | 66.1 ✗ | 71.4 ✗ |  |
-| [astro](https://astro.build/) | landing | 26 | 1004 | 72.9 ✗ | 70.7 ✗ | 74.0 ✗ | 81.5 ✗ |  |
-| [bootstrap](https://getbootstrap.com/) | landing | 10 | 424 | 82.3 ✗ | 81.0 ✗ | 82.4 ✗ | 77.9 ✗ |  |
-| [tailwind](https://tailwindcss.com/) | landing | 51 | 1381 | 65.5 ✗ | 66.4 ✗ | 64.0 ✗ | 58.0 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 89.0 ✗ | 90.0 ✗ | 84.2 ✗ | 86.0 ✗ |  |
+| [nuxt](https://nuxt.com/) | Vue application | 74 | 1107 | 89.5 ✗ | 88.0 ✗ | 87.9 ✗ | 84.2 ✗ |  |
+| [svelte](https://svelte.dev/) | landing | 25 | 238 | 59.7 ✗ | 66.7 ✗ | 67.2 ✗ | 70.4 ✗ |  |
+| [astro](https://astro.build/) | landing | 26 | 1004 | 83.1 ✗ | 81.9 ✗ | 84.6 ✗ | 87.6 ✗ |  |
+| [bootstrap](https://getbootstrap.com/) | landing | 10 | 424 | 88.0 ✗ | 85.6 ✗ | 83.1 ✗ | 79.5 ✗ |  |
+| [tailwind](https://tailwindcss.com/) | landing | 52 | 1384 | 64.2 ✗ | 64.5 ✗ | 61.3 ✗ | 56.1 ✗ |  |
 | [overreacted](https://overreacted.io/) | blog | 9 | 304 | 85.7 ✗ | 84.8 ✗ | 82.6 ✗ | 70.4 ✗ |  |
-| [csstricks](https://css-tricks.com/) | blog | 66 | 646 | 63.9 ✗ | 69.8 ✗ | 79.5 ✗ | 52.8 ✗ |  |
-| [smashing](https://www.smashingmagazine.com/) | blog | 29 | 564 | 74.1 ✗ | 72.0 ✗ | 72.9 ✗ | 70.6 ✗ |  |
-| [bellroy](https://bellroy.com/) | shop | 115 | 1561 | 81.1 ✗ | 22.2 ✗ | 28.4 ✗ | 26.6 ✗ |  |
-| [allbirds](https://www.allbirds.com/) | shop | 362 | 1290 | 83.7 ✗ | 83.9 ✗ | 87.1 ✗ | 49.0 ✗ |  |
-| [typewolf](https://www.typewolf.com/) | web fonts | 60 | 630 | 65.6 ✗ | 61.9 ✗ | 56.4 ✗ | 49.5 ✗ |  |
-| [gridbyexample](https://gridbyexample.com/) | grid | 8 | 96 | 90.0 ✗ | 82.6 ✗ | 83.2 ✗ | 89.3 ✗ |  |
-| [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 52.2 ✗ | 59.5 ✗ | 57.9 ✗ | 55.0 ✗ |  |
-| [animatestyle](https://animate.style/) | animation | 13 | 655 | 71.0 ✗ | 76.6 ✗ | 68.9 ✗ | 50.5 ✗ |  |
+| [csstricks](https://css-tricks.com/) | blog | 66 | 646 | 67.0 ✗ | 69.0 ✗ | 75.0 ✗ | 60.1 ✗ |  |
+| [smashing](https://www.smashingmagazine.com/) | blog | 29 | 565 | 75.0 ✗ | 72.9 ✗ | 74.0 ✗ | 71.8 ✗ |  |
+| [bellroy](https://bellroy.com/) | shop | 115 | 1573 | 66.7 ✗ | 20.2 ✗ | 29.0 ✗ | 26.4 ✗ |  |
+| [allbirds](https://www.allbirds.com/) | shop | 362 | 1290 | 83.1 ✗ | 84.0 ✗ | 87.0 ✗ | 48.9 ✗ |  |
+| [typewolf](https://www.typewolf.com/) | web fonts | 60 | 630 | 65.5 ✗ | 61.8 ✗ | 56.4 ✗ | 49.5 ✗ |  |
+| [gridbyexample](https://gridbyexample.com/) | grid | 8 | 96 | 93.5 ✗ | 93.4 ✗ | 93.9 ✗ | 96.5 ✗ |  |
+| [everylayout](https://every-layout.dev/) | grid | 50 | 261 | 48.9 ✗ | 57.1 ✗ | 56.3 ✗ | 57.5 ✗ |  |
+| [animatestyle](https://animate.style/) | animation | 13 | 656 | 67.9 ✗ | 69.7 ✗ | 60.5 ✗ | 63.0 ✗ |  |

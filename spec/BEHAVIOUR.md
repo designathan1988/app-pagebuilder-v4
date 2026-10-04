@@ -9055,6 +9055,10 @@ instance (`status.locked.edit`).
   prefix), in the page's residual stylesheet (`<page>.capture.css`). The canvas draws it and the export links it before
   the project's own stylesheet, so the page looks as it did and what the person edits in the inspector wins over it. A
   page that is no capture keeps none.
+- A linked or embedded stylesheet's `media` condition remains attached to its rules when the Companion localizes it;
+  the same address under different media conditions gets separate local sheets. A print-only sheet therefore stays
+  inactive on screen, including through the import and export, instead of adding print-only link text or hiding page
+  sections in the editing canvas.
 - The residual sheet declares `__builder_base` before the site's own layers for captured presentation hints. Builder
   neutral base rules are scoped away from captured pages; the site's own universal resets stay in the residual sheet.
   Author CSS therefore keeps its original priority and browser defaults apply where the site declares nothing.
