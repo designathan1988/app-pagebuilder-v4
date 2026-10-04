@@ -9067,6 +9067,8 @@ instance (`status.locked.edit`).
   every width. The importer does not write competing base values for those properties into the project's later sheet;
   the original responsive cascade remains effective. A class with CSS escapes, such as `md\:block`, matches the
   unescaped name in the captured element's `data-capture-class` attribute.
+- A width condition nested inside a stylesheet's own media condition is read with both conditions. It remains in the
+  captured stylesheet, and its properties are not copied into later base styles that would override the condition.
 - A link or a label that names no element of the captured page (one a script removed) is released, and the report
   says so (`status.import.released`), so the import is always a valid document.
 - Shadow DOM is flattened: a host's open shadow root stands in its place, a slot holds the nodes assigned to it, and

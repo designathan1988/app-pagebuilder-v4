@@ -6,7 +6,7 @@
     "doors": 1356,
     "scenarios": 1826,
     "modules": 466,
-    "lines": 81358
+    "lines": 81359
   },
   "features": [
     {
@@ -4041,7 +4041,7 @@
     },
     {
       "path": "src/core/import/stylesheet.ts",
-      "lines": 177,
+      "lines": 178,
       "commands": [],
       "features": []
     },

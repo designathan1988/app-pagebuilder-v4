@@ -60,6 +60,16 @@ describe('the residual stylesheet of a captured page', () => {
     expect(capturedPageCss(ran.document, home)).toContain('*{box-sizing:border-box}');
   });
 
+  it('keeps a width rule nested under a screen stylesheet ahead of generated base styles', () => {
+    const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>@media screen {.navigation{display:flex;flex-wrap:wrap}@media screen and (min-width:80em){.navigation{flex-wrap:nowrap}}}</style></head><body><nav class="navigation">Links</nav></body></html>';
+    const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });
+    if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
+    const home = ran.document.pages[0];
+    if (home === undefined) throw new Error('no page');
+    expect(capturedPageCss(ran.document, home)).toContain('flex-wrap:nowrap');
+    expect(JSON.stringify({ tree: home.tree, classes: ran.document.classes })).not.toContain('"flex-wrap"');
+  });
+
   it('keeps rules targeting the drawing inside an opaque SVG', () => {
     const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>.mandala svg > text { fill: #51565d; }</style></head><body><div class="mandala"><svg viewBox="0 0 10 10"><text>x</text></svg></div></body></html>';
     const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });

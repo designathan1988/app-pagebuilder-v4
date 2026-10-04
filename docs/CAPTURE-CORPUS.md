@@ -13,10 +13,10 @@ Sites at the target: 0 of 20. Measured: 20.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 609 | 93.2 ✗ | 92.9 ✗ | 92.0 ✗ | 86.2 ✗ |  |
 | [govuk](https://www.gov.uk/) | documentation | 11 | 483 | 87.6 ✗ | 86.2 ✗ | 82.9 ✗ | 78.6 ✗ |  |
-| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 76.6 ✗ | 89.7 ✗ | 74.9 ✗ | 62.0 ✗ |  |
+| [w3c](https://www.w3.org/) | documentation | 17 | 306 | 91.4 ✗ | 89.7 ✗ | 74.9 ✗ | 62.0 ✗ |  |
 | [react](https://react.dev/) | React application | 54 | 730 | 88.2 ✗ | 87.7 ✗ | 86.7 ✗ | 82.9 ✗ |  |
 | [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 98.3 | 98.2 | 96.5 ✗ | 94.2 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 89.0 ✗ | 90.0 ✗ | 84.2 ✗ | 86.0 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 91.0 ✗ | 90.0 ✗ | 82.3 ✗ | 86.0 ✗ |  |
 | [nuxt](https://nuxt.com/) | Vue application | 74 | 1107 | 89.5 ✗ | 88.0 ✗ | 87.9 ✗ | 84.2 ✗ |  |
 | [svelte](https://svelte.dev/) | landing | 25 | 238 | 59.7 ✗ | 66.7 ✗ | 67.2 ✗ | 70.4 ✗ |  |
 | [astro](https://astro.build/) | landing | 26 | 1004 | 83.1 ✗ | 81.9 ✗ | 84.6 ✗ | 87.6 ✗ |  |

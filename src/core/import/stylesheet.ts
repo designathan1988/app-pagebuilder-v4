@@ -143,9 +143,10 @@ export function readStylesheet(source: string): CssSheet {
       const end = matchingBrace(text, open, to);
       if (prelude.startsWith('@')) {
         const name = /^@([\w-]+)/.exec(prelude)?.[1]?.toLowerCase() ?? '';
-        if (name === 'media' && media.length === 0) {
+        if (name === 'media') {
           const condition = prelude.slice('@media'.length).trim();
-          walk(open + 1, end, [condition]);
+          if (media.length > 0) atRules.push({ name, line: lineAt(text, pieceAt) });
+          walk(open + 1, end, [...media, condition]);
         } else {
           atRules.push({ name, line: lineAt(text, pieceAt) });
         }
