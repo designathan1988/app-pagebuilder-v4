@@ -139,7 +139,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | STG-5.2 | Activity bar labels and tooltips (J26), active icon keeps its panel (J8b) | done | QA 171 (Insert first and named Insert, AUD-21) |
 | STG-5.3 | Explorer: names without overlap, badges, duplicate page opens and focuses its name (J20) | done | QA 108; C2 |
 | STG-5.4 | Layers: colour shown, collapse all keeps the root (J9), Shift range (J17), instance badge (J21), batch rename | done | QA 82, 84, 85, 90 |
-| STG-5.5 | Insert: accents, synonyms, relevance (J11), roving focus (J12), template thumbnails, drag to the canvas | partial | QA 86, 105; M1; real template thumbnails belong to stage 15 (out) |
+| STG-5.5 | Insert: accents, synonyms, relevance (J11), roving focus (J12), template thumbnails, drag to the canvas | done | QA 86, 105; QA 250: eight palette browser tests, 33 search/keyboard scenarios, real `npm run ui -- insert` and `npm run ui -- drag` flows with photos and no incident; the gallery of real template thumbnails belongs to stage 15, out by DEC-08 |
 | STG-5.6 | Styles: scrolls whole, swatches, new variable focused, class counts (J5) | done | QA 92, 107 |
 | STG-5.7 | Floating windows: header, dock button, close (J5) | done | QA 97; flow `floating-window` |
 | STG-5.8 | Inspector Style: sections, selector bar, class chips, legend | done | QA 100, 132 |
