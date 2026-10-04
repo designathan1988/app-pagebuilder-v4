@@ -51,6 +51,15 @@ describe('the residual stylesheet of a captured page', () => {
     if (home === undefined) throw new Error('no page');
     expect(capturedPageCss(document, home)).toBe('');
   });
+
+  it('keeps rules targeting the drawing inside an opaque SVG', () => {
+    const markup = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>.mandala svg > text { fill: #51565d; }</style></head><body><div class="mandala"><svg viewBox="0 0 10 10"><text>x</text></svg></div></body></html>';
+    const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });
+    if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
+    const home = ran.document.pages[0];
+    if (home === undefined) throw new Error('no page');
+    expect(capturedPageCss(ran.document, home)).toContain('svg>text{fill:#51565d}');
+  });
 });
 
 describe('a state an element does not take', () => {
@@ -85,5 +94,14 @@ describe('what the importer keeps of a page', () => {
   it('matches a descendant rule on a class the element’s own rule took', () => {
     const tree = run('<!doctype html><html><head><style>.box { padding: 4px; } .box p { color: rgb(4, 5, 6); }</style></head><body><div class="box"><p>B</p></div></body></html>');
     expect(JSON.stringify(tree)).toContain('rgb(4, 5, 6)');
+  });
+  it('lets an important author class beat a less important element rule', () => {
+    const markup = '<!doctype html><html><head><style>.VPNav{top:72px!important}.VPNav.nav-bar.stick{top:0}</style></head><body><header class="VPNav nav-bar stick">Navigation</header></body></html>';
+    const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', markup)] }, { confirmed: true });
+    if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
+    const header = ran.document.pages[0]?.tree.children[0];
+    expect(header?.classes).toContain('VPNav');
+    expect(ran.document.classes?.find((one) => one.name === 'VPNav')?.styles.desktop?.base?.top).toBe('72px');
+    expect(header?.styles.desktop?.base?.top).toBeUndefined();
   });
 });

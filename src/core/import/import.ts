@@ -280,6 +280,12 @@ function svgSizeAttribute(size: SvgSize, html: string, value: string, boxSize: r
   }
   if (html === 'viewbox') {
     size.viewBox = text.split(/[\s,]+/).join(' ');
+    const box = size.viewBox.split(' ');
+    const width = Number(box[2]);
+    const height = Number(box[3]);
+    if (box.length === 4 && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+      size.declarations += `aspect-ratio: ${box[2]} / ${box[3]};`;
+    }
     return true;
   }
   if (html === 'preserveaspectratio') {
@@ -591,9 +597,14 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   let hiddenFlag = false;
   // an <svg>'s size and its drawing's coordinate system (svgSizeAttribute)
   const svgSize: SvgSize = { declarations: '', viewBox: null, aspect: null };
+  const imageSize = new Map<string, string>();
   for (const [html, value] of child.attributes) {
     if (html === 'class') continue;
     if (type === SVG_TYPE && svgSizeAttribute(svgSize, html, value, rules.boxSize)) continue;
+    if (child.tag === 'img' && rules.boxSize.includes(html) && /^\d+$/.test(value)) {
+      imageSize.set(html, value);
+      continue;
+    }
     if (html === 'hidden') {
       hiddenFlag = true;
       continue;
@@ -635,6 +646,17 @@ function build(child: MarkupChild, builder: Builder, ancestors: readonly string[
   builder.lines.set(made.id, line);
   if (inlineStyle !== null) builder.inline.set(made.id, styleDeclarations(builder, inlineStyle, line));
   if (svgSize.declarations !== '') builder.presentational.set(made.id, styleDeclarations(builder, svgSize.declarations, line));
+  if (imageSize.size > 0) {
+    const [widthProperty, heightProperty] = rules.boxSize;
+    const width = widthProperty === undefined ? undefined : imageSize.get(widthProperty);
+    const height = heightProperty === undefined ? undefined : imageSize.get(heightProperty);
+    const dimensions = [
+      ...(width === undefined ? [] : [`${widthProperty}: ${width}px;`]),
+      ...(height === undefined ? [] : [`${heightProperty}: ${height}px;`]),
+      ...(width !== undefined && height !== undefined && Number(width) > 0 && Number(height) > 0 ? [`aspect-ratio: auto ${width} / ${height};`] : []),
+    ].join('');
+    builder.presentational.set(made.id, styleDeclarations(builder, dimensions, line));
+  }
   const content = element?.content ?? 'children';
   if (content === 'text') {
     const runs = canonical(runsOf(child.children, builder, child.tag === 'pre' || child.tag === 'textarea'));
@@ -798,7 +820,7 @@ function firstWrapper(tags: readonly string[], rules: ModelRules): string | null
 // the markup of an element as the source holds it, the way the parser kept it (an <svg>'s own content)
 function nodeMarkup(node: MarkupNode): string {
   const attributes = [...node.attributes].map(([name, value]) => ` ${name}="${value.replaceAll('"', '&quot;')}"`).join('');
-  const inner = node.children.map((child) => (typeof child === 'string' ? child : nodeMarkup(child))).join('');
+  const inner = node.children.map((child) => (typeof child === 'string' ? child.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;') : nodeMarkup(child))).join('');
   return `<${node.tag}${attributes}>${inner}</${node.tag}>`;
 }
 
@@ -839,6 +861,7 @@ function styleDeclarations(builder: Builder, text: string, line: number): readon
 interface Candidate {
   readonly value: StoredValue;
   readonly rank: readonly number[];
+  readonly author?: boolean;
 }
 
 const higher = (a: readonly number[], b: readonly number[]): boolean => {
@@ -1013,8 +1036,9 @@ function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: 
       return held;
     };
     for (const one of ready) {
-      // a rule of a class of the person's own is that class's definition (below), which the element takes by listing it
-      if (one.classRule !== null && authors.has(one.classRule)) continue;
+      // Author classes keep their definitions, but their declarations still compete in the cascade. A winning
+      // author declaration must not be written again as the element's own rule after the class in the export.
+      const author = one.classRule !== null && authors.has(one.classRule);
       // the rule of the class the element's own rule is written with applies to the element (the class left its class
       // list); every other rule applies where the matcher says it does
       const ownRule = one.classRule !== null && one.classRule === generated;
@@ -1043,7 +1067,7 @@ function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: 
           // class outweighs any number of types), then source order
           const rank = [declaration.important ? 1 : 0, 0, one.bare.specificity[0], one.bare.specificity[1], one.bare.specificity[2], one.order];
           const held = layer.own.get(property);
-          if (held === undefined || higher(rank, held.rank)) layer.own.set(property, { value, rank });
+          if (held === undefined || higher(rank, held.rank)) layer.own.set(property, { value, rank, author });
         }
       }
     }
@@ -1112,9 +1136,11 @@ function writeStyles(tree: DocNode, builder: Builder, sources: readonly SheetSou
     if (own !== undefined) {
       const styles: Record<string, Record<string, Record<string, StoredValue>>> = {};
       for (const layer of own.values()) {
+        const written = [...layer.own].filter(([, candidate]) => !candidate.author);
+        if (written.length === 0) continue;
         const byState = (styles[layer.breakpoint] ??= {});
         const declarations = (byState[layer.state] ??= {});
-        for (const [property, candidate] of layer.own) declarations[property] = candidate.value;
+        for (const [property, candidate] of written) declarations[property] = candidate.value;
       }
       (node as { styles: Styles }).styles = styles as Styles;
     }
@@ -1677,6 +1703,8 @@ function mapsSelector(text: string, rules: ModelRules): boolean {
   const selector = readSelector(text);
   if (selector === null || innerPseudo(selector)) return false;
   const last = selector.compounds[selector.compounds.length - 1] as Compound;
+  // The SVG node is one model element; its text, paths and shapes are markup inside it, not model nodes.
+  if (last.tag !== null && last.tag !== rules.root.tag && typeOfTag(last.tag, rules) === null) return false;
   const classRule = classRuleOf(selector);
   if (last.pseudo !== null && (rules.statePseudos.get(last.pseudo) === undefined || (selector.compounds.length > 1 && classRule === null))) return false;
   return classRule === null || validClassName(classRule);

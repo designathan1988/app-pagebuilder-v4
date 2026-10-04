@@ -11,14 +11,14 @@ Sites at the target: 0 of 20. Measured: 20.
 
 | Site | Kind | Files | Elements | 1440px | 1180px | 834px | 390px | Problem |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 605 | 59.1 ✗ | 62.2 ✗ | 61.2 ✗ | 69.7 ✗ |  |
+| [mdn](https://developer.mozilla.org/en-US/) | documentation | 71 | 606 | 66.5 ✗ | 64.7 ✗ | 60.7 ✗ | 67.8 ✗ |  |
 | [govuk](https://www.gov.uk/) | documentation | 11 | 477 | 65.4 ✗ | 64.3 ✗ | 65.8 ✗ | 80.1 ✗ |  |
 | [w3c](https://www.w3.org/) | documentation | 17 | 294 | 59.2 ✗ | 60.1 ✗ | 64.7 ✗ | 72.6 ✗ |  |
 | [react](https://react.dev/) | React application | 53 | 730 | 85.8 ✗ | 83.6 ✗ | 79.8 ✗ | 73.5 ✗ |  |
-| [nextjs](https://nextjs.org/) | React application | 39 | 1115 | 68.5 ✗ | 67.4 ✗ | 87.9 ✗ | 95.3 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 46 | 573 | 90.7 ✗ | 86.8 ✗ | 85.1 ✗ | 87.5 ✗ |  |
+| [nextjs](https://nextjs.org/) | React application | 40 | 1151 | 67.5 ✗ | 66.3 ✗ | 85.2 ✗ | 95.1 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 47 | 573 | 90.1 ✗ | 86.3 ✗ | 82.6 ✗ | 86.6 ✗ |  |
 | [nuxt](https://nuxt.com/) | Vue application | 73 | 1044 | 62.4 ✗ | 64.0 ✗ | 76.5 ✗ | 78.0 ✗ |  |
-| [svelte](https://svelte.dev/) | landing | 24 | 229 | 49.1 ✗ | 44.9 ✗ | 46.3 ✗ | 42.7 ✗ |  |
+| [svelte](https://svelte.dev/) | landing | 25 | 238 | 55.0 ✗ | 45.9 ✗ | 47.4 ✗ | 43.5 ✗ |  |
 | [astro](https://astro.build/) | landing | 26 | 876 | 50.8 ✗ | 48.8 ✗ | 64.7 ✗ | 86.0 ✗ |  |
 | [bootstrap](https://getbootstrap.com/) | landing | 10 | 409 | 50.7 ✗ | 51.2 ✗ | 71.2 ✗ | 71.4 ✗ |  |
 | [tailwind](https://tailwindcss.com/) | landing | 51 | 1338 | 51.4 ✗ | 57.2 ✗ | 63.9 ✗ | 50.7 ✗ |  |

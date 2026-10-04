@@ -9058,12 +9058,19 @@ instance (`status.locked.edit`).
   link between two captured pages names the other page of the project. A count out of range is refused
   (`status.capture.badPages`).
 - The capture's details that keep a page as it was drawn: an `<svg>`'s width and height become its size (presentation
-  attributes, below every rule of the sheets) and a viewBox other than its size keeps the drawing's coordinates; a
+  attributes, below every rule of the sheets), its viewBox supplies the intrinsic aspect ratio, and a viewBox other
+  than its size keeps the drawing's coordinates; text inside its markup is escaped before it is parsed so visible
+  angle brackets do not discard the drawing. An image's HTML width and height become low-priority size hints and its
+  intrinsic ratio; a stylesheet can override either dimension. Rules aimed at the shapes and text inside an SVG stay
+  in the residual stylesheet because those parts are markup of one editable SVG node, not separate model nodes. A
   piece of a text the page does not draw (a hidden short label) is no part of the text; the theme a page sets on its
   `<html>` (its classes and `data-` attributes) reaches its body; a page's Content Security Policy does not stop the
   capture. An anchor with an image, SVG or video becomes a Link Block, retaining its editable visual child. Ordinary
   HTML whitespace in text runs collapses to spaces, while an actual `<br>` remains a line break and preformatted text
   keeps its whitespace.
+- A runtime style on the page's `<html>` is kept as a last sheet when the capture reads it, since the project model has
+  no root style attribute. A declaration of an author class still competes in the imported cascade (including its
+  `!important` priority); if it wins, a lower-priority rule is not copied onto the element as its own style.
 - **A page behind a login** (STG-12.4): the **Builder Capture** browser extension (`companion/extension`, built with
   `npm run extension:build`, loaded unpacked) reads the page of the person's own tab, logged in, with the same reading
   the Companion runs, and every file the copy needs with the person's credentials, and hands them to the Companion with

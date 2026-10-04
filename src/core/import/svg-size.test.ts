@@ -52,4 +52,15 @@ describe('an imported svg', () => {
     expect(markup(svg)).toContain('<svg viewBox="0 0 48 48" width="100%" height="100%" preserveAspectRatio="xMinYMin meet">');
     expect(markup(svg)).toContain('class="logo__letter"');
   });
+
+  it('keeps SVG text containing an escaped angle bracket', () => {
+    const svg = svgOf('<svg width="48" height="48" viewBox="0 0 48 48"><text><textPath>&lt;&gt;</textPath></text></svg>');
+    expect(markup(svg)).toContain('<textPath>&lt;&gt;</textPath>');
+  });
+
+  it('keeps the intrinsic ratio of a viewBox when the stylesheet sets only the height', () => {
+    const svg = svgOf('<div class="mandala"><svg viewBox="50 50 575 575"><path d="M50 50H625V625H50Z"/></svg></div>', '.mandala svg { height: 560px; }');
+    expect(base(svg).height).toBe('560px');
+    expect(base(svg)['aspect-ratio']).toBe('575 / 575');
+  });
 });

@@ -18,6 +18,10 @@ export function serializePage(origin: string): PageRead {
     if (el instanceof HTMLLinkElement) sheets.push({ href: el.href, text: null, scope: null });
     else if (el.textContent !== null && !el.textContent.includes('animation-play-state:paused!important')) sheets.push({ href: null, text: el.textContent, scope: null });
   }
+  // Scripts often set layout variables on <html> itself. The document model keeps no root style attribute, so
+  // retain its declarations as the last sheet: the residual capture CSS keeps the html rule on canvas and export.
+  const rootStyle = document.documentElement.getAttribute('style')?.trim();
+  if (rootStyle) sheets.push({ href: null, text: `html{${rootStyle}}`, scope: null });
   // the custom elements met (a tag with a dash): each becomes a div wearing the class ce-<tag>, which the page's
   // and the shadow roots' rules are rewritten to (scopeCss), so the import keeps it as an element instead of
   // unwrapping it, and a shadow root's rules stay within their host
