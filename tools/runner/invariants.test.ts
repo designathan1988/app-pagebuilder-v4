@@ -182,14 +182,28 @@ describe('the invariant probe', () => {
       return out;
     };
     const broken: string[] = [];
-    for (const name of ['aurora', 'catalog']) {
+    for (const name of ['aurora', 'catalog', 'content-site']) {
       const base = fixture(name);
       const first = base.pages[0]?.tree.children[0]?.id ?? base.pages[0]?.tree.id;
       for (const command of COMMANDS.filter(headless)) {
         const door = command.entryPoints.find(builtDoor);
         const valid: Record<string, unknown> = { ...(door?.args ?? {}) };
         for (const [n, a] of Object.entries(command.args)) if (valid[n] === undefined && a.type === 'node') valid[n] = first;
-        for (const args of variants(command, valid)) {
+        // every built door's own arguments, and each of them with one argument left out (the audit of 2026-10-04: every
+        // argument of element.setLink is optional, and a call naming the element alone threw — the store's argument
+        // check cannot say "one of these", so the handler has to refuse with words)
+        // one element of each type the page holds, so a command that acts on one kind only is reached
+        const kinds = [...new Map((base.pages[0] === undefined ? [] : [...walk(base.pages[0].tree)]).map((n) => [n.type, n.id])).values()];
+        const partial: Record<string, unknown>[] = [];
+        for (const one of command.entryPoints.filter(builtDoor)) {
+          for (const node of Object.values(command.args).some((a) => a.type === 'node') ? kinds : [first]) {
+            const own: Record<string, unknown> = { ...one.args };
+            for (const [n, a] of Object.entries(command.args)) if (own[n] === undefined && a.type === 'node') own[n] = node;
+            partial.push(own);
+            for (const n of Object.keys(own)) if (command.args[n]?.optional === true) partial.push(Object.fromEntries(Object.entries(own).filter(([k]) => k !== n)));
+          }
+        }
+        for (const args of [...variants(command, valid), ...partial]) {
           const store = storeOn(base);
           if (first !== undefined) (store.dispatch as unknown as Dispatch)('selection.select' as CommandId, { target: first });
           try {
