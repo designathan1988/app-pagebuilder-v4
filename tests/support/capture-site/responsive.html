@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Responsive capture</title></head>
+<body>
+<div id="responsive-rail" style="width: 480px; height: 80px; background: rgb(20, 80, 120);"></div>
+<script>
+  const rail = document.getElementById('responsive-rail');
+  function sizeRail() {
+    rail.style.width = window.innerWidth <= 390 ? '180px' : window.innerWidth <= 834 ? '300px' : window.innerWidth <= 1180 ? '400px' : '480px';
+  }
+  window.addEventListener('resize', sizeRail);
+  sizeRail();
+  rail.style.borderRadius = window.innerWidth <= 390 ? '30px' : '4px';
+</script>
+</body>
+</html>

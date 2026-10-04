@@ -9043,6 +9043,11 @@ instance (`status.locked.edit`).
   (`project.captureUrl`) closes the dialog and sends the request; the status bar says it is capturing.
 - The captured files go through **Import HTML** as if they had been picked (`project.importHtml`): its destinations
   dialog, then the page with its classes, its media queries as the project's breakpoints, its images and fonts.
+- The Companion opens the site separately at 1440, 1180, 834 and 390 px. It keeps the desktop DOM as the editable
+  page and compares the inline declarations its scripts wrote to the same surviving elements at each width. Only
+  properties that differ are moved from the desktop style attributes into a captured stylesheet with width-specific
+  media rules. Stable body paths tie an element's observations together; a changed or missing element is not guessed.
+  The original site's scripts do not run in the exported page, but their measured layout values do at those widths.
 - The Companion marks the captured page (`<meta name="builder-capture">`), and the import keeps, beside the classes and
   values it maps, what the model does not hold of its sheets: a rule whose selector it does not read (a descendant with
   a state, `:has()`, an attribute), an at-rule other than a media query a breakpoint takes (`@font-face`, `@keyframes`,

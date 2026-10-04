@@ -3519,7 +3519,8 @@
           "File › Open a web address…, type the address, Capture (the Builder Companion running)."
         ],
         "expected": [
-          "The page as its scripts left it arrives through Import HTML: its destinations, then a page with its classes, images and fonts."
+          "The page as its scripts left it arrives through Import HTML: its destinations, then a page with its classes, images and fonts.",
+          "Inline layout values produced at the reference viewport widths remain responsive on the canvas and in the exported page."
         ]
       },
       "scenarios": [

@@ -283,6 +283,81 @@ export async function replayHar(context: BrowserContext, file: string): Promise<
   if (failed.size > 0) await context.route((url) => failed.has(url.href), (route) => route.abort());
 }
 
+interface InlineSnapshot { readonly id: string; readonly tag: string; readonly style: string }
+
+async function markRuntime(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const visit = (parent: Element, path: string): void => {
+      [...parent.children].forEach((element, index) => {
+        const next = path === '' ? String(index) : `${path}.${index}`;
+        element.setAttribute('data-capture-runtime', next);
+        visit(element, next);
+      });
+    };
+    visit(document.body, '');
+  });
+}
+
+// Keep the values a site's scripts write at the four reference widths. Each width opens afresh, since initialization
+// can differ from a resize. The captured DOM stays one editable tree: only changing inline declarations move into a
+// responsive source sheet, matched by stable body path when the same element survives across widths.
+async function responsiveInline(page: Page, read: PageRead, url: string, timeout: number): Promise<PageRead> {
+  const snapshots: InlineSnapshot[][] = [];
+  const readSnapshot = () => page.evaluate(() => [...document.body.querySelectorAll<HTMLElement>('[data-capture-runtime]')].map((el) => ({
+    id: el.getAttribute('data-capture-runtime') ?? '', tag: el.localName, style: el.getAttribute('style') ?? '',
+  })));
+  snapshots.push(await readSnapshot());
+  for (const width of [1180, 834, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
+    await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
+    await settle(page);
+    await markRuntime(page);
+    snapshots.push(await readSnapshot());
+  }
+  const merged = await page.evaluate(({ html, snapshots }) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const byWidth = snapshots.map((rows) => new Map(rows.map((row) => [row.id, row])));
+    const rules: string[][] = [[], [], [], []];
+    let changed = false;
+    for (const element of doc.querySelectorAll<HTMLElement>('[data-capture-runtime]')) {
+      const id = element.getAttribute('data-capture-runtime') ?? '';
+      const rows = byWidth.map((one) => one.get(id));
+      if (rows.some((one) => one === undefined || one.tag !== element.localName)) {
+        element.removeAttribute('data-capture-runtime');
+        continue;
+      }
+      const styles = rows.map((one) => {
+        const holder = document.createElement('span');
+        holder.setAttribute('style', one?.style ?? '');
+        return holder.style;
+      });
+      const properties = new Set(styles.flatMap((style) => [...style]));
+      const different = [...properties].filter((property) => styles.some((style) => style.getPropertyValue(property) !== styles[0]?.getPropertyValue(property) || style.getPropertyPriority(property) !== styles[0]?.getPropertyPriority(property)));
+      if (different.length === 0) {
+        element.removeAttribute('data-capture-runtime');
+        continue;
+      }
+      changed = true;
+      for (const property of different) element.style.removeProperty(property);
+      for (let at = 0; at < styles.length; at += 1) {
+        const declarations = different.flatMap((property) => {
+          const value = styles[at]?.getPropertyValue(property) ?? '';
+          if (value === '') return [];
+          const priority = styles[at]?.getPropertyPriority(property) === 'important' ? '!important' : '';
+          return [`${property}:${value}${priority};`];
+        });
+        if (declarations.length > 0) rules[at]?.push(`[data-capture-runtime="${id}"]{${declarations.join('')}}`);
+      }
+    }
+    if (!changed) return { html, css: '' };
+    const conditions = ['(min-width:1181px)', '(min-width:835px) and (max-width:1180px)', '(min-width:391px) and (max-width:834px)', '(max-width:390px)'];
+    const css = rules.map((parts, at) => parts.length === 0 ? '' : `@media ${conditions[at]}{${parts.join('')}}`).filter((one) => one !== '').join('\n');
+    return { html: `<!doctype html>\n${doc.documentElement.outerHTML}`, css };
+  }, { html: read.html, snapshots });
+  return merged.css === '' ? read : { ...read, html: merged.html, sheets: [...read.sheets, { href: null, text: merged.css, scope: null }] };
+}
+
 export async function capture(address: string, options: { readonly width?: number; readonly timeout?: number; readonly pages?: number; readonly har?: string } = {}): Promise<Capture> {
   const start = new URL(address);
   if (!isHttp(start.href)) throw new Error(`${address} is no http or https address`);
@@ -312,6 +387,7 @@ export async function capture(address: string, options: { readonly width?: numbe
       const url = queue.shift() as string;
       let response;
       try {
+        await page.setViewportSize({ width: options.width ?? 1440, height: 900 });
         // the document read, then the network let rest (settle): a page whose load never ends is still captured
         response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: options.timeout ?? 45_000 });
       } catch (error) {
@@ -326,7 +402,8 @@ export async function capture(address: string, options: { readonly width?: numbe
       // a page that answered at an address the crawl already took (a redirect) is that page
       if (captured.has(pageKey(base))) continue;
       // what the page holds now (serializePage), built into its file and the site's files
-      const read = await page.evaluate(serializePage, start.origin);
+      await markRuntime(page);
+      const read = await responsiveInline(page, await page.evaluate(serializePage, start.origin), base, options.timeout ?? 45_000);
       if (title === '') title = read.title;
       captured.set(pageKey(base), await site.pageOf(read, base));
       for (const link of read.links) {
