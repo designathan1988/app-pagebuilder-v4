@@ -7,7 +7,7 @@ import { message, registerHandler } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
 import { withFunction } from './functions.ts';
 import { removeStyle } from './reset.ts';
-import { propertyName, readValue, typedText, writeStyle } from './set.ts';
+import { propertyName, readValue, typedText, withTargets, writeStyle } from './set.ts';
 import { storedValue } from './stored.ts';
 
 // the functions to set (name → argument), each one added or replaced in the value
@@ -21,7 +21,9 @@ export function applyFunctions(held: string | undefined, functions: unknown): st
   return value;
 }
 
-export const setFilterCommand = registerHandler('style.setFilter', (context, { property, functions }) => {
+export const setFilterCommand = registerHandler('style.setFilter', (given, { property, functions, targets }) => {
+  const context = withTargets(given, targets);
+  if (context === null) return { kind: 'change' };
   const { state, rules } = context;
   // Remove filters: no functions means the declaration goes, not a filter: none left in its place
   if (functions === 'none') return removeStyle(context, property);

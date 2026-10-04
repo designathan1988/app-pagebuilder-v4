@@ -215,7 +215,10 @@ export function readValue<Ui>(context: HandlerContext<Ui>, property: string, typ
   const { state, rules, css } = context;
   // a variable named without var() ("--brand", as a person types it in any field; the plan's stage 3) is var(--brand)
   const bare = new RegExp(`^\\s*--(${IDENTIFIER_SOURCE})\\s*$`, 'u').exec(typedText);
-  const text = bare === null ? typedText : `var(--${bare[1] ?? ''})`;
+  // one number with a decimal comma ("1,5px": pt-BR's decimal separator, which the numpad of an ABNT2 keyboard types)
+  // is that number with a point (the audit's L10N1); a list ("a, b") or anything else keeps its commas
+  const decimal = /^\s*[+-]?\d+,\d+\s*[a-z%]*\s*$/i.test(typedText) ? typedText.replace(',', '.') : typedText;
+  const text = bare === null ? decimal : `var(--${bare[1] ?? ''})`;
   // a design token of the project, named as a CSS variable, is kept as written (spec css-variables-tokens, Problems in
   // Pager 4); one the project does not have is no value
   const token = new RegExp(`^\\s*var\\(\\s*--(${IDENTIFIER_SOURCE})\\s*\\)\\s*$`, 'u').exec(text);
@@ -357,13 +360,20 @@ export function writePropertyText<Ui>(context: HandlerContext<Ui>, property: str
   return writeStyle(context, property, read.css, longhandValues(property, read.value, context.rules));
 }
 
+// The context a style write of a field runs in: a field left by a press that selected another element names the
+// elements its value was typed for (`targets`), and the value goes to them, those still in the document, never to what
+// the press selected; null when none of them is left. Every field's command takes it (the audit's FD1: the border,
+// the radius, an image, a shadow, a filter, a transform lost the typing instead).
+export function withTargets<Ui>(given: HandlerContext<Ui>, targets: unknown): HandlerContext<Ui> | null {
+  if (!Array.isArray(targets)) return given;
+  const named = targets.filter((id): id is string => typeof id === 'string' && locate(given.state.document, id as NodeId) !== null);
+  return named.length === 0 ? null : { ...given, state: { ...given.state, selection: named as NodeId[] } };
+}
+
 export const setStyleCommand = registerHandler('style.set', (given, { property, value, targets }) => {
   if (typeof property !== 'string' || typeof value !== 'string') throw new Error('style.set: a door hands a property and the text of its value');
-  // a field left by a press that selected another element names the elements its value was typed for: the value goes
-  // to them, those still in the document, never to what the press selected
-  const named = Array.isArray(targets) ? targets.filter((id): id is string => typeof id === 'string' && locate(given.state.document, id as NodeId) !== null) : null;
-  if (named !== null && named.length === 0) return { kind: 'change' as const };
-  const context = named === null ? given : { ...given, state: { ...given.state, selection: named as NodeId[] } };
+  const context = withTargets(given, targets);
+  if (context === null) return { kind: 'change' as const };
   // a recipe (line-clamp) writes its own declarations (display, overflow): one the element already holds as its own
   // would be drawn twice, so the write is refused naming it (the user's real-use audit, item A3.31)
   const recipe = context.rules.recipeFacts.get(property);

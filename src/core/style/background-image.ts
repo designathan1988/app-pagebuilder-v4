@@ -18,11 +18,13 @@ import { imageAddress } from './codecs.ts';
 import { splitLayers } from './codecs.ts';
 import { editedGradient, parseGradient, type GradientEdit } from './gradient.ts';
 import { removeStyle } from './reset.ts';
-import { propertyName, readValue, typedText, writeStyle } from './set.ts';
+import { propertyName, readValue, typedText, withTargets, writeStyle } from './set.ts';
 import { storedValue } from './stored.ts';
 import { argumentRefused } from '../store/args.ts';
 
-export const setBackgroundImageCommand = registerHandler('style.setBackgroundImage', (context, { property, value, edit }) => {
+export const setBackgroundImageCommand = registerHandler('style.setBackgroundImage', (given, { property, value, edit, targets }) => {
+  const context = withTargets(given, targets);
+  if (context === null) return { kind: 'change' };
   if (typeof property !== 'string') throw new Error('style.setBackgroundImage: a door hands the property it edits');
   const { state, rules } = context;
   let text: string;

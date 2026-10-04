@@ -11,7 +11,7 @@
 import { message, registerHandler } from '../commands/registry.ts';
 import type { ModelRules } from '../document/validate.ts';
 import { codecOf } from './codecs.ts';
-import { declarationsOf, factsOf, propertyName, readValue, writeStyle } from './set.ts';
+import { declarationsOf, factsOf, propertyName, readValue, withTargets, writeStyle } from './set.ts';
 
 // the aspects of a border side, in its composite's order (border-top: width, style, colour): style.setBorder's
 // arguments of the same names
@@ -32,7 +32,9 @@ function writtenAs(sides: string, aspects: readonly string[]): string {
   return aspects.length === 1 && aspects[0] === ASPECTS[0] ? `border-${sides}-${ASPECTS[0]}` : `border-${sides}`;
 }
 
-export const setBorderCommand = registerHandler('style.setBorder', (context, args) => {
+export const setBorderCommand = registerHandler('style.setBorder', (asked, args) => {
+  const context = withTargets(asked, args.targets);
+  if (context === null) return { kind: 'change' };
   const given = ASPECTS.flatMap((aspect) => {
     const text = (args as Aspects)[aspect as keyof Aspects];
     return typeof text === 'string' && text.trim() !== '' ? [[aspect, text.trim()] as const] : [];
@@ -58,7 +60,9 @@ export const setBorderCommand = registerHandler('style.setBorder', (context, arg
 
 // the corners of style.setRadius's `corners`, in border-radius's order (its longhands: top left, top right, bottom
 // right, bottom left)
-export const setRadiusCommand = registerHandler('style.setRadius', (context, { corners, value }) => {
+export const setRadiusCommand = registerHandler('style.setRadius', (given, { corners, value, targets }) => {
+  const context = withTargets(given, targets);
+  if (context === null) return { kind: 'change' };
   const target = corners === 'all' ? 'border-radius' : `border-${corners}-radius`;
   const read = readValue(context, target, value);
   if (read === null) return { kind: 'refused', message: message('status.value.invalid', { property: propertyName(target, context.rules), value }) };

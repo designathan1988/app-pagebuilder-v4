@@ -6130,6 +6130,11 @@
           "type": "color",
           "values": [],
           "optional": true
+        },
+        "targets": {
+          "type": "nodes",
+          "values": [],
+          "optional": true
         }
       },
       "availability": {
@@ -6763,6 +6768,11 @@
           "type": "string",
           "values": [],
           "optional": false
+        },
+        "targets": {
+          "type": "nodes",
+          "values": [],
+          "optional": true
         }
       },
       "availability": {
@@ -7062,6 +7072,11 @@
         },
         "distance": {
           "type": "number",
+          "values": [],
+          "optional": true
+        },
+        "targets": {
+          "type": "nodes",
           "values": [],
           "optional": true
         }
@@ -7718,6 +7733,11 @@
           "values": [
             "Shift"
           ],
+          "optional": true
+        },
+        "targets": {
+          "type": "nodes",
+          "values": [],
           "optional": true
         }
       },
@@ -8685,6 +8705,11 @@
           "type": "json",
           "values": [],
           "optional": false
+        },
+        "targets": {
+          "type": "nodes",
+          "values": [],
+          "optional": true
         }
       },
       "availability": {
@@ -9125,6 +9150,11 @@
           "type": "json",
           "values": [],
           "optional": false
+        },
+        "targets": {
+          "type": "nodes",
+          "values": [],
+          "optional": true
         }
       },
       "availability": {

@@ -226,6 +226,9 @@ export function restoredWork(saved: SavedWork | null | undefined, rules: ModelRu
 export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | undefined, restored: boolean, canWrite: () => boolean = () => true): () => void {
   // a saved work the reader refused: nothing is written until another project replaces the document
   let blocked = saved !== null && saved !== undefined && !restored;
+  // work made while recovery is required is never written (the saved record stays untouched): leaving the tab then
+  // asks first, or it is lost without a word (the audit's AS1)
+  let unwritten = false;
   let revision = typeof saved?.revision === 'number' ? saved.revision : 0;
   savedRevision = revision;
   let last = store.getState();
@@ -340,7 +343,7 @@ export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | un
     // IndexedDB write started now could be cut short: the next start reads the journal). A selection-only revision
     // is written too while it binds an unconfirmed draft, so that draft finds the same revision on the next start.
     journalNow(draft);
-    if (state !== 'saving' && refusal === null && !draft) return;
+    if (state !== 'saving' && refusal === null && !draft && !unwritten) return;
     event.preventDefault();
     event.returnValue = '';
   };
@@ -374,8 +377,12 @@ export function startAutosave<Ui>(store: Store<Ui>, saved: SavedWork | null | un
     const replaced = now.document !== last.document && now.history.past.length === 0 && now.history.future.length === 0;
     const changedDocument = now.document !== last.document;
     last = now;
-    if (blocked && !replaced) return;
+    if (blocked && !replaced) {
+      unwritten = true;
+      return;
+    }
     blocked = false;
+    unwritten = false;
     revision += 1;
     savedRevision = revision;
     const work: SavedWork = { revision, format: now.document.version, document: now.document, selection: now.selection };

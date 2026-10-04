@@ -45,6 +45,7 @@ import { quickPanelOpen } from '../quick-panel/quick-panel.ts';
 import { unitMenu } from '../../core/style/units.ts';
 import { cssFamily, familyOf, isFontFile } from '../../core/files/fonts.ts';
 import { afterGesture, registerRepeat, registerSlider } from '../input/pointer.ts';
+import { wheelStep } from '../input/wheel-step.ts';
 import { pointerViews } from '../input/pointer/views.ts';
 import { MODEL_RULES, useEditorState, useStore, type EditorState, type EditorStore, layeredRules } from '../store.ts';
 import { styleClassOf, styleSource } from '../inspector/style-target.ts';
@@ -123,8 +124,8 @@ function useWheelSteps(input: RefObject<HTMLInputElement | null>, property: stri
     const element = input.current;
     if (element === null) return;
     const onWheel = (event: WheelEvent) => {
-      if (document.activeElement !== element || event.deltaY === 0) return;
-      const direction = event.deltaY < 0 ? 'up' : 'down';
+      const direction = document.activeElement === element ? wheelStep(event) : null;
+      if (direction === null) return;
       const door = WHEEL_STEPS.find((d) => d.door.args.direction === direction);
       if (door === undefined) return;
       event.preventDefault();
@@ -928,9 +929,11 @@ export function TextStyleField({
       const args = part !== null ? { ...entry.door.args, ...part.args(text, held) } : ownArgs(entry, property, text, extra);
       afterGesture(store, () => {
         const now = store.getState().selection;
-        // a command of its own writes to the selection: kept only while it is still the one the value was typed for
-        if (now.length === 0 || now.length !== targets.length || now.some((id, i) => id !== targets[i])) return;
-        (store.dispatch as Dispatch)(entry.command.id, args);
+        const same = now.length === targets.length && now.every((id, i) => id === targets[i]);
+        // a press that selected another element: the value goes to the elements it was typed for (the command's
+        // targets, as style.set's: the audit's FD1); a command that takes none keeps it only on the same selection
+        if (!same && (targets.length === 0 || !('targets' in entry.command.args))) return;
+        (store.dispatch as Dispatch)(entry.command.id, same ? args : { ...args, targets: [...targets] });
       });
     };
   });

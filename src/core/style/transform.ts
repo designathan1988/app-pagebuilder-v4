@@ -5,10 +5,12 @@
 import { message, registerHandler } from '../commands/registry.ts';
 import { locate } from '../document/model.ts';
 import { applyFunctions } from './filter.ts';
-import { propertyName, readValue, writeStyle } from './set.ts';
+import { propertyName, readValue, withTargets, writeStyle } from './set.ts';
 import { storedValue } from './stored.ts';
 
-export const setTransformCommand = registerHandler('style.setTransform', (context, { property, parts }) => {
+export const setTransformCommand = registerHandler('style.setTransform', (given, { property, parts, targets }) => {
+  const context = withTargets(given, targets);
+  if (context === null) return { kind: 'change' };
   const { state, rules } = context;
   const primary = state.selection[0] === undefined ? null : locate(state.document, state.selection[0]);
   if (primary === null) return { kind: 'change' };

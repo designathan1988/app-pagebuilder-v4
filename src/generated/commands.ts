@@ -303,12 +303,12 @@ export interface CommandArgs {
   "style.set": { readonly property: StyleTargetId; readonly value: string; readonly targets?: readonly NodeId[] };
   "style.setSpacing": { readonly box: "padding" | "margin"; readonly sides: "all" | "top" | "right" | "bottom" | "left"; readonly value: string; readonly modifier?: "Shift" | "Alt" };
   "inspector.toggleSpacingLink": { readonly box: "padding" | "margin" };
-  "style.setBorder": { readonly sides: "all" | "top" | "right" | "bottom" | "left"; readonly width?: string; readonly style?: string; readonly color?: string };
-  "style.setRadius": { readonly corners: "all" | "top-left" | "top-right" | "bottom-right" | "bottom-left"; readonly value: string };
-  "style.setBackgroundImage": { readonly property: StyleTargetId; readonly value?: JsonValue; readonly edit?: JsonValue; readonly distance?: number };
-  "style.setShadows": { readonly property: "box-shadow" | "text-shadow"; readonly edit: JsonValue; readonly distance?: number; readonly modifier?: "Shift" };
-  "style.setFilter": { readonly property: StyleTargetId; readonly functions: JsonValue };
-  "style.setTransform": { readonly property: StyleTargetId; readonly parts: JsonValue };
+  "style.setBorder": { readonly sides: "all" | "top" | "right" | "bottom" | "left"; readonly width?: string; readonly style?: string; readonly color?: string; readonly targets?: readonly NodeId[] };
+  "style.setRadius": { readonly corners: "all" | "top-left" | "top-right" | "bottom-right" | "bottom-left"; readonly value: string; readonly targets?: readonly NodeId[] };
+  "style.setBackgroundImage": { readonly property: StyleTargetId; readonly value?: JsonValue; readonly edit?: JsonValue; readonly distance?: number; readonly targets?: readonly NodeId[] };
+  "style.setShadows": { readonly property: "box-shadow" | "text-shadow"; readonly edit: JsonValue; readonly distance?: number; readonly modifier?: "Shift"; readonly targets?: readonly NodeId[] };
+  "style.setFilter": { readonly property: StyleTargetId; readonly functions: JsonValue; readonly targets?: readonly NodeId[] };
+  "style.setTransform": { readonly property: StyleTargetId; readonly parts: JsonValue; readonly targets?: readonly NodeId[] };
   "style.setAlignment": { readonly x: "start" | "center" | "end"; readonly y: "start" | "center" | "end" };
   "style.setCustomDeclarations": { readonly declarations: string; readonly target?: NodeId };
   "style.applyCssRule": { readonly css: string };

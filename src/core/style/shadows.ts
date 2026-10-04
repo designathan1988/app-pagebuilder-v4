@@ -10,7 +10,7 @@ import { message, registerHandler } from '../commands/registry.ts';
 import { locate, type StructuredLayer } from '../document/model.ts';
 import type { ModelRules, StructureField } from '../document/validate.ts';
 import { structuredCss } from '../render/output.ts';
-import { propertyName, typedText, writeStyle } from './set.ts';
+import { propertyName, typedText, withTargets, writeStyle } from './set.ts';
 import { storedLayers } from './stored.ts';
 
 // the layer Add a shadow appends (spec, "Trigger"): its colour, its lengths, its flags off
@@ -154,7 +154,9 @@ export function editedLayers(layers: readonly StructuredLayer[], fields: readonl
   return { layers: layers.map((l, n) => (n === i ? next : l)) };
 }
 
-export const setShadowsCommand = registerHandler('style.setShadows', (context, { property, edit, modifier }) => {
+export const setShadowsCommand = registerHandler('style.setShadows', (asked, { property, edit, modifier, targets }) => {
+  const context = withTargets(asked, targets);
+  if (context === null) return { kind: 'change' };
   const { state, rules, css } = context;
   const fields = rules.structures.get(property);
   if (fields === undefined) throw new Error(`properties.json: ${property} has no structured value`);
