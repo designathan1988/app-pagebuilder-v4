@@ -46,7 +46,7 @@ test.afterAll(async () => {
 });
 
 type CapturedNode = { kind: 'element' | 'text' | 'comment'; tag?: string; value?: string; attributes?: { name: string; namespace: string | null; value: string }[]; children?: CapturedNode[] };
-type Doc = { pages: { file: string; tree: unknown; capture?: { viewports: { root: CapturedNode }[] } }[]; files?: { path: string }[]; classes?: { name: string }[] };
+type Doc = { pages: { file: string; tree: unknown; capture?: { widths: number[]; root: CapturedNode } }[]; files?: { path: string }[]; classes?: { name: string }[] };
 const read = (page: Page) => page.evaluate(() => (window as unknown as { __builderTestPort: { document(): Doc } }).__builderTestPort.document());
 
 test('a web address is captured as its script left it and imported as a page', runs('workspace.openDialog#menu-file-capture-url', 'project.captureUrl#capture-url-run'), async ({ page }) => {
@@ -67,9 +67,10 @@ test('a web address is captured as its script left it and imported as a page', r
   await expect(frame.getByRole('heading', { name: 'Grão Norte' })).toBeVisible();
   // what the site's script added after load is there
   await expect(frame.getByText('Added by a script')).toBeVisible();
-  // a web component's shadow DOM is flattened: its slot holds the light text, its own text and style come with it
+  // a web component's shadow DOM is kept as its own (DEC-61): its slot holds the light text, and its own text and style
+  // draw it inside the shadow root (the host keeps the colour it inherits)
   await expect(frame.getByText('Fresh beans')).toBeVisible();
-  expect(await frame.getByText('Fresh beans').evaluate((el) => getComputedStyle(el).color)).toBe('rgb(185, 81, 42)');
+  expect(await frame.locator('x-badge p').evaluate((el) => getComputedStyle(el).color)).toBe('rgb(185, 81, 42)');
   // the stylesheet's rules, as classes: the brand colour, the lead's colour of the <style>
   expect(await frame.getByRole('heading', { name: 'Grão Norte' }).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(245, 230, 211)');
   expect(await frame.getByText('Fresh coffee, roasted every week.').evaluate((el) => getComputedStyle(el).color)).toBe('rgb(122, 62, 29)');
@@ -110,7 +111,8 @@ test('captured mixed DOM and source cascade survive canvas and export', runs('pr
   expect(await frame.locator('#story').evaluate((element) => getComputedStyle(element).color)).toBe(source.color);
   await page.screenshot({ path: '.cache/logs/captured-mixed-canvas.png' });
   await page.getByText('Formatted captured code').click();
-  await expect(page.locator('.captured-inspector__code').first()).toContainText('<p class="story" id="story" data-capture-class="story">Before');
+  // the page's own markup, with no attribute the capture added (DEC-61: the tree is the page's own)
+  await expect(page.locator('.captured-inspector__code').first()).toContainText('<p class="story" id="story">Before');
   await expect(page.locator('.captured-inspector__code').first()).not.toContainText('animation-play-state:paused!important');
   await page.screenshot({ path: '.cache/logs/captured-mixed-code.png' });
   await page.locator('[data-region="captured-inspector"] button').filter({ hasText: 'text: Before' }).click();
@@ -177,7 +179,26 @@ test('a script-driven width survives capture and export at every project viewpor
     expect(await exported.locator('#responsive-rail').evaluate(el => Math.round(el.getBoundingClientRect().width)), `${width}px`).toBe(expected);
     expect(await exported.locator('#responsive-rail').evaluate(el => Math.round(parseFloat(getComputedStyle(el).borderTopLeftRadius))), `${width}px initial layout`).toBe(width === 390 ? 30 : 4);
   }
+  // one page for every width (DEC-61): resized without reloading, it takes the nearest width's nodes and values
+  await exported.setViewportSize({ width: 1440, height: 900 });
+  await exported.goto('http://made.capture.test/responsive.html');
+  await exported.setViewportSize({ width: 390, height: 900 });
+  await expect.poll(() => exported.locator('#responsive-rail').evaluate(el => Math.round(el.getBoundingClientRect().width)), 'resized to 390px').toBe(180);
+  await exported.setViewportSize({ width: 1440, height: 900 });
+  await expect.poll(() => exported.locator('#responsive-rail').evaluate(el => Math.round(el.getBoundingClientRect().width)), 'resized back to 1440px').toBe(480);
   await exported.close();
+  // without scripts the page is still there: the widest width, as static HTML
+  const still = await context.browser()?.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 900 } });
+  if (still === undefined) throw new Error('no browser');
+  const plain = await still.newPage();
+  await plain.route('http://made.capture.test/**', route => {
+    const name = new URL(route.request().url()).pathname.slice(1);
+    const bytes = files.get(name);
+    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType: name.endsWith('.css') ? 'text/css' : 'text/html', body: bytes });
+  });
+  await plain.goto('http://made.capture.test/responsive.html');
+  await expect(plain.locator('#responsive-rail')).toBeVisible();
+  await still.close();
 });
 
 test('picture sources keep the selected artwork in the exported desktop and phone pages', runs('project.captureUrl#capture-url-run', 'project.export#menu-file'), async ({ page, context }) => {
@@ -270,7 +291,7 @@ test('the captured html root class keeps its inherited font in canvas and export
   const root = page.frameLocator('.frame__page').locator('html');
   await expect.poll(() => root.evaluate((element) => getComputedStyle(element).fontFamily)).toContain('Courier New');
   const capturedPage = (await read(page)).pages[0];
-  expect(capturedPage?.capture?.viewports[0]?.root.attributes).toContainEqual({ name: 'class', namespace: null, value: 'font-brand' });
+  expect(capturedPage?.capture?.root.attributes).toContainEqual({ name: 'class', namespace: null, value: 'font-brand' });
   expect((capturedPage?.tree as { children: unknown[] }).children).toHaveLength(0);
   const downloading = page.waitForEvent('download');
   await runDoor(page, 'project.export#menu-file');
@@ -323,7 +344,7 @@ test('two pages of the site are captured, the link between them written from one
     for (const child of node.children ?? []) walk(child);
   };
   for (const one of (await read(page)).pages) {
-    const root = one.capture?.viewports[0]?.root;
+    const root = one.capture?.root;
     if (root !== undefined) walk(root);
   }
   expect(hrefs['See the plans']).toBe('plans/index.html');

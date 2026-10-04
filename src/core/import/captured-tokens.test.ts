@@ -42,7 +42,7 @@ describe('the variables of a captured page', () => {
     expect((ran.document.tokens ?? []).map((token) => token.name)).not.toContain('sk-banner-height');
     const home = ran.document.pages[0];
     if (home === undefined) throw new Error('no page');
-    const head = home.capture?.viewports[0]?.root.children.find((one) => one.kind === 'element' && one.tag === 'head');
+    const head = home.capture?.root.children.find((one) => one.kind === 'element' && one.tag === 'head');
     const styles = head?.kind === 'element' ? head.children.filter((one) => one.kind === 'element' && one.tag === 'style') : [];
     expect(styles).toHaveLength(2);
     expect(JSON.stringify(styles[0])).toContain(':root{--sk-banner-height:0px}');

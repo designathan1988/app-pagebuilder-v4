@@ -7,7 +7,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { test, type Page } from '@playwright/test';
 import { captureRecorded, closeBrowser, replayHar, settle } from '../companion/capture.ts';
-import { REFERENCE_TIME, readLayoutSnapshot, readReference, readReferenceManifest, readReferenceSnapshot, recordReference, seedSiteScripts, startSiteClock } from './reference.ts';
+import { pauseSiteClock, readLayoutSnapshot, restartSiteClock, readReference, readReferenceManifest, readReferenceSnapshot, recordReference, seedSiteScripts, startSiteClock } from './reference.ts';
 import { comparePictures, WIDTHS } from '../journey/fidelity.ts';
 import { open } from '../journey/kit.ts';
 import { fileMenu } from '../journey/ui.ts';
@@ -48,7 +48,7 @@ async function picture(page: Page, address: string, width: number, file: string,
   await page.evaluate(async () => {
     await document.fonts.ready;
   });
-  if (fixedClock) await page.clock.pauseAt(new Date(REFERENCE_TIME));
+  if (fixedClock) await pauseSiteClock(page);
   else await page.waitForTimeout(300);
   await page.screenshot({ path: file, fullPage: true });
   return fs.readFileSync(file).toString('base64');
@@ -100,8 +100,7 @@ for (const site of SITES.filter((one) => only.length === 0 || only.includes(one.
         const replayPage = await replay.newPage();
         await startSiteClock(replayPage);
         for (const [index, width] of WIDTHS.entries()) {
-          if (index > 0) await replayPage.clock.resume();
-          await replayPage.clock.setFixedTime(new Date(REFERENCE_TIME));
+          if (index > 0) await restartSiteClock(replayPage);
           const png = await picture(replayPage, site.url, width, path.join(out, `replay-${width}.png`), true);
           const compared = await comparePictures(page, png, originals.get(width) ?? '');
           referenceReplay.push({ width, pixelMatchCommon: compared.match, originalHeight: compared.targetHeight, replayHeight: compared.exportHeight });

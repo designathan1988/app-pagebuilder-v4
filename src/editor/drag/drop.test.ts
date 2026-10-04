@@ -5,7 +5,7 @@ import { DROP_ZONES, edgeBand, escapeBand, proposeDrop, slotAt, type Axis, type 
 
 const node = (id: string, type: string, children: DocNode[] = []): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag: null, attributes: {}, classes: [], styles: {}, text: null, children });
 const DOC: DocumentJson = {
-  version: 3,
+  version: 4,
   pages: [
     {
       id: 'p',

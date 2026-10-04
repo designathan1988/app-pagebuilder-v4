@@ -6,7 +6,7 @@ import { suggestedName, suggestionsOf } from './suggest.ts';
 
 const PAD = { 'padding-top': '56px', 'padding-left': '40px' };
 const node = (id: string, type: string, base: Record<string, string>): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag: type, attributes: {}, classes: [], styles: { desktop: { base } } as DocNode['styles'], text: null, children: [] });
-const project = (children: readonly DocNode[]): DocumentJson => ({ version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('Page', 'page', {}), tag: 'body', children: [...children] } }] });
+const project = (children: readonly DocNode[]): DocumentJson => ({ version: 4, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('Page', 'page', {}), tag: 'body', children: [...children] } }] });
 
 describe('style suggestions', () => {
   it('offers what every element of a type repeats, and nothing it does not', () => {

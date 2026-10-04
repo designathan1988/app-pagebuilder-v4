@@ -24,6 +24,8 @@ import { isFeatureBuilt } from '../../src/app/features.ts';
 import { shortcutRuns } from '../../src/editor/input/shortcut-rule.ts';
 import type { FeatureId } from '../../src/generated/ids.ts';
 import { EMPTY_FIXTURE, applyDiff, matchDocument, refusalCheck, resolveNode, type DiffOp } from '../../src/manifest/scenario.ts';
+import type { CapturedNode, CapturedPage } from '../../src/core/document/captured.ts';
+import { capturedAt } from '../../src/core/render/captured.ts';
 import { barLabel, control, door as doorData, focusContext, inQuickPanel, keys, modifiedControl, openCommandBar, openMenu, openQuickPanel, openStyleControl, openValueMenu, runDoor, standingControl, type Door } from '../../tests/e2e/door.ts';
 import { openEditor } from '../../tests/support/editor.ts';
 import { unzip } from './unzip.ts';
@@ -379,22 +381,22 @@ function resolveArgs(ref: string, args: Record<string, unknown>, document: unkno
 // canvas drawn at all (the Code view shows the code pane alone) has nothing to check: the frame is the editor's, and
 // what the centre column shows there is the pane's own business.
 async function canvasProblems(page: Page, document: unknown): Promise<string[]> {
-  type CapturedElement = { kind: 'element'; id: string; children: (CapturedElement | { kind: 'text' | 'comment'; id: string })[] };
-  const pages = (document as { pages: { tree: Node; capture?: { viewports: { width: number; root: CapturedElement }[] } }[] }).pages;
+  const pages = (document as { pages: { tree: Node; capture?: CapturedPage }[] }).pages;
   if ((await page.locator('.frame__page').count()) === 0) return [];
   const frame = page.frameLocator('.frame__page');
   if (await frame.locator('html[data-builder-capture]').count() > 0) {
     const width = await frame.locator('html').evaluate((element) => element.clientWidth);
     const drawn = await frame.locator('[data-capture-node]').evaluateAll((els) => els.map((el) => el.getAttribute('data-capture-node')));
-    const shown = pages.flatMap((one) => one.capture?.viewports ?? []).filter((one) => one.root.id === drawn[0]);
-    const viewport = shown.sort((a, b) => Math.abs(a.width - width) - Math.abs(b.width - width))[0];
-    if (viewport === undefined) return ['a captured page absent from the document is drawn'];
+    const shown = pages.flatMap((one) => (one.capture === undefined ? [] : [one.capture])).find((one) => one.root.id === drawn[0]);
+    if (shown === undefined) return ['a captured page absent from the document is drawn'];
+    // the page as the observed width nearest the canvas's showed it (core/render/captured.ts capturedAt)
     const expected: string[] = [];
-    const walk = (node: CapturedElement): void => {
+    const walk = (node: CapturedNode): void => {
+      if (node.kind !== 'element') return;
       expected.push(node.id);
-      for (const child of node.children) if (child.kind === 'element') walk(child);
+      node.children.forEach(walk);
     };
-    walk(viewport.root);
+    walk(capturedAt(shown, width));
     return drawn.join() === expected.join() ? [] : [`captured DOM IDs differ: expected ${expected.join(',')}; drawn ${drawn.join(',')}`];
   }
   const drawn = await frame.locator('[data-node]').evaluateAll((els) => els.map((el) => el.getAttribute('data-node')));

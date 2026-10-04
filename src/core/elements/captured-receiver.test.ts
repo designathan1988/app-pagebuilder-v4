@@ -17,7 +17,7 @@ const captured = (): DocumentJson =>
         name: 'Shot',
         file: 'shot.html',
         tree: node('Shot-root', 'page', 'body'),
-        capture: { viewports: [{ width: 1440, root: { kind: 'element', id: 'h', namespace: 'http://www.w3.org/1999/xhtml', tag: 'html', attributes: [], children: [] } }] },
+        capture: { widths: [1440], root: { kind: 'element', id: 'h', namespace: 'http://www.w3.org/1999/xhtml', tag: 'html', attributes: [], children: [] } },
       },
     ],
   });

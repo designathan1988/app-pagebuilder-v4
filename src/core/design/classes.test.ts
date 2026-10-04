@@ -26,7 +26,7 @@ const context = (document: DocumentJson, selection: readonly string[]): HandlerC
   css: anyCss,
 });
 const project = (children: readonly DocNode[]): DocumentJson => ({
-  version: 3,
+  version: 4,
   pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('Page', { children: [...children] }), type: 'page' as DocNode['type'], tag: 'body' } }],
   classes: [{ name: 'card', styles: { desktop: { base: { 'padding-top': '16px' } } } }],
 });

@@ -5,8 +5,8 @@
     "commands": 373,
     "doors": 1362,
     "scenarios": 1831,
-    "modules": 475,
-    "lines": 82672
+    "modules": 476,
+    "lines": 83135
   },
   "features": [
     {
@@ -3350,13 +3350,19 @@
     },
     {
       "path": "src/core/capture/edits.ts",
-      "lines": 105,
+      "lines": 125,
       "commands": [
         "capture.edit"
       ],
       "features": [
         "capture-url"
       ]
+    },
+    {
+      "path": "src/core/capture/merge.ts",
+      "lines": 179,
+      "commands": [],
+      "features": []
     },
     {
       "path": "src/core/clipboard/clipboard.ts",
@@ -3593,7 +3599,7 @@
     },
     {
       "path": "src/core/document/captured.ts",
-      "lines": 144,
+      "lines": 239,
       "commands": [],
       "features": []
     },
@@ -3605,7 +3611,7 @@
     },
     {
       "path": "src/core/document/migrations.ts",
-      "lines": 49,
+      "lines": 61,
       "commands": [],
       "features": []
     },
@@ -3623,7 +3629,7 @@
     },
     {
       "path": "src/core/document/validate.ts",
-      "lines": 661,
+      "lines": 664,
       "commands": [],
       "features": []
     },
@@ -3802,7 +3808,7 @@
     },
     {
       "path": "src/core/export/export.ts",
-      "lines": 563,
+      "lines": 564,
       "commands": [
         "project.export"
       ],
@@ -4046,7 +4052,7 @@
     },
     {
       "path": "src/core/import/import.ts",
-      "lines": 1952,
+      "lines": 1940,
       "commands": [
         "project.importHtml"
       ],
@@ -4401,7 +4407,7 @@
     },
     {
       "path": "src/core/render/captured.ts",
-      "lines": 200,
+      "lines": 328,
       "commands": [],
       "features": []
     },
@@ -5177,7 +5183,7 @@
     },
     {
       "path": "src/editor/canvas/render/captured.ts",
-      "lines": 113,
+      "lines": 144,
       "commands": [],
       "features": []
     },
@@ -6137,7 +6143,7 @@
     },
     {
       "path": "src/editor/shell/captured-inspector.tsx",
-      "lines": 128,
+      "lines": 127,
       "commands": [],
       "features": []
     },
@@ -6885,7 +6891,7 @@
     },
     {
       "path": "src/manifest/check/scenarios.ts",
-      "lines": 258,
+      "lines": 265,
       "commands": [],
       "features": []
     },

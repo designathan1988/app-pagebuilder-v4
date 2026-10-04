@@ -86,7 +86,7 @@ describe('references follow what moves or leaves (RF1)', () => {
     const root = { kind: 'element' as const, id: 'h', namespace: 'http://www.w3.org/1999/xhtml', tag: 'html', attributes: [], children: [] };
     const sheet = 'body{background:url("img/bg.png")}';
     const document = documentOf({
-      pages: [page('home', 'index.html', []), { ...page('cap', 'cap.html', []), capture: { viewports: [{ width: 1440, root }] } }],
+      pages: [page('home', 'index.html', []), { ...page('cap', 'cap.html', []), capture: { widths: [1440], root } }],
       folders: ['site'],
       files: [{ path: 'cap.capture.css', type: 'text/css', bytes: base64(sheet) }, { path: 'img/bg.png', type: 'image/png', bytes: '' }],
     });

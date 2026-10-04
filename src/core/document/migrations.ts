@@ -9,6 +9,8 @@
 //
 // Version 2 gives captured pages an HTML-root class setting. Version 3 gives captured pages a distinct ordered
 // source DOM; old authored pages keep their existing tree and gain no capture data in either migration step.
+// Version 4 holds a captured page as one tree for every observed width (DEC-61): a version-3 page kept one snapshot per
+// width with no node identity between them, so it keeps its widest snapshot.
 import { DOCUMENT_VERSION, type DocumentJson } from './model.ts';
 
 export interface Migration {
@@ -23,7 +25,17 @@ export interface Migration {
 export const MIGRATIONS: readonly Migration[] = [
   { from: 1, to: 2, migrate: (document) => ({ ...document, version: 2 }) },
   { from: 2, to: 3, migrate: (document) => ({ ...document, version: 3 }) },
+  { from: 3, to: 4, migrate: (document) => ({ ...document, version: 4, pages: Array.isArray(document.pages) ? document.pages.map(widestCapture) : document.pages }) },
 ];
+
+function widestCapture(page: unknown): unknown {
+  if (page === null || typeof page !== 'object' || !('capture' in page)) return page;
+  const capture = (page as { capture: unknown }).capture as { viewports?: unknown; resourceProblems?: unknown } | null;
+  if (capture === null || typeof capture !== 'object' || !Array.isArray(capture.viewports)) return page;
+  const widest = [...(capture.viewports as { width: number; root: unknown }[])].sort((a, b) => b.width - a.width)[0];
+  if (widest === undefined) return page;
+  return { ...page, capture: { widths: [widest.width], root: widest.root, ...(capture.resourceProblems === undefined ? {} : { resourceProblems: capture.resourceProblems }) } };
+}
 
 export type MigrationResult =
   | { readonly ok: true; readonly document: unknown }

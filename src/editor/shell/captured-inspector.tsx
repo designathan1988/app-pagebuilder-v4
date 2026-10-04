@@ -1,7 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import type { CapturedNode } from '../../core/document/captured.ts';
-import { capturedViewport } from '../../core/render/captured.ts';
-import { formattedCapturedCss, formattedCapturedHtml } from '../../core/render/captured.ts';
+import { capturedAt, formattedCapturedCss, formattedCapturedHtml } from '../../core/render/captured.ts';
 import type { ProjectFile } from '../../core/document/model.ts';
 import { openedPage } from '../../core/project/pages.ts';
 import { activeBreakpoint } from '../view/breakpoints.ts';
@@ -100,7 +99,7 @@ export function CapturedInspector() {
   const selected = useEditorState((state) => state.ui.capturedNode ?? null);
   const [search, setSearch] = useState('');
   const [codeOpen, setCodeOpen] = useState(false);
-  const root = page?.capture === undefined ? null : capturedViewport(page.capture, width);
+  const root = page?.capture === undefined ? null : capturedAt(page.capture, width);
   const rows = useMemo(() => root === null ? [] : flatten(root), [root]);
   const visible = search.trim() === '' ? rows.filter((one) => one.inBody && (one.node.kind === 'element' || one.node.value.trim() !== '')).slice(0, 200) : rows.filter((one) => one.label.toLowerCase().includes(search.toLowerCase())).slice(0, 200);
   const node = rows.find((one) => one.node.id === selected)?.node ?? null;

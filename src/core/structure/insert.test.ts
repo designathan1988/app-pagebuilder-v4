@@ -19,7 +19,7 @@ import { deepFreeze } from '../store/store.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const DOC: DocumentJson = {
-  version: 3,
+  version: 4,
   pages: [
     {
       id: 'p',
@@ -117,7 +117,7 @@ describe('the content model (src/core/elements/content-model.ts)', () => {
 describe('element.insert into a Link Block (spec elements-structure, Problems in Pager 5)', () => {
   // a Link Block holding a container, and a section beside it
   const LINKED: DocumentJson = {
-    version: 3,
+    version: 4,
     pages: [
       {
         id: 'p',

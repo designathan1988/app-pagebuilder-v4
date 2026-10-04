@@ -11,6 +11,7 @@
 // its end terminals the fast runner cannot read are skipped, the others checked.
 import fs from 'node:fs';
 import path from 'node:path';
+import { migrateDocument } from '../../src/core/document/migrations.ts';
 import { afterAll, describe, expect, it } from 'vitest';
 import { runName, writeHeadlessResults } from './balance.ts';
 import type { Layout } from '../../src/core/ports/layout.ts';
@@ -120,7 +121,12 @@ function scenarioBrowserOnly(s: Scenario, door: string): string | null {
 }
 
 function fixtureOf(name: string, locale: Locale): DocumentJson {
-  if (name !== EMPTY_FIXTURE) return JSON.parse(fs.readFileSync(path.join('manifest/features/fixtures', `${name}.json`), 'utf8')) as DocumentJson;
+  if (name !== EMPTY_FIXTURE) {
+    // a fixture is read as File › Open reads a saved project: carried to the current format first
+    const migrated = migrateDocument(JSON.parse(fs.readFileSync(path.join('manifest/features/fixtures', `${name}.json`), 'utf8')));
+    if (!migrated.ok) throw new Error(`fixture ${name} cannot be read: ${migrated.reason}`);
+    return migrated.document as DocumentJson;
+  }
   const rootLabel = manifest.elements.elements.find((e) => e.id === MODEL_RULES.root.type)?.labelKey ?? 'element.page.label';
   return emptyProject({ page: translate(locale, 'pages.defaultHome'), root: translate(locale, rootLabel as 'element.page.label') }, MODEL_RULES.root);
 }

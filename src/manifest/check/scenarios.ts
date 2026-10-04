@@ -1,5 +1,6 @@
 // Every scenario can be run as written: its fixture, document paths, steps, door coverage and tooth proof.
 import { rulesFromManifest, validateDocument } from '../../core/document/validate.ts';
+import { migrateDocument } from '../../core/document/migrations.ts';
 import type { DocumentJson } from '../../core/document/model.ts';
 import { EMPTY_FIXTURE, applyDiff, emptyProject, parsePath, resolveNode, withStandInIds } from '../scenario.ts';
 import { GESTURE_DOOR_KINDS, type Command, type Scenario } from '../schema.ts';
@@ -34,9 +35,15 @@ export function scenariosRules(ctx: CheckContext) {
       report('fixture', file, '', 'a fixture is a project document: { "version", "pages" } in the model of src/core/document/model.ts');
       continue;
     }
-    const invalid = validateDocument(json as DocumentJson, [], modelRules);
+    // a fixture is read as File › Open reads a saved project: carried to the current format first (migrations.ts)
+    const migrated = migrateDocument(json);
+    if (!migrated.ok) {
+      report('fixture', file, '/version', `a fixture the app cannot read (${migrated.reason})`);
+      continue;
+    }
+    const invalid = validateDocument(migrated.document as DocumentJson, [], modelRules);
     for (const problem of invalid) report('fixture', file, problem.path, problem.message);
-    if (invalid.length === 0) fixtureDocs.set(id, json);
+    if (invalid.length === 0) fixtureDocs.set(id, migrated.document);
   }
   const textOf = (locale: string, key: string): string => {
     const catalogue = input.catalogues[locale];

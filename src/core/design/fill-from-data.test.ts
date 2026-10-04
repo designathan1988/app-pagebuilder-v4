@@ -32,7 +32,7 @@ const instance = (id: string): DocNode => ({
 
 const doc = (csv: string): DocumentJson =>
   ({
-    version: 3,
+    version: 4,
     components: [{ name: 'Item', tree: CARD_TREE }],
     files: [file('img/graos.png', 'image/png'), file('img/xicara.png', 'image/png'), file('img/loja.png', 'image/png'), file('data/cardapio.csv', 'text/csv', csv)],
     pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: [node('Grid', 'div', 'div', { children: [instance('Card')] })] }) }],

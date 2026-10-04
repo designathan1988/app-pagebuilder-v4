@@ -22,8 +22,25 @@ export async function seedSiteScripts(context: BrowserContext): Promise<void> {
   }, REFERENCE_SEED);
 }
 
+// The page's clock starts at the reference moment and runs. A fixed time (setFixedTime) freezes Date only while timers
+// keep running, so a script that measures elapsed time with Date.now() never finishes: allbirds' entrance kept its hero
+// at opacity 0 in every reference (Playwright, Clock: "timers depend on Date.now and are confused when the Date.now
+// value does not change over time... install the clock"; https://playwright.dev/docs/clock).
 export async function startSiteClock(page: Page): Promise<void> {
-  await page.clock.setFixedTime(new Date(REFERENCE_TIME));
+  await page.clock.install({ time: new Date(REFERENCE_TIME) });
+}
+
+// Before another navigation: the clock runs again from the reference moment.
+export async function restartSiteClock(page: Page): Promise<void> {
+  await page.clock.resume();
+  await page.clock.setSystemTime(new Date(REFERENCE_TIME));
+}
+
+// Time stops while the page is photographed and read. Playwright's pauseAt refuses a past moment, and the page's time
+// has run since its reference moment: it pauses a second after the page's own now.
+export async function pauseSiteClock(page: Page): Promise<void> {
+  const now = await page.evaluate(() => Date.now());
+  await page.clock.pauseAt(new Date(now + 1_000));
 }
 
 async function settledSnapshot(page: Page): Promise<{ readonly bytes: Buffer; readonly state: SettleResult }> {
@@ -31,7 +48,7 @@ async function settledSnapshot(page: Page): Promise<{ readonly bytes: Buffer; re
   await page.evaluate(async () => {
     await document.fonts.ready;
   });
-  await page.clock.pauseAt(new Date(REFERENCE_TIME));
+  await pauseSiteClock(page);
   return { bytes: await page.screenshot({ fullPage: true }), state };
 }
 
@@ -136,11 +153,9 @@ export async function recordReference(browser: Browser, url: string, har: string
   try {
     for (const [index, width] of widths.entries()) {
       if (index > 0) {
-        await page.clock.resume();
-        await repeatPage.clock.resume();
+        await restartSiteClock(page);
+        await restartSiteClock(repeatPage);
       }
-      await page.clock.setFixedTime(new Date(REFERENCE_TIME));
-      await repeatPage.clock.setFixedTime(new Date(REFERENCE_TIME));
       await page.setViewportSize({ width, height: 900 });
       await repeatPage.setViewportSize({ width, height: 900 });
       if (isChallengeResponse(await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 }))) throw new CaptureChallengeError(url);

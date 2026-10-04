@@ -55,8 +55,18 @@ async function readResources(read: PageRead, base: string): Promise<Record<strin
   }
   for (const image of read.images) if (!image.src.startsWith('data:')) await fetchOne(image.src);
   for (const script of read.scripts ?? []) if (script.src !== null) await fetchOne(script.src);
-  for (const match of read.html.matchAll(/url\(\s*(?:&quot;|['"])?([^'")&]+)(?:&quot;|['"])?\s*\)/g)) {
-    const raw = match[1] ?? '';
+  // every attribute value of the tree (its inline styles' url()s among them), walked here: this function runs in the
+  // tab and can call nothing defined outside it
+  const values: string[] = [];
+  const walk = (node: PageRead['root']['children'][number]): void => {
+    if (node.kind !== 'element') return;
+    for (const attribute of node.attributes) values.push(attribute.value);
+    node.children.forEach(walk);
+    node.shadow?.children.forEach(walk);
+  };
+  walk(read.root);
+  for (const match of values.join(' ').matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g)) {
+    const raw = match[2] ?? '';
     if (!raw.startsWith('data:') && !raw.startsWith('__capture')) await fetchOne(new URL(raw, base).href);
   }
   return out;

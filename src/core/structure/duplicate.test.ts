@@ -18,7 +18,7 @@ import { deepFreeze } from '../store/store.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const DOC: DocumentJson = {
-  version: 3,
+  version: 4,
   pages: [
     {
       id: 'p',
@@ -107,7 +107,7 @@ describe('element.duplicate (src/core/structure/duplicate.ts)', () => {
       node('Raw anchor', 'link', 'a', { attributes: { href: '#control' } }),
       node('Trigger', 'button', 'button', { interactions: [{ trigger: 'click', action: 'show', target: 'Control' as NodeId }] }),
     ] });
-    const document: DocumentJson = { version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: [group] }) }] };
+    const document: DocumentJson = { version: 4, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children: [group] }) }] };
     const result = after(['Group'], document);
     const copy = result.document.pages[0]?.tree.children[1];
     expect(copy?.attributes.id).toBe('group-copy');

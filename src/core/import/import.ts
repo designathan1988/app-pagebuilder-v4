@@ -61,7 +61,7 @@ import { browserPorts } from '../ports/browser.ts';
 import { orphanReferences } from '../elements/references.ts';
 import { generate as generateCssTree, parse as parseCssTree, walk as walkCssTree, type CssNode as CssTreeNode } from 'css-tree';
 import { capturedPageStylePath } from './capture-styles.ts';
-import { captureSnapshotPath, captureTree, type CapturedNode, type CapturedSnapshotPackage } from '../document/captured.ts';
+import { capturedFromPackage, captureSnapshotPath, captureTree, type CapturedNode } from '../document/captured.ts';
 
 // the entries this module published before the markup reading moved out stay published here: consumers need not change
 export { parseMarkup, parsePage, lineOf } from './markup.ts';
@@ -1536,20 +1536,8 @@ function pageFrom(file: PickedFile, builder: Builder): Page {
   if (builder.captured) {
     const title = parsed.title.trim();
     const snapshot = builder.picked.find((one) => one.name === captureSnapshotPath(file.name));
-    let viewports: { width: number; root: ReturnType<typeof captureTree> }[];
-    let resourceProblems: CapturedSnapshotPackage['resourceProblems'];
-    if (snapshot === undefined) viewports = [{ width: 1440, root: captureTree(builder.markup, ids) }];
-    else {
-      const packageData = JSON.parse(textOfFile(snapshot)) as CapturedSnapshotPackage;
-      if (packageData.format !== 1 || !Array.isArray(packageData.viewports) || packageData.viewports.length === 0) throw new Error(`Invalid captured snapshots for ${file.name}`);
-      viewports = packageData.viewports.map((one) => ({ width: one.width, root: captureTree(one.html, ids) }));
-      resourceProblems = packageData.resourceProblems;
-    }
-    return {
-      id: ids.next(), name: title !== '' ? title : baseName(file.name), file: file.name,
-      tree: body,
-      capture: { viewports, ...(resourceProblems === undefined ? {} : { resourceProblems }) },
-    };
+    const capture = snapshot === undefined ? { widths: [1440], root: captureTree(builder.markup, ids) } : capturedFromPackage(JSON.parse(textOfFile(snapshot)), ids);
+    return { id: ids.next(), name: title !== '' ? title : baseName(file.name), file: file.name, tree: body, capture };
   }
   // the head first: the stylesheets it links and the settings it holds come before the body's own (a <style> block in
   // the body is later in the document, and later rules win)
@@ -1700,8 +1688,8 @@ export function importedSite<Ui>(context: HandlerContext<Ui>, picked: readonly P
     const page = pageFrom(file, builder);
     if (page.capture === undefined) elements += countOf(page.tree) - 1;
     else {
-      const root = page.capture.viewports[0]?.root;
-      const body = root?.children.find((one) => one.kind === 'element' && one.tag === 'body');
+      const root = page.capture.root;
+      const body = root.children.find((one) => one.kind === 'element' && one.tag === 'body');
       const count = (node: CapturedNode): number => node.kind === 'element' ? 1 + node.children.reduce((sum, child) => sum + count(child), 0) : 0;
       elements += body === undefined ? 0 : Math.max(0, count(body) - 1);
     }

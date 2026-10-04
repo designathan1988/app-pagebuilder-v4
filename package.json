@@ -74,6 +74,7 @@
     "happy-dom": "^20.14.5",
     "html-validate": "^11.16.0",
     "lucide-static": "^1.48.0",
+    "parse5": "^8.0.1",
     "style-dictionary": "^5.5.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.1",

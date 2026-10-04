@@ -1,46 +1,83 @@
-// The capture's reading of a page (the plan's stage 12), apart from Node and Playwright so the browser extension
-// (companion/extension) bundles the same function the Companion runs in Chrome (tools/companion/capture.ts).
-// What a page holds as its scripts left it (run in the page: by Playwright for the Companion's capture, by the
-// browser extension in the person's own tab): its markup with the shadow DOM flattened, scripts and the settle style
-// left out, its sheets in order, its images, its links to other pages of the site (each marked until the crawl knows
-// which pages it took) and the custom elements it met. Self-contained: it reads nothing but the page.
+// The capture's reading of a page (the plan's stage 12; docs/CAPTURE-IMPORTER-ARCHITECTURE.md, Observe), apart from
+// Node and Playwright so the browser extension (companion/extension) bundles the same function the Companion runs in
+// Chrome (tools/companion/capture.ts). Self-contained: it runs inside the page (page.evaluate sends its source), so it
+// reads nothing but the page and calls nothing outside itself.
+//
+// The page travels as a tree of nodes, never as HTML text: a DOM a script built may not survive being written and
+// parsed again (a <div> a script put in <head> sends every later head element into <body>; HTML Standard, parsing).
+// rrweb serializes the same way. What it holds:
+//   - every element, text and comment node in order, with namespaces and attributes; an open shadow root is kept as
+//     the host's shadow (MDN: declarative shadow DOM writes it back);
+//   - a stylesheet (<link rel=stylesheet>, <style>) stays at its place as a placeholder comment naming its entry in
+//     `sheets`: a <style>'s text is read from its CSSOM when the page lets it be read (CSS-in-JS libraries insert their
+//     rules with insertRule and leave the element's text empty), a link is fetched by its address; adopted
+//     stylesheets follow the document's (or the shadow root's) own (CSSOM: document or shadow root CSS style sheets);
+//   - state: a field's value and checked state, an option's selection, a scrolled box's offsets;
+//   - images marked with the source the browser chose (currentSrc), srcset candidates marked one by one, canvas and
+//     video paint and frames marked for their visual fallback, same-site links marked until the crawl knows its pages;
+//   - left out: scripts, <noscript>, resource hints, the capture's own style.
+export interface ObservedAttribute {
+  readonly name: string;
+  readonly namespace: string | null;
+  readonly value: string;
+}
+export interface ObservedState {
+  readonly value?: string;
+  readonly checked?: boolean;
+  readonly selected?: boolean;
+  readonly scrollLeft?: number;
+  readonly scrollTop?: number;
+}
+export type ObservedNode =
+  | {
+    readonly kind: 'element'; readonly id: string; readonly namespace: string; readonly tag: string; readonly attributes: readonly ObservedAttribute[];
+    readonly children: readonly ObservedNode[]; readonly shadow?: { readonly mode: 'open' | 'closed'; readonly children: readonly ObservedNode[] }; readonly state?: ObservedState;
+  }
+  | { readonly kind: 'text'; readonly id: string; readonly value: string }
+  | { readonly kind: 'comment'; readonly id: string; readonly value: string };
+export type ObservedElement = Extract<ObservedNode, { readonly kind: 'element' }>;
+
 export interface PageRead {
   readonly title: string;
   readonly viewportWidth?: number;
-  readonly html: string;
-  readonly sheets: readonly { readonly href: string | null; readonly text: string | null; readonly scope: string | null; readonly media?: string | null }[];
+  readonly root: ObservedElement;
+  readonly sheets: readonly { readonly href: string | null; readonly text: string | null; readonly media?: string | null }[];
   readonly images: readonly { readonly index: number; readonly src: string; readonly folder?: 'img' | 'media' }[];
   readonly links: readonly string[];
   readonly scripts?: readonly { readonly src: string | null; readonly text: string; readonly type: string }[];
   readonly opaque?: readonly { readonly path: string; readonly marker: string; readonly kind: 'canvas' | 'video' | 'frame' }[];
 }
+
 export function serializePage(origin: string): PageRead {
+  const HTML = 'http://www.w3.org/1999/xhtml';
+  const SETTLE = 'animation-play-state:paused!important';
+  const HINTS = new Set(['preload', 'modulepreload', 'prefetch', 'preconnect', 'dns-prefetch', 'prerender']);
+  let next = 0;
+  const id = (): string => `k${next++}`;
   const scripts = [...document.querySelectorAll('script')].map((element) => ({
     src: element.hasAttribute('src') ? element.src : null,
     text: element.textContent ?? '',
     type: element.getAttribute('type') ?? '',
   }));
-  const sheets: { readonly href: string | null; readonly text: string | null; readonly scope: string | null; readonly media?: string | null }[] = [];
-  const lightSheets = new Map<Element, number>();
-  for (const el of document.querySelectorAll('link[rel~="stylesheet"][href], style')) {
-    const media = el.getAttribute('media')?.trim() || null;
-    if (el instanceof HTMLLinkElement) {
-      lightSheets.set(el, sheets.length);
-      sheets.push({ href: el.href, text: null, scope: null, media });
+  const sheets: { readonly href: string | null; readonly text: string | null; readonly media?: string | null }[] = [];
+  // a stylesheet's rules as the page holds them now: its CSSOM when readable (rules inserted by a script included),
+  // else null (a cross-origin sheet the page may not read)
+  const cssomText = (sheet: CSSStyleSheet | null): string | null => {
+    if (sheet === null) return null;
+    try {
+      return [...sheet.cssRules].map((rule) => rule.cssText).join('\n');
+    } catch {
+      return null;
     }
-    else if (el.textContent !== null && !el.textContent.includes('animation-play-state:paused!important')) {
-      lightSheets.set(el, sheets.length);
-      sheets.push({ href: null, text: el.textContent, scope: null, media });
-    }
-  }
-  // Existing capture packages expose root runtime declarations as the last sheet. Keep that
-  // representation while the captured DOM also retains the literal, higher-priority inline style.
-  const rootStyle = document.documentElement.getAttribute('style')?.trim();
-  if (rootStyle) sheets.push({ href: null, text: `html:root{${rootStyle}}`, scope: null });
-  // The page as it is drawn, shadow DOM flattened (the plan's stage 12): a host's open shadow root stands in its
-  // place, a <slot> holds the nodes assigned to it (its own fallback when none is), and the host's light children
-  // that no slot takes are not drawn, so they go; a shadow root's styles join the page's sheets, :host written as
-  // the host's own tag. An image is marked with the source the browser chose for it (its currentSrc).
+  };
+  const sheetPlaceholder = (entry: { readonly href: string | null; readonly text: string | null; readonly media?: string | null }): ObservedNode => {
+    sheets.push(entry);
+    return { kind: 'comment', id: id(), value: `__capture_sheet_${sheets.length - 1}__` };
+  };
+  const adopted = (list: readonly CSSStyleSheet[]): ObservedNode[] => list.flatMap((sheet) => {
+    const text = cssomText(sheet);
+    return text === null ? [] : [sheetPlaceholder({ href: null, text, media: null })];
+  });
   const images: { readonly index: number; readonly src: string; readonly folder?: 'img' | 'media' }[] = [];
   const opaque: { path: string; marker: string; kind: 'canvas' | 'video' | 'frame' }[] = [];
   const assetMarker = (value: string, folder: 'img' | 'media' = 'img'): string => {
@@ -86,130 +123,109 @@ export function serializePage(origin: string): PageRead {
     for (const replacement of replacements.reverse()) marked = marked.slice(0, replacement.start) + replacement.value + marked.slice(replacement.end);
     return marked;
   };
-  // `shadowed`: the node lies in a shadow tree or is slotted into one, where the rules that hide it (a closed
-  // dropdown's slot, :host(:not([open]))) do not survive the flattening: an element the page does not draw there
-  // comes hidden (kept, not drawn), as the page showed it
-  const flat = (node: Node, shadowed = false): Node | null => {
-    if (!(node instanceof Element)) return node.cloneNode(false);
-    if (node instanceof HTMLStyleElement && (node.textContent ?? '').includes('animation-play-state:paused!important')) return null;
-    const sheet = lightSheets.get(node);
-    if (sheet !== undefined) return document.createComment(`__capture_sheet_${sheet}__`);
-    const copy = node.cloneNode(false) as Element;
-    const undrawn = shadowed && getComputedStyle(node).display === 'none';
-    if (undrawn) copy.setAttribute('hidden', '');
-    // the classes the markup gave it, kept apart: the import may make a class the element's own styles and drop
-    // it, and the residual stylesheet's rules name these (core/import residualCss)
-    if (copy.getAttribute('class')) copy.setAttribute('data-capture-class', copy.getAttribute('class') as string);
-    if (node instanceof HTMLCanvasElement) {
-      try {
-        copy.setAttribute('data-capture-paint', assetMarker(node.toDataURL('image/png')));
-      }
-      catch {
-        const marker = `__capture_opaque_${opaque.length}__`;
-        copy.setAttribute('data-capture-paint', marker);
-        opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'canvas' });
-      }
-      return copy;
-    }
-    if (node instanceof HTMLVideoElement) {
-      const marker = `__capture_opaque_${opaque.length}__`;
-      copy.removeAttribute('src');
-      copy.removeAttribute('autoplay');
-      copy.setAttribute('poster', marker);
-      opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'video' });
-      for (const source of node.querySelectorAll('source[src]')) {
-        const address = source.getAttribute('src');
-        if (address !== null) assetMarker(address, 'media');
-      }
-      const ownSource = node.getAttribute('src');
-      if (ownSource !== null) assetMarker(ownSource, 'media');
-      return copy;
-    }
-    if (node instanceof HTMLIFrameElement) {
-      const marker = `__capture_opaque_${opaque.length}__`;
-      copy.removeAttribute('src');
-      copy.removeAttribute('srcdoc');
-      copy.setAttribute('data-capture-paint', marker);
-      opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'frame' });
-      return copy;
-    }
-    if (node instanceof HTMLSourceElement) {
-      const srcset = node.getAttribute('srcset');
-      if (srcset !== null) copy.setAttribute('srcset', markedSrcset(srcset));
-    }
-    if (node instanceof HTMLImageElement) {
-      const src = node.currentSrc || node.getAttribute('src') || '';
-      const index = images.length;
-      copy.removeAttribute('loading');
-      copy.setAttribute('src', `__capture_image_${index}__`);
-      images.push({ index, src: src === '' ? '' : new URL(src, document.baseURI).href });
-      const srcset = node.getAttribute('srcset');
-      if (srcset !== null) copy.setAttribute('srcset', markedSrcset(srcset));
-      return copy;
-    }
-    const media = node.localName === 'video' || node.localName === 'audio' || node.localName === 'source' || node.localName === 'track';
-    for (const name of ['src', 'poster', 'data']) {
-      const original = node.getAttribute(name);
-      if (original === null || (name === 'data' && node.localName !== 'object')) continue;
-      copy.setAttribute(name, assetMarker(original, media && name === 'src' ? 'media' : 'img'));
-    }
-    if ((node.localName === 'image' && node.namespaceURI === 'http://www.w3.org/2000/svg') || (node.localName === 'link' && (node.getAttribute('rel') ?? '').split(/\s+/).includes('icon'))) {
-      for (const name of ['href', 'xlink:href']) {
-        const original = node.getAttribute(name);
-        if (original !== null) copy.setAttribute(name, assetMarker(original));
-      }
-    }
-    const root = node.shadowRoot;
-    if (root !== null) {
-      const tag = node.localName;
-      for (const style of root.querySelectorAll('style')) if (style.textContent !== null) sheets.push({ href: null, text: style.textContent, scope: tag, media: style.getAttribute('media')?.trim() || null });
-      for (const sheet of root.adoptedStyleSheets) {
-        try {
-          sheets.push({ href: null, text: [...sheet.cssRules].map((rule) => rule.cssText).join('\n'), scope: tag });
-        } catch {
-          // a sheet whose rules cannot be read is left out
-        }
-      }
-    }
-    const children = root === null ? [...node.childNodes] : [...root.childNodes];
-    for (const child of children) {
-      if (child instanceof HTMLStyleElement && root !== null) continue;
-      if (child instanceof HTMLSlotElement) {
-        const assigned = child.assignedNodes({ flatten: true });
-        // a slot the page does not draw draws none of what it holds
-        const shut = getComputedStyle(child).display === 'none';
-        for (const one of assigned.length > 0 ? assigned : [...child.childNodes]) {
-          const made = flat(one, true);
-          if (made instanceof Element && shut) made.setAttribute('hidden', '');
-          if (made !== null && (!shut || made instanceof Element)) copy.append(made);
-        }
-        continue;
-      }
-      const made = flat(child, shadowed || root !== null);
-      if (made !== null) copy.append(made);
-    }
-    return copy;
-  };
-  const clone = flat(document.documentElement) as HTMLElement;
-  // Keep root classes on <html>; a variable defined there cannot be inherited upward from <body>.
-  const body = clone.querySelector('body');
-  if (body !== null) {
-    for (const attribute of document.documentElement.attributes) if (attribute.name.startsWith('data-') && attribute.name !== 'data-capture-class' && !body.hasAttribute(attribute.name)) body.setAttribute(attribute.name, attribute.value);
-  }
-  for (const el of clone.querySelectorAll('script, noscript, link[rel="preload"], link[rel="modulepreload"]')) el.remove();
-  // an image with no source keeps none (its mark is cleared once the sources are written)
-  const sourced = images.filter((one) => one.src !== '');
   const links: string[] = [];
-  clone.querySelectorAll('a[href]').forEach((a) => {
-    const raw = a.getAttribute('href') ?? '';
-    if (raw === '' || raw.startsWith('#') || /^(mailto|tel|javascript):/i.test(raw)) return;
+  const linkMark = (raw: string): string => {
+    if (raw === '' || raw.startsWith('#') || /^(mailto|tel|javascript):/i.test(raw) || !URL.canParse(raw, document.baseURI)) return raw;
     const at = new URL(raw, document.baseURI);
-    if (at.origin !== origin) {
-      a.setAttribute('href', at.href);
-      return;
-    }
-    a.setAttribute('href', `__capture_link__${at.origin}${at.pathname}__${at.hash}__`);
+    if (at.origin !== origin) return at.href;
     links.push(`${at.origin}${at.pathname}`);
-  });
-  return { title: document.title, viewportWidth: window.innerWidth, html: `<!doctype html>\n${clone.outerHTML}`, sheets, images: sourced, links, scripts, opaque };
+    return `__capture_link__${at.origin}${at.pathname}__${at.hash}__`;
+  };
+  const stateOf = (element: Element): ObservedState | undefined => {
+    const state: { -readonly [K in keyof ObservedState]: ObservedState[K] } = {};
+    if (element instanceof HTMLInputElement) {
+      // only a field whose value a person types (the HTML Standard's "value" mode): a checkbox answers "on" by default,
+      // and a password or file is never kept
+      const typed = !['checkbox', 'radio', 'file', 'password', 'hidden', 'submit', 'reset', 'button', 'image'].includes(element.type);
+      if (typed && element.value !== element.defaultValue) state.value = element.value;
+      if (element.checked !== element.defaultChecked) state.checked = element.checked;
+    }
+    if (element instanceof HTMLTextAreaElement && element.value !== element.defaultValue) state.value = element.value;
+    if (element instanceof HTMLOptionElement && element.selected !== element.defaultSelected) state.selected = element.selected;
+    if (element.scrollLeft !== 0) state.scrollLeft = element.scrollLeft;
+    if (element.scrollTop !== 0 && element !== document.documentElement && element !== document.body) state.scrollTop = element.scrollTop;
+    return Object.keys(state).length === 0 ? undefined : state;
+  };
+  const read = (node: Node): ObservedNode | null => {
+    if (node.nodeType === Node.TEXT_NODE) return { kind: 'text', id: id(), value: node.nodeValue ?? '' };
+    if (node.nodeType === Node.COMMENT_NODE) return { kind: 'comment', id: id(), value: node.nodeValue ?? '' };
+    if (!(node instanceof Element)) return null;
+    const tag = node.localName;
+    const html = node.namespaceURI === HTML;
+    if (html && (tag === 'script' || tag === 'noscript')) return null;
+    if (html && tag === 'link') {
+      const rel = (node.getAttribute('rel') ?? '').toLowerCase().split(/\s+/);
+      if (rel.some((one) => HINTS.has(one))) return null;
+      if (rel.includes('stylesheet') && node.hasAttribute('href')) return sheetPlaceholder({ href: (node as HTMLLinkElement).href, text: null, media: node.getAttribute('media')?.trim() || null });
+    }
+    if (html && tag === 'style') {
+      const style = node as HTMLStyleElement;
+      if ((style.textContent ?? '').includes(SETTLE)) return null;
+      return sheetPlaceholder({ href: null, text: cssomText(style.sheet) ?? style.textContent ?? '', media: node.getAttribute('media')?.trim() || null });
+    }
+    const attributes: ObservedAttribute[] = [];
+    for (const attribute of node.attributes) {
+      const name = attribute.name;
+      let value = attribute.value;
+      if (name === 'data-capture-runtime') continue;
+      if (html && tag === 'img' && name === 'src') continue;
+      if (html && tag === 'img' && name === 'loading') continue;
+      if ((html && (tag === 'img' || tag === 'source') && name === 'srcset')) value = markedSrcset(value);
+      else if (html && (tag === 'video' || tag === 'iframe') && (name === 'src' || name === 'srcdoc' || name === 'autoplay')) continue;
+      else if (html && tag === 'video' && name === 'poster') continue;
+      else if (['src', 'poster'].includes(name) || (name === 'data' && tag === 'object')) value = assetMarker(value, ['video', 'audio', 'source', 'track'].includes(tag) && name === 'src' ? 'media' : 'img');
+      else if (((tag === 'image' && !html) || (html && tag === 'link' && /\bicon\b/i.test(node.getAttribute('rel') ?? ''))) && (name === 'href' || name === 'xlink:href')) value = assetMarker(value);
+      else if (html && tag === 'a' && name === 'href') value = linkMark(value);
+      attributes.push({ name, namespace: attribute.namespaceURI, value });
+    }
+    if (html && tag === 'img') {
+      const image = node as HTMLImageElement;
+      const src = image.currentSrc || image.getAttribute('src') || '';
+      const index = images.length;
+      images.push({ index, src: src === '' ? '' : new URL(src, document.baseURI).href });
+      attributes.push({ name: 'src', namespace: null, value: `__capture_image_${index}__` });
+    }
+    if (html && tag === 'canvas') {
+      let paint: string;
+      try {
+        paint = assetMarker((node as HTMLCanvasElement).toDataURL('image/png'));
+      } catch {
+        paint = `__capture_opaque_${opaque.length}__`;
+        opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker: paint, kind: 'canvas' });
+      }
+      attributes.push({ name: 'data-capture-paint', namespace: null, value: paint });
+    }
+    if (html && tag === 'video') {
+      const marker = `__capture_opaque_${opaque.length}__`;
+      opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'video' });
+      attributes.push({ name: 'poster', namespace: null, value: marker });
+      for (const source of node.querySelectorAll('source[src]')) assetMarker(source.getAttribute('src') ?? '', 'media');
+      const own = node.getAttribute('src');
+      if (own !== null) assetMarker(own, 'media');
+    }
+    if (html && tag === 'iframe') {
+      const marker = `__capture_opaque_${opaque.length}__`;
+      opaque.push({ path: node.getAttribute('data-capture-runtime') ?? '', marker, kind: 'frame' });
+      attributes.push({ name: 'data-capture-paint', namespace: null, value: marker });
+    }
+    const childOf = html && tag === 'template' ? (node as HTMLTemplateElement).content.childNodes : node.childNodes;
+    const children = [...childOf].flatMap((child) => read(child) ?? []);
+    const root = node.shadowRoot;
+    const shadow = root === null ? undefined : { mode: root.mode, children: [...[...root.childNodes].flatMap((child) => read(child) ?? []), ...adopted(root.adoptedStyleSheets)] };
+    const state = stateOf(node);
+    return { kind: 'element', id: id(), namespace: node.namespaceURI ?? HTML, tag, attributes, children, ...(shadow === undefined ? {} : { shadow }), ...(state === undefined ? {} : { state }) };
+  };
+  const root = read(document.documentElement);
+  if (root === null || root.kind !== 'element') throw new Error('the page has no document element');
+  // The document's adopted stylesheets come after its own sheets: written last in its body.
+  const extra = adopted(document.adoptedStyleSheets);
+  // A root runtime style is kept as the root's own style attribute; it also takes a last sheet of its own, so the
+  // project's stylesheet ranks it as the page did (spec capture-url).
+  const rootStyle = document.documentElement.getAttribute('style')?.trim();
+  if (rootStyle) extra.push(sheetPlaceholder({ href: null, text: `html:root{${rootStyle}}`, media: null }));
+  const withExtra = extra.length === 0 ? root : {
+    ...root,
+    children: root.children.map((child) => (child.kind === 'element' && child.tag === 'body' && child.namespace === HTML ? { ...child, children: [...child.children, ...extra] } : child)),
+  };
+  return { title: document.title, viewportWidth: window.innerWidth, root: withExtra, sheets, images: images.filter((one) => one.src !== ''), links, scripts, opaque };
 }

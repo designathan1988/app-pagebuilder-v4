@@ -32,7 +32,7 @@ function imported(meta: string) {
 // Format-3 captures retain the complete author sheet and DOM; no selector is partitioned into a
 // residual rule and a later generated rule. Each prior cascade case now checks its full source.
 const capturedStyles = (document: ReturnType<typeof imported>): string[] => {
-  const root = document.pages[0]?.capture?.viewports[0]?.root;
+  const root = document.pages[0]?.capture?.root;
   const find = (node: CapturedNode): string[] => node.kind === 'element'
     ? [...(node.tag === 'style' ? [node.children.filter((child) => child.kind === 'text').map((child) => child.kind === 'text' ? child.value : '').join('')] : []), ...node.children.flatMap(find)]
     : [];
@@ -52,7 +52,7 @@ describe('the original stylesheet of a captured page', () => {
     expect(source).toContain('@font-face');
     expect(source).toContain('@media (prefers-color-scheme: dark)');
     expect(source).toContain('color: #f5e6d3');
-    expect(home.capture?.viewports[0]?.root.children.some((one) => one.kind === 'element' && one.tag === 'head' && one.children.some((child) => child.kind === 'element' && child.tag === 'link'))).toBe(true);
+    expect(home.capture?.root.children.some((one) => one.kind === 'element' && one.tag === 'head' && one.children.some((child) => child.kind === 'element' && child.tag === 'link'))).toBe(true);
     expect(home.tree.children).toHaveLength(0);
     expect(capturedPageCss(document, home)).toBe('');
   });

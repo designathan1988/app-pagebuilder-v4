@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test';
 import type { PageRead } from './serialize.ts';
+import { mapTree } from './tree.ts';
+import type { CapturedElement } from '../../src/core/document/captured.ts';
 
 // Read opaque visible paint from the same full-page screenshot as the DOM observation. This does
 // not scroll a frame or rerun a site's JavaScript after the reference photograph was taken.
@@ -40,18 +42,19 @@ export async function completeOpaquePaint(page: Page, read: PageRead, screenshot
   }
   catch { cropped = opaque.map(() => null); }
   const images = [...read.images];
-  let html = read.html;
   const unresolved = [];
+  const replacements = new Map<string, string>();
   for (const [index, item] of opaque.entries()) {
     const data = cropped[index];
     if (data === null || data === undefined) {
       unresolved.push(item);
-      html = html.replaceAll(item.marker, '');
+      replacements.set(item.marker, '');
       continue;
     }
     const asset = images.length;
     images.push({ index: asset, src: data, folder: 'img' });
-    html = html.replaceAll(item.marker, `__capture_image_${asset}__`);
+    replacements.set(item.marker, `__capture_image_${asset}__`);
   }
-  return { ...read, html, images, opaque: unresolved };
+  const root = mapTree(read.root as CapturedElement, { attribute: (value) => [...replacements].reduce((out, [marker, by]) => out.replaceAll(marker, by), value) });
+  return { ...read, root, images, opaque: unresolved };
 }

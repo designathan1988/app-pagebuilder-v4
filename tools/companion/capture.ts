@@ -11,11 +11,14 @@ import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import type { Browser, BrowserContext, Page, Response } from '@playwright/test';
 import { chromium } from '@playwright/test';
-import { generate as generateCss, parse as parseCss, walk as walkCss, type CssNode } from 'css-tree';
+import { parse as parseCss, type CssNode } from 'css-tree';
 import { serializePage, type PageRead } from './serialize.ts';
 import { completeOpaquePaint } from './paint.ts';
-import { captureSnapshotPath, type CapturedSnapshotPackage } from '../../src/core/document/captured.ts';
-import type { CapturedResourceProblem } from '../../src/core/document/captured.ts';
+import { captureSnapshotPath, type CapturedElement, type CapturedResourceProblem, type CapturedSnapshotPackage } from '../../src/core/document/captured.ts';
+import { mergeWidths } from '../../src/core/capture/merge.ts';
+import { sequentialIds } from '../../src/core/ports/ids.ts';
+import { capturedExportHtml } from '../../src/core/render/captured.ts';
+import { attributeValues, element, mapTree, prependToHead } from './tree.ts';
 
 export { serializePage, type PageRead } from './serialize.ts';
 
@@ -179,35 +182,6 @@ const pageKey = (url: string): string => {
 };
 // a project path written from a page's own folder (img/a.png from about/index.html is ../img/a.png)
 const fromPage = (page: string, target: string): string => '../'.repeat(page.split('/').length - 1) + target;
-// A shadow root's sheet (`scope`, its host's tag) with every rule kept within its host: :host is the host itself,
-// ::slotted(x) an x inside it, any other selector a descendant of it. Custom elements keep their own tags in the
-// captured DOM, so the page's own sheets need no rewrite. A sheet that does not parse is kept as it is.
-export function scopeCss(text: string, scope: string | null): string {
-  if (scope === null) return text;
-  let ast: CssNode;
-  try {
-    ast = parseCss(text);
-  } catch {
-    return text;
-  }
-  walkCss(ast, {
-    visit: 'Rule',
-    enter(rule) {
-      if (rule.prelude.type !== 'SelectorList' || (this.atrule !== null && /keyframes$/i.test(this.atrule.name))) return;
-      const selectors = rule.prelude.children.toArray().map((selector) => {
-        const out = generateCss(selector).replace(/::slotted\(([^)]*)\)/g, '$1');
-        return /:host\b/.test(out) ? out.replace(/:host\(([^)]*)\)/g, `${scope}$1`).replace(/:host\b/g, scope) : `${scope} ${out}`;
-      });
-      try {
-        rule.prelude = parseCss(selectors.join(','), { context: 'selectorList' }) as typeof rule.prelude;
-      } catch {
-        // a selector the rewrite could not keep leaves the rule as it was
-      }
-    },
-  });
-  return generateCss(ast);
-}
-
 // a link between two pages of the project, written from one's folder to the other
 function between(from: string, to: string): string {
   const base = from.split('/').slice(0, -1);
@@ -238,6 +212,7 @@ function siteBuilder(fetched: Fetcher) {
   const assets = new Map<string, string>();
   const sheetPaths = new Map<string, string>();
   const inlineScripts = new Map<string, string>();
+  const inlineSheets = new Map<string, string>();
   let inline = 0;
   // one asset of the site downloaded once, under its folder, by the order it was met
   const fetchAsset = async (url: string, folder: string): Promise<string | null> => {
@@ -325,12 +300,12 @@ function siteBuilder(fetched: Fetcher) {
     for (const one of sheetsToReplace.reverse()) out = out.slice(0, one.start) + one.value + out.slice(one.end);
     return out;
   };
-  // a page's file: its markup with its sheets linked, its images and backgrounds downloaded, and the capture's mark
-  const pageOf = async (read: PageRead, base: string): Promise<{ readonly path: string; html: string }> => {
+  // a page's tree with its sheets linked at their places, its images, backgrounds and other files downloaded, and the
+  // capture's mark: every change made on attribute values and placeholder comments, never on markup text
+  const pageOf = async (read: PageRead, base: string): Promise<{ readonly path: string; readonly root: CapturedElement }> => {
     const path = pagePath(base);
     for (const paint of read.opaque ?? []) missing(`${base}#${paint.kind}:${paint.path}`, 'blocked');
     const sheetLinks = new Map<number, string>();
-    const deferredLinks: string[] = [];
     for (const [index, sheet] of read.sheets.entries()) {
       let at: string | undefined;
       const media = sheet.media?.trim() ?? '';
@@ -349,18 +324,19 @@ function siteBuilder(fetched: Fetcher) {
           files.push({ path: at, type: 'text/css', base64: Buffer.from(conditioned(await localSheet(got.body.toString('utf8'), sheet.href)), 'utf8').toString('base64') });
         }
       } else if (sheet.text !== null) {
-        inline += 1;
-        at = `css/inline-${inline}.css`;
-        files.push({ path: at, type: 'text/css', base64: Buffer.from(conditioned(await localSheet(scopeCss(sheet.text, sheet.scope), base)), 'utf8').toString('base64') });
+        // the same rules at several widths (or pages) are one file, as a published script is
+        const text = conditioned(await localSheet(sheet.text, base));
+        const digest = createHash('sha256').update(text).digest('hex');
+        at = inlineSheets.get(digest);
+        if (at === undefined) {
+          inline += 1;
+          at = `css/inline-${inline}.css`;
+          inlineSheets.set(digest, at);
+          files.push({ path: at, type: 'text/css', base64: Buffer.from(text, 'utf8').toString('base64') });
+        }
       }
-      if (at !== undefined) {
-        const link = `<link rel="stylesheet" href="${fromPage(path, at)}">`;
-        if (read.html.includes(`<!--__capture_sheet_${index}__-->`)) sheetLinks.set(index, link);
-        else deferredLinks.push(link);
-      }
+      if (at !== undefined) sheetLinks.set(index, fromPage(path, at));
     }
-    let html = read.html;
-    for (const paint of read.opaque ?? []) html = html.replaceAll(paint.marker, '');
     // Preserve the published JavaScript files as editable project assets. The editing canvas and
     // static snapshot export do not execute them a second time over an already observed DOM.
     for (const script of read.scripts ?? []) {
@@ -374,48 +350,89 @@ function siteBuilder(fetched: Fetcher) {
         }
       }
     }
-    for (const [index, link] of sheetLinks) html = html.replace(`<!--__capture_sheet_${index}__-->`, link);
-    html = html.replace(/<!--__capture_sheet_\d+__-->/g, '');
+    const localImages = new Map<number, string>();
     for (const image of read.images) {
       const local = await fetchAsset(image.src, image.folder ?? 'img');
-      html = html.split(`__capture_image_${image.index}__`).join(local === null ? image.src : fromPage(path, local));
+      localImages.set(image.index, local === null ? image.src : fromPage(path, local));
     }
-    // an image that named no source keeps none
-    html = html.replace(/__capture_image_\d+__/g, '');
-    // inline style="background-image:url(…)" of the markup, downloaded too
-    for (const match of html.matchAll(/url\(\s*(?:&quot;|['"])?([^'")&]+)(?:&quot;|['"])?\s*\)/g)) {
-      const raw = match[1] ?? '';
-      if (raw.startsWith('data:') || raw.startsWith('__capture')) continue;
-      const local = await fetchAsset(new URL(raw, base).href, 'img');
-      if (local !== null) html = html.split(match[0]).join(`url(${fromPage(path, local)})`);
+    const opaqueMarkers = (read.opaque ?? []).map((one) => one.marker);
+    const resolved = (value: string): string => {
+      let out = value.replace(/__capture_image_(\d+)__/g, (_all, index: string) => localImages.get(Number(index)) ?? '');
+      for (const marker of opaqueMarkers) out = out.replaceAll(marker, '');
+      return out;
+    };
+    let root = mapTree(read.root as CapturedElement, {
+      attribute: resolved,
+      comment: (node) => {
+        const sheet = /^__capture_sheet_(\d+)__$/.exec(node.value);
+        if (sheet === null) return node;
+        const href = sheetLinks.get(Number(sheet[1]));
+        return href === undefined ? null : element(node.id, 'link', { rel: 'stylesheet', href });
+      },
+    });
+    // a style attribute's url()s (an inline background), downloaded too
+    const styleUrls = new Map<string, string>();
+    for (const value of attributeValues(root)) {
+      for (const match of value.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g)) {
+        const raw = match[2] ?? '';
+        if (raw.startsWith('data:') || raw.startsWith('#') || styleUrls.has(raw) || !URL.canParse(raw, base)) continue;
+        const local = await fetchAsset(new URL(raw, base).href, 'img');
+        if (local !== null) styleUrls.set(raw, fromPage(path, local));
+      }
     }
-    // the mark of a captured page: the import keeps what the model does not hold of its sheets (spec capture-url)
-    const mark = `<meta name="builder-capture" content="${base.replaceAll('"', '&quot;')}">`;
-    html = html.replace(/<head([^>]*)>/i, `<head$1>\n${mark}`);
-    if (deferredLinks.length > 0) html = html.replace(/<\/head>/i, `${deferredLinks.join('\n')}\n</head>`);
-    return { path, html };
+    if (styleUrls.size > 0) {
+      root = mapTree(root, {
+        attribute: (value, name) => (name !== 'style' ? value : value.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, (all, _quote: string, raw: string) => {
+          const local = styleUrls.get(raw);
+          return local === undefined ? all : `url(${local})`;
+        })),
+      });
+    }
+    // the mark of a captured page: the import knows it by its mark and reads its tree from the package
+    // (spec capture-url)
+    root = prependToHead(root, [element(`${root.id}-capture-mark`, 'meta', { name: 'builder-capture', content: base })]);
+    return { path, root };
   };
   return { files, pageOf, problems };
 }
 
-// the pages' files, a link to a page the crawl took written to that page's file and any other keeping its address
-function resolvedPageLinks(html: string, path: string, captured: ReadonlyMap<string, { readonly path: string }>): string {
-  return html.replace(/__capture_link__(.*?)__(#[^"]*?)?__/g, (_all, url: string, hash: string | undefined) => {
-    const target = captured.get(url);
-    // The exported captured page keeps its source-relative link text. Its own inert-site bootstrap
-    // delegates uncaptured paths to the original host when clicked; captured pages use local paths.
-    return `${target === undefined ? new URL(url).pathname : between(path, target.path)}${hash ?? ''}`;
+// the pages' trees with every link to a page the crawl took written to that page's file, any other keeping its
+// address
+function resolvedPageLinks(root: CapturedElement, path: string, captured: ReadonlyMap<string, { readonly path: string }>): CapturedElement {
+  return mapTree(root, {
+    attribute: (value, name) => (name !== 'href' ? value : value.replace(/__capture_link__(.*?)__(#[^"]*?)?__/g, (_all, url: string, hash: string | undefined) => {
+      const target = captured.get(url);
+      // The exported captured page keeps its source-relative link text. Its own inert-site bootstrap
+      // delegates uncaptured paths to the original host when clicked; captured pages use local paths.
+      return `${target === undefined ? new URL(url).pathname : between(path, target.path)}${hash ?? ''}`;
+    })),
   });
 }
 
-function pageFiles(captured: ReadonlyMap<string, { readonly path: string; html: string }>): CapturedFile[] {
-  for (const [, one] of captured) one.html = resolvedPageLinks(one.html, one.path, captured);
-  return [...captured.values()].map((one): CapturedFile => ({ path: one.path, type: 'text/html', base64: Buffer.from(one.html, 'utf8').toString('base64') }));
+// A captured page's two files: the page as a person opens it (the widest width as static HTML, the other widths
+// applied by its width script) and its capture package (format 2: the one tree of every width), which an import reads.
+interface CapturedPageFiles {
+  readonly path: string;
+  capture: { readonly widths: readonly number[]; root: CapturedElement };
+}
+function pageFiles(captured: ReadonlyMap<string, CapturedPageFiles>, problems: readonly CapturedResourceProblem[]): CapturedFile[] {
+  for (const [, one] of captured) one.capture.root = resolvedPageLinks(one.capture.root, one.path, captured);
+  return [...captured.values()].flatMap((one): CapturedFile[] => {
+    const value: CapturedSnapshotPackage = { format: 2, widths: one.capture.widths, root: one.capture.root, ...(problems.length === 0 ? {} : { resourceProblems: problems }) };
+    return [
+      { path: one.path, type: 'text/html', base64: Buffer.from(capturedExportHtml(one.capture), 'utf8').toString('base64') },
+      { path: captureSnapshotPath(one.path), type: 'application/json', base64: Buffer.from(JSON.stringify(value), 'utf8').toString('base64') },
+    ];
+  });
 }
 
-function snapshotFile(path: string, variants: readonly { readonly width: number; readonly html: string }[], problems: readonly CapturedResourceProblem[] = []): CapturedFile {
-  const value: CapturedSnapshotPackage = { format: 1, viewports: variants, ...(problems.length === 0 ? {} : { resourceProblems: problems }) };
-  return { path: captureSnapshotPath(path), type: 'application/json', base64: Buffer.from(JSON.stringify(value), 'utf8').toString('base64') };
+// the widths of one page, localized each, as one tree (src/core/capture/merge.ts)
+async function mergedPage(site: ReturnType<typeof siteBuilder>, observations: readonly { readonly width: number; readonly read: PageRead }[], base: string): Promise<CapturedPageFiles> {
+  const localized = [];
+  for (const observation of observations) localized.push({ width: observation.width, ...(await site.pageOf(observation.read, base)) });
+  const first = localized[0];
+  if (first === undefined) throw new Error(`No captured document at ${base}`);
+  return { path: first.path, capture: mergeWidths(localized.map((one) => ({ width: one.width, root: one.root })), sequentialIds('c')) };
 }
 
 // A recorded site (a HAR file with its contents embedded, Playwright's recordHar): the capture reads the page and every
@@ -506,8 +523,7 @@ export async function capture(address: string, options: { readonly width?: numbe
     const page = await context.newPage();
     const site = siteBuilder(fetched);
     // the pages captured, by their address, their markup still holding the link marks until the crawl ends
-    const captured = new Map<string, { readonly path: string; html: string }>();
-    const snapshots: { readonly path: string; readonly variants: readonly { readonly width: number; readonly html: string }[] }[] = [];
+    const captured = new Map<string, CapturedPageFiles>();
     const queue: string[] = [pageKey(start.href)];
     const queued = new Set(queue);
     let title = '';
@@ -534,24 +550,19 @@ export async function capture(address: string, options: { readonly width?: numbe
       // what the page holds now (serializePage), built into its file and the site's files
       await markRuntime(page);
       const observations = await responsiveDocuments(page, await page.evaluate(serializePage, start.origin), base, start.origin, options.timeout ?? 45_000);
-      const variants = [];
-      for (const observation of observations) variants.push({ width: observation.width, ...(await site.pageOf(observation.read, base)) });
-      const first = variants[0];
       const firstObservation = observations[0];
-      if (first === undefined || firstObservation === undefined) throw new Error(`No captured document at ${base}`);
+      if (firstObservation === undefined) throw new Error(`No captured document at ${base}`);
       if (title === '') title = firstObservation.read.title;
-      captured.set(pageKey(base), { path: first.path, html: first.html });
-      snapshots.push({ path: first.path, variants });
+      captured.set(pageKey(base), await mergedPage(site, observations, base));
       for (const link of firstObservation.read.links) {
         if (queued.has(link)) continue;
         queued.add(link);
         queue.push(link);
       }
     }
-    const pages = pageFiles(captured);
     const problems = [...site.problems.values()];
-    const sidecars = snapshots.map((one) => snapshotFile(one.path, one.variants.map((variant) => ({ width: variant.width, html: resolvedPageLinks(variant.html, one.path, captured) })), problems));
-    return { title, files: [...pages, ...sidecars, ...site.files], problems };
+    const pages = pageFiles(captured, problems);
+    return { title, files: [...pages, ...site.files], problems };
   } finally {
     await context.close();
   }
@@ -571,11 +582,9 @@ export async function captureSnapshot(snapshot: Snapshot): Promise<Capture> {
     const one = snapshot.resources[url];
     return one === undefined ? null : { ok: one.status >= 200 && one.status < 300, type: one.type, body: Buffer.from(one.base64, 'base64') };
   });
-  const copied = await site.pageOf(snapshot.read, snapshot.url);
-  const captured = new Map([[pageKey(snapshot.url), copied]]);
-  const pages = pageFiles(captured);
+  const captured = new Map([[pageKey(snapshot.url), await mergedPage(site, [{ width: snapshot.read.viewportWidth ?? 1440, read: snapshot.read }], snapshot.url)]]);
   const problems = [...site.problems.values()];
-  return { title: snapshot.read.title, files: [...pages, snapshotFile(copied.path, [{ width: snapshot.read.viewportWidth ?? 1440, html: pages[0] === undefined ? copied.html : Buffer.from(pages[0].base64, 'base64').toString('utf8') }], problems), ...site.files], problems };
+  return { title: snapshot.read.title, files: [...pageFiles(captured, problems), ...site.files], problems };
 }
 
 // Build the corpus copy from the DOM and runtime values read on the exact live page used for its reference PNGs.
@@ -588,13 +597,7 @@ export async function captureRecorded(url: string, observations: readonly { read
     const one = recorded.get(address);
     return one === undefined ? null : { ok: one.status >= 200 && one.status < 300, type: one.type, body: one.body };
   });
-  const variants = [];
-  for (const observation of observations) variants.push({ width: observation.width, ...(await site.pageOf(observation.read, url)) });
-  const first = variants[0];
-  if (first === undefined) throw new Error('a recorded capture has no page');
-  const captured = new Map([[pageKey(url), { path: first.path, html: first.html }]]);
-  const pages = pageFiles(captured);
-  const localized = variants.map((one) => ({ width: one.width, html: resolvedPageLinks(one.html, one.path, captured) }));
+  const captured = new Map([[pageKey(url), await mergedPage(site, observations, url)]]);
   const problems = [...site.problems.values()];
-  return { title: firstObservation.read.title, files: [...pages, snapshotFile(first.path, localized, problems), ...site.files], problems };
+  return { title: firstObservation.read.title, files: [...pageFiles(captured, problems), ...site.files], problems };
 }

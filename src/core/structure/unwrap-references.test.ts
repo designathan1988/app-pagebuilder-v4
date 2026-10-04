@@ -36,7 +36,7 @@ const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = 
 });
 
 const DOC: DocumentJson = {
-  version: 3,
+  version: 4,
   pages: [
     {
       id: 'p',

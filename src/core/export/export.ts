@@ -48,7 +48,7 @@ import type { SiteScripts } from '../ports/site-scripts.ts';
 import { addressedMotionNodes, treeUsesMotion } from '../motion/document.ts';
 import { motionConfig, siteUsesLottie } from '../motion/export.ts';
 import { rulesForDocument } from '../document/breakpoint-rules.ts';
-import { capturedHtml, capturedResponsiveHtml, exportedCapturedRoot, type CapturedHead } from '../render/captured.ts';
+import { capturedExportHtml, exportedCapturedRoot, type CapturedHead } from '../render/captured.ts';
 import { captureSnapshotPath, type CapturedSnapshotPackage } from '../document/captured.ts';
 import { FORMS_SCRIPT, INTERACTIONS_SCRIPT, LOTTIE_SCRIPT, MOTION_SCRIPT, STYLESHEET } from './paths.ts';
 
@@ -261,7 +261,7 @@ export function pageLines(document: DocumentJson, pageIndex: number, manifestRul
   const page = document.pages[pageIndex];
   if (page === undefined) throw new Error(`export: the document has no page ${pageIndex}`);
   if (page.capture !== undefined) {
-    const source = capturedResponsiveHtml(page.capture, capturedHeadOf(document, page));
+    const source = capturedExportHtml(page.capture, capturedHeadOf(document, page));
     return { html: source.split('\n').map((text) => ({ text, node: null })), css: [], classes: new Map() };
   }
   // the elements an interaction addresses, and every element that holds an animation: both take a class, so the script
@@ -544,8 +544,9 @@ export const exportProject = registerHandler('project.export', ({ state, rules, 
   const capturedSnapshots = state.document.pages.flatMap((page) => {
     if (page.capture === undefined) return [];
     const packageData: CapturedSnapshotPackage = {
-      format: 1,
-      viewports: page.capture.viewports.map((one) => ({ width: one.width, html: capturedHtml(exportedCapturedRoot(one.root, capturedHeadOf(state.document, page))) })),
+      format: 2,
+      widths: page.capture.widths,
+      root: exportedCapturedRoot(page.capture.root, capturedHeadOf(state.document, page)),
       ...(page.capture.resourceProblems === undefined ? {} : { resourceProblems: page.capture.resourceProblems }),
     };
     return [{ path: captureSnapshotPath(page.file), bytes: encoder.encode(JSON.stringify(packageData)) }];

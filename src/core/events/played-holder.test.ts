@@ -12,7 +12,7 @@ import { playedAnimations } from './interactions.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const fade = { name: 'fade', settings: { duration: '1s' }, keyframes: [{ offset: 0, easing: '', declarations: { opacity: '0' } }, { offset: 100, easing: '', declarations: { opacity: '1' } }] };
-const doc = (): DocumentJson => ({ version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('root', 'page', 'body', { children: [
+const doc = (): DocumentJson => ({ version: 4, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('root', 'page', 'body', { children: [
   node('Button', 'button', 'button', { text: 'Go', animations: [fade], interactions: [{ trigger: 'click', action: 'play-animation', animation: 'fade', target: 'Heading' as NodeId }] } as never),
   node('Heading', 'heading', 'h2', { text: 'Hi' }),
 ] }) }] });

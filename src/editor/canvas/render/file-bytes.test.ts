@@ -20,7 +20,7 @@ describe('new bytes of a file reach the elements that draw it (RN1)', () => {
     let n = 0;
     URL.createObjectURL = () => `blob:test/${n++}`;
     try {
-      const doc: DocumentJson = { version: 3, files: [{ path: 'img/a.svg', type: 'image/svg+xml', bytes: btoa('<svg/>') }], pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('root', 'page', 'body', { children: [node('pic', 'image', 'img', { attributes: { src: 'img/a.svg', alt: '' } as never })] }) }] };
+      const doc: DocumentJson = { version: 4, files: [{ path: 'img/a.svg', type: 'image/svg+xml', bytes: btoa('<svg/>') }], pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('root', 'page', 'body', { children: [node('pic', 'image', 'img', { attributes: { src: 'img/a.svg', alt: '' } as never })] }) }] };
       const target = document.implementation.createHTMLDocument('page');
       let current = doc;
       const renderer = new PageRenderer(target, model, 0, null, (name, value) => canvasValue(current, name, value));

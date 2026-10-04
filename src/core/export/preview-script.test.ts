@@ -16,7 +16,7 @@ const bytes = btoa(CODE);
 describe('the preview writes a script\'s code as it is (PS1, RP1)', () => {
   it('keeps $ patterns and never ends the inline script early', () => {
     const tree = node('root', 'page', 'body', { attributes: { pageScripts: 'js/app.js' } as DocNode['attributes'], children: [node('h', 'heading', 'h1', { text: 'Hi' })] });
-    const document: DocumentJson = { version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree }], files: [{ path: 'js/app.js', type: 'text/javascript', bytes }] } as DocumentJson;
+    const document: DocumentJson = { version: 4, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree }], files: [{ path: 'js/app.js', type: 'text/javascript', bytes }] } as DocumentJson;
     const html = previewPage(document, RULES);
     expect(html).toContain("var price = '$&'; var tail = \"$'\";");
     expect(html).toContain("var tag = '<\\/script><b>out</b>';");

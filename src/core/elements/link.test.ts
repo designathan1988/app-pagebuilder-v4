@@ -16,7 +16,7 @@ const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 // a page with a Link Block (its link given), a locked section holding another, and a paragraph
 const docWith = (href: string | undefined, locked = false): DocumentJson => ({
-  version: 3,
+  version: 4,
   pages: [
     {
       id: 'p',

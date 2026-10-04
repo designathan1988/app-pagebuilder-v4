@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "pages": [
     {
       "id": "capture-page",
@@ -17,34 +17,79 @@
         "children": []
       },
       "capture": {
-        "viewports": [
-          {
-            "width": 1440,
-            "root": {
+        "widths": [
+          1440
+        ],
+        "root": {
+          "kind": "element",
+          "id": "captured-html",
+          "namespace": "http://www.w3.org/1999/xhtml",
+          "tag": "html",
+          "attributes": [],
+          "children": [
+            {
               "kind": "element",
-              "id": "captured-html",
+              "id": "captured-head",
               "namespace": "http://www.w3.org/1999/xhtml",
-              "tag": "html",
+              "tag": "head",
+              "attributes": [],
+              "children": []
+            },
+            {
+              "kind": "element",
+              "id": "captured-body",
+              "namespace": "http://www.w3.org/1999/xhtml",
+              "tag": "body",
               "attributes": [],
               "children": [
-                { "kind": "element", "id": "captured-head", "namespace": "http://www.w3.org/1999/xhtml", "tag": "head", "attributes": [], "children": [] },
                 {
-                  "kind": "element", "id": "captured-body", "namespace": "http://www.w3.org/1999/xhtml", "tag": "body", "attributes": [],
+                  "kind": "element",
+                  "id": "captured-story",
+                  "namespace": "http://www.w3.org/1999/xhtml",
+                  "tag": "p",
+                  "attributes": [
+                    {
+                      "name": "id",
+                      "namespace": null,
+                      "value": "story"
+                    }
+                  ],
                   "children": [
                     {
-                      "kind": "element", "id": "captured-story", "namespace": "http://www.w3.org/1999/xhtml", "tag": "p", "attributes": [{ "name": "id", "namespace": null, "value": "story" }],
-                      "children": [
-                        { "kind": "text", "id": "captured-before", "value": "Before " },
-                        { "kind": "element", "id": "captured-image", "namespace": "http://www.w3.org/1999/xhtml", "tag": "img", "attributes": [{ "name": "alt", "namespace": null, "value": "Artwork" }, { "name": "src", "namespace": null, "value": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='48'%3E%3Crect width='96' height='48' fill='%23cc5533'/%3E%3C/svg%3E" }], "children": [] },
-                        { "kind": "text", "id": "captured-after", "value": " after" }
-                      ]
+                      "kind": "text",
+                      "id": "captured-before",
+                      "value": "Before "
+                    },
+                    {
+                      "kind": "element",
+                      "id": "captured-image",
+                      "namespace": "http://www.w3.org/1999/xhtml",
+                      "tag": "img",
+                      "attributes": [
+                        {
+                          "name": "alt",
+                          "namespace": null,
+                          "value": "Artwork"
+                        },
+                        {
+                          "name": "src",
+                          "namespace": null,
+                          "value": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='48'%3E%3Crect width='96' height='48' fill='%23cc5533'/%3E%3C/svg%3E"
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "kind": "text",
+                      "id": "captured-after",
+                      "value": " after"
                     }
                   ]
                 }
               ]
             }
-          }
-        ]
+          ]
+        }
       }
     }
   ]

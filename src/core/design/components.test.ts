@@ -18,7 +18,7 @@ import { componentHolders } from './instances.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const node = (id: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name: id, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
 const card = () => node('Card', 'article', 'article', { children: [node('Title', 'heading', 'h3', { text: 'Monthly' })] });
-const doc = (children: DocNode[]): DocumentJson => ({ version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children }) }] });
+const doc = (children: DocNode[]): DocumentJson => ({ version: 4, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('Page', 'page', 'body', { children }) }] });
 // one generator for the whole file: the ids of every command run here never meet, as the editor's random ones
 const IDS = sequentialIds('x');
 const context = (document: DocumentJson, selection: string[]): HandlerContext<never> => ({

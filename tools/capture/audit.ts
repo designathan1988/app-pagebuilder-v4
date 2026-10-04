@@ -4,7 +4,8 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { Window, type Document as HappyDocument, type Node as HappyNode, type Element as HappyElement } from 'happy-dom';
 import { parse as parseCss, walk as walkCss } from 'css-tree';
-import type { CapturedNode } from '../../src/core/document/captured.ts';
+import type { CapturedNode, CapturedSnapshotPackage } from '../../src/core/document/captured.ts';
+import { capturedAt } from '../../src/core/render/captured.ts';
 import { rewriteSrcsetUrls } from '../../src/core/files/srcset.ts';
 import type { DocumentJson } from '../../src/core/document/model.ts';
 import type { AuditNode } from './audit-observation.ts';
@@ -255,7 +256,9 @@ export async function auditWidth(site: { readonly id: string; readonly url: stri
   if (digest(snapshotBytes) !== entry.snapshotSha256) throw new Error(`${site.id} ${width}: source DOM digest mismatch`);
   const observation = legacy ? JSON.parse(snapshotBytes.toString('utf8')) as RecordedObservation : readReferenceSnapshot(site.url, har, reference, width);
   if (legacy) problem('reference', 'legacy-readiness-unknown', `${site.id}:${width}`, 'format 5 settle evidence', 'format 4 reference');
-  const source = await htmlTree(observation.read.html);
+  // the live page as observed: a tree (DEC-61), or the HTML text of a reference recorded before it
+  const legacyHtml = (observation.read as { html?: string }).html;
+  const source = legacyHtml !== undefined ? await htmlTree(legacyHtml) : storedTree(observation.read.root as CapturedNode);
   const pageFile = pagePath(site.url);
   const packageFile = path.join(out, 'capture', `${pageFile}.capture.json`);
   const documentFile = path.join(out, 'document.json');
@@ -263,11 +266,12 @@ export async function auditWidth(site: { readonly id: string; readonly url: stri
   let packageNodes: number | null = null, projectNodes: number | null = null, exportNodes: number | null = null;
   if (!fs.existsSync(packageFile)) problem('live-to-package', 'missing-snapshot-package', packageFile, 'localized viewport HTML', 'absent');
   else {
-    const packageData = JSON.parse(fs.readFileSync(packageFile, 'utf8')) as { viewports?: { width: number; html: string }[]; resourceProblems?: { url: string; reason: string }[] };
-    const variant = packageData.viewports?.find((one) => one.width === width);
-    if (variant === undefined) problem('live-to-package', 'missing-width', `${packageFile}:${width}`, 'localized viewport HTML', 'absent');
+    const packageData = JSON.parse(fs.readFileSync(packageFile, 'utf8')) as CapturedSnapshotPackage;
+    const legacyVariant = packageData.format === 1 ? packageData.viewports.find((one) => one.width === width) : undefined;
+    const observed = packageData.format === 2 && packageData.widths.includes(width);
+    if (legacyVariant === undefined && !observed) problem('live-to-package', 'missing-width', `${packageFile}:${width}`, 'localized viewport tree', 'absent');
     else {
-      const tree = await htmlTree(variant.html);
+      const tree = legacyVariant !== undefined ? await htmlTree(legacyVariant.html) : storedTree(capturedAt(packageData as Extract<CapturedSnapshotPackage, { format: 2 }>, width));
       packageNodes = count(bodyOf(tree));
       compare(source, tree, 'live-to-package', issues);
       resourceIssues(path.join(out, 'capture'), pageFile, tree, issues);
@@ -278,14 +282,15 @@ export async function auditWidth(site: { readonly id: string; readonly url: stri
   else {
     const document = JSON.parse(fs.readFileSync(documentFile, 'utf8')) as DocumentJson;
     const capture = document.pages.find((one) => one.file === pageFile)?.capture;
-    const variant = capture?.viewports.find((one) => one.width === width);
+    const variant = capture === undefined || !capture.widths.includes(width) ? undefined : { root: capturedAt(capture, width) };
     if (variant === undefined) problem('package-to-project', 'missing-project-width', `${pageFile}:${width}`, 'captured JSON tree', 'absent');
     else {
       const tree = storedTree(variant.root);
       projectNodes = count(bodyOf(tree));
       if (fs.existsSync(packageFile)) {
-        const packageData = JSON.parse(fs.readFileSync(packageFile, 'utf8')) as { viewports?: { width: number; html: string }[] };
-        const packageVariant = packageData.viewports?.find((one) => one.width === width);
+        const packageData = JSON.parse(fs.readFileSync(packageFile, 'utf8')) as CapturedSnapshotPackage;
+        if (packageData.format === 2 && packageData.widths.includes(width)) compare(storedTree(capturedAt(packageData, width)), tree, 'package-to-project', issues);
+        const packageVariant = packageData.format === 1 ? packageData.viewports.find((one) => one.width === width) : undefined;
         if (packageVariant !== undefined) compare(await htmlTree(packageVariant.html), tree, 'package-to-project', issues);
       }
       if (fs.existsSync(exportFile)) {

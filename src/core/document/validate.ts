@@ -24,7 +24,7 @@ import { authoringProblems } from './authoring.ts';
 import { settingOf } from '../page/grid-settings.ts';
 import { canonical, hasMarks, parseInline, plainText } from '../text/inline.ts';
 import { DOCUMENT_VERSION, walk, type DocNode, type DocumentJson, type Selection } from './model.ts';
-import { capturedProblems, type CapturedNode } from './captured.ts';
+import { capturedProblems } from './captured.ts';
 import { breakpointProblems, rulesForDocument, type ProjectBreakpoint } from './breakpoint-rules.ts';
 
 export interface ElementRules {
@@ -433,11 +433,14 @@ export function validateDocument(doc: DocumentJson, selection: Selection, manife
   const nodeIds = new Set<string>();
   for (const page of doc.pages ?? []) {
     if (isRecord(page.tree)) for (const node of walk(page.tree)) nodeIds.add(node.id);
-    const visit = (node: CapturedNode): void => {
-      nodeIds.add(node.id);
-      if (node.kind === 'element') node.children.forEach(visit);
+    // the captured tree's ids, read with care: a malformed capture is reported above, never thrown on here
+    const visit = (node: unknown): void => {
+      if (!isRecord(node)) return;
+      if (typeof node.id === 'string') nodeIds.add(node.id);
+      if (Array.isArray(node.children)) node.children.forEach(visit);
+      if (isRecord(node.shadow) && Array.isArray(node.shadow.children)) node.shadow.children.forEach(visit);
     };
-    for (const viewport of page.capture?.viewports ?? []) visit(viewport.root);
+    if (isRecord(page.capture)) visit(page.capture.root);
   }
   const seen = new Set<string>();
   selection.forEach((id, i) => {

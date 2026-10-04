@@ -3,7 +3,7 @@ import type { DocumentJson, Page, ProjectFile } from '../../../core/document/mod
 import { dataUrl, fileAt, objectUrl } from '../../../core/files/files.ts';
 import { rewriteSrcsetUrls } from '../../../core/files/srcset.ts';
 import { fileUrlsIn } from '../../../core/render/output.ts';
-import { capturedViewport } from '../../../core/render/captured.ts';
+import { capturedAt } from '../../../core/render/captured.ts';
 
 const HTML = 'http://www.w3.org/1999/xhtml';
 const RESOURCE = new Set(['src', 'poster', 'data', 'xlink:href', 'data-capture-paint']);
@@ -46,7 +46,25 @@ function attributes(target: Element, node: CapturedElement, document: DocumentJs
   if (node.tag === 'iframe') target.setAttribute('sandbox', '');
 }
 
-function makeNode(target: Document, document: DocumentJson, page: Page, node: CapturedNode, elements: Map<string, Element>): Node {
+// what the page held beyond its markup (a field's value, a selection, a scrolled box's offsets), given back once the
+// element is in the page: offsets need its layout
+type Scrolled = [Element, number, number];
+function applyState(element: Element, node: CapturedElement, scrolled: Scrolled[]): void {
+  const state = node.state;
+  if (state === undefined) return;
+  // the canvas's elements belong to the frame's window: known by their tag, not by this window's classes
+  const html = node.namespace === HTML;
+  if (html && node.tag === 'input') {
+    const input = element as HTMLInputElement;
+    if (state.value !== undefined) input.value = state.value;
+    if (state.checked !== undefined) input.checked = state.checked;
+  }
+  if (html && node.tag === 'textarea' && state.value !== undefined) (element as HTMLTextAreaElement).value = state.value;
+  if (html && node.tag === 'option' && state.selected !== undefined) (element as HTMLOptionElement).selected = state.selected;
+  if (state.scrollLeft !== undefined || state.scrollTop !== undefined) scrolled.push([element, state.scrollLeft ?? 0, state.scrollTop ?? 0]);
+}
+
+function makeNode(target: Document, document: DocumentJson, page: Page, node: CapturedNode, elements: Map<string, Element>, scrolled: Scrolled[] = []): Node {
   if (node.kind === 'text') return target.createTextNode(node.value);
   if (node.kind === 'comment') return target.createComment(node.value);
   // an element that acts on the page instead of drawing (a refresh, a <base>) is never put on the canvas
@@ -67,7 +85,15 @@ function makeNode(target: Document, document: DocumentJson, page: Page, node: Ca
       return sheet;
     }
   }
-  for (const child of node.children) element.append(makeNode(target, document, page, child, elements));
+  // an open shadow root is the host's own again (attachShadow refuses elements that cannot host one: drawn without it)
+  if (node.shadow !== undefined) {
+    try {
+      const root = element.attachShadow({ mode: node.shadow.mode });
+      for (const child of node.shadow.children) root.append(makeNode(target, document, page, child, elements, scrolled));
+    } catch { /* not a valid shadow host */ }
+  }
+  for (const child of node.children) element.append(makeNode(target, document, page, child, elements, scrolled));
+  applyState(element, node, scrolled);
   if (node.tag === 'style') element.textContent = css(document, page.file, element.textContent ?? '');
   const paint = node.attributes.find((one) => one.name === 'data-capture-paint')?.value;
   if (paint !== undefined && node.tag === 'canvas') {
@@ -91,7 +117,7 @@ function makeNode(target: Document, document: DocumentJson, page: Page, node: Ca
 
 export function mountCaptured(target: Document, document: DocumentJson, page: Page, width: number): Map<string, Element> {
   if (page.capture === undefined) throw new Error('captured renderer requires a captured page');
-  const root = capturedViewport(page.capture, width);
+  const root = capturedAt(page.capture, width);
   const elements = new Map<string, Element>();
   attributes(target.documentElement, root, document, page);
   target.documentElement.setAttribute('data-builder-capture', '');
@@ -106,7 +132,12 @@ export function mountCaptured(target: Document, document: DocumentJson, page: Pa
   target.body.setAttribute('data-capture-node', body.id);
   elements.set(head.id, target.head);
   elements.set(body.id, target.body);
-  target.head.replaceChildren(...head.children.map((node) => makeNode(target, document, page, node, elements)));
-  target.body.replaceChildren(...body.children.map((node) => makeNode(target, document, page, node, elements)));
+  const scrolled: Scrolled[] = [];
+  target.head.replaceChildren(...head.children.map((node) => makeNode(target, document, page, node, elements, scrolled)));
+  target.body.replaceChildren(...body.children.map((node) => makeNode(target, document, page, node, elements, scrolled)));
+  for (const [element, left, top] of scrolled) {
+    element.scrollLeft = left;
+    element.scrollTop = top;
+  }
   return elements;
 }

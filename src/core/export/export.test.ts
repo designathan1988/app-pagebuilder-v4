@@ -17,7 +17,7 @@ import { exportPage, exportProject, previewPage, siteFiles } from './export.ts';
 const RULES = rulesFromManifest(manifest.elements, manifest.properties, manifest.html);
 const styled = (declarations: Record<string, string>) => ({ desktop: { base: declarations } }) as DocNode['styles'];
 const node = (id: string, name: string, type: string, tag: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: type as DocNode['type'], name, tag, attributes: {}, classes: [], styles: {}, text: null, children: [], ...fields });
-const page = (children: DocNode[]): DocumentJson => ({ version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('root', 'Page', 'page', 'body', { children }) }] });
+const page = (children: DocNode[]): DocumentJson => ({ version: 4, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: node('root', 'Page', 'page', 'body', { children }) }] });
 const contextOf = (document: DocumentJson, at: number): HandlerContext<never> => ({
   state: { document, selection: [], history: EMPTY_HISTORY, message: null, ui: undefined as never },
   clock: manualClock(at),
@@ -191,7 +191,7 @@ describe('class names say the role in the code language, and a second look a mod
   const card = (id: string, styles: Record<string, string>) => node(id, 'Cartão', 'article', 'article', { styles: styled(styles) });
   const heading = (id: string, tag: string) => node(id, 'Título', 'heading', tag, { text: 'T', styles: styled({ 'font-size': tag === 'h2' ? '32px' : '24px' }) });
   const marina: DocumentJson = {
-    version: 3,
+    version: 4,
     language: 'pt-BR',
     codeLanguage: 'en',
     pages: [

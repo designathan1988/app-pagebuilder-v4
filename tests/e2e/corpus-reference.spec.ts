@@ -5,8 +5,9 @@ import type { BrowserContext } from '@playwright/test';
 import { expect, test } from '../support/test.ts';
 import { comparePictures } from '../../tools/journey/fidelity.ts';
 import { captureRecorded, replayHar, settle } from '../../tools/companion/capture.ts';
-import { REFERENCE_TIME, readLayoutSnapshot, recordReference, readReference, readReferenceSnapshot, seedSiteScripts, startSiteClock } from '../../tools/capture/reference.ts';
+import { pauseSiteClock, readLayoutSnapshot, recordReference, readReference, readReferenceSnapshot, restartSiteClock, seedSiteScripts, startSiteClock } from '../../tools/capture/reference.ts';
 import { diagnosePictures } from '../../tools/capture/diagnose.ts';
+import type { ObservedNode } from '../../tools/companion/serialize.ts';
 
 test('a recorded reference comes from a fresh navigation at each viewport and replays its selected resources', async ({ browser, page }) => {
   test.setTimeout(120_000);
@@ -48,9 +49,26 @@ test('a recorded reference comes from a fresh navigation at each viewport and re
     expect(snapshots[1]?.read.images.some((image) => image.src.endsWith('/narrow.svg'))).toBe(true);
     expect(snapshots[0]?.layout.find((box) => box.id === 'hero')).toMatchObject({ tag: 'img', bounds: { width: 480, height: 240 } });
     expect(snapshots[1]?.layout.find((box) => box.id === 'hero')?.path).toBe(snapshots[0]?.layout.find((box) => box.id === 'hero')?.path);
-    const state = await Promise.all(snapshots.map((one) => page.evaluate((html) => new DOMParser().parseFromString(html, 'text/html').querySelector('#state')?.textContent, one.read.html)));
+    // the text of #state in each width's observed tree (a tree of nodes since DEC-61)
+    const textOf = (node: ObservedNode): string => (node.kind === 'text' ? node.value : node.kind === 'element' ? node.children.map(textOf).join('') : '');
+    const stateOf = (node: ObservedNode): string | undefined => {
+      if (node.kind !== 'element') return undefined;
+      if (node.attributes.some((one) => one.name === 'id' && one.value === 'state')) return textOf(node);
+      for (const child of node.children) {
+        const found = stateOf(child);
+        if (found !== undefined) return found;
+      }
+      return undefined;
+    };
+    const state = snapshots.map((one) => (one === undefined ? undefined : stateOf(one.read.root)));
+    // every width's page starts at the reference moment, its clock then running (DEC-61: a frozen Date stopped
+    // time-driven entrances), and draws the same seeded random value
     expect(state[0]).toBeDefined();
-    expect(state[0]).toBe(state[1]);
+    const [time0, random0] = (state[0] ?? '').split('/');
+    const [time1, random1] = (state[1] ?? '').split('/');
+    expect(time0?.slice(0, 19)).toBe('2026-10-04T12:00:00');
+    expect(time1?.slice(0, 19)).toBe('2026-10-04T12:00:00');
+    expect(random0).toBe(random1);
     const captured = await captureRecorded(url, snapshots, har);
     const capturedHtml = Buffer.from(captured.files.find((file) => file.type === 'text/html')?.base64 ?? '', 'base64').toString('utf8');
     expect(capturedHtml).toContain(state[0]);
@@ -69,13 +87,12 @@ test('a recorded reference comes from a fresh navigation at each viewport and re
     const made = await replay.newPage();
     await startSiteClock(made);
     for (const [index, [width, image]] of ([[1440, 'wide.svg'], [1180, 'narrow.svg']] as const).entries()) {
-      if (index > 0) await made.clock.resume();
-      await made.clock.setFixedTime(new Date(REFERENCE_TIME));
+      if (index > 0) await restartSiteClock(made);
       await made.setViewportSize({ width, height: 900 });
       await made.goto(url);
       await settle(made);
       await made.evaluate(async () => { await document.fonts.ready; });
-      await made.clock.pauseAt(new Date(REFERENCE_TIME));
+      await pauseSiteClock(made);
       await expect(made.locator('#hero')).toHaveAttribute('src', `/${image}`);
       await expect.poll(() => made.locator('#hero').evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBe(480);
       const screenshot = (await made.screenshot({ fullPage: true })).toString('base64');

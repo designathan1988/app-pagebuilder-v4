@@ -7,7 +7,7 @@ import type { DocNode, DocumentJson, NodeId } from '../document/model.ts';
 import { interactionsJs } from './script.ts';
 
 const node = (id: string, fields: Partial<DocNode> = {}): DocNode => ({ id: id as NodeId, type: 'button' as DocNode['type'], name: id, tag: 'button', attributes: {}, classes: [], styles: {}, text: 'Go', children: [], ...fields });
-const doc = (children: DocNode[]): DocumentJson => ({ version: 3, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('root'), type: 'page' as DocNode['type'], tag: 'body', children } }] });
+const doc = (children: DocNode[]): DocumentJson => ({ version: 4, pages: [{ id: 'p', name: 'Home', file: 'index.html', tree: { ...node('root'), type: 'page' as DocNode['type'], tag: 'body', children } }] });
 
 describe('the interactions script binds what the interaction says, once (EV1)', () => {
   it('binds an interaction that applies to a class to every element with that class', () => {

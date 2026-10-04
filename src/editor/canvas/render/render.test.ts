@@ -15,7 +15,7 @@ const attributes = (a: Record<string, string | number | boolean>) => a as DocNod
 const styles = (s: Record<string, Record<string, Record<string, string>>>) => s as DocNode['styles'];
 
 const doc: DocumentJson = {
-  version: 3,
+  version: 4,
   pages: [
     {
       id: 'p1',
