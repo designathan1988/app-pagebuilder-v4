@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { Window, type Node as HappyNode, type Element as HappyElement } from 'happy-dom';
+import { Window, type Document as HappyDocument, type Node as HappyNode, type Element as HappyElement } from 'happy-dom';
 import { parse as parseCss, walk as walkCss } from 'css-tree';
 import type { CapturedNode } from '../../src/core/document/captured.ts';
 import { rewriteSrcsetUrls } from '../../src/core/files/srcset.ts';
@@ -12,7 +12,7 @@ import type { CapturedBox } from './reference.ts';
 import { readReferenceManifest, readReferenceSnapshot, type RecordedObservation, type ReferenceManifest } from './reference.ts';
 import { pagePath } from '../companion/capture.ts';
 
-export interface AuditIssue {
+interface AuditIssue {
   readonly boundary: 'live-to-package' | 'package-to-project' | 'project-to-export' | 'resources' | 'layout' | 'reference';
   readonly kind: string;
   readonly path: string;
@@ -34,14 +34,23 @@ export interface WidthAudit {
 }
 
 interface NodeView { readonly kind: 'element' | 'text' | 'comment'; readonly tag?: string; readonly namespace?: string; readonly text?: string; readonly attributes?: readonly { readonly name: string; readonly value: string }[]; readonly children?: readonly NodeView[] }
-const window = new Window();
-const parser = new window.DOMParser();
 const internal = new Set(['data-capture-runtime', 'data-capture-class', 'data-capture-node', 'data-node', 'data-builder-capture']);
 const urlAttributes = new Set(['src', 'srcset', 'poster', 'href', 'xlink:href', 'action', 'formaction']);
 const trim = (value: string, size = 110): string => value.replace(/\s+/g, ' ').slice(0, size);
 
-function htmlTree(html: string): NodeView {
-  const document = parser.parseFromString(html, 'text/html');
+// A window per document, closed once the document is read: happy-dom keeps what a window's DOMParser made until the
+// window is closed (https://github.com/capricorn86/happy-dom/issues/2148), and its close is asynchronous. One window
+// for the whole corpus kept about 34 MB per parsed page and the audit of 20 sites ran out of memory.
+async function htmlTree(html: string): Promise<NodeView> {
+  const window = new Window();
+  try {
+    return copiedTree(new window.DOMParser().parseFromString(html, 'text/html'));
+  } finally {
+    await window.happyDOM.close();
+  }
+}
+
+function copiedTree(document: HappyDocument): NodeView {
   const visit = (node: HappyNode): NodeView | null => {
     if (node.nodeType === 3) return { kind: 'text', text: node.nodeValue ?? '' };
     if (node.nodeType === 8) return { kind: 'comment', text: node.nodeValue ?? '' };
@@ -148,6 +157,15 @@ function compare(expected: NodeView, actual: NodeView, boundary: AuditIssue['bou
   visit(bodyOf(expected), bodyOf(actual), '/body', 'structural');
 }
 
+/**
+ * Whether the export's whole-page picture is wider than the window while the original's is not: a page a person must
+ * scroll sideways (the reviewer's R7, bellroy's export 1770 px wide in a 1180 px window). A source that is itself wider
+ * than the window is the site's own overflow, not the export's; a pixel of rounding is allowed.
+ */
+export function overflowsWindow(width: number, sourceWidth: number | null, madeWidth: number | null): boolean {
+  return sourceWidth !== null && madeWidth !== null && madeWidth > width + 1 && sourceWidth <= width + 1;
+}
+
 function pngWidth(file: string): number | null {
   if (!fs.existsSync(file)) return null;
   const bytes = fs.readFileSync(file);
@@ -219,7 +237,7 @@ function geometry(source: readonly CapturedBox[], exported: readonly CapturedBox
   }
 }
 
-export function auditWidth(site: { readonly id: string; readonly url: string }, width: number): WidthAudit {
+export async function auditWidth(site: { readonly id: string; readonly url: string }, width: number): Promise<WidthAudit> {
   const base = path.join('.cache', 'corpus');
   const out = path.join(base, site.id);
   const har = path.join(base, 'har', `${site.id}.har`);
@@ -237,7 +255,7 @@ export function auditWidth(site: { readonly id: string; readonly url: string }, 
   if (digest(snapshotBytes) !== entry.snapshotSha256) throw new Error(`${site.id} ${width}: source DOM digest mismatch`);
   const observation = legacy ? JSON.parse(snapshotBytes.toString('utf8')) as RecordedObservation : readReferenceSnapshot(site.url, har, reference, width);
   if (legacy) problem('reference', 'legacy-readiness-unknown', `${site.id}:${width}`, 'format 5 settle evidence', 'format 4 reference');
-  const source = htmlTree(observation.read.html);
+  const source = await htmlTree(observation.read.html);
   const pageFile = pagePath(site.url);
   const packageFile = path.join(out, 'capture', `${pageFile}.capture.json`);
   const documentFile = path.join(out, 'document.json');
@@ -249,7 +267,7 @@ export function auditWidth(site: { readonly id: string; readonly url: string }, 
     const variant = packageData.viewports?.find((one) => one.width === width);
     if (variant === undefined) problem('live-to-package', 'missing-width', `${packageFile}:${width}`, 'localized viewport HTML', 'absent');
     else {
-      const tree = htmlTree(variant.html);
+      const tree = await htmlTree(variant.html);
       packageNodes = count(bodyOf(tree));
       compare(source, tree, 'live-to-package', issues);
       resourceIssues(path.join(out, 'capture'), pageFile, tree, issues);
@@ -268,7 +286,7 @@ export function auditWidth(site: { readonly id: string; readonly url: string }, 
       if (fs.existsSync(packageFile)) {
         const packageData = JSON.parse(fs.readFileSync(packageFile, 'utf8')) as { viewports?: { width: number; html: string }[] };
         const packageVariant = packageData.viewports?.find((one) => one.width === width);
-        if (packageVariant !== undefined) compare(htmlTree(packageVariant.html), tree, 'package-to-project', issues);
+        if (packageVariant !== undefined) compare(await htmlTree(packageVariant.html), tree, 'package-to-project', issues);
       }
       if (fs.existsSync(exportFile)) {
         const exported = observedTree(JSON.parse(fs.readFileSync(exportFile, 'utf8')) as AuditNode);
@@ -280,7 +298,7 @@ export function auditWidth(site: { readonly id: string; readonly url: string }, 
   const targetPng = path.join(reference, entry.file);
   const exportPng = path.join(out, `export-${width}.png`);
   const sourceWidth = pngWidth(targetPng), madeWidth = pngWidth(exportPng);
-  if (sourceWidth !== null && madeWidth !== null && madeWidth > width + 1 && sourceWidth <= width + 1) problem('layout', 'horizontal-overflow', exportPng, `at most ${width}px`, `${madeWidth}px`);
+  if (overflowsWindow(width, sourceWidth, madeWidth)) problem('layout', 'horizontal-overflow', exportPng, `at most ${width}px`, `${madeWidth}px`);
   const exportLayout = path.join(out, `export-layout-${width}.json`);
   if (fs.existsSync(exportLayout)) geometry(observation.layout, JSON.parse(fs.readFileSync(exportLayout, 'utf8')) as CapturedBox[], issues);
   if (entry.stabilityMatch < 99) problem('reference', 'unstable-live-source', `${site.id}:${width}`, 'at least 99% live/live', `${entry.stabilityMatch}%`);

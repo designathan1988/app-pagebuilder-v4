@@ -11,7 +11,7 @@ const rows: WidthAudit[] = [];
 const errors: { site: string; width: number; error: string }[] = [];
 for (const site of chosen) for (const width of widths) {
   try {
-    rows.push(auditWidth(site, width));
+    rows.push(await auditWidth(site, width));
   }
   catch (error) { errors.push({ site: site.id, width, error: String(error).split('\n')[0] ?? 'unknown error' }); }
 }
