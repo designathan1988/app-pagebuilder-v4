@@ -1399,7 +1399,7 @@ function conditionalVariables(sources: readonly SheetSource[]): ReadonlySet<stri
 // light-dark() one inside @supports) is no token: the project's stylesheet comes after the residual one (capture-styles
 // .ts), so its first value would win over the condition; it stays in the residual stylesheet, in the site's order.
 function rootTokens<Ui>(context: HandlerContext<Ui>, sources: readonly SheetSource[], report: Report, captured = false): Token[] {
-  const conditional = captured ? conditionalVariables(sources) : new Set<string>();
+  const conditional = captured ? new Set(conditionalVariables(sources)) : new Set<string>();
   const declared = new Map<string, { readonly value: string; readonly file: string; readonly line: number }>();
   const usedIn = new Map<string, Set<string>>();
   for (const source of sources) {
@@ -1409,6 +1409,9 @@ function rootTokens<Ui>(context: HandlerContext<Ui>, sources: readonly SheetSour
         if (colon < 0) continue;
         const property = declaration.text.slice(0, colon).trim();
         const value = declaration.text.slice(colon + 1).trim().replace(/\s*!important$/i, '');
+        // A script-written root style becomes a later html rule in the captured sheet. Keep its custom property
+        // alongside the :root default there; a generated project token would otherwise restore the default last.
+        if (captured && (rule.selector.trim() === 'html' || rule.selector.trim() === 'html:root') && property.startsWith('--')) conditional.add(property.slice(2));
         if (isRootTokenRule(rule)) declared.set(property.slice(2), { value, file: source.file, line: declaration.line });
         else for (const match of value.matchAll(/var\(\s*--([A-Za-z0-9_-]+)/g)) usedIn.set(match[1] as string, (usedIn.get(match[1] as string) ?? new Set()).add(property));
       }

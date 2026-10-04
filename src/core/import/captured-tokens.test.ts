@@ -34,4 +34,14 @@ describe('the variables of a captured page', () => {
   it('keeps every variable as a token on a page that is no capture', () => {
     expect(tokenNames(imported(''))).toEqual(['bg', 'ink']);
   });
+
+  it('keeps a root variable rewritten on html after the source default', () => {
+    const html = '<!doctype html><html><head><meta name="builder-capture" content="https://example.com/"><style>:root{--sk-banner-height:0px}</style><style>html{--sk-banner-height:4.2rem}</style></head><body><div class="banner">Summit</div></body></html>';
+    const ran = runHandler(importHtmlCommand, documentOf({ pages: [] }), { files: [file('index.html', 'text/html', html)] }, { confirmed: true });
+    if (ran.outcome.kind !== 'change') throw new Error(JSON.stringify(ran.outcome));
+    expect((ran.document.tokens ?? []).map((token) => token.name)).not.toContain('sk-banner-height');
+    const home = ran.document.pages[0];
+    if (home === undefined) throw new Error('no page');
+    expect(capturedPageCss(ran.document, home)).toContain('html{--sk-banner-height:4.2rem}');
+  });
 });

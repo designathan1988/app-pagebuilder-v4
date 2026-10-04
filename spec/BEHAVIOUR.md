@@ -9109,6 +9109,9 @@ instance (`status.locked.edit`).
   through a more specific normal selector. The export keeps those values in the residual CSS under an element-specific
   selector with ID-level specificity; asset URLs inside them follow the residual file's path. This preserves the
   inline value without putting a `style` attribute in the clean export.
+- A custom property written by the site's script on `<html>` remains in the captured sheet instead of becoming an
+  earlier `:root` default in the project's generated variables. Its residual `html:root` rule outranks the site's
+  `:root` default so a captured banner height or similar root layout value remains visible in canvas and export.
 - A plain, attribute-free `<span>` containing only visual media or a visual link releases its wrapper and keeps each
   child, including the link and its image, editable. Image width and height attributes remain lower-priority hints:
   when a captured responsive stylesheet controls

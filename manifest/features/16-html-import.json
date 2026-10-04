@@ -3524,7 +3524,7 @@
           "Inline layout values produced at the reference viewport widths remain responsive on the canvas and in the exported page.",
           "Picture sources chosen at the reference viewport widths use captured local assets on the canvas and in the exported page.",
           "The captured page keeps the site's own resets and browser defaults while authored pages keep Builder defaults.",
-          "Custom properties written inline by the site keep their effect in the exported page without inline styles.",
+          "Custom properties written inline by the site, including on the root element, keep their effect in the exported page without inline styles.",
           "A stylesheet linked only for print remains inactive on the screen after capture and export."
         ]
       },

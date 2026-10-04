@@ -16,9 +16,9 @@ Sites at the target: 1 of 20. Measured: 20.
 | [w3c](https://www.w3.org/) | documentation | 17 | 306 | 91.5 ✗ | 89.8 ✗ | 75.1 ✗ | 62.3 ✗ |  |
 | [react](https://react.dev/) | React application | 54 | 730 | 88.2 ✗ | 87.7 ✗ | 86.7 ✗ | 82.9 ✗ |  |
 | [nextjs](https://nextjs.org/) | React application | 41 | 1160 | 98.3 | 98.2 | 96.5 ✗ | 94.2 ✗ |  |
-| [vue](https://vuejs.org/) | Vue application | 47 | 537 | 91.2 ✗ | 90.0 ✗ | 82.3 ✗ | 84.7 ✗ |  |
+| [vue](https://vuejs.org/) | Vue application | 47 | 537 | 89.0 ✗ | 90.0 ✗ | 82.3 ✗ | 84.7 ✗ |  |
 | [nuxt](https://nuxt.com/) | Vue application | 74 | 1107 | 89.5 ✗ | 88.0 ✗ | 87.9 ✗ | 84.2 ✗ |  |
-| [svelte](https://svelte.dev/) | landing | 26 | 233 | 58.3 ✗ | 51.1 ✗ | 60.9 ✗ | 68.2 ✗ |  |
+| [svelte](https://svelte.dev/) | landing | 26 | 233 | 59.4 ✗ | 52.3 ✗ | 62.1 ✗ | 72.8 ✗ |  |
 | [astro](https://astro.build/) | landing | 26 | 1004 | 83.1 ✗ | 81.9 ✗ | 84.6 ✗ | 87.6 ✗ |  |
 | [bootstrap](https://getbootstrap.com/) | landing | 10 | 424 | 88.0 ✗ | 85.6 ✗ | 83.1 ✗ | 79.5 ✗ |  |
 | [tailwind](https://tailwindcss.com/) | landing | 52 | 1384 | 64.2 ✗ | 64.5 ✗ | 61.3 ✗ | 56.1 ✗ |  |

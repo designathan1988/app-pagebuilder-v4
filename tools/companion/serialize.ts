@@ -22,7 +22,7 @@ export function serializePage(origin: string): PageRead {
   // Scripts often set layout variables on <html> itself. The document model keeps no root style attribute, so
   // retain its declarations as the last sheet: the residual capture CSS keeps the html rule on canvas and export.
   const rootStyle = document.documentElement.getAttribute('style')?.trim();
-  if (rootStyle) sheets.push({ href: null, text: `html{${rootStyle}}`, scope: null });
+  if (rootStyle) sheets.push({ href: null, text: `html:root{${rootStyle}}`, scope: null });
   // the custom elements met (a tag with a dash): each becomes a div wearing the class ce-<tag>, which the page's
   // and the shadow roots' rules are rewritten to (scopeCss), so the import keeps it as an element instead of
   // unwrapping it, and a shadow root's rules stay within their host

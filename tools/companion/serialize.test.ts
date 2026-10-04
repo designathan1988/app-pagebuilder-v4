@@ -7,5 +7,12 @@ it('keeps the root element\'s runtime custom property as a stylesheet rule', () 
   document.documentElement.setAttribute('style', '--vp-layout-top-height: 72px;');
   document.body.innerHTML = '<header style="top:var(--vp-layout-top-height)">Navigation</header>';
   const read = serializePage('https://site.test');
-  expect(read.sheets.at(-1)?.text ?? '').toContain('html{--vp-layout-top-height: 72px;}');
+  expect(read.sheets.at(-1)?.text ?? '').toContain('html:root{--vp-layout-top-height: 72px;}');
+});
+
+it('ranks a root runtime style above a stylesheet root default', () => {
+  document.documentElement.setAttribute('style', '--sk-banner-height: 4.2rem;');
+  document.body.innerHTML = '<div class="banner">Summit</div>';
+  const read = serializePage('https://site.test');
+  expect(read.sheets.at(-1)?.text ?? '').toContain('html:root{--sk-banner-height: 4.2rem;}');
 });
