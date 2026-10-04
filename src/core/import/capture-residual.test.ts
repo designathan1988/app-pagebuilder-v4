@@ -82,6 +82,15 @@ describe('what the importer keeps of a page', () => {
     const tree = run('<!doctype html><html><body><main><x-card><p>Kept</p></x-card></main></body></html>');
     expect(JSON.stringify(tree)).toContain('"text":"Kept"');
   });
+  it('keeps images inside an unstyled inline wrapper', () => {
+    const tree = run('<!doctype html><html><body><div><span><img src="shoe.png" alt="Shoe"><img src="shoe-hover.png" alt="Hover"></span></div></body></html>');
+    const container = tree?.children[0];
+    expect(container?.children.map((child) => child.type)).toEqual(['image', 'image']);
+    expect(container?.children.map((child) => child.attributes)).toEqual([
+      expect.objectContaining({ src: 'shoe.png', alt: 'Shoe' }),
+      expect.objectContaining({ src: 'shoe-hover.png', alt: 'Hover' }),
+    ]);
+  });
   it('takes the hidden attribute as the element hidden', () => {
     const tree = run('<!doctype html><html><body><div hidden><p>Closed</p></div></body></html>');
     expect(tree?.children[0]?.hidden).toBe(true);

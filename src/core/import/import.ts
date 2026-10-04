@@ -522,6 +522,15 @@ function htmlNames(node: DocNode, rules: ModelRules): ReadonlyMap<string, string
 function build(child: MarkupChild, builder: Builder, ancestors: readonly string[]): Raw {
   if (typeof child === 'string') return child.trim() === '' && ancestors[ancestors.length - 1] !== 'pre' ? { nothing: true } : { text: child };
   const { rules, make } = builder;
+  // A plain span around only images is HTML phrasing content, but the model's span is a text-only Paragraph.
+  // Release the wrapper so its visual children remain editable rather than turning the span into empty text.
+  if (builder.mode === 'import' && child.tag === 'span' && child.attributes.size === 0 && child.children.some((one) => typeof one !== 'string' && one.tag === 'img') && child.children.every((one) => typeof one === 'string' ? one.trim() === '' : one.tag === 'img')) {
+    builder.report.unwrapped.push(lineOfNode(builder.markup, child));
+    return { nodes: child.children.flatMap((one) => {
+      const made = build(one, builder, ancestors);
+      return 'node' in made ? [made.node] : 'nodes' in made ? [...made.nodes] : [];
+    }) };
+  }
   // an <a> is the Link Block when it holds a block of its own (a card made of one link) and the Link otherwise, as
   // the editor's two types of the same tag are meant (elements.json)
   const type = child.tag === 'a' ? (holdsBlock(child, rules) || holdsLinkedMedia(child) ? 'linkBlock' : 'link') : typeOfTag(child.tag, rules);
@@ -1102,7 +1111,7 @@ function cascade(tree: DocNode, builder: Builder, { ready, classNames, order }: 
       if (held === undefined || higher(rank, held.rank)) base.own.set(property, { value, rank });
     }
     // an <svg>'s width and height attributes: below every rule of the sheets, which all rank above them
-    for (const [property, value] of builder.presentational.get(node.id) ?? []) if (!base.own.has(property)) base.own.set(property, { value, rank: [0, 0, 0, 0, 0, 0] });
+    for (const [property, value] of builder.presentational.get(node.id) ?? []) if (!base.own.has(property) && !deferred.has(property)) base.own.set(property, { value, rank: [0, 0, 0, 0, 0, 0] });
     const own = new Map<string, Layer>();
     for (const [key, layer] of layers) if (layer.own.size > 0) own.set(key, layer);
     if (own.size > 0) winners.set(node.id, own);

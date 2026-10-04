@@ -9076,6 +9076,9 @@ instance (`status.locked.edit`).
   capture. An anchor with an image, SVG or video becomes a Link Block, retaining its editable visual child. Ordinary
   HTML whitespace in text runs collapses to spaces, while an actual `<br>` remains a line break and preformatted text
   keeps its whitespace.
+- A plain, attribute-free `<span>` containing only images releases its wrapper and keeps each image as an editable
+  child. Image width and height attributes remain lower-priority hints: when a captured responsive stylesheet controls
+  either dimension, the hint does not become a later generated rule that overrides it.
 - A runtime style on the page's `<html>` is kept as a last sheet when the capture reads it, since the project model has
   no root style attribute. A declaration of an author class still competes in the imported cascade (including its
   `!important` priority); if it wins, a lower-priority rule is not copied onto the element as its own style.

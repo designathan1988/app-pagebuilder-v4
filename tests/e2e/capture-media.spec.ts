@@ -9,18 +9,19 @@ const IMPORT = 'project.importHtml#menu-file';
 const EXPORT = 'project.export#toolbar-top-bar-export';
 
 test('a captured min-width rule keeps its wide and narrow heights after export', runs(IMPORT, EXPORT), async ({ page, context }) => {
-  const html = '<!doctype html><html><head><meta name="builder-capture" content="https://source.test/"><link rel="stylesheet" href="site.css"></head><body><section class="hero" data-capture-class="hero"><p>Hero</p></section><div class="hidden md:block" data-capture-class="hidden md:block">Wide only</div><div class="range" data-capture-class="range">Range</div></body></html>';
-  const css = '.hero{height:16px}.hidden{display:none}.range{width:36px}@media(min-width:768px){.hero{height:250px}.md\\:block{display:block}}@media(width >= 50rem){.range{width:70px}}';
+  const html = '<!doctype html><html><head><meta name="builder-capture" content="https://source.test/"><link rel="stylesheet" href="site.css"></head><body><section class="hero" data-capture-class="hero"><img class="h-full" data-capture-class="h-full" src="pixel.svg" width="200" height="200" alt="Pixel"></section><div class="hidden md:block" data-capture-class="hidden md:block">Wide only</div><div class="range" data-capture-class="range">Range</div></body></html>';
+  const css = '.hero{height:16px}.h-full{height:100%}.hidden{display:none}.range{width:36px}@media(min-width:768px){.hero{height:250px}.md\\:block{display:block}}@media(width >= 50rem){.range{width:70px}}';
   await openEditor(page);
   const choosing = page.waitForEvent('filechooser');
   await runDoor(page, IMPORT);
   await (await choosing).setFiles([
     { name: 'index.html', mimeType: 'text/html', buffer: Buffer.from(html) },
     { name: 'site.css', mimeType: 'text/css', buffer: Buffer.from(css) },
+    { name: 'pixel.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1" fill="red"/></svg>') },
   ]);
   await page.locator('[data-door="project.importHtml#destination-replace"]').click();
   await page.locator('[data-confirmation="confirm"]').click();
-  await expect(page.frameLocator('.frame__page').getByText('Hero')).toBeVisible();
+  await expect(page.frameLocator('.frame__page').getByRole('img', { name: 'Pixel' })).toBeVisible();
   const downloading = page.waitForEvent('download');
   await runDoor(page, EXPORT);
   const files = unzip(fs.readFileSync(await (await downloading).path()));
@@ -28,12 +29,13 @@ test('a captured min-width rule keeps its wide and narrow heights after export',
   await exported.route('https://made.test/**', route => {
     const path = new URL(route.request().url()).pathname.slice(1);
     const bytes = files.get(path);
-    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType: path.endsWith('.css') ? 'text/css' : 'text/html', body: bytes });
+    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType: path.endsWith('.css') ? 'text/css' : path.endsWith('.svg') ? 'image/svg+xml' : 'text/html', body: bytes });
   });
   for (const [width, height] of [[1440, 250], [390, 16]] as const) {
     await exported.setViewportSize({ width, height: 900 });
     await exported.goto('https://made.test/index.html');
     expect(await exported.locator('section').evaluate(el => Math.round(el.getBoundingClientRect().height)), `${width}px`).toBe(height);
+    expect(await exported.getByRole('img', { name: 'Pixel' }).evaluate(el => Math.round(el.getBoundingClientRect().height)), `${width}px image`).toBe(height);
     expect(await exported.locator('[data-capture-class="hidden md:block"]').evaluate(el => getComputedStyle(el).display), `${width}px utility`).toBe(width === 1440 ? 'block' : 'none');
     expect(await exported.locator('[data-capture-class="range"]').evaluate(el => Math.round(el.getBoundingClientRect().width)), `${width}px range`).toBe(width === 1440 ? 70 : 36);
   }
