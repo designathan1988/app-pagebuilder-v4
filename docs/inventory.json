@@ -6,7 +6,7 @@
     "doors": 1361,
     "scenarios": 1830,
     "modules": 473,
-    "lines": 82267
+    "lines": 82143
   },
   "features": [
     {
@@ -3331,7 +3331,7 @@
     },
     {
       "path": "src/core/animation/animation.ts",
-      "lines": 368,
+      "lines": 345,
       "commands": [
         "animation.create",
         "animation.rename",
@@ -3850,7 +3850,7 @@
     },
     {
       "path": "src/core/files/files.ts",
-      "lines": 547,
+      "lines": 539,
       "commands": [
         "files.upload",
         "files.createFolder",
@@ -4012,7 +4012,7 @@
     },
     {
       "path": "src/core/import/capture-styles.ts",
-      "lines": 55,
+      "lines": 20,
       "commands": [],
       "features": []
     },
@@ -4156,7 +4156,7 @@
     },
     {
       "path": "src/core/motion/timeline.ts",
-      "lines": 292,
+      "lines": 291,
       "commands": [],
       "features": []
     },
@@ -4210,7 +4210,7 @@
     },
     {
       "path": "src/core/page/grid-settings.ts",
-      "lines": 30,
+      "lines": 29,
       "commands": [],
       "features": []
     },
@@ -4849,7 +4849,7 @@
     },
     {
       "path": "src/core/style/tracks.ts",
-      "lines": 146,
+      "lines": 143,
       "commands": [
         "style.setGridTracks"
       ],
@@ -4908,7 +4908,7 @@
     },
     {
       "path": "src/core/text/inline.ts",
-      "lines": 338,
+      "lines": 333,
       "commands": [],
       "features": []
     },
@@ -5305,7 +5305,7 @@
     },
     {
       "path": "src/editor/command-bar/command-bar.ts",
-      "lines": 248,
+      "lines": 247,
       "commands": [
         "commandBar.open"
       ],
@@ -5779,7 +5779,7 @@
     },
     {
       "path": "src/editor/inspector/spacing.ts",
-      "lines": 48,
+      "lines": 47,
       "commands": [
         "inspector.toggleSpacingLink"
       ],
@@ -6389,7 +6389,7 @@
     },
     {
       "path": "src/editor/shell/slots.tsx",
-      "lines": 44,
+      "lines": 39,
       "commands": [],
       "features": []
     },
@@ -6485,7 +6485,7 @@
     },
     {
       "path": "src/editor/timeline/panel.tsx",
-      "lines": 225,
+      "lines": 220,
       "commands": [],
       "features": []
     },
@@ -6647,7 +6647,7 @@
     },
     {
       "path": "src/editor/view/style-state.ts",
-      "lines": 82,
+      "lines": 80,
       "commands": [
         "view.setStyleState"
       ],
@@ -6711,7 +6711,7 @@
     },
     {
       "path": "src/editor/workspace/panel-drag.ts",
-      "lines": 102,
+      "lines": 101,
       "commands": [],
       "features": []
     },
@@ -6903,7 +6903,7 @@
     },
     {
       "path": "src/manifest/css.ts",
-      "lines": 302,
+      "lines": 286,
       "commands": [],
       "features": []
     },
@@ -6915,7 +6915,7 @@
     },
     {
       "path": "src/manifest/runtime.ts",
-      "lines": 142,
+      "lines": 137,
       "commands": [],
       "features": []
     },
@@ -6969,7 +6969,7 @@
     },
     {
       "path": "src/modules/layout-composer/geometry/geometry.ts",
-      "lines": 121,
+      "lines": 119,
       "commands": [],
       "features": []
     },
@@ -6993,7 +6993,7 @@
     },
     {
       "path": "src/modules/layout-composer/gestures/recognize.ts",
-      "lines": 631,
+      "lines": 630,
       "commands": [],
       "features": []
     },
@@ -7005,7 +7005,7 @@
     },
     {
       "path": "src/modules/layout-composer/gestures/structural.ts",
-      "lines": 191,
+      "lines": 187,
       "commands": [],
       "features": []
     },
@@ -7053,7 +7053,7 @@
     },
     {
       "path": "src/modules/layout-composer/intent/analysis.ts",
-      "lines": 390,
+      "lines": 385,
       "commands": [],
       "features": []
     },

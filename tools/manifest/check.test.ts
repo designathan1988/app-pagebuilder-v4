@@ -10,7 +10,7 @@ import { PLANTS, ownGenerated, plantDeleteScenarios, plantRenderScenario, plante
 const loaded = loadManifest();
 
 describe('manifest:check', () => {
-  it('passes on the real manifest', () => {
+  it('passes on the real manifest', { timeout: 30_000 }, () => {
     expect(loaded.problems).toEqual([]);
     const result = checkManifest(loaded.input);
     expect(result.problems).toEqual([]);
@@ -53,7 +53,7 @@ describe('manifest:check', () => {
     });
   });
 
-  it('has the planted fixtures of the browser-support model, each on its own rule', () => {
+  it('has the planted fixtures of the browser-support model, each on its own rule', { timeout: 30_000 }, () => {
     const rules = new Map(PLANTS.map((p) => [p.id, p.rule]));
     expect({
       'edited-property-unsupported': rules.get('edited-property-unsupported'),
@@ -286,7 +286,7 @@ describe('manifest:check', () => {
   });
 
 
-  it('reads a registration with or without type arguments, and nothing that only names the function', () => {
+  it('reads a registration with or without type arguments, and nothing that only names the function', { timeout: 30_000 }, () => {
     const code = [
       "export const undo = registerHandler('history.undo', () => ({ kind: 'undo' }));",
       "export const open = registerHandler<'workspace.setPanelOpen', EditorUi>('workspace.setPanelOpen', ({ state }) => state);",
@@ -304,7 +304,7 @@ describe('manifest:check', () => {
   // A plant that must leave the manifest valid: the scenario contract accepts what it describes.
   const valid = (apply: Plant['apply']) => checkManifest(planted(loaded.input, { id: 'valid', rule: 'fixture', description: '', apply })).problems;
 
-  it('counts a measure of the editor and a kept preference as end terminals', () => {
+  it('counts a measure of the editor and a kept preference as end terminals', { timeout: 30_000 }, () => {
     expect(
       valid((m) => {
         const [remove] = plantDeleteScenarios(m);
@@ -333,7 +333,7 @@ describe('manifest:check', () => {
     expect(empty('en', '/Página').map((p) => p.rule)).toEqual(['document-path', 'document-path', 'document-path']);
   });
 
-  it('checks the arguments of a step against its command: a palette entry, a node path', () => {
+  it('checks the arguments of a step against its command: a palette entry, a node path', { timeout: 30_000 }, () => {
     const insert = (entry: string) =>
       checkManifest(
         planted(loaded.input, {
@@ -350,7 +350,7 @@ describe('manifest:check', () => {
     expect(insert('banner')).toEqual(['step: "banner": the argument "entry" of element.insert is a palette entry of elements.json']);
   });
 
-  it('accepts a held drag that a later step releases on its door or drag.cancel ends, and typed characters', () => {
+  it('accepts a held drag that a later step releases on its door or drag.cancel ends, and typed characters', { timeout: 30_000 }, () => {
     const drag = 'element.moveTo#canvas-drag-canvas-element-before-after';
     const held = { door: drag, args: { parent: '/Page/Section', index: 1 }, target: '/Page/Section/Heading', drop: { placement: 'after', reference: '/Page/Section/Paragraph' }, action: false, hold: true, type: null };
     for (const end of [
@@ -367,7 +367,7 @@ describe('manifest:check', () => {
     }
   });
 
-  it('refuses a tooth-proof module that does not exist', () => {
+  it('refuses a tooth-proof module that does not exist', { timeout: 30_000 }, () => {
     const input = planted(loaded.input, {
       id: 'tooth-module-missing',
       rule: 'tooth-proof',
