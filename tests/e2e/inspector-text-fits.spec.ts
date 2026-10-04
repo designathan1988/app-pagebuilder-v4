@@ -6,6 +6,7 @@
 // ellipsis, and then its field's tooltip carries it whole. Text read only by assistive technology is not drawn, so it is not measured.
 import { expect, test, type Page } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
+import fs from 'node:fs';
 import { control, openEverySection, runDoor, runs } from './door.ts';
 
 const INSERT = 'element.insert#elements-tile';
@@ -13,6 +14,26 @@ const TABS = ['workspace.setActiveTab#inspector-tab-style', 'workspace.setActive
 const ALL = 'inspector.setMode#inspector-mode-all';
 const MASK_KIND = 'element.setAttribute#forms-mask-kind';
 const MASK_PRESET = 'element.setAttribute#forms-mask-preset';
+const OPEN = 'project.open#menu-file';
+const ROW = 'selection.select#layers-row';
+const ADD_EVENT = 'interactions.add#inspector-interaction-add';
+const ADD_MOTION = 'motion.add#inspector-motion-add';
+// the value an input holds, wider than the room it gives it (an input cuts its text with no ellipsis)
+const cutValues = (page: Page, scope: string) =>
+  page.locator(scope).evaluate((region) => {
+    const canvas = document.createElement('canvas').getContext('2d');
+    return [...region.querySelectorAll<HTMLInputElement>('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color])')]
+      .filter((input) => input.value !== '' && input.getClientRects().length > 0 && getComputedStyle(input).color !== 'rgba(0, 0, 0, 0)')
+      .filter((input) => {
+        const style = getComputedStyle(input);
+        if (canvas === null) return false;
+        canvas.font = style.font;
+        const room = input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+        // what the field scrolls counts what its text cannot see, the list's drop-down indicator included
+        return canvas.measureText(input.value).width > room + 1 || input.scrollWidth > input.clientWidth + 1;
+      })
+      .map((input) => `${input.labels?.[0]?.textContent ?? input.getAttribute('aria-label') ?? ''}: ${input.value}`);
+  });
 // one element of each kind whose inspector draws sections of its own: a box, text, a link and a button, media, form
 // controls, a list, a table, a disclosure, a dialog, a drawing
 const ENTRIES = ['section', 'heading', 'link', 'button', 'image', 'video', 'form', 'input-text', 'select', 'input-range', 'unordered-list', 'table', 'details', 'dialog', 'svg'];
@@ -127,6 +148,20 @@ for (const locale of ['en-US', 'pt-BR']) {
           .map((input) => `${input.getAttribute('aria-label') ?? ''}: ${input.value}`);
       });
       expect(cutChoices).toEqual([]);
+    });
+
+    // The Interactions tab's fields show their values whole (the audit of 2026-10-04: with an event and a motion on the
+    // Hero, Reduced motion read "Respect it (no movemer" at 1440 px, cut mid-word with no ellipsis).
+    test('the Interactions tab shows every field value whole with an event and a motion', runs(OPEN, ROW, ADD_EVENT, ADD_MOTION), async ({ page }) => {
+      const chooser = page.waitForEvent('filechooser');
+      await runDoor(page, OPEN);
+      await (await chooser).setFiles({ name: 'motion.json', mimeType: 'application/json', buffer: fs.readFileSync('manifest/features/fixtures/motion.json') });
+      await control(page, ROW, { args: { target: 'n-hero' } }).click();
+      await runDoor(page, TABS[2]);
+      await runDoor(page, ADD_EVENT);
+      await runDoor(page, ADD_MOTION);
+      await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+      expect(await cutValues(page, 'aside.inspector')).toEqual([]);
     });
   });
 }

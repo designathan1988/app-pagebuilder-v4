@@ -16,8 +16,9 @@ const ROWS = '.field-row';
 const PAIR = 'field-row--pair';
 const LABEL = ':scope > .field-row__label';
 const CELLS = ':scope > .field-cell';
-// a field of offered values standing in the row's value column
-const CHOICE = ':scope > input[list]';
+// a field of offered values standing in the row's value column: the input itself, or the input of a panel's field
+// form (shell/panel-field.tsx: an interaction card's fields, the timeline's settings)
+const CHOICE = ':scope > input[list], :scope > .panel-field__form > input[list]';
 // the texts a cell cuts with an ellipsis: a field's shown value, a keyword menu's value
 const CLIPS = '.field__rest-value, .field__keyword-value';
 // the width of each row's label column, read while the row is laid out beside its label (a row is drawn so before it is
@@ -55,7 +56,14 @@ function fitsBeside(row: HTMLElement, context: CanvasRenderingContext2D): boolea
     // the field beside its label: the row less the label column and the gap
     const own = getComputedStyle(choice);
     const frame = px(own.paddingLeft) + px(own.paddingRight) + px(own.borderLeftWidth) + px(own.borderRightWidth);
-    if (widthOf(context, choice.value, own) + frame > inner - column - gap + TOLERANCE) return false;
+    // what else its form holds beside it (an easing's curve button) takes its share of the value column
+    const beside = choice.parentElement === row ? 0 : (choice.parentElement?.getBoundingClientRect().width ?? 0) - choice.getBoundingClientRect().width;
+    // what the field needs: while it overflows as drawn, its own width plus what it cuts (the browser's scroll width
+    // counts what the text cannot see beside it: the list's drop-down indicator Chrome draws inside an input with a
+    // datalist, which the text's own width leaves out); else the width of its words
+    const overflow = choice.scrollWidth - choice.clientWidth;
+    const needs = overflow > 1 ? choice.getBoundingClientRect().width + overflow : widthOf(context, choice.value, own) + frame;
+    if (needs + beside > inner - column - gap + TOLERANCE) return false;
   }
   if (!row.classList.contains(PAIR)) return true;
   // a pair's half beside its label: the row less the label column and the two gaps, halved (inspector.css)
