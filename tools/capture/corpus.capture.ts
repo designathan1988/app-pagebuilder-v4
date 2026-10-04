@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { test, type Browser, type Page } from '@playwright/test';
-import { capture, closeBrowser, settle } from '../companion/capture.ts';
+import { capture, closeBrowser, replayHar, settle } from '../companion/capture.ts';
 import { comparePictures, WIDTHS } from '../journey/fidelity.ts';
 import { open } from '../journey/kit.ts';
 import { fileMenu } from '../journey/ui.ts';
@@ -82,7 +82,7 @@ for (const site of SITES.filter((one) => only.length === 0 || only.includes(one.
       }
       // the original at every width, from the record
       const original = await browser.newContext({ locale: 'en-US', bypassCSP: true });
-      await original.routeFromHAR(har, { notFound: 'abort' });
+      await replayHar(original, har);
       const originalPage = await original.newPage();
       const originals = new Map<number, string>();
       for (const width of WIDTHS) originals.set(width, await picture(originalPage, site.url, width, path.join(out, `original-${width}.png`)));

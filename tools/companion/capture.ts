@@ -8,7 +8,7 @@
 // two captured pages written from one file to the other: the files File › Import HTML takes
 // (src/core/import/import.ts).
 import fs from 'node:fs';
-import type { Browser, Page } from '@playwright/test';
+import type { Browser, BrowserContext, Page } from '@playwright/test';
 import { chromium } from '@playwright/test';
 import { generate as generateCss, parse as parseCss, walk as walkCss, type CssNode } from 'css-tree';
 import { serializePage, type PageRead } from './serialize.ts';
@@ -275,6 +275,14 @@ function harEntries(file: string): Map<string, Recorded> {
   return out;
 }
 
+// An unfinished request in the record has no response to replay. Abort it as the original navigation saw it fail;
+// leaving Playwright to serve that HAR entry can keep a parser-blocking stylesheet pending forever.
+export async function replayHar(context: BrowserContext, file: string): Promise<void> {
+  await context.routeFromHAR(file, { notFound: 'abort' });
+  const failed = new Set([...harEntries(file)].filter(([, response]) => response.status < 0).map(([url]) => url));
+  if (failed.size > 0) await context.route((url) => failed.has(url.href), (route) => route.abort());
+}
+
 export async function capture(address: string, options: { readonly width?: number; readonly timeout?: number; readonly pages?: number; readonly har?: string } = {}): Promise<Capture> {
   const start = new URL(address);
   if (!isHttp(start.href)) throw new Error(`${address} is no http or https address`);
@@ -283,7 +291,7 @@ export async function capture(address: string, options: { readonly width?: numbe
   const context = await (await browser()).newContext({ viewport: { width: options.width ?? 1440, height: 900 }, locale: 'en-US', bypassCSP: true });
   try {
     const recorded = options.har === undefined ? null : harEntries(options.har);
-    if (options.har !== undefined) await context.routeFromHAR(options.har, { notFound: 'abort' });
+    if (options.har !== undefined) await replayHar(context, options.har);
     // a file of the site: from the record when the capture replays one, else from the network
     const fetched = async (url: string, timeout = 20_000): Promise<{ readonly ok: boolean; readonly type: string; readonly body: Buffer } | null> => {
       if (recorded !== null) {

@@ -23,7 +23,7 @@ Sites at the target: 0 of 20. Measured: 20.
 | [bootstrap](https://getbootstrap.com/) | landing | 10 | 409 | 50.7 ✗ | 51.2 ✗ | 71.2 ✗ | 71.4 ✗ |  |
 | [tailwind](https://tailwindcss.com/) | landing | 51 | 1338 | 51.4 ✗ | 57.2 ✗ | 63.9 ✗ | 50.7 ✗ |  |
 | [overreacted](https://overreacted.io/) | blog | 9 | 304 | 75.7 ✗ | 74.7 ✗ | 72.8 ✗ | 61.9 ✗ |  |
-| [csstricks](https://css-tricks.com/) | blog | 0 | — | — | — | — | — | TimeoutError: page.goto: Timeout 45000ms exceeded. |
+| [csstricks](https://css-tricks.com/) | blog | 66 | 646 | 55.0 ✗ | 54.6 ✗ | 63.6 ✗ | 54.5 ✗ |  |
 | [smashing](https://www.smashingmagazine.com/) | blog | 29 | 557 | 53.0 ✗ | 56.9 ✗ | 57.6 ✗ | 51.0 ✗ |  |
 | [bellroy](https://bellroy.com/) | shop | 115 | 1545 | 16.1 ✗ | 13.5 ✗ | 17.9 ✗ | 16.8 ✗ |  |
 | [allbirds](https://www.allbirds.com/) | shop | 359 | 1284 | 7.9 ✗ | 7.9 ✗ | 8.6 ✗ | 10.1 ✗ |  |

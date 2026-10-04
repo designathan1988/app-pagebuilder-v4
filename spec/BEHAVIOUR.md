@@ -9079,7 +9079,9 @@ instance (`status.locked.edit`).
 - Not captured: pages beyond the count asked (their links stay absolute), what a script draws live (canvas, WebGL), the
   content of a frame from another origin.
 - **The corpus** (`npm run capture:corpus`, the report `docs/CAPTURE-CORPUS.md`): twenty public sites recorded once
-  into HAR files and replayed, captured, imported, exported and compared with the original at every breakpoint. The
+  into HAR files and replayed, captured, imported, exported and compared with the original at every breakpoint. A
+  request recorded without a response is aborted during both original and capture replay; a pending stylesheet must
+  not hold the page's `DOMContentLoaded` event open indefinitely. The
   plan's target, 98 % of pixels alike at every breakpoint, is not met (open: AUD-15, STG-12.6).
 
 ### Refusals
