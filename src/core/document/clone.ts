@@ -9,6 +9,36 @@ type Pair = { readonly source: DocNode; readonly copy: DocNode };
 const IDREF_LISTS = new Set(['aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'headers']);
 const IDREF_SINGLES = new Set(['aria-activedescendant', 'list']);
 
+// A copy's animations under @keyframes names no animation of the document (nor of the copies made before it) holds:
+// one stylesheet holds every animation, so a copy that kept a name would move as the original's keyframes say, and an
+// edit of either would change both (the audit's UQ1). The copy's own interactions that play one follow its new name.
+export function withFreshAnimationNames(node: DocNode, taken: Set<string>): DocNode {
+  const renamed = new Map<string, string>();
+  const animations = node.animations?.map((animation) => {
+    if (!taken.has(animation.name)) {
+      taken.add(animation.name);
+      return animation;
+    }
+    let name = `${animation.name}-2`;
+    for (let n = 3; taken.has(name); n += 1) name = `${animation.name}-${n}`;
+    taken.add(name);
+    renamed.set(animation.name, name);
+    return { ...animation, name };
+  });
+  const interactions = renamed.size === 0 ? node.interactions : node.interactions?.map((one) => (one.animation !== undefined && renamed.has(one.animation) ? { ...one, animation: renamed.get(one.animation) as string } : one));
+  return {
+    ...node,
+    ...(animations === undefined ? {} : { animations }),
+    ...(interactions === undefined ? {} : { interactions }),
+    children: node.children.map((child) => withFreshAnimationNames(child, taken)),
+  };
+}
+
+// every @keyframes name the pages of a document hold
+export function animationNamesOf(document: DocumentJson): Set<string> {
+  return new Set([...allNodes(document)].flatMap((node) => (node.animations ?? []).map((animation) => animation.name)));
+}
+
 export function refreshCopiedIdentities(document: DocumentJson, pairs: readonly Pair[], regenerateHtmlIds: boolean | 'collisions' = true): DocNode[] {
   const occupied = new Set([...allNodes(document)].map((node) => node.attributes.id).filter((id): id is string => typeof id === 'string' && id !== ''));
   const nodeIds = new Map<string, NodeId>();
@@ -62,5 +92,7 @@ export function refreshCopiedIdentities(document: DocumentJson, pairs: readonly 
       ...(inline === undefined ? {} : { inline }),
       children: copy.children.map(repair) };
   };
-  return pairs.map(({ copy }) => repair(copy));
+  // a copy kept outside the pages (a component's definition: regenerateHtmlIds false) keeps its element's names
+  const names = animationNamesOf(document);
+  return pairs.map(({ copy }) => (regenerateHtmlIds === false ? repair(copy) : withFreshAnimationNames(repair(copy), names)));
 }

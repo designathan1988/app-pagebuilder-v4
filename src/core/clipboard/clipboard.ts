@@ -29,6 +29,7 @@ import { allNodes, locate, type DocNode, type DocumentJson, type Location, type 
 import type { ModelRules } from '../document/validate.ts';
 import { placementRefusal } from '../elements/content-model.ts';
 import { referenceHtmlOf } from '../elements/references.ts';
+import { animationNamesOf, withFreshAnimationNames } from '../document/clone.ts';
 import { pageCss, pageLines } from '../export/export.ts';
 import { deepEqual, type Patch } from '../history/transaction.ts';
 import { nodesFromExternal, reportNotes } from '../import/import.ts';
@@ -190,7 +191,9 @@ function settled(document: DocumentJson, nodes: readonly DocNode[], renamed: Rea
       children: node.children.map((child) => repair(child, detaching)),
     } as DocNode;
   };
-  return nodes.map((node) => repair(node));
+  // a pasted animation takes a @keyframes name the document does not hold (clone.ts, the audit's UQ1)
+  const names = animationNamesOf(document);
+  return nodes.map((node) => withFreshAnimationNames(repair(node), names));
 }
 
 // where pasted nodes go: into a selected container, after a selected leaf, else at the end of the root of the page

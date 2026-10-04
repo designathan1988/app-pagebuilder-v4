@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 473,
-    "lines": 82482
+    "lines": 82517
   },
   "features": [
     {
@@ -3360,7 +3360,7 @@
     },
     {
       "path": "src/core/clipboard/clipboard.ts",
-      "lines": 353,
+      "lines": 356,
       "commands": [
         "clipboard.copy",
         "clipboard.cut",
@@ -3599,7 +3599,7 @@
     },
     {
       "path": "src/core/document/clone.ts",
-      "lines": 67,
+      "lines": 99,
       "commands": [],
       "features": []
     },
