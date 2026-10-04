@@ -6865,12 +6865,13 @@
                     "letter-spacing: 2px;",
                     ".card {",
                     "padding: 24px;",
-                    "background-color: #fafafa;"
+                    "background-color: #fafafa;",
+                    ".card:hover {",
+                    "background-color: #eeeeee;",
+                    "@media (max-width: 390px) {",
+                    "font-size: 24px;"
                   ],
-                  "absent": [
-                    ":hover",
-                    "@media"
-                  ]
+                  "absent": []
                 },
                 {
                   "path": "css/site.css",
