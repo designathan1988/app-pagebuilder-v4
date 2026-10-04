@@ -1,7 +1,7 @@
 // The Companion's snapshot route (STG-12.4): only the extension that holds its token hands it a page, and a capture of
 // that address is then answered from what the extension read, not from the Companion's own Chrome.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { Server } from 'node:http';
+import { request, type Server } from 'node:http';
 import { startCompanion, stopCompanion } from './server.ts';
 
 const PORT = 5431;
@@ -43,5 +43,50 @@ describe('the snapshot route', () => {
     const sidecar = JSON.parse(Buffer.from(captured.files.find((file) => file.path === 'account.html.capture.json')?.base64 ?? '', 'base64').toString('utf8')) as { format: number; viewports: { html: string }[] };
     expect(sidecar.format).toBe(1);
     expect(sidecar.viewports.some((viewport) => viewport.html.includes('Welcome back'))).toBe(true);
+  });
+});
+
+// What a web page the person opens can ask of the Companion (OWASP CSRF; Chrome's Local Network Access): a page of
+// another site sends a simple cross-origin POST the server still runs, and with `access-control-allow-origin: *` it
+// would read the answer. Only the editor's pages (a loopback origin) and the extension's token are answered, a
+// rebound host name is refused, and only http and https addresses are captured.
+const raw = (path: string, headers: Record<string, string>, body: unknown): Promise<{ status: number; allow: string | undefined; text: string }> =>
+  new Promise((resolve, reject) => {
+    const sent = request({ host: '127.0.0.1', port: PORT, path, method: 'POST', headers: { 'content-type': 'text/plain', ...headers } }, (res) => {
+      let text = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk: string) => (text += chunk));
+      res.on('end', () => resolve({ status: res.statusCode ?? 0, allow: res.headers['access-control-allow-origin'] as string | undefined, text }));
+    });
+    sent.on('error', reject);
+    sent.end(JSON.stringify(body));
+  });
+
+describe('who may ask the Companion', () => {
+  it('refuses a capture asked by a page of another site, and never lets it read the answer', async () => {
+    await post('/snapshot', snapshot, TOKEN);
+    const asked = await raw('/capture', { origin: 'https://evil.example' }, { url: 'https://intranet.example/account' });
+    expect(asked.status).toBe(403);
+    expect(asked.allow).toBeUndefined();
+    expect(asked.text).not.toContain('Welcome back');
+  });
+
+  it('refuses a request whose host is not this machine (a rebound name)', async () => {
+    const asked = await raw('/capture', { host: `attacker.example:${PORT}`, origin: `http://attacker.example:${PORT}` }, { url: 'https://intranet.example/account' });
+    expect(asked.status).toBe(403);
+  });
+
+  it('answers the editor on a loopback origin, naming that origin', async () => {
+    await post('/snapshot', snapshot, TOKEN);
+    const asked = await raw('/capture', { origin: 'http://127.0.0.1:5173' }, { url: 'https://intranet.example/account' });
+    expect(asked.status).toBe(200);
+    expect(asked.allow).toBe('http://127.0.0.1:5173');
+  });
+
+  it('captures only http and https addresses', async () => {
+    for (const url of ['file:///C:/Windows/win.ini', 'chrome://settings', 'javascript:alert(1)']) {
+      const asked = await raw('/capture', { origin: 'http://localhost:5173' }, { url });
+      expect(asked.status, url).toBe(400);
+    }
   });
 });
