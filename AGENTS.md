@@ -141,7 +141,7 @@ remains, explain the blocker and the decision needed from the user.
 - The document JSON is the source of truth, never the DOM; the page renders in an iframe scaled with CSS `zoom`.
 - npm (never pnpm), TypeScript strict, Vite, Vitest, Playwright with `channel: 'chrome'`. Colours, spacing, type, radii
   and shadows come only from the tokens (`src/ui/tokens.css`, generated). UI text only through the i18n catalogues (en
-  is the source, pt-BR ships). Code, comments, documents, file names and commits in English; file names in kebab-case;
+  is the source, pt-BR ships). Code, comments, documents and file names in English, commit messages in Brazilian Portuguese (DEC-63); file names in kebab-case;
   tools in TypeScript (exceptions in `docs/PRODUCT.md` section 7).
 - Export: a ZIP with HTML plus a separate CSS file, BEM classes, no inline styles. The dev server port comes from
   `PORT`.
