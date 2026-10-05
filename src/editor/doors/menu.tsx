@@ -138,7 +138,7 @@ function MenuList({ menu, onDone, focusFirst, anchor, beside }: MenuListProps) {
     ? side === null ? undefined : { position: 'fixed' as const, ...placedStyle(side) }
     : anchor === undefined ? undefined : at === null ? { position: 'fixed' as const, visibility: 'hidden' as const } : { position: 'fixed' as const, ...placedStyle(at), right: 'auto', bottom: 'auto' };
   return (
-    <div className="menu" role="menu" ref={list} style={placed} aria-label={t(menuOf(menu).labelKey as MessageId)} data-region={`menu:${menu}`} data-key-context="menu">
+    <div className="menu" role="menu" tabIndex={-1} ref={list} style={placed} aria-label={t(menuOf(menu).labelKey as MessageId)} data-region={`menu:${menu}`} data-key-context="menu">
       {slotsIn(`menu:${menu}`)
         // the State menu offers only the states the selected element kind stands on (A3.36): an h2 takes no :disabled
         .filter((slot) => {
@@ -319,7 +319,7 @@ function OpenContextMenu() {
   if (items.length === 0) return null;
   return (
     <div className="context-menu" data-context-menu>
-      <div className="menu" role="menu" ref={list} aria-label={t('contextMenu.label')} data-region="context-menu" data-key-context="menu" style={placedStyle(at)}>
+      <div className="menu" role="menu" tabIndex={-1} ref={list} aria-label={t('contextMenu.label')} data-region="context-menu" data-key-context="menu" style={placedStyle(at)}>
         {items.map((entry) => (
           <MenuItem key={entry.ref} entry={entry} onDone={dismiss} keysIn="canvas" />
         ))}

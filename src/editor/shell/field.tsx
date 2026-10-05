@@ -106,7 +106,7 @@ function FieldMenu({ anchor, list, label, children }: { readonly anchor: RefObje
   // hidden item takes no focus (Escape then went to another key context and closed nothing)
   const style: CSSProperties = at === null ? { opacity: 0, left: 0, top: 0 } : { left: at.left, top: at.top };
   return createPortal(
-    <div className="menu field__menu field__menu--floating" role="menu" ref={list} aria-label={label} data-key-context="menu" style={style}>
+    <div className="menu field__menu field__menu--floating" role="menu" tabIndex={-1} ref={list} aria-label={label} data-key-context="menu" style={style}>
       {children}
     </div>,
     document.body,
@@ -410,7 +410,7 @@ function UnitMenu({ entry, property, shown, input, ready, suggestions }: {
       </button>
 
       {open ? (
-        <div className="menu field__menu" role="menu" ref={(element) => { list.current = element;
+        <div className="menu field__menu" role="menu" tabIndex={-1} ref={(element) => { list.current = element;
           unitList.current = element;
         }} aria-label={door.label} data-key-context="menu">
           {suggestions.values.map((value) => (
@@ -1253,7 +1253,7 @@ export function KeywordButtons({ entry, door, property, values, icons, label }: 
           </button>
 
           {layer.open && available ? (
-            <div className="menu field__menu" role="menu" ref={menuList} aria-label={label} data-key-context="menu">
+            <div className="menu field__menu" role="menu" tabIndex={-1} ref={menuList} aria-label={label} data-key-context="menu">
               {values.map((value) => (
                 <button
                   key={value}

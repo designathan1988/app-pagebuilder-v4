@@ -46,7 +46,7 @@ function PageSwitcher({ entry }: { readonly entry: DoorEntry }) {
         <Icon name={GLYPHS.dropdown} size="xs" />
       </button>
       {layer.open ? (
-        <div className="menu top-bar__page-menu" role="menu" ref={list} aria-label={door.label} data-key-context="menu">
+        <div className="menu top-bar__page-menu" role="menu" tabIndex={-1} ref={list} aria-label={door.label} data-key-context="menu">
           {pages.map((one) => (
             <PageItem key={one.tree.id} entry={entry} page={one.tree.id} name={one.name} file={one.file} shown={one.tree.id === page?.tree.id} onDone={layer.close} />
           ))}
