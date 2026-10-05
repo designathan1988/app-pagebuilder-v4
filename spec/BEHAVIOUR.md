@@ -3134,6 +3134,8 @@ Each item is a requirement for this editor.
 
 The manifest draws the two Element actions items with `checked: null`: the item reads "Lock" even on a locked element, where it unlocks it. Pager flips the label (Lock/Unlock). Proposal: `checked: "checkbox"` on `element.toggleLock#menu-element-actions` and `element.toggleHidden#menu-element-actions`, so each item says whether the primary selected element is locked or hidden. Not changed here: it is door data, outside this phase.
 
+
+A concept row's name stands on its disclosure's line however tall its head's control is — the alignment matrix's three lines, the Anchors' two lines of buttons (the user's review of 2026-10-05, LR2: the Anchors' name was centred under its disclosure, which stood alone above it; `tests/e2e/concept-row-heads.spec.ts`).
 ## inspector-property-search
 
 The Style tab's "Find a property…" field filters the tab down to the properties it names. Pager has no such filter (its
