@@ -11,54 +11,54 @@ Open: 0 divergences of 0 kinds. Decisions (docs/PRODUCT.md, section 4) keep the 
 
 | State | Theme | Language | Regions | Controls | Open | Kept by a decision |
 |---|---|---|---|---|---|---|
-| default | dark | en | 15 | 117 | 0 | 9 |
-| selection | dark | en | 16 | 117 | 0 | 9 |
-| breakpoint | dark | en | 15 | 126 | 0 | 14 |
-| menu | dark | en | 16 | 134 | 0 | 17 |
-| context | dark | en | 16 | 133 | 0 | 11 |
-| palette | dark | en | 16 | 119 | 0 | 10 |
-| multi | dark | en | 15 | 116 | 0 | 14 |
+| default | dark | en | 15 | 115 | 0 | 11 |
+| selection | dark | en | 16 | 115 | 0 | 11 |
+| breakpoint | dark | en | 15 | 126 | 0 | 15 |
+| menu | dark | en | 16 | 132 | 0 | 19 |
+| context | dark | en | 16 | 131 | 0 | 13 |
+| palette | dark | en | 16 | 117 | 0 | 12 |
+| multi | dark | en | 15 | 114 | 0 | 14 |
 | state | dark | en | 12 | 77 | 0 | 13 |
 | text | dark | en | 15 | 113 | 0 | 15 |
 | interaction | dark | en | 14 | 107 | 0 | 6 |
-| hover | dark | en | 12 | 102 | 0 | 8 |
-| drag | dark | en | 14 | 117 | 0 | 10 |
-| default | light | en | 15 | 117 | 0 | 9 |
-| selection | light | en | 16 | 117 | 0 | 9 |
-| breakpoint | light | en | 15 | 126 | 0 | 14 |
-| menu | light | en | 16 | 134 | 0 | 17 |
-| context | light | en | 16 | 133 | 0 | 11 |
-| palette | light | en | 16 | 119 | 0 | 10 |
-| multi | light | en | 15 | 116 | 0 | 14 |
+| hover | dark | en | 12 | 100 | 0 | 10 |
+| drag | dark | en | 14 | 115 | 0 | 12 |
+| default | light | en | 15 | 115 | 0 | 11 |
+| selection | light | en | 16 | 115 | 0 | 11 |
+| breakpoint | light | en | 15 | 126 | 0 | 15 |
+| menu | light | en | 16 | 132 | 0 | 19 |
+| context | light | en | 16 | 131 | 0 | 13 |
+| palette | light | en | 16 | 117 | 0 | 12 |
+| multi | light | en | 15 | 114 | 0 | 14 |
 | state | light | en | 12 | 77 | 0 | 13 |
 | text | light | en | 15 | 113 | 0 | 15 |
 | interaction | light | en | 14 | 107 | 0 | 6 |
-| hover | light | en | 12 | 102 | 0 | 8 |
-| drag | light | en | 14 | 117 | 0 | 10 |
-| default | dark | pt-BR | 15 | 117 | 0 | 10 |
-| selection | dark | pt-BR | 16 | 117 | 0 | 10 |
-| breakpoint | dark | pt-BR | 15 | 126 | 0 | 14 |
-| menu | dark | pt-BR | 16 | 134 | 0 | 18 |
-| context | dark | pt-BR | 16 | 133 | 0 | 12 |
-| palette | dark | pt-BR | 16 | 119 | 0 | 11 |
-| multi | dark | pt-BR | 15 | 116 | 0 | 14 |
+| hover | light | en | 12 | 100 | 0 | 10 |
+| drag | light | en | 14 | 115 | 0 | 12 |
+| default | dark | pt-BR | 15 | 115 | 0 | 9 |
+| selection | dark | pt-BR | 16 | 115 | 0 | 9 |
+| breakpoint | dark | pt-BR | 15 | 126 | 0 | 15 |
+| menu | dark | pt-BR | 16 | 132 | 0 | 17 |
+| context | dark | pt-BR | 16 | 131 | 0 | 11 |
+| palette | dark | pt-BR | 16 | 117 | 0 | 10 |
+| multi | dark | pt-BR | 15 | 114 | 0 | 14 |
 | state | dark | pt-BR | 12 | 77 | 0 | 13 |
 | text | dark | pt-BR | 15 | 113 | 0 | 15 |
 | interaction | dark | pt-BR | 14 | 107 | 0 | 6 |
-| hover | dark | pt-BR | 12 | 102 | 0 | 9 |
-| drag | dark | pt-BR | 14 | 117 | 0 | 11 |
-| default | light | pt-BR | 15 | 117 | 0 | 10 |
-| selection | light | pt-BR | 16 | 117 | 0 | 10 |
-| breakpoint | light | pt-BR | 15 | 126 | 0 | 14 |
-| menu | light | pt-BR | 16 | 134 | 0 | 18 |
-| context | light | pt-BR | 16 | 133 | 0 | 12 |
-| palette | light | pt-BR | 16 | 119 | 0 | 11 |
-| multi | light | pt-BR | 15 | 116 | 0 | 14 |
+| hover | dark | pt-BR | 12 | 100 | 0 | 8 |
+| drag | dark | pt-BR | 14 | 115 | 0 | 10 |
+| default | light | pt-BR | 15 | 115 | 0 | 9 |
+| selection | light | pt-BR | 16 | 115 | 0 | 9 |
+| breakpoint | light | pt-BR | 15 | 126 | 0 | 15 |
+| menu | light | pt-BR | 16 | 132 | 0 | 17 |
+| context | light | pt-BR | 16 | 131 | 0 | 11 |
+| palette | light | pt-BR | 16 | 117 | 0 | 10 |
+| multi | light | pt-BR | 15 | 114 | 0 | 14 |
 | state | light | pt-BR | 12 | 77 | 0 | 13 |
 | text | light | pt-BR | 15 | 113 | 0 | 15 |
 | interaction | light | pt-BR | 14 | 107 | 0 | 6 |
-| hover | light | pt-BR | 12 | 102 | 0 | 9 |
-| drag | light | pt-BR | 14 | 117 | 0 | 11 |
+| hover | light | pt-BR | 12 | 100 | 0 | 8 |
+| drag | light | pt-BR | 14 | 115 | 0 | 10 |
 
 ## Open divergences
 
@@ -69,9 +69,10 @@ Open: 0 divergences of 0 kinds. Decisions (docs/PRODUCT.md, section 4) keep the 
 
 - **DEC-03** (Fit leaves 8 px around the page, where the canonical shows 24): region `canvas-frame` height; region `canvas-frame` width
 - **DEC-21** (Page tabs carry no ×; code file tabs do): nothing diverges by it in this run
-- **DEC-41** (the app offers more than the mock shows (every property in All, more menu items, the reverse directions, more quick-panel fields, Layers under every view, the class moves under the affects line): its heights, and the controls it pushes out of the window): control `style.set#inspector-background-color` drawn; control `style.set#inspector-color` drawn; control `style.set#inspector-flex-direction` width; control `style.set#inspector-font-family` drawn; control `style.set#inspector-font-size` drawn; control `style.set#inspector-font-weight` drawn; control `style.set#inspector-letter-spacing` drawn; control `style.set#inspector-line-height` drawn; control `style.set#inspector-opacity` drawn; control `style.set#inspector-overflow` drawn; control `style.set#inspector-text-align` drawn; control `style.set#inspector-text-transform` drawn; control `style.set#inspector-transition` drawn; control `style.set#inspector-translate-y` drawn; control `style.setBackgroundImage#inspector-background-image-gradient-add` drawn; control `style.setBorder#inspector-border-border-editor` drawn; control `style.setRadius#inspector-border-radius-radius-editor` drawn; control `style.setShadows#inspector-box-shadow-shadow-add` drawn; region `context-menu` height; region `explorer-layers` height; region `insert` height; region `inspector-interactions` height; region `inspector-selector-bar` height; region `inspector-style` height; region `layers-row` height; region `menu:arrange` height; region `quick-panel` height; region `styles` height
+- **DEC-41** (the app offers more than the mock shows (every property in All, more menu items, the reverse directions, more quick-panel fields, Layers under every view, the class moves under the affects line): its heights, and the controls it pushes out of the window): control `style.set#inspector-background-color` drawn; control `style.set#inspector-color` drawn; control `style.set#inspector-flex-direction` width; control `style.set#inspector-font-family` drawn; control `style.set#inspector-font-size` drawn; control `style.set#inspector-font-weight` drawn; control `style.set#inspector-letter-spacing` drawn; control `style.set#inspector-line-height` drawn; control `style.set#inspector-opacity` drawn; control `style.set#inspector-text-align` drawn; control `style.set#inspector-text-transform` drawn; control `style.set#inspector-transition` drawn; control `style.set#inspector-translate-y` drawn; control `style.setBackgroundImage#inspector-background-image-gradient-add` drawn; control `style.setBorder#inspector-border-border-editor` drawn; control `style.setBorder#inspector-border-color-border-editor` drawn; control `style.setRadius#inspector-border-radius-radius-editor` drawn; control `style.setShadows#inspector-box-shadow-shadow-add` drawn; region `context-menu` height; region `explorer-layers` height; region `insert` height; region `inspector-interactions` height; region `inspector-selector-bar` height; region `inspector-style` height; region `layers-row` height; region `menu:arrange` height; region `quick-panel` height; region `styles` height
 - **DEC-42** (Align acts on positioned elements only): control `position.align#menu-arrange-bottom` colour; control `position.align#menu-arrange-horizontal-center` colour; control `position.align#menu-arrange-left` colour; control `position.align#menu-arrange-right` colour; control `position.align#menu-arrange-top` colour; control `position.align#menu-arrange-vertical-center` colour
-- **DEC-44** (the app's reading of a state the mock draws otherwise (provenance in a multiple selection, menu widths and the palette's height from their own items, Bold only on a bold selection, the drop container's tint, the picked row)): control `interactions.update#layers-row-pick-target` background; control `selection.select#layers-row` background; control `style.set#inspector-display` background; control `style.set#inspector-display` colour; control `style.set#inspector-row-gap` background; control `style.set#inspector-row-gap` colour; control `text.toggleBold#toolbar-text-toolbar-bold` background; region `command-palette` height; region `context-menu` width; region `menu:arrange` width
+- **DEC-44** (the app's reading of a state the mock draws otherwise (provenance in a multiple selection, menu widths and the palette's height from their own items, Bold only on a bold selection, the drop container's tint, the picked row)): control `interactions.update#layers-row-pick-target` background; control `selection.select#layers-row` background; control `style.set#inspector-display` background; control `style.set#inspector-display` colour; control `style.set#inspector-gap` background; control `style.set#inspector-gap` colour; control `text.toggleBold#toolbar-text-toolbar-bold` background; region `command-palette` height; region `context-menu` width; region `menu:arrange` width
+- **DEC-66** (the inspector's label column is 116 px and its width 336 px (the user's review of 2026-10-05: a Portuguese name fits one line), so the value column is narrower than the mock's and the quick panel, 68 % of the inspector, wider): control `style.setAlignment#inspector-alignment-matrix` width; region `quick-panel` width
 
 ## Faces measured in the app
 

@@ -171,6 +171,11 @@
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height"
+        },
+        {
+          "kind": "control",
+          "id": "style.setBorder#inspector-border-color-border-editor",
+          "property": "drawn"
         }
       ]
     },
@@ -254,6 +259,27 @@
           "id": "selection.select#layers-row",
           "property": "background",
           "state": "drag"
+        },
+        {
+          "kind": "control",
+          "id": "style.set#inspector-gap",
+          "state": "multi"
+        }
+      ]
+    },
+    {
+      "decision": "DEC-66",
+      "why": "the inspector's label column is 116 px and its width 336 px (the user's review of 2026-10-05: a Portuguese name fits one line), so the value column is narrower than the mock's and the quick panel, 68 % of the inspector, wider",
+      "matches": [
+        {
+          "kind": "region",
+          "id": "quick-panel",
+          "property": "width"
+        },
+        {
+          "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix",
+          "property": "width"
         }
       ]
     }

@@ -6,7 +6,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 15,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -34,7 +34,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -42,6 +56,13 @@
           "property": "width",
           "canon": "60",
           "app": "96"
+        },
+        {
+          "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -60,13 +81,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -78,7 +92,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 16,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -106,7 +120,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -114,6 +142,13 @@
           "property": "width",
           "canon": "60",
           "app": "96"
+        },
+        {
+          "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -132,13 +167,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -178,27 +206,34 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "625.5",
-          "app": "834"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "quick-panel",
           "property": "height",
           "canon": "466",
-          "app": "642"
+          "app": "675"
+        },
+        {
+          "kind": "region",
+          "id": "quick-panel",
+          "property": "width",
+          "canon": "196",
+          "app": "228.5"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
-          "canon": "151",
+          "canon": "123",
           "app": "187"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
-          "canon": "649",
+          "canon": "677",
           "app": "613"
         },
         {
@@ -257,7 +292,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 16,
-      "controls": 134,
+      "controls": 132,
       "divergences": [
         {
           "kind": "region",
@@ -285,7 +320,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "region",
@@ -310,6 +359,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -325,13 +381,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -385,7 +434,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 16,
-      "controls": 133,
+      "controls": 131,
       "divergences": [
         {
           "kind": "region",
@@ -413,7 +462,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "region",
@@ -438,6 +501,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -456,13 +526,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -471,7 +534,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 16,
-      "controls": 119,
+      "controls": 117,
       "divergences": [
         {
           "kind": "region",
@@ -499,7 +562,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "region",
@@ -517,6 +594,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -535,13 +619,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -550,7 +627,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 15,
-      "controls": 116,
+      "controls": 114,
       "divergences": [
         {
           "kind": "region",
@@ -578,7 +655,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -603,14 +680,21 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
+          "id": "style.set#inspector-gap 1",
           "property": "colour",
           "canon": "rgb(79, 224, 204)",
           "app": "rgb(166, 216, 106)"
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.set#inspector-gap 1",
           "property": "background",
           "canon": "rgb(18, 58, 54)",
           "app": "rgb(38, 50, 26)"
@@ -638,14 +722,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setRadius#inspector-border-radius-radius-editor 1",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -678,21 +755,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
           "canon": "153",
-          "app": "217"
+          "app": "215"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
           "canon": "647",
-          "app": "583"
+          "app": "585"
         },
         {
           "kind": "control",
@@ -710,7 +787,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -785,7 +862,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -899,7 +976,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -922,7 +999,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 12,
-      "controls": 102,
+      "controls": 100,
       "divergences": [
         {
           "kind": "region",
@@ -943,7 +1020,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -951,6 +1042,13 @@
           "property": "width",
           "canon": "60",
           "app": "96"
+        },
+        {
+          "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -972,13 +1070,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -987,7 +1078,7 @@
       "theme": "dark",
       "language": "en",
       "regions": 14,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -1015,7 +1106,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -1033,6 +1138,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -1048,13 +1160,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -1066,7 +1171,7 @@
       "theme": "light",
       "language": "en",
       "regions": 15,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -1094,7 +1199,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -1102,6 +1221,13 @@
           "property": "width",
           "canon": "60",
           "app": "96"
+        },
+        {
+          "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -1120,13 +1246,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -1138,7 +1257,7 @@
       "theme": "light",
       "language": "en",
       "regions": 16,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -1166,7 +1285,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -1174,6 +1307,13 @@
           "property": "width",
           "canon": "60",
           "app": "96"
+        },
+        {
+          "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -1192,13 +1332,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -1238,27 +1371,34 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "625.5",
-          "app": "834"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "quick-panel",
           "property": "height",
           "canon": "466",
-          "app": "642"
+          "app": "675"
+        },
+        {
+          "kind": "region",
+          "id": "quick-panel",
+          "property": "width",
+          "canon": "196",
+          "app": "228.5"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
-          "canon": "151",
+          "canon": "123",
           "app": "187"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
-          "canon": "649",
+          "canon": "677",
           "app": "613"
         },
         {
@@ -1317,7 +1457,7 @@
       "theme": "light",
       "language": "en",
       "regions": 16,
-      "controls": 134,
+      "controls": 132,
       "divergences": [
         {
           "kind": "region",
@@ -1345,7 +1485,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "region",
@@ -1370,6 +1524,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -1385,13 +1546,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -1445,7 +1599,7 @@
       "theme": "light",
       "language": "en",
       "regions": 16,
-      "controls": 133,
+      "controls": 131,
       "divergences": [
         {
           "kind": "region",
@@ -1473,7 +1627,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "region",
@@ -1498,6 +1666,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -1516,13 +1691,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -1531,7 +1699,7 @@
       "theme": "light",
       "language": "en",
       "regions": 16,
-      "controls": 119,
+      "controls": 117,
       "divergences": [
         {
           "kind": "region",
@@ -1559,7 +1727,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "region",
@@ -1577,6 +1759,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -1595,13 +1784,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -1610,7 +1792,7 @@
       "theme": "light",
       "language": "en",
       "regions": 15,
-      "controls": 116,
+      "controls": 114,
       "divergences": [
         {
           "kind": "region",
@@ -1638,7 +1820,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -1663,14 +1845,21 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
+          "id": "style.set#inspector-gap 1",
           "property": "colour",
           "canon": "rgb(11, 122, 109)",
           "app": "rgb(74, 117, 18)"
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.set#inspector-gap 1",
           "property": "background",
           "canon": "rgb(220, 242, 238)",
           "app": "rgb(237, 244, 225)"
@@ -1698,14 +1887,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setRadius#inspector-border-radius-radius-editor 1",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -1738,21 +1920,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
           "canon": "153",
-          "app": "217"
+          "app": "215"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
           "canon": "647",
-          "app": "583"
+          "app": "585"
         },
         {
           "kind": "control",
@@ -1770,7 +1952,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -1845,7 +2027,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -1959,7 +2141,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -1982,7 +2164,7 @@
       "theme": "light",
       "language": "en",
       "regions": 12,
-      "controls": 102,
+      "controls": 100,
       "divergences": [
         {
           "kind": "region",
@@ -2003,7 +2185,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -2011,6 +2207,13 @@
           "property": "width",
           "canon": "60",
           "app": "96"
+        },
+        {
+          "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -2032,13 +2235,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -2047,7 +2243,7 @@
       "theme": "light",
       "language": "en",
       "regions": 14,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -2075,7 +2271,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-selector-bar",
+          "property": "height",
+          "canon": "151",
+          "app": "123"
+        },
+        {
+          "kind": "region",
+          "id": "inspector-style",
+          "property": "height",
+          "canon": "649",
+          "app": "677"
         },
         {
           "kind": "control",
@@ -2093,6 +2303,13 @@
         },
         {
           "kind": "control",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
           "id": "style.set#inspector-background-color 1",
           "property": "drawn",
           "canon": "yes",
@@ -2108,13 +2325,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -2126,7 +2336,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 15,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -2154,7 +2364,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -2165,10 +2375,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -2187,13 +2397,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -2205,7 +2408,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -2233,7 +2436,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -2244,10 +2447,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -2266,13 +2469,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -2312,28 +2508,35 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "625.5",
-          "app": "834"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "quick-panel",
           "property": "height",
           "canon": "466",
-          "app": "642"
+          "app": "675"
+        },
+        {
+          "kind": "region",
+          "id": "quick-panel",
+          "property": "width",
+          "canon": "196",
+          "app": "228.5"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
-          "canon": "151",
-          "app": "215"
+          "canon": "123",
+          "app": "187"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
-          "canon": "649",
-          "app": "585"
+          "canon": "677",
+          "app": "613"
         },
         {
           "kind": "control",
@@ -2391,7 +2594,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 134,
+      "controls": 132,
       "divergences": [
         {
           "kind": "region",
@@ -2419,7 +2622,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -2444,10 +2647,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -2466,13 +2669,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -2526,7 +2722,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 133,
+      "controls": 131,
       "divergences": [
         {
           "kind": "region",
@@ -2554,7 +2750,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -2579,10 +2775,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -2604,13 +2800,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -2619,7 +2808,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 119,
+      "controls": 117,
       "divergences": [
         {
           "kind": "region",
@@ -2647,7 +2836,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -2665,10 +2854,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -2690,13 +2879,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -2705,7 +2887,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 15,
-      "controls": 116,
+      "controls": 114,
       "divergences": [
         {
           "kind": "region",
@@ -2733,7 +2915,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -2758,14 +2940,21 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
+          "id": "style.set#inspector-gap 1",
           "property": "colour",
           "canon": "rgb(79, 224, 204)",
           "app": "rgb(166, 216, 106)"
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.set#inspector-gap 1",
           "property": "background",
           "canon": "rgb(18, 58, 54)",
           "app": "rgb(38, 50, 26)"
@@ -2793,14 +2982,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setRadius#inspector-border-radius-radius-editor 1",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -2833,21 +3015,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
           "canon": "153",
-          "app": "217"
+          "app": "215"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
           "canon": "647",
-          "app": "583"
+          "app": "585"
         },
         {
           "kind": "control",
@@ -2865,7 +3047,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -2940,7 +3122,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -3054,7 +3236,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -3077,7 +3259,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 12,
-      "controls": 102,
+      "controls": 100,
       "divergences": [
         {
           "kind": "region",
@@ -3098,7 +3280,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -3109,10 +3291,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -3134,13 +3316,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -3149,7 +3324,7 @@
       "theme": "dark",
       "language": "pt-BR",
       "regions": 14,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -3177,7 +3352,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -3195,10 +3370,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -3217,13 +3392,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -3235,7 +3403,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 15,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -3263,7 +3431,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -3274,10 +3442,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -3296,13 +3464,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -3314,7 +3475,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -3342,7 +3503,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -3353,10 +3514,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -3375,13 +3536,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -3421,28 +3575,35 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "625.5",
-          "app": "834"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "quick-panel",
           "property": "height",
           "canon": "466",
-          "app": "642"
+          "app": "675"
+        },
+        {
+          "kind": "region",
+          "id": "quick-panel",
+          "property": "width",
+          "canon": "196",
+          "app": "228.5"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
-          "canon": "151",
-          "app": "215"
+          "canon": "123",
+          "app": "187"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
-          "canon": "649",
-          "app": "585"
+          "canon": "677",
+          "app": "613"
         },
         {
           "kind": "control",
@@ -3500,7 +3661,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 134,
+      "controls": 132,
       "divergences": [
         {
           "kind": "region",
@@ -3528,7 +3689,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -3553,10 +3714,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -3575,13 +3736,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -3635,7 +3789,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 133,
+      "controls": 131,
       "divergences": [
         {
           "kind": "region",
@@ -3663,7 +3817,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -3688,10 +3842,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -3713,13 +3867,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -3728,7 +3875,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 16,
-      "controls": 119,
+      "controls": 117,
       "divergences": [
         {
           "kind": "region",
@@ -3756,7 +3903,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -3774,10 +3921,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -3799,13 +3946,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -3814,7 +3954,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 15,
-      "controls": 116,
+      "controls": 114,
       "divergences": [
         {
           "kind": "region",
@@ -3842,7 +3982,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -3867,14 +4007,21 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
+        },
+        {
+          "kind": "control",
+          "id": "style.set#inspector-gap 1",
           "property": "colour",
           "canon": "rgb(11, 122, 109)",
           "app": "rgb(74, 117, 18)"
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-row-gap 1",
+          "id": "style.set#inspector-gap 1",
           "property": "background",
           "canon": "rgb(220, 242, 238)",
           "app": "rgb(237, 244, 225)"
@@ -3902,14 +4049,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setRadius#inspector-border-radius-radius-editor 1",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -3942,21 +4082,21 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
           "id": "inspector-selector-bar",
           "property": "height",
           "canon": "153",
-          "app": "217"
+          "app": "215"
         },
         {
           "kind": "region",
           "id": "inspector-style",
           "property": "height",
           "canon": "647",
-          "app": "583"
+          "app": "585"
         },
         {
           "kind": "control",
@@ -3974,7 +4114,7 @@
         },
         {
           "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
+          "id": "style.setBorder#inspector-border-color-border-editor 1",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
@@ -4049,7 +4189,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -4163,7 +4303,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "region",
@@ -4186,7 +4326,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 12,
-      "controls": 102,
+      "controls": 100,
       "divergences": [
         {
           "kind": "region",
@@ -4207,7 +4347,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -4218,10 +4358,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -4243,13 +4383,6 @@
           "property": "drawn",
           "canon": "yes",
           "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
         }
       ]
     },
@@ -4258,7 +4391,7 @@
       "theme": "light",
       "language": "pt-BR",
       "regions": 14,
-      "controls": 117,
+      "controls": 115,
       "divergences": [
         {
           "kind": "region",
@@ -4286,7 +4419,7 @@
           "id": "canvas-frame",
           "property": "width",
           "canon": "748.8",
-          "app": "852"
+          "app": "804"
         },
         {
           "kind": "control",
@@ -4304,10 +4437,10 @@
         },
         {
           "kind": "control",
-          "id": "style.set#inspector-overflow 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
+          "id": "style.setAlignment#inspector-alignment-matrix 1",
+          "property": "width",
+          "canon": "193",
+          "app": "163"
         },
         {
           "kind": "control",
@@ -4326,13 +4459,6 @@
         {
           "kind": "control",
           "id": "style.setBorder#inspector-border-border-editor 1",
-          "property": "drawn",
-          "canon": "yes",
-          "app": "no"
-        },
-        {
-          "kind": "control",
-          "id": "style.setBorder#inspector-border-border-editor 2",
           "property": "drawn",
           "canon": "yes",
           "app": "no"
