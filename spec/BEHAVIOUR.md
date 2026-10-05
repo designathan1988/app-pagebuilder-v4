@@ -6057,6 +6057,14 @@ The panel's controls have `tabindex="-1"` (sealed out of the Tab order, `quick-p
 7. **More actions opens a separate strip** of action buttons. Required: More actions opens the element's context menu at the button, the same menu as a right-click (see `context-menu.md`).
 10. **The open panel lay over the handles Edit on canvas draws** (a band of a text's left margin under the panel's grip). Required: choosing a mode in Edit on canvas folds the panel to its chip, so the handles it draws are never under it; the chip opens the panel again, the mode still on.
 9. **Pinned at the top of the stage when no side held it whole, the panel covered an element near the top, and the handles of Edit on canvas drawn on it** (the canonical frame's tab row took 28 px of the stage). Required: when no side of the element holds the whole panel inside the stage, the panel takes the side where, held inside the stage, it covers the least of the element (on a tie the first of above, below, right and left, so a panel over a wide element stays centred and its side edges keep their handles).
+11. **The chip moved to the label's left near the stage's edge, and the open panel took whichever side of the element
+    had room** (Problem 9), so neither stood where the label is. Required (the user's rule of 2026-10-05, DEC-70, which
+    replaces Problem 9's placement): **the quick panel stands on the right of the selection's label, touching it, on its
+    line** — the chip resting on the frame as the label does (their bottoms level), the open panel with its top level
+    with the label's — open or closed, wherever the label stands; a panel the person dragged by its grip stays where it
+    was left (Problem 1). Both are fixed in the window: beside a label near the stage's edge the open panel lies over the
+    inspector or the dock, whole, its close in reach; and the stage is clipped, never scrolled (`overflow: clip`), so the
+    focus put in the panel's first field cannot move the page under it. While the label is out of sight, so are they.
 8. **Its bar showed align and distribute always disabled, and its fields a Reset "not available yet" with nothing to reset** (the user's real-use audit, item 1.4: 8 buttons and 19 Resets that looked usable and did nothing). Required: the bar draws an action only while it can act (its door built and its command able to run on the selection; a list of choices, Edit on canvas, while built); a field's Reset is drawn only while the element holds a value of its own (inspector-provenance-reset, Problems in Pager 5).
 
 ### Our rule: the fields follow the element kind, and every style door shares one context (the user's real-use audit, items 6.1 and A3.8)
@@ -6626,18 +6634,18 @@ The outline follows the element at any zoom (mapped through the iframe's CSS zoo
    over a card's price; a press on the price selected and dragged the button). Required: the label covers the least it
    can, and then takes no press — a press there reaches the page under it; the label takes presses (select, drag) only
    where it covers nothing.
-7. **Every label stood about 22 px off its element** (the user's review of 2026-10-05, LR2: "o rótulo da moldura de
-   seleção e o quick panel todos posicionados errados" — a link's label 22 px under it, a footer's 22 px over it, the
-   quick panel's chip beside it): the faint margin bands that wait along every edge of any selection (item 4.1) and the
-   rotation zones that draw nothing were counted as controls the label must clear, and every place was pushed out by a
-   handle and a zone's room, so no place touching the element was ever tried. Required: the label touches its element,
-   --space-1 off its edge as the canonical label (design/final .ov-tag): above, inside its top-left corner, or below,
-   at its start or its end, the first that covers no page text, no resize handle, no band a mode pins and not the
-   north-east rotation zone (the one drawn); only where every touching place is taken does it step out past the handles
-   (`placeLabel`'s stepOut). A place met by less than a pixel is free (a fractional layout's rounding). The label lies
-   over the faint bands and the side grips (z-index 3) and a press on it is its own, never a band's beneath; the
-   handles, the rotation zones, the chip and the anchor tabs stay over it; the chip beside it steps past whichever
-   rotation zone it meets (`tests/e2e/selection-label-touches.spec.ts`).
+7. **Every label stood about 22 px off its element** (the user's review of 2026-10-05, LR2), and then (QA 375) at the
+   first free place of six — above, inside its corner or below, at its start or its end, stepped past a handle — so it
+   moved from element to element. Required (the user's rule of 2026-10-05, DEC-70, which replaces Problem 3's "above,
+   else below, else inside"): **the label has one place**, always above its element, its bottom on the top of the
+   selection's frame line and its start at the frame's left edge — never inside, below, beside or moved aside for an
+   obstacle, for a small element or a large one, at the page's top (it stands over the breakpoint tabs) or its right
+   edge, turned (it stands on the turned frame's upright bounding box), at every zoom from 25 % to 400 %, scrolled, for
+   several selected (over their union) and at every breakpoint. It is drawn fixed in the window, so neither the page's
+   view nor the chrome layer clips it, and it is out of sight only where that place is out of view (the element's top
+   scrolled out of the page's view, or the label out of the stage) — never moved into the view. Over page text it takes
+   no press (Problem 6). The handles and the rotation zones are drawn over it and keep their presses. The quick panel
+   stands on its right, touching it (spec quick-panel, Problem 11) (`tests/e2e/selection-label-touches.spec.ts`).
 
 
 The Select tool is the canvas toolbar's first tool (view.selectTool, also V): the editor's ordinary way of working, where a click selects and a drag moves or resizes what is selected. Choosing it puts any other tool away (the Layout tool, the grid edit mode); its button is pressed while no other tool is on.

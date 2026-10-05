@@ -24,7 +24,7 @@ import { ATTRIBUTES } from '../inspector/attributes.ts';
 import { styleClassOf } from '../inspector/style-target.ts';
 import { BASE_STATE, activeState } from '../view/style-state.ts';
 import { activeBreakpoint } from '../view/breakpoints.ts';
-import { appliesTo, offsetOf, placeChip, placeQuickPanel, quickPanelOffsets, quickPanelOpen, type Box, type Offset } from '../quick-panel/quick-panel.ts';
+import { appliesTo, offsetOf, placeQuickPanel, quickPanelOffsets, quickPanelOpen, type Box, type Offset } from '../quick-panel/quick-panel.ts';
 import { TextStyleField, keptByFieldEnter, type FieldPart, KeptTextField, TextField, keptTextOf, useSelectionContext } from '../shell/field.tsx';
 import { EDIT_MODES, modeBuilt, modeRefusal, type EditMode } from './edit-mode.ts';
 import { MODEL_RULES, useEditorState, useStore } from '../store.ts';
@@ -376,27 +376,22 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
       const drawn = open ? panel.current : chip.current;
       const box = frame ? nodeBox(frame, id) : null;
       if (area && box && drawn) {
-        const origin = area.getBoundingClientRect();
-        const element = { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height };
+        // in the window's pixels: the chip and the panel are fixed (canvas-editing.css), so the stage's clip never cuts
+        // them and the panel beside a label near the stage's edge lies over the inspector or the dock, whole, its close
+        // within reach (DEC-70)
+        const stageBox = area.getBoundingClientRect();
+        const element = { x: box.x, y: box.y, width: box.width, height: box.height };
         const size = open ? { width: drawn.offsetWidth, height: drawn.offsetHeight } : CHIP;
         const label = area.querySelector('[data-chrome="label"]:not(.is-measuring)');
-        const gap = token(area, '--space-4');
-        const spacing = { gap, inset: token(area, '--space-8'), above: label instanceof HTMLElement ? label.offsetHeight + gap : 0 };
-        const whole = { x: 0, y: 0, width: origin.width, height: origin.height };
-        // the chip beside the selection's label; the open panel where placeQuickPanel puts it
+        const inset = token(area, '--space-8');
+        const whole = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
+        // the chip and the open panel stand on the right of the selection's label, touching it (DEC-70): both wait for
+        // the label to be placed, so neither is drawn anywhere else first; and while the label is out of the stage's
+        // view (the page scrolled it away, cut by the stage's edge) neither is drawn, since it follows the label
         const at = label?.getBoundingClientRect();
-        const beside = !open && at ? placeChip({ x: at.x - origin.x, y: at.y - origin.y, width: at.width, height: at.height }, size, whole, gap) : null;
-        // it never covers one of the selection's rotation zones (spec rotation-handle), which a narrow element's label
-        // reaches: it steps past the zone it meets, to its right
-        const zones = [...area.querySelectorAll('[data-rotate-handle]')].map((zone) => {
-          const box = zone.getBoundingClientRect();
-          return { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height };
-        });
-        const meets = (one: Box, turn: Box) => one.x < turn.x + turn.width && turn.x < one.x + one.width && one.y < turn.y + turn.height && turn.y < one.y + one.height;
-        const turn = beside === null ? undefined : zones.find((zone) => meets(beside, zone));
-        const chipBox = beside !== null && turn !== undefined ? { ...beside, x: turn.x + turn.width + gap } : beside;
-        // the chip waits for the label to be placed: until then it is not drawn where it would cover the page
-        const next = !open && chipBox === null ? null : { id, open, box: chipBox ?? placeQuickPanel(element, size, whole, spacing, offset), element, widest: Math.max(0, origin.width - 2 * spacing.inset) };
+        const seen = at !== undefined && at.left >= stageBox.left - 0.5 && at.top >= stageBox.top - 0.5 && at.right <= stageBox.right + 0.5 && at.bottom <= stageBox.bottom + 0.5;
+        const placedBox = at === undefined || !seen ? null : placeQuickPanel({ x: at.x, y: at.y, width: at.width, height: at.height }, element, size, open, whole, inset, offset);
+        const next = placedBox === null ? null : { id, open, box: placedBox, element, widest: Math.max(0, window.innerWidth - 2 * inset) };
         setPlaced((before) => (JSON.stringify(before) === JSON.stringify(next) ? before : next));
       }
       request = requestAnimationFrame(measure);

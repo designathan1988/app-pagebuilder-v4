@@ -426,12 +426,15 @@
   translate: 0 calc(-100% - var(--space-1));
 }
 
+/* clipped, never scrolled (MDN overflow: clip makes no scroll container): the quick panel stands beside the selection's
+   label wherever it ends (DEC-70), and with overflow: hidden the focus put in its first field scrolled the stage under
+   the page, the chip then drawn 16 px off its label */
 .stage {
   position: relative;
   grid-area: 2 / 2;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: clip;
 }
 
 /* the canvas holds the keyboard focus, given by F6 (spec keyboard-panel-navigation; the audit's AUD-13) */
@@ -1028,6 +1031,19 @@
   visibility: hidden;
 }
 
+/* the selection's label (and a captured element's) has one place, above its element touching its frame (DEC-70):
+   fixed in the window, so neither the page's view nor the chrome layer clips it above the page's top edge; away (out of
+   sight) where that place is out of view */
+.chrome__label[data-chrome="label"],
+.chrome__label[data-chrome="captured-label"] {
+  position: fixed;
+}
+
+.chrome__label.is-away,
+.text-toolbar.is-away {
+  visibility: hidden;
+}
+
 .chrome__tag {
   font: var(--fw-caption) var(--fs-caption) / var(--lh-caption) var(--font-mono);
 }
@@ -1075,7 +1091,8 @@
 /* the text toolbar while a text is edited in place (text-toolbar.tsx): Bold, Italic and Link in a floating bar above
    the edit's label; its controls take presses of their own (pointer.ts leaves the focus in the text) */
 .text-toolbar {
-  position: absolute;
+  /* fixed in the window above the selection's label, which is (DEC-70) */
+  position: fixed;
   display: flex;
   gap: var(--space-1);
   padding: var(--space-1);
@@ -1313,13 +1330,10 @@
   pointer-events: none;
 }
 
-/* a captured element's label stands above its element, or inside its top-left corner where no room is above */
+/* a captured element's label stands above its element, touching its frame (DEC-70): placed at the frame's top-left
+   corner, lifted by its own height */
 .chrome__captured .chrome__label {
   transform: translateY(-100%);
-}
-
-.chrome__captured .chrome__label.is-inside {
-  transform: none;
 }
 
 .chrome__flash {

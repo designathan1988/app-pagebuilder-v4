@@ -1,14 +1,19 @@
-// Where the chrome may draw: the label rule and a resize handle's hit area (split out of canvas/chrome.tsx, which
+// Where the chrome may draw: the label rules and a resize handle's hit area (split out of canvas/chrome.tsx, which
 // keeps the drawing). Pure: boxes in, boxes out — the caller supplies the page's content boxes, the visible canvas and
 // the box being labelled, so the rules can be read (and tested) on their own.
 //
-// The label rule (archive/DESIGN.md "Canvas"): a label never covers page content, and (the canvas audit of 2026-09-29)
-// never covers a control the chrome draws either — a resize handle or an edit band under it would lose the press to the
-// label, which stands for the element and starts a move. It sits above its element when that space is free, otherwise
-// inside the element's top-left corner when that corner is free, otherwise below the element; with a ghost chip at the
-// pointer (a drag) it keeps clear of the chip too. Where no place is free the label covers the least it can and says so
-// (`covers`): the selection's label then takes no press, so a press meant for the text under it reaches the text
-// (jornada03 J16: a label over a card's price selected the button instead).
+// The selection's label has one place (the user's rule of 2026-10-05, DEC-70; selectionLabelBox): above its element,
+// its bottom on the top edge of the selection's frame and its start on the frame's left edge — never inside, below,
+// beside or moved aside for what lies there, at any size, zoom, scroll, rotation or breakpoint, for one element or
+// several. Where it lies over page text it says so (`covers`), and the selection's label then takes no press, so a
+// press meant for the text under it reaches the text (jornada03 J16: a label over a card's price selected the button
+// instead).
+//
+// A drop label (placeLabel, archive/DESIGN.md "Canvas") never covers page content, nor a control the chrome draws (a
+// resize handle or an edit band under it would lose the press to the label): it sits above its element when that space
+// is free, otherwise inside the element's top-left corner when that corner is free, otherwise below the element; with a
+// ghost chip at the pointer (a drag) it keeps clear of the chip too. Where no place is free it covers the least it can
+// and says so.
 export interface Box {
   readonly x: number;
   readonly y: number;
@@ -105,6 +110,32 @@ export function controlBoxes(layer: HTMLElement, origin: { readonly x: number; r
   });
 }
 
+// The selection's label's one place (DEC-70): above the frame, touching it, at its left edge. `frame` is the element's
+// box (or the union of several), `edge` the width of the frame's line drawn outside that box (the selection's outline),
+// so the label touches the line, not the box under it. `covers` says whether it lies over page content.
+export function selectionLabelBox(frame: Box, size: { readonly width: number; readonly height: number }, edge: number, content: readonly Box[]): { box: Box; placement: Placement; covers: boolean } {
+  const box = { x: frame.x - edge, y: frame.y - edge - size.height, ...size };
+  const inner = { x: box.x + SLACK, y: box.y + SLACK, width: box.width - 2 * SLACK, height: box.height - 2 * SLACK };
+  return { box, placement: 'above', covers: content.some((c) => overlaps(inner, c)) };
+}
+
+// The box the selection's label stands on for an element turned by `degrees` about its centre (its frame drawn turned
+// with it): the frame's line turned, its upright bounding box, given back as the box whose line of width `edge` drawn
+// outside it would be that bounding box — so the label touches the turned frame's highest point and starts at its
+// leftmost one (DEC-70).
+export function turnedFrame(box: Box, degrees: number, edge: number): Box {
+  const angle = (degrees * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(angle));
+  const sin = Math.abs(Math.sin(angle));
+  const width = box.width + 2 * edge;
+  const height = box.height + 2 * edge;
+  const across = width * cos + height * sin;
+  const down = width * sin + height * cos;
+  const x = box.x + box.width / 2 - across / 2;
+  const y = box.y + box.height / 2 - down / 2;
+  return { x: x + edge, y: y + edge, width: across - 2 * edge, height: down - 2 * edge };
+}
+
 // A label's box held inside an area: moved the least distance that puts it inside, its size kept.
 function heldInside(box: Box, area: Box): Box {
   return {
@@ -121,12 +152,7 @@ function heldInside(box: Box, area: Box): Box {
 // receiver, so the three places are tried at its start and then at its far end (a line between two lines of text: the
 // text sits at the left, and the far end is empty), and where even those are not free the place covering the least
 // content wins — never the largest overlap just because it is the documented order.
-//
-// `stepOut` is how far further out a label may step when every place touching its element is taken (by a control on the
-// element's edge, the resize handles and rotation zones the selection's label must not cover): the places touching the
-// element come first, as the canonical label touches its frame (design/final .ov-tag), and the stepped-out ones after
-// them (the user's review of 2026-10-05, LR2: every selection label stood 24 px off its element).
-export function placeLabel(box: Box, size: { readonly width: number; readonly height: number }, gap: number, content: readonly Box[], canvas: Box, ghost: Box | null = null, stepOut = 0): { box: Box; placement: Placement; covers: boolean } {
+export function placeLabel(box: Box, size: { readonly width: number; readonly height: number }, gap: number, content: readonly Box[], canvas: Box, ghost: Box | null = null): { box: Box; placement: Placement; covers: boolean } {
   const far = box.x + box.width - size.width;
   // 'inside' needs the label to fit within the element it names: a label taller than the element spills past its
   // bottom edge and reads as a label of whatever lies there (a paragraph one line tall), so the corner is offered only
@@ -140,7 +166,7 @@ export function placeLabel(box: Box, size: { readonly width: number; readonly he
     { placement: 'below', box: { x: far, y: box.y + box.height + out, ...size } },
     ...(fitsInside ? [{ placement: 'inside' as const, box: { x: far - out, y: box.y + out, ...size } }] : []),
   ];
-  const places = [...around(gap), ...(stepOut > 0 ? around(gap + stepOut) : [])];
+  const places = around(gap);
   const clear = (p: { box: Box }) => ghost === null || !overlaps(p.box, ghost);
   // how much of the label's area covers page content, in square pixels
   const covered = (b: Box) =>

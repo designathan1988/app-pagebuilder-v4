@@ -13,7 +13,7 @@
 // (core/structure/hand.ts), the same indicator stands at the hand's aim, with the refusal the move would meet there
 // (spec hand-keyboard-move, "Visual feedback"). While a text is edited in place, its outline and label ("Editing
 // text · Intro") wear the text editing mode colour instead of the selection's, and the text toolbar (text-toolbar.tsx)
-// sits above the label, the two placed as one by the label rule; the toolbar's controls take presses of their own.
+// sits above the label, at its start; the toolbar's controls take presses of their own.
 // The label of the one selected element is the one part of the chrome that takes a
 // press: pointer.ts reads it (data-label-for) as a press on that element (spec select-click, "Hit zones"). Where a
 // node is on the screen comes from the
@@ -21,8 +21,9 @@
 // follows scrolling, zoom and layout; the page itself is never touched (only the renderer writes it). Apart from
 // those labels the chrome takes no pointer event, and it has no listener of its own (pointer.ts owns every gesture).
 //
-// Label rule (archive/DESIGN.md "Canvas"): a label never covers page content. It sits above its element when that space
-// is free, otherwise inside the element's top-left corner when that corner is free, otherwise below the element.
+// The selection's label has one place (DEC-70, canvas/placement.ts selectionLabelBox): above its element, touching the
+// top of its frame, at the frame's left edge. A drop label never covers page content (placeLabel): above its element
+// when that space is free, otherwise inside the element's top-left corner, otherwise below it.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react';
 import { styleClassOf } from '../inspector/style-target.ts';
 import { useSelectionContext } from '../shell/field.tsx';
@@ -56,7 +57,7 @@ const LEAVE_MODE = manifest.doors.find((d) => d.door.kind === 'shortcut' && d.do
 import { ViewOverlays } from './view-overlays.tsx';
 import { GridOverlay } from './grid-overlay.tsx';
 // where a label and a resize handle may be drawn (canvas/placement.ts): the rules moved out of this file, which draws
-import { controlBoxes, handleHitBox, overlaps as overlapsBox, placeLabel, visibleCanvas, type Box, type Placement } from './placement.ts';
+import { controlBoxes, handleHitBox, overlaps as overlapsBox, placeLabel, selectionLabelBox, turnedFrame, visibleCanvas, type Box, type Placement } from './placement.ts';
 import { distancesOf, type Distance } from './distances.ts';
 import { altDistances, hoverSizeOf, type HoverSize } from './hover-measure.ts';
 import { breakpointName } from '../../core/document/breakpoints.ts';
@@ -225,7 +226,9 @@ interface Layout {
   // the box around every selected node, drawn dashed while several are selected (archive/DESIGN.md "Canvas", multi)
   readonly union: Box | null;
   readonly hovered: Box | null;
-  readonly label: { readonly box: Box; readonly placement: Placement; readonly covers?: boolean } | null;
+  // `seen`: whether its place lies in view (the element's top inside the page's view, the label inside the stage): it
+  // is drawn fixed in the window (canvas.css), so nothing clips it and it hides itself where it would stand out of view
+  readonly label: { readonly box: Box; readonly placement: Placement; readonly covers?: boolean; readonly seen?: boolean } | null;
   // where the text toolbar goes while a text is edited in place: above the edit's label, placed with it as one
   readonly toolbar: { readonly x: number; readonly y: number } | null;
   // the marquee's band while one is drawn (pointer.ts)
@@ -600,9 +603,9 @@ function DropFlash() {
 // (the page scrolls, zooms and lays out under it).
 function CapturedSelection() {
   const id = useEditorState((s) => s.ui.capturedNode ?? null);
-  const [shown, setShown] = useState<{ readonly id: string; readonly box: Box; readonly tag: string; readonly inside: boolean } | null>(null);
+  const [shown, setShown] = useState<{ readonly id: string; readonly box: Box; readonly tag: string; readonly edge: number } | null>(null);
   const layer = useRef<HTMLDivElement>(null);
-  const tag = useRef<HTMLDivElement>(null);
+  const frame = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (id === null) return;
     let request = 0;
@@ -610,13 +613,13 @@ function CapturedSelection() {
       const iframe = canvasFrame();
       const origin = layer.current?.parentElement?.getBoundingClientRect();
       const found = iframe && origin ? capturedBox(iframe, id) : null;
+      // the label touches the frame's line (DEC-70): its width, once the frame is drawn
+      const edge = frame.current ? parseFloat(getComputedStyle(frame.current).outlineWidth) || 0 : 0;
       setShown((was) => {
         if (found === null || !origin) return null;
         const next = { x: found.box.x - origin.x, y: found.box.y - origin.y, width: found.box.width, height: found.box.height };
-        // the label above the element where it has the room, else inside its top-left corner (the label rule)
-        const inside = next.y < (tag.current?.offsetHeight ?? 0);
-        const same = was !== null && was.id === id && was.tag === found.tag && was.inside === inside;
-        return same && was.box.x === next.x && was.box.y === next.y && was.box.width === next.width && was.box.height === next.height ? was : { id, box: next, tag: found.tag, inside };
+        const same = was !== null && was.id === id && was.tag === found.tag && was.edge === edge;
+        return same && was.box.x === next.x && was.box.y === next.y && was.box.width === next.width && was.box.height === next.height ? was : { id, box: next, tag: found.tag, edge };
       });
       request = requestAnimationFrame(measure);
     };
@@ -625,12 +628,16 @@ function CapturedSelection() {
   }, [id]);
   // what was measured for another selection (or none) is not drawn
   const drawn = shown !== null && shown.id === id ? shown : null;
+  const origin = useScreenOrigin(layer, drawn !== null);
+  // the label's one place (DEC-70): above the element, touching its frame, at the frame's left edge (its own height is
+  // taken by the stylesheet's translate), fixed in the window as the selection's label; away while the element's top
+  // is out of the page's view
   return (
     <div ref={layer} className="chrome__captured">
       {drawn === null ? null : (
         <>
-          <div className="chrome__selection" data-chrome="captured-selection" style={{ left: drawn.box.x, top: drawn.box.y, width: drawn.box.width, height: drawn.box.height }} />
-          <div ref={tag} className={`chrome__label is-target${drawn.inside ? ' is-inside' : ''}`} data-chrome="captured-label" style={{ left: drawn.box.x, top: drawn.box.y }}>
+          <div ref={frame} className="chrome__selection" data-chrome="captured-selection" style={{ left: drawn.box.x, top: drawn.box.y, width: drawn.box.width, height: drawn.box.height }} />
+          <div className={`chrome__label is-target${drawn.box.y < -drawn.edge - 0.5 ? ' is-away' : ''}`} data-chrome="captured-label" style={{ left: origin.x + drawn.box.x - drawn.edge, top: origin.y + drawn.box.y - drawn.edge }}>
             <span className="chrome__name">{drawn.tag}</span>
           </div>
         </>
@@ -722,33 +729,35 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
         const first = union ?? selected[0];
         const size = label.current ? { width: label.current.offsetWidth, height: label.current.offsetHeight } : null;
         const tools = editing && bar.current ? { width: bar.current.offsetWidth, height: bar.current.offsetHeight } : null;
-        // the chrome's controls the label keeps clear of: they appear and move with the mode and the selection, so
-        // their boxes are part of the key the label is placed again on (rounded: a sub-pixel move changes nothing)
-        const controls = layer.current === null ? [] : controlBoxes(layer.current, { x: origin.x, y: origin.y });
-        // the label is placed again only when its element, its size or a control it must clear moved: reading the
-        // page's content is the slow part
-        const key = JSON.stringify([first, size, tools, mode, controls.map((b) => [Math.round(b.x), Math.round(b.y), Math.round(b.width), Math.round(b.height)])]);
+        // the width of the frame's line drawn outside the box (the selection's outline, the union's dashed one): the
+        // label touches the line, so it is part of the key the label is placed again on
+        const frameLine = layer.current?.querySelector<HTMLElement>(union === null ? '[data-chrome="selection"]' : '[data-chrome="union"]');
+        const edge = frameLine ? parseFloat(getComputedStyle(frameLine).outlineWidth) || 0 : 0;
+        // the label is placed again only when its element, its size or its frame's line changed: reading the page's
+        // content (whether the label lies over text) is the slow part
+        // an element's own rotation turns its frame (item 4.4): the label stands on the turned frame's bounding box
+        const turn = union === null && selection.length === 1 && selection[0] !== undefined ? elementRotation(iframe, selection[0]) : 0;
+        const key = JSON.stringify([first, size, tools, mode, edge, turn, Math.round(origin.x), Math.round(origin.y), Math.round(origin.width), Math.round(origin.height)]);
         if (first === undefined || size === null) {
           placed = null;
           placedToolbar = null;
         } else if (key !== placedFor) {
-          // The label touches its element, --space-1 off its edge as the canonical label (design/final .ov-tag), and
-          // never covers a control (A3.16: the control could not be taken): the controls are among the boxes it keeps
-          // clear of, and only where every touching place is taken does it step out past them — the resize handles are
-          // --space-6 square with their whole box beyond the edge, and the rotation zones stand a further --space-4
-          // outside the corners (4.4). (The user's review of 2026-10-05, LR2: it stood that far off every element.)
-          const spacing = getComputedStyle(layer.current as HTMLDivElement);
-          const gap = parseFloat(spacing.getPropertyValue('--space-1')) || 0;
-          const clear = (parseFloat(spacing.getPropertyValue('--space-6')) || 0) + (parseFloat(spacing.getPropertyValue('--space-4')) || 0);
-          // the selection's label sits above its element, and it clears the page's own content like every other label
-          // (the label rule: never over page text — the boxes are the same contentBoxes the drop indicator's label
-          // avoids): above while there is room, inside the element's top-left corner, or below, whichever covers least.
-          // While a text is edited in place, its toolbar sits above its label and the two are placed as one.
-          const whole = tools === null ? size : { width: Math.max(size.width, tools.width), height: tools.height + gap + size.height };
-          const content = [...contentBoxes(iframe).map((b) => local(b) as Box), ...controls];
-          const spot = placeLabel(first, whole, gap, content, visibleCanvas(origin), null, clear);
-          placed = tools === null ? spot : { placement: spot.placement, box: { x: spot.box.x, y: spot.box.y + tools.height + gap, ...size } };
-          placedToolbar = tools === null ? null : { x: spot.box.x, y: spot.box.y };
+          // The selection's label has one place (the user's rule of 2026-10-05, DEC-70): above its element, touching
+          // the top of the frame's line, at its left edge — whatever lies there, for one element or several, at every
+          // zoom, scroll and breakpoint. Over page text it takes no press (`covers`, jornada03 J16). While a text is
+          // edited in place, its toolbar sits above the label, at the same start.
+          const gap = parseFloat(getComputedStyle(layer.current as HTMLDivElement).getPropertyValue('--space-1')) || 0;
+          const content = contentBoxes(iframe).map((b) => local(b) as Box);
+          const spot = selectionLabelBox(turn === 0 || first === undefined ? first : turnedFrame(first, turn, edge), size, edge, content);
+          // in view while the element's top is inside the page's view and the label inside the stage: the label is
+          // fixed in the window, above the page's edge too (an element at the page's top), so no layer clips it, and
+          // it hides where it would stand over the rulers, the panels or the breakpoint tabs of a page scrolled away
+          const shown = document.querySelector('[data-canvas-stage]')?.getBoundingClientRect();
+          const stage = shown === undefined ? { x: 0, y: 0, width: origin.width, height: origin.height } : { x: shown.x - origin.x, y: shown.y - origin.y, width: shown.width, height: shown.height };
+          const top = tools === null ? spot.box.y : spot.box.y - gap - tools.height;
+          const seen = first.y >= -edge - 0.5 && first.y <= origin.height + 0.5 && spot.box.x >= stage.x - 0.5 && spot.box.x + Math.max(size.width, tools?.width ?? 0) <= stage.x + stage.width + 0.5 && top >= stage.y - 0.5;
+          placed = { ...spot, seen };
+          placedToolbar = tools === null ? null : { x: spot.box.x, y: top };
         }
         placedFor = key;
         const hoveredBox = hovered !== null && !selection.includes(hovered as (typeof selection)[number]) ? local(nodeBox(iframe, hovered)) : null;
@@ -902,10 +911,29 @@ function RotateZones({ door, spots }: { readonly door: DoorEntry; readonly spots
   ));
 }
 
+// Where a chrome layer stands in the window, read at every frame while `active` (the page pans, zooms and the panels
+// move it): what is drawn fixed in the window from the layer's own pixels adds it (the selection's label, DEC-70).
+function useScreenOrigin(layer: RefObject<HTMLElement | null>, active: boolean): { readonly x: number; readonly y: number } {
+  const [origin, setOrigin] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    if (!active) return;
+    let request = 0;
+    const read = () => {
+      const box = layer.current?.getBoundingClientRect();
+      if (box) setOrigin((was) => (was.x === box.x && was.y === box.y ? was : { x: box.x, y: box.y }));
+      request = requestAnimationFrame(read);
+    };
+    request = requestAnimationFrame(read);
+    return () => cancelAnimationFrame(request);
+  }, [layer, active]);
+  return origin;
+}
+
 // The selection's label: the count of several selected elements with their union's size, or the one element's name,
 // tag, the class the writes land in, its angle and size, the state and the breakpoint in view (A3.8, A3.36).
-function SelectionLabel({ labelRef, selection, node, targets, shown, dropping, editing, styleClass, state, breakpoint }: {
+function SelectionLabel({ labelRef, selection, node, targets, shown, dropping, editing, styleClass, state, breakpoint, origin }: {
   readonly labelRef: RefObject<HTMLDivElement | null>;
+  readonly origin: { readonly x: number; readonly y: number };
   readonly selection: readonly NodeId[];
   readonly node: DocNode | null;
   readonly targets: readonly NodeId[];
@@ -917,13 +945,16 @@ function SelectionLabel({ labelRef, selection, node, targets, shown, dropping, e
   readonly breakpoint: ReturnType<typeof activeBreakpoint>;
 }) {
   const t = useT();
+  // fixed in the window (DEC-70): the chrome layer's place on the screen plus the label's in the layer
+  const at = shown.label ? { left: origin.x + shown.label.box.x, top: origin.y + shown.label.box.y } : undefined;
+  const away = shown.label?.seen === false ? ' is-away' : '';
   return selection.length > 1 ? (
     <div
       ref={labelRef}
-      className={`chrome__label${shown.label ? '' : ' is-measuring'}`}
+      className={`chrome__label${shown.label ? '' : ' is-measuring'}${away}`}
       data-chrome="label"
       data-placement={shown.label?.placement}
-      style={shown.label ? { left: shown.label.box.x, top: shown.label.box.y } : undefined}
+      style={at}
     >
       <span className="chrome__name">{t('canvas.selectedCount', { count: selection.length })}</span>
       {shown.size !== null ? (
@@ -935,11 +966,11 @@ function SelectionLabel({ labelRef, selection, node, targets, shown, dropping, e
   ) : node !== null && targets.includes(node.id) ? (
     <div
       ref={labelRef}
-      className={`chrome__label is-target${shown.label ? '' : ' is-measuring'}${shown.label?.covers === true ? ' is-covering' : ''}${dropping ? ' is-hidden' : ''}${editing ? ' is-editing' : ''}`}
+      className={`chrome__label is-target${shown.label ? '' : ' is-measuring'}${shown.label?.covers === true ? ' is-covering' : ''}${dropping ? ' is-hidden' : ''}${editing ? ' is-editing' : ''}${away}`}
       data-chrome="label"
       data-label-for={node.id}
       data-placement={shown.label?.placement}
-      style={shown.label ? { left: shown.label.box.x, top: shown.label.box.y } : undefined}
+      style={at}
     >
       {editing ? (
         <span className="chrome__name">{t('canvas.editingText', { name: node.name })}</span>
@@ -1048,6 +1079,7 @@ export function CanvasChrome() {
   }, [editingOnCanvas, mode, node, resizable, context, store]);
 
   const layout = useChromeLayout({ layer, label, bar, selection, targets, hovered, node, drawnBand, editing, altHeld, resizing, documentNow, mode });
+  const origin = useScreenOrigin(layer, selection.length > 0);
 
   const at = (b: Box): CSSProperties => ({ left: b.x, top: b.y, width: b.width, height: b.height });
   const shown = selection.length === 0 && hovered === null && drawnBand === null ? EMPTY : layout;
@@ -1106,8 +1138,8 @@ export function CanvasChrome() {
       {/* the rotation zones, one outside each corner (item 4.4): the same door, drawn four times, each turned with the
           element when it holds a rotation */}
       {resizable && shown.selected[0] && !dropping && !editing && !editingOnCanvas && ROTATE_HANDLE !== null && isDoorBuilt(ROTATE_HANDLE) && shown.rotate !== null ? <RotateZones door={ROTATE_HANDLE} spots={shown.rotate} /> : null}
-      <SelectionLabel labelRef={label} selection={selection} node={node} targets={targets} shown={shown} dropping={dropping} editing={editing} styleClass={styleClass} state={state} breakpoint={breakpoint} />
-      {editing && node !== null ? <TextToolbar bar={bar} className={shown.toolbar ? '' : 'is-measuring'} style={shown.toolbar ? { left: shown.toolbar.x, top: shown.toolbar.y } : undefined} /> : null}
+      <SelectionLabel labelRef={label} selection={selection} node={node} targets={targets} shown={shown} dropping={dropping} editing={editing} styleClass={styleClass} state={state} breakpoint={breakpoint} origin={origin} />
+      {editing && node !== null ? <TextToolbar bar={bar} className={shown.toolbar ? (shown.label?.seen === false ? 'is-away' : '') : 'is-measuring'} style={shown.toolbar ? { left: origin.x + shown.toolbar.x, top: origin.y + shown.toolbar.y } : undefined} /> : null}
     </div>
   );
 }

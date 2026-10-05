@@ -308,22 +308,28 @@ test('the label shows the live size while a resize goes on', runs(OPEN, ROW, SE)
   expect(await chip.textContent(), 'and keeps the size it ends with').toBe(during);
 });
 
-// A3.16: the label never covers a handle, or the handle could not be taken
-test('the selection label never covers a handle', runs(OPEN, ROW), async ({ page }) => {
+// A3.16: a handle the label lies over can still be taken. The label has one place (the user's rule of 2026-10-05,
+// DEC-70: above its element, touching its frame, at its left edge), so over a narrow element it lies over the handles
+// of the top edge; the handles are drawn over it, and a press at a handle's centre reaches the handle.
+test('every handle the selection label lies over is drawn over it and takes its press', runs(OPEN, ROW), async ({ page }) => {
   await control(page, ROW, { args: { target: 'n-title' } }).click();
   // a narrow element: its label is wider than it is, so the label's box reaches over the handles on its top edge
   await typeField(page, WIDTH, '120');
   await typeField(page, 'style.set#inspector-height', '90');
   const label = await page.locator('[data-chrome="label"]').boundingBox();
   if (label === null) throw new Error('the label is not laid out');
-  const handles = await page.locator('[data-canvas-overlay] [data-resize-handle]').all();
+  const handles = await page.locator('[data-canvas-overlay] [data-resize-handle]:not([data-chrome="edge"])').all();
   expect(handles.length, 'the handles are drawn').toBeGreaterThan(0);
-  let covering = 0;
+  let under = 0;
   for (const drawn of handles) {
     const box = await drawn.boundingBox();
-    if (box !== null && overlaps(label, box)) covering += 1;
+    if (box === null || !overlaps(label, box)) continue;
+    under += 1;
+    const centre = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    const reached = await drawn.evaluate((element, at) => document.elementFromPoint(at.x, at.y) === element, centre);
+    expect(reached, `the ${await drawn.getAttribute('data-resize-handle')} handle takes the press at its centre`).toBe(true);
   }
-  expect(covering, 'no handle lies under the label').toBe(0);
+  expect(under, 'the narrow element’s label lies over a handle of its top edge').toBeGreaterThan(0);
 });
 
 // The user's real-use audit: the chrome clips its drawing to the canvas, and an element at the page's edge (a section)
@@ -393,15 +399,17 @@ test('the south handle of a selected card never covers the card below: that card
 });
 
 // The user's real-use audit: at 100 % a 1440 px page is wider than the canvas, and the overlay reaches under the
-// panels; a label placed in the overlay's own coordinates lands where nobody sees it. Held inside the visible canvas.
-test('the selection label stays inside the visible canvas when the page is wider than it', runs(OPEN, ROW, 'view.zoomTo#menu-zoom-100'), async ({ page }) => {
+// panels. The label keeps its one place at its element's start (DEC-70), never moved inside the canvas: where that
+// place lies out of the canvas the label is out of sight, never drawn over the panels.
+test('the selection label keeps its place at its element when the page is wider than the canvas, out of sight there', runs(OPEN, ROW, 'view.zoomTo#menu-zoom-100'), async ({ page }) => {
   await control(page, ROW, { args: { target: 'n-hero' } }).click();
   await openMenu(page, 'zoom');
   await control(page, 'view.zoomTo#menu-zoom-100').click();
-  const label = await page.locator('[data-chrome="label"]').boundingBox();
+  const label = page.locator('[data-chrome="label"]');
+  const frame = await page.locator('[data-chrome="selection"]').boundingBox();
   const stage = await page.locator('[data-canvas-stage]').boundingBox();
-  if (label === null || stage === null) throw new Error('the label or the stage is not laid out');
-  expect(label.x, 'the label starts inside the canvas').toBeGreaterThanOrEqual(stage.x - 1);
-  expect(label.y, 'and above its bottom').toBeLessThanOrEqual(stage.y + stage.height + 1);
-  expect(Math.round(label.x + label.width), 'and ends inside it').toBeLessThanOrEqual(Math.round(stage.x + stage.width) + 1);
+  if (frame === null || stage === null) throw new Error('the selection or the stage is not laid out');
+  expect(frame.x, 'the premise: the hero starts left of the canvas').toBeLessThan(stage.x);
+  await expect.poll(async () => Math.round(((await label.boundingBox())?.x ?? 0) - frame.x), 'the label starts at the frame line').toBe(-2);
+  await expect(label, 'out of sight, not over the panels').toHaveCSS('visibility', 'hidden');
 });

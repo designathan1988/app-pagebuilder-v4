@@ -12,13 +12,11 @@
 // so it survives a reload. It is window chrome: nothing in the document changes and nothing is recorded in the
 // history. Its distance, the pointer's horizontal travel, is already in the offset the drag gives.
 //
-// Where the chip goes (placeChip): beside the selection's label, on its right (on its left when the stage has no room
-// there), level with it (archive/DESIGN.md "Canvas": the label, its size chip and the quick panel chip beside it), so
-// it covers no more of the page than the label does. Where the open panel goes (placeQuickPanel): a remembered offset,
-// held inside the stage, whichever part of the element it covers — the person dragged it there; otherwise the side of
-// the element with the most free space where the panel fits (above, below, right, left, in that order on a tie), clear
-// of the element's label above it; with no side free, the side where, held inside the stage, it covers the least of the
-// element. The stage keeps an inset free all round.
+// Where the chip and the open panel go (placeQuickPanel; the user's rule of 2026-10-05, DEC-70): always on the right of
+// the selection's label, touching it, on its line — the chip resting on the frame as the label does (their bottoms
+// level), the open panel with its top level with the label's — never moved aside for what lies there or for the
+// stage's edge. A panel the person dragged by its grip stays where it was left (its remembered offset), held inside the
+// stage, which keeps an inset free all round.
 //
 // Which fields it shows (appliesTo): a field shows only when its property applies to the selected element, by the
 // element predicates of core/style/applies.ts: the text properties on an element that holds text, the SVG fill on an
@@ -77,50 +75,19 @@ export function readOffsets(stored: unknown): Readonly<Record<string, Offset>> |
 
 const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(value, high));
 
-// Where the panel (or its chip) of `size` goes for an element's box, all in the stage's pixels: `above` is the room the
-// element's label takes above it, `gap` the space between the panel and what it is placed beside, `inset` the margin
-// kept free inside the stage.
-export function placeQuickPanel(element: Box, size: { readonly width: number; readonly height: number }, stage: Box, spacing: { readonly gap: number; readonly inset: number; readonly above: number }, offset: Offset | null): Box {
-  const { gap, inset, above } = spacing;
-  const inner = { x: stage.x + inset, y: stage.y + inset, width: Math.max(0, stage.width - 2 * inset), height: Math.max(0, stage.height - 2 * inset) };
-  const right = inner.x + inner.width;
-  const bottom = inner.y + inner.height;
-  const heldX = (x: number) => clamp(x, inner.x, right - size.width);
-  const heldY = (y: number) => clamp(y, inner.y, bottom - size.height);
-  if (offset !== null) {
+// Where the chip (`open` false) or the open panel of `size` goes, in the stage's pixels: `label` is the selection's
+// label's box; `offset` the person's own drag of the open panel, from the element's top-left corner, held inside the
+// stage less its `inset`.
+export function placeQuickPanel(label: Box, element: Box, size: { readonly width: number; readonly height: number }, open: boolean, stage: Box, inset: number, offset: Offset | null): Box {
+  if (open && offset !== null) {
     // The person's own drag wins: the panel is where it was left, held inside the stage. A remembered offset is never
     // refused for covering the element — the panel is taller than most elements, and refusing the drag would leave a
     // panel that jumps back under the pointer (spec quick-panel, scenario the-grip-drags-the-panel-…).
-    return { x: heldX(element.x + offset.x), y: heldY(element.y + offset.y), ...size };
+    const right = stage.x + stage.width - inset;
+    const bottom = stage.y + stage.height - inset;
+    return { x: clamp(element.x + offset.x, stage.x + inset, right - size.width), y: clamp(element.y + offset.y, stage.y + inset, bottom - size.height), ...size };
   }
-  const centreX = heldX(element.x + element.width / 2 - size.width / 2);
-  const centreY = heldY(element.y);
-  const sides = [
-    { box: { x: centreX, y: element.y - above - gap - size.height, ...size }, free: element.y - above - inner.y },
-    { box: { x: centreX, y: element.y + element.height + gap, ...size }, free: bottom - (element.y + element.height) },
-    { box: { x: element.x + element.width + gap, y: centreY, ...size }, free: right - (element.x + element.width) },
-    { box: { x: element.x - gap - size.width, y: centreY, ...size }, free: element.x - inner.x },
-  ];
-  const fits = (b: Box) => b.x >= inner.x && b.y >= inner.y && b.x + b.width <= right && b.y + b.height <= bottom;
-  const best = sides.filter((s) => fits(s.box)).reduce<(typeof sides)[number] | null>((most, s) => (most === null || s.free > most.free ? s : most), null);
-  if (best !== null) return best.box;
-  // No side holds it whole: each side's place, held inside the stage, and the one that covers the least of the element
-  // wins (on a tie the first of above, below, right, left: centred over the element, its side edges and their handles
-  // stay free) — the panel pinned at the stage's top covered a text near the top whole, and the
-  // handles Edit on canvas draws on it with it (spec quick-panel, Problems in Pager 9)
-  const held = sides.map((s) => ({ ...s, box: { ...s.box, x: heldX(s.box.x), y: heldY(s.box.y) } }));
-  const covered = (b: Box) => Math.max(0, Math.min(b.x + b.width, element.x + element.width) - Math.max(b.x, element.x)) * Math.max(0, Math.min(b.y + b.height, element.y + element.height) - Math.max(b.y, element.y));
-  const least = held.reduce((most, s) => (covered(s.box) < covered(most.box) ? s : most));
-  return least.box;
-}
-
-export function placeChip(label: Box, size: { readonly width: number; readonly height: number }, stage: Box, gap: number): Box {
-  const right = label.x + label.width + gap;
-  const beside = right + size.width <= stage.x + stage.width ? right : label.x - gap - size.width;
-  // held inside the stage (a label of an element the view shows in part lies partly outside it)
-  const x = clamp(beside, stage.x, stage.x + stage.width - size.width);
-  const y = clamp(label.y + (label.height - size.height) / 2, stage.y, stage.y + stage.height - size.height);
-  return { x, y, ...size };
+  return { x: label.x + label.width, y: open ? label.y : label.y + label.height - size.height, ...size };
 }
 
 // the offset of a placed panel from its element, what quickPanel.setOffset keeps

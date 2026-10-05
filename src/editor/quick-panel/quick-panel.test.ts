@@ -1,28 +1,33 @@
+// Where the quick panel's chip and the open panel go (src/editor/quick-panel/quick-panel.ts placeQuickPanel): on the
+// right of the selection's label, touching it, on its line (the user's rule of 2026-10-05, DEC-70), whatever lies
+// there and wherever the stage ends; a panel the person dragged stays where it was left, held inside the stage.
 import { describe, expect, it } from 'vitest';
 import { placeQuickPanel } from './quick-panel.ts';
 
 const STAGE = { x: 0, y: 0, width: 900, height: 700 };
-const SPACING = { gap: 12, inset: 20, above: 20 };
+const INSET = 20;
 const PANEL = { width: 216, height: 560 };
+const CHIP = { width: 24, height: 24 };
+const ELEMENT = { x: 100, y: 80, width: 200, height: 40 };
+const LABEL = { x: 98, y: 62, width: 90, height: 16 };
 
 describe('placeQuickPanel (src/editor/quick-panel/quick-panel.ts)', () => {
-  it('takes the side with the most free room where the whole panel fits', () => {
-    const placed = placeQuickPanel({ x: 100, y: 80, width: 200, height: 40 }, PANEL, STAGE, SPACING, null);
-    // below: 580 free, above: none; right: 600 free wins over below
-    expect(placed.x).toBe(312);
+  it('puts the chip on the right of the label, touching it, their bottoms level on the frame', () => {
+    expect(placeQuickPanel(LABEL, ELEMENT, CHIP, false, STAGE, INSET, null)).toEqual({ x: 188, y: 54, ...CHIP });
   });
 
-  it('with no side holding it whole, covers the least of the element instead of pinning at the top', () => {
-    // a text as wide as the page near its top: no side holds a 560 px tall panel beside it; pinned at the top it
-    // covered the text whole, held below it it covers its lower half only
-    const element = { x: 20, y: 100, width: 860, height: 40 };
-    const placed = placeQuickPanel(element, PANEL, STAGE, SPACING, null);
-    const overlap = Math.max(0, Math.min(placed.y + placed.height, element.y + element.height) - Math.max(placed.y, element.y));
-    expect(placed.y).toBe(120);
-    expect(overlap, 'less of the text is covered than the whole').toBe(20);
+  it('puts the open panel on the right of the label, touching it, its top level with the label', () => {
+    expect(placeQuickPanel(LABEL, ELEMENT, PANEL, true, STAGE, INSET, null)).toEqual({ x: 188, y: 62, ...PANEL });
+  });
+
+  // the old rule held the chip inside the stage and moved it to the label's left near the stage's right edge
+  it('keeps the chip beside the label past the edge of the stage', () => {
+    const far = { x: 860, y: 2, width: 90, height: 16 };
+    expect(placeQuickPanel(far, ELEMENT, CHIP, false, STAGE, INSET, null)).toEqual({ x: 950, y: -6, ...CHIP });
   });
 
   it("keeps the person's own offset, held inside the stage", () => {
-    expect(placeQuickPanel({ x: 100, y: 80, width: 200, height: 40 }, PANEL, STAGE, SPACING, { x: 10, y: 20 })).toEqual({ x: 110, y: 100, ...PANEL });
+    expect(placeQuickPanel(LABEL, ELEMENT, PANEL, true, STAGE, INSET, { x: 10, y: 20 })).toEqual({ x: 110, y: 100, ...PANEL });
+    expect(placeQuickPanel(LABEL, ELEMENT, PANEL, true, STAGE, INSET, { x: 900, y: 0 })).toEqual({ x: 664, y: 80, ...PANEL });
   });
 });

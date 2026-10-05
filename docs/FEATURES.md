@@ -103,7 +103,7 @@ Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests pas
 | `inspector-advanced-mode` | Switch the inspector between all properties and essentials only | yes | 2 | 2 | [inspector-advanced-mode](../spec/BEHAVIOUR.md#inspector-advanced-mode) | 2 | passes 2/2 |
 | `inspector-add-property` | Add a property that is not shown yet | yes | 2 | 2 | [inspector-add-property](../spec/BEHAVIOUR.md#inspector-add-property) | 5 | passes 3/3 |
 | `semantic-tag-switch` | Switch an element between equivalent semantic tags | yes | 12 | 1 | [semantic-tag-switch](../spec/BEHAVIOUR.md#semantic-tag-switch) | 6 | passes 12/12 |
-| `quick-panel` | Floating quick panel over the selection | yes | 36 | 37 | [quick-panel](../spec/BEHAVIOUR.md#quick-panel) | 16 | passes 44/44 |
+| `quick-panel` | Floating quick panel over the selection | yes | 36 | 37 | [quick-panel](../spec/BEHAVIOUR.md#quick-panel) | 17 | passes 44/44 |
 | `multi-select-edit` | Edit a property on several selected elements at once | yes | 3 | 4 | [multi-select-edit](../spec/BEHAVIOUR.md#multi-select-edit) | 4 | passes 6/6 |
 | `value-presets` | Ready-made values with a preview | yes | 4 | 2 | [value-presets](../spec/BEHAVIOUR.md#value-presets) | 0 | passes 4/4 |
 

@@ -111,7 +111,9 @@ test('a locked element: its style fields are disabled with the lock as their rea
   await expect(swatch).toHaveAttribute('aria-disabled', 'true');
   await swatch.click({ force: true });
   await expect(control(page, PICKER_VALUE)).toHaveCount(0);
-  // the quick panel's Width: the same door rule, the same reason
+  // the quick panel's Width: the same door rule, the same reason. Its chip stands beside the selection's label, at the
+  // element's start (DEC-70), which at 100 % lies left of the canvas: the page is fitted first so the chip is in sight
+  await page.keyboard.press('Shift+1');
   await page.locator('[data-quick-panel-chip][aria-expanded="false"]').click();
   await refusedBeforeTyping(page, QUICK_WIDTH, 'Actions');
   await control(page, ROW, { args: { target: 'n-actions' } }).click();

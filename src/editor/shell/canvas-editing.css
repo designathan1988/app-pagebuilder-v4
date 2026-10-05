@@ -1,8 +1,9 @@
-/* the quick panel over the stage (src/editor/canvas/quick-panel.tsx): a chip beside the selection, which opens the
-   panel of its fields in two columns */
+/* the quick panel over the stage (src/editor/canvas/quick-panel.tsx): a chip beside the selection's label, which opens
+   the panel of its fields in two columns; fixed in the window, so beside a label near the stage's edge it lies over the
+   inspector or the dock, whole, instead of being cut by the stage (DEC-70) */
 .quick-panel-chip,
 .quick-panel {
-  position: absolute;
+  position: fixed;
   z-index: 5;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);

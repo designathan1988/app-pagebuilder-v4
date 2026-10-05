@@ -1,54 +1,150 @@
-// The selection's label touches its element (the user's review of 2026-10-05, LR2: "o rótulo da moldura de seleção e
-// o quick panel todos posicionados errados" — every label stood about 22 px off its element, above or below, the quick
-// panel's chip beside it: the faint margin bands that wait along every edge and the rotation zones that draw nothing
-// were taken for controls the label must clear, so no place touching the element was ever free). The canonical label
-// stands just off its element's edge (design/final .ov-tag); it still covers no page text, no resize handle (A3.16)
-// and no band a mode pins, and the chip beside it covers no rotation zone.
+// The selection's label and the quick panel have one place each (the user's rule of 2026-10-05, DEC-70): the label
+// always above its element, touching the top of the selection's frame and starting at its left edge — never inside,
+// below, beside or moved aside for an obstacle — and the quick panel always on the label's right, on its line, touching
+// it (the chip resting on the frame as the label does, the open panel level with the label's top). It holds for a small
+// element and a large one, at the page's top and its right edge, rotated, zoomed from 25 % to 400 %, scrolled, for
+// several selected, at every breakpoint, with the panel open and closed. (QA 375 had placed the label at the first
+// free place of six, and the chip beside it, held inside the stage.)
 import fs from 'node:fs';
-import { expect, test } from '../support/test.ts';
+import { expect, test, type Page } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
-import { control, runDoor, runs } from './door.ts';
+import { control, openMenu, runDoor, runs } from './door.ts';
 
 const OPEN = 'project.open#menu-file';
 const ROW = 'selection.select#layers-row';
+const FIT = 'view.zoomFit#toolbar-status-bar-fit';
 
-test('the selection label stands touching its element, above, below or inside it, and the chip beside it', runs(OPEN, ROW), async ({ page }) => {
+// the label's distance from the frame's line above it and from its left, and the chip's (or the open panel's) from the
+// label's right and its level; null where nothing is drawn or the label is out of sight
+async function measured(page: Page): Promise<{ readonly label: [number, number]; readonly chip: [number, number] | null } | null> {
+  return page.evaluate(() => {
+    const frame = document.querySelector('[data-chrome="union"]') ?? document.querySelector('[data-chrome="selection"]');
+    const label = document.querySelector('[data-chrome="label"]:not(.is-measuring)');
+    if (frame === null || label === null || getComputedStyle(label).visibility === 'hidden') return null;
+    // the frame's line drawn outside its box; turned with the element, its upright bounding box grows by the line's width
+    // times |cos| + |sin| on each side
+    const turn = new DOMMatrix(getComputedStyle(frame).transform === 'none' ? undefined : getComputedStyle(frame).transform);
+    const edge = (parseFloat(getComputedStyle(frame).outlineWidth) || 0) * (Math.abs(turn.a) + Math.abs(turn.b));
+    const f = frame.getBoundingClientRect();
+    const l = label.getBoundingClientRect();
+    const open = document.querySelector('.quick-panel:not(.is-measuring)');
+    const chip = open ?? document.querySelector('.quick-panel-chip:not(.is-measuring)');
+    const c = chip?.getBoundingClientRect();
+    const round = (n: number) => Math.round(n * 2) / 2 + 0;
+    return {
+      label: [round(f.top - edge - l.bottom), round(l.left - (f.left - edge))],
+      chip: c === undefined ? null : [round(c.left - l.right), round(open !== null ? c.top - l.top : c.bottom - l.bottom)],
+    };
+  });
+}
+
+async function holds(page: Page, name: string, chip: 'chip' | 'none' = 'chip'): Promise<void> {
+  await expect.poll(() => measured(page), { message: name }).toEqual({ label: [0, 0], chip: chip === 'none' ? null : [0, 0] });
+}
+
+// by its Layers row, or, where the tree draws no row for it (outside the panel's window), by a click on the canvas
+const select = async (page: Page, target: string, modifiers: ('Shift')[] = []) => {
+  const row = control(page, ROW, { args: { target } });
+  if ((await row.count()) > 0) {
+    await row.click({ modifiers });
+    return;
+  }
+  const at = await page.evaluate((id) => {
+    const iframe = document.querySelector<HTMLIFrameElement>('.frame__page');
+    const element = iframe?.contentDocument?.querySelector(`[data-node="${id}"]`);
+    if (!iframe || !element) throw new Error(`the canvas does not draw ${id}`);
+    const zoom = iframe.currentCSSZoom;
+    const frame = iframe.getBoundingClientRect();
+    const r = element.getBoundingClientRect();
+    return { x: frame.left + (r.left + r.width / 2) * zoom, y: frame.top + (r.top + r.height / 2) * zoom };
+  }, target);
+  for (const key of modifiers) await page.keyboard.down(key);
+  await page.mouse.click(at.x, at.y);
+  for (const key of modifiers) await page.keyboard.up(key);
+};
+
+test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openEditor(page);
   const chooser = page.waitForEvent('filechooser');
   await runDoor(page, OPEN);
   await (await chooser).setFiles({ name: 'canonical.json', mimeType: 'application/json', buffer: fs.readFileSync('manifest/features/fixtures/canonical.json') });
-  // a section at the page's top, a heading under a line of text, a full-width heading, a button and a menu link
-  for (const target of ['c-hero', 'c-title', 'c-plans-title', 'c-subscribe', 'c-nav-0']) {
-    await control(page, ROW, { args: { target } }).click();
-    const label = page.locator(`[data-chrome="label"][data-label-for="${target}"]:not(.is-measuring)`);
-    await expect(label).toBeVisible();
-    // the chip follows the label a frame later: read until both have settled
-    const read = () => page.evaluate((id) => {
-      const frame = document.querySelector('.chrome__selection')?.getBoundingClientRect();
-      const tag = document.querySelector(`[data-chrome="label"][data-label-for="${id}"]`);
-      const own = tag?.getBoundingClientRect();
-      if (frame === undefined || own === undefined || tag === null) return ['nothing drawn'];
-      const problems: string[] = [];
-      const placement = tag.getAttribute('data-placement');
-      // the distance between the label and its element's edge, by where it stands
-      const off = placement === 'above' ? frame.top - own.bottom : placement === 'below' ? own.top - frame.bottom : Math.min(own.top - frame.top, own.left - frame.left);
-      if (off < 0 || off > 4) problems.push(`${id} ${placement}: ${Math.round(off)} px off its element`);
-      const meets = (a: DOMRect, b: DOMRect) => a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1;
-      for (const handle of document.querySelectorAll('[data-canvas-overlay] [data-resize-handle]:not([data-chrome="edge"])')) {
-        if (meets(own, handle.getBoundingClientRect())) problems.push(`${id}: the label covers the ${handle.getAttribute('data-resize-handle')} handle`);
-      }
-      const chip = document.querySelector('.quick-panel-chip')?.getBoundingClientRect();
-      if (chip === undefined) problems.push(`${id}: no chip`);
-      else {
-        // on the label's line (centred on it, held inside the stage at its edge)
-        const middle = own.top + own.height / 2;
-        if (middle < chip.top || middle > chip.bottom) problems.push(`${id}: the chip is not on the label's line`);
-        if (chip.left < own.right) problems.push(`${id}: the chip is not beside the label`);
-        for (const zone of document.querySelectorAll('[data-rotate-handle]')) if (meets(chip, zone.getBoundingClientRect())) problems.push(`${id}: the chip covers the ${zone.getAttribute('data-rotate-zone')} rotation zone`);
-      }
-      return problems;
-    }, target);
-    await expect.poll(read, { message: target }).toEqual([]);
+  await expect(page.frameLocator('.frame__page').locator('[data-node="c-hero"]')).toHaveCount(1);
+});
+
+test('the selection label stands above its element touching its frame, the chip on its right, for every kind of element', runs(OPEN, ROW), async ({ page }) => {
+  // a large section, a small link (narrower than its label), the header and the page at the page's top (their label
+  // over the breakpoint tabs), the last link at the page's right edge, an image at the right, a heading under text, a
+  // button
+  for (const target of ['c-hero', 'c-nav-0', 'c-header', 'c-enter', 'c-hero-image', 'c-title', 'c-subscribe']) {
+    await select(page, target);
+    await holds(page, target);
   }
+  // the page root draws no quick panel; its label stands above the page, over the tabs, in sight
+  await select(page, 'c-page');
+  await holds(page, 'c-page', 'none');
+  // several selected: the label over their union
+  await select(page, 'c-card-subscription');
+  await select(page, 'c-card-beans', ['Shift']);
+  await holds(page, 'two cards');
+});
+
+test('the label and the chip keep their places at every zoom, scrolled, rotated and at every breakpoint', runs(OPEN, ROW, FIT, 'view.zoomTo#menu-zoom-25', 'view.zoomTo#menu-zoom-400', 'view.setBreakpoint#toolbar-breakpoint-tabs-tablet', 'view.setBreakpoint#toolbar-breakpoint-tabs-phone', 'style.set#handle-rotate'), async ({ page }) => {
+  await select(page, 'c-title');
+  await openMenu(page, 'zoom');
+  await control(page, 'view.zoomTo#menu-zoom-25').click();
+  await holds(page, 'zoom 25 %');
+  await openMenu(page, 'zoom');
+  await control(page, 'view.zoomTo#menu-zoom-400').click();
+  // at 400 % the title's start lies left of the canvas: the label keeps its place there, out of sight, and the chip
+  // with it — neither is moved into the canvas
+  await expect.poll(() => measured(page), { message: 'zoom 400 %: out of sight' }).toBeNull();
+  await expect(page.locator('.quick-panel-chip:not(.is-measuring)')).toHaveCount(0);
+  await control(page, FIT).click();
+  await holds(page, 'fit');
+  // rotated by its rotation handle
+  await select(page, 'c-plans-title');
+  // the north-west zone turned 30° along the circle around the heading's centre
+  const zone = await page.locator('[data-canvas-overlay] [data-rotate-zone="nw"]').boundingBox();
+  const button = await page.locator('[data-chrome="selection"]').boundingBox();
+  if (zone === null || button === null) throw new Error('no rotation zone');
+  const centre = { x: button.x + button.width / 2, y: button.y + button.height / 2 };
+  const from = { x: zone.x + zone.width / 2, y: zone.y + zone.height / 2 };
+  const radius = Math.hypot(from.x - centre.x, from.y - centre.y);
+  const start = Math.atan2(from.y - centre.y, from.x - centre.x);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 12; i += 1) await page.mouse.move(centre.x + radius * Math.cos(start + (Math.PI / 6) * (i / 12)), centre.y + radius * Math.sin(start + (Math.PI / 6) * (i / 12)));
+  await page.mouse.up();
+  await expect(page.locator('[data-chrome="label-angle"]')).toBeVisible();
+  await holds(page, 'rotated');
+  // scrolled: the label follows its element
+  await select(page, 'c-card-beans-title');
+  await page.locator('[data-canvas-stage]').hover();
+  await page.mouse.wheel(0, 300);
+  await holds(page, 'scrolled');
+  for (const breakpoint of ['tablet', 'phone']) {
+    await control(page, `view.setBreakpoint#toolbar-breakpoint-tabs-${breakpoint}`).click();
+    await select(page, 'c-subscribe');
+    await holds(page, breakpoint);
+  }
+});
+
+test('the open quick panel stands on the label’s right, level with its top, whole beside a label near the canvas edge', runs(OPEN, ROW, 'quickPanel.setOpen#chip'), async ({ page }) => {
+  await select(page, 'c-subscribe');
+  await page.locator('.quick-panel-chip').click();
+  await expect(page.locator('.quick-panel:not(.is-measuring)')).toBeVisible();
+  await holds(page, 'open');
+  // a link near the canvas's right edge: the panel stands beside its label still, over the inspector, its close in
+  // reach (the stage is clipped, never scrolled by the focus put in the panel)
+  await select(page, 'c-nav-2');
+  await holds(page, 'open near the edge');
+  const close = page.locator('.quick-panel .quick-panel__close');
+  const reach = await close.evaluate((element) => {
+    const b = element.getBoundingClientRect();
+    return document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2)?.closest('.quick-panel__close') === element;
+  });
+  expect(reach, 'the close takes its press').toBe(true);
+  await close.click();
+  await holds(page, 'closed again');
 });

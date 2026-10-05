@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83490
+    "lines": 83510
   },
   "features": [
     {
@@ -5081,7 +5081,7 @@
     },
     {
       "path": "src/editor/canvas/chrome.tsx",
-      "lines": 1114,
+      "lines": 1146,
       "commands": [],
       "features": []
     },
@@ -5177,13 +5177,13 @@
     },
     {
       "path": "src/editor/canvas/placement.ts",
-      "lines": 170,
+      "lines": 196,
       "commands": [],
       "features": []
     },
     {
       "path": "src/editor/canvas/quick-panel.tsx",
-      "lines": 501,
+      "lines": 496,
       "commands": [],
       "features": []
     },
@@ -6085,7 +6085,7 @@
     },
     {
       "path": "src/editor/quick-panel/quick-panel.ts",
-      "lines": 138,
+      "lines": 105,
       "commands": [
         "quickPanel.setOpen",
         "quickPanel.setOffset"
