@@ -313,6 +313,86 @@ test('the captured html root class keeps its inherited font in canvas and export
   await exported.close();
 });
 
+// One tree for every width (DEC-61): an edit made on the canvas's width is the element's at every width, those whose
+// own values differ included (the rail's inline style differs at each width).
+test('an edit of a captured element is seen at every width of the exported page', runs('project.captureUrl#capture-url-run', 'capture.select#captured-inspector-node', 'capture.edit#captured-apply', 'project.export#menu-file'), async ({ page, context }) => {
+  test.setTimeout(120_000);
+  await openEditor(page);
+  await runDoor(page, 'workspace.openDialog#menu-file-capture-url');
+  const dialog = page.locator('[data-region="capture-url-dialog"]');
+  await dialog.locator('input[name="url"]').fill(`127.0.0.1:${SITE_PORT}/responsive.html`);
+  await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
+  const destination = page.locator('[data-door="project.importHtml#destination-page"]');
+  await expect(destination).toBeVisible({ timeout: 60_000 });
+  await destination.click();
+  await page.locator('[data-region="captured-inspector"] button').filter({ hasText: '#responsive-rail' }).click();
+  const edit = page.locator('[data-region="captured-edit"]');
+  await edit.locator('input').first().fill('title');
+  await edit.locator('textarea').fill('Edited rail');
+  await page.locator('[data-door="capture.edit#captured-apply"]').click();
+  await expect(page.frameLocator('.frame__page').locator('#responsive-rail')).toHaveAttribute('title', 'Edited rail');
+  const downloading = page.waitForEvent('download');
+  await runDoor(page, 'project.export#menu-file');
+  const files = unzip(fs.readFileSync(await (await downloading).path()));
+  const exported = await context.newPage();
+  await exported.route('http://made.capture.test/**', route => {
+    const name = new URL(route.request().url()).pathname.slice(1);
+    const bytes = files.get(name);
+    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType: name.endsWith('.css') ? 'text/css' : 'text/html', body: bytes });
+  });
+  for (const [width, expected] of [[1440, 480], [390, 180]] as const) {
+    await exported.setViewportSize({ width, height: 900 });
+    await exported.goto('http://made.capture.test/responsive.html');
+    const rail = exported.locator('#responsive-rail');
+    await expect(rail, `${width}px`).toHaveAttribute('title', 'Edited rail');
+    expect(await rail.evaluate((element) => Math.round(element.getBoundingClientRect().width)), `${width}px keeps its own width`).toBe(expected);
+  }
+  await exported.close();
+});
+
+// A block in a paragraph, a link in a link, a row straight in a table: a script builds them, the HTML parser never
+// makes them from text (HTML Standard, tree construction). The exported page is that page once its script has run.
+test('what a script built and the parser would rebuild comes back as the page held it', runs('project.captureUrl#capture-url-run', 'project.export#menu-file'), async ({ page, context }) => {
+  test.setTimeout(120_000);
+  type Shape = { tag: string; id: string; children: (Shape | string)[] };
+  const shapeOf = (root: Element): Shape => {
+    const walk = (element: Element): Shape => ({
+      tag: element.localName, id: element.id,
+      children: [...element.childNodes].flatMap((child): (Shape | string)[] => (child.nodeType === 1 ? [walk(child as Element)] : child.nodeType === 3 && (child.nodeValue ?? '').trim() !== '' ? [(child.nodeValue ?? '').trim()] : [])),
+    });
+    return walk(root);
+  };
+  const original = await context.newPage();
+  await original.goto(`http://127.0.0.1:${SITE_PORT}/parser-rebuilt.html`);
+  const source = await original.locator('#target').evaluate(shapeOf);
+  await original.close();
+  expect(JSON.stringify(source)).toContain('"tag":"p","id":"para","children":["Before",{"tag":"div"');
+  await openEditor(page);
+  await runDoor(page, 'workspace.openDialog#menu-file-capture-url');
+  const dialog = page.locator('[data-region="capture-url-dialog"]');
+  await dialog.locator('input[name="url"]').fill(`127.0.0.1:${SITE_PORT}/parser-rebuilt.html`);
+  await dialog.locator('[data-door="project.captureUrl#capture-url-run"]').click();
+  const destination = page.locator('[data-door="project.importHtml#destination-page"]');
+  await expect(destination).toBeVisible({ timeout: 60_000 });
+  await destination.click();
+  // the canvas builds the page with DOM calls: as the page held it
+  expect(await page.frameLocator('.frame__page').locator('#target').evaluate(shapeOf)).toEqual(source);
+  const downloading = page.waitForEvent('download');
+  await runDoor(page, 'project.export#menu-file');
+  const files = unzip(fs.readFileSync(await (await downloading).path()));
+  const exported = await context.newPage();
+  await exported.route('http://made.capture.test/**', route => {
+    const name = new URL(route.request().url()).pathname.slice(1);
+    const bytes = files.get(name);
+    return bytes === undefined ? route.fulfill({ status: 404, body: '' }) : route.fulfill({ contentType: name.endsWith('.css') ? 'text/css' : 'text/html', body: bytes });
+  });
+  await exported.goto('http://made.capture.test/parser-rebuilt.html');
+  expect(await exported.locator('#target').evaluate(shapeOf)).toEqual(source);
+  expect(await exported.locator('#inner').evaluate((element) => getComputedStyle(element).color)).toBe('rgb(10, 120, 60)');
+  await exported.screenshot({ path: '.cache/logs/capture-v2/parser-rebuilt-export.png' });
+  await exported.close();
+});
+
 test('two pages of the site are captured, the link between them written from one file to the other', runs('project.captureUrl#capture-url-run'), async ({ page }) => {
   test.setTimeout(120_000);
   await openEditor(page);

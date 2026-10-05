@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Parser rebuilt</title>
+  <style>
+    #inner { color: rgb(10, 120, 60); }
+    #grid td { padding: 4px; border: 1px solid rgb(0, 0, 0); }
+  </style>
+</head>
+<body>
+  <main id="target"></main>
+  <script>
+    // What a script can build and the HTML parser never makes from text: a block inside a paragraph, a link inside a
+    // link, a row straight in a table.
+    const target = document.getElementById('target');
+    const paragraph = document.createElement('p');
+    paragraph.id = 'para';
+    const block = document.createElement('div');
+    block.id = 'inner';
+    block.textContent = 'a block in a paragraph';
+    paragraph.append('Before ', block, ' after');
+    const outer = document.createElement('a');
+    outer.id = 'outer';
+    outer.href = '/outer';
+    const inner = document.createElement('a');
+    inner.id = 'inner-link';
+    inner.href = '/inner';
+    inner.textContent = 'inner';
+    outer.append('outer ', inner);
+    const table = document.createElement('table');
+    table.id = 'grid';
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.textContent = 'cell';
+    row.append(cell);
+    table.append(row);
+    target.append(paragraph, outer, table);
+  </script>
+</body>
+</html>

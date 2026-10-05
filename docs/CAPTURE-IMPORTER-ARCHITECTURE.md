@@ -75,7 +75,11 @@ format 1 capture package imports the same way.
 widths). The export writes the widest projection as static HTML (no script needed to see the page), shadow roots as
 declarative shadow DOM, and a Builder-owned script that applies the other widths' nodes, attributes and text when the
 window matches them, on load and on resize. Every written page parses back to the tree it came from: an element the
-HTML parser would move out of `<head>` is not written there (a head is never drawn).
+HTML parser would move out of `<head>` is not written there (a head is never drawn), a `<pre>`, `<textarea>` or
+`<listing>` whose text starts with a newline takes one more, and an element whose children the parser would rebuild
+(a block in a `<p>`, an `<a>` in an `<a>`, a table part out of its place or with what it may not hold, an inner
+`<form>`, a list item or heading straight in another, HTML in SVG; `parserRebuilt`, checked against parse5 on
+random pages) has its children, and its parent's, set from the tree by the width script.
 
 ### 6. Edit
 

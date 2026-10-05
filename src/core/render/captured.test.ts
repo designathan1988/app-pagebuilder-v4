@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { captureTree, type CapturedElement, type CapturedNode } from '../document/captured.ts';
 import { sequentialIds } from '../ports/ids.ts';
 import { mergeWidths } from '../capture/merge.ts';
-import { capturedAt, capturedExportHtml, capturedHtml, exportedCapturedRoot } from './captured.ts';
+import { capturedAt, capturedExportHtml, capturedHtml, exportedCapturedRoot, parserRebuilt } from './captured.ts';
 
 const HTML = 'http://www.w3.org/1999/xhtml';
 const HEAD = { title: 'Captured', lang: 'en' };
@@ -138,5 +138,70 @@ describe('the exported file of a captured page', () => {
     // its static page parses back into the widest projection (marks aside)
     const parsed = JSON.stringify(parsedShape(parsedRoot(html.replace(/<script>[\s\S]*?<\/script>/g, '')))).replace(/,\["data-capture-node","[^"]+"\]|\["data-capture-node","[^"]+"\],?/g, '');
     expect(parsed).toBe(JSON.stringify(shape(exportedCapturedRoot(capturedAt(capture, 1440), HEAD))));
+  });
+});
+
+describe('what the HTML parser rebuilds from a written page (HTML Standard, tree construction)', () => {
+  const body = (...children: CapturedNode[]) => element('html', {}, [element('head'), element('body', {}, children)]);
+  const bodyOf = (root: CapturedElement) => root.children[1] as CapturedElement;
+  const roundTrips = (root: CapturedElement) => JSON.stringify(parsedShape(parsedRoot(capturedHtml(root)))) === JSON.stringify(shape(root));
+
+  it('names a paragraph a block closes, an <a> another opens, a table part a <tr> wraps, and their holders', () => {
+    const paragraph = element('p', {}, [text('a'), element('div', {}, [text('b')])]);
+    const outer = element('a', { href: '/x' }, [text('one'), element('a', { href: '/y' }, [text('two')])]);
+    const table = element('table', {}, [element('tr', {}, [element('td', {}, [text('cell')])])]);
+    for (const [made, parts] of [[paragraph, [paragraph]], [outer, [outer]], [table, [table]]] as const) {
+      const root = body(made);
+      expect(roundTrips(root)).toBe(false);
+      expect([...parserRebuilt(root)].sort()).toEqual([...parts.map((one) => one.id), bodyOf(root).id].sort());
+    }
+  });
+
+  it('names an inner form, a list item in a list item, a heading in a heading and HTML inside SVG', () => {
+    const svg = { ...element('svg', {}, [element('div', {}, [text('x')])]), namespace: 'http://www.w3.org/2000/svg' };
+    for (const made of [
+      element('form', {}, [element('form', {}, [text('inner')])]),
+      element('li', {}, [element('li', {}, [text('inner')])]),
+      element('h1', {}, [element('h2', {}, [text('inner')])]),
+      svg,
+    ]) {
+      const root = body(made);
+      expect(roundTrips(root)).toBe(false);
+      expect(parserRebuilt(root).size).toBeGreaterThan(0);
+    }
+  });
+
+  it('names nothing in what the parser gives back as written', () => {
+    for (const made of [
+      element('p', {}, [element('span', {}, [text('a')]), element('em', {}, [text('b')])]),
+      element('a', { href: '/x' }, [element('span', {}, [text('a')])]),
+      element('table', {}, [element('tbody', {}, [element('tr', {}, [element('td', {}, [element('p', {}, [text('cell')])])])])]),
+      element('ul', {}, [element('li', {}, [element('ul', {}, [element('li', {}, [text('nested')])])])]),
+      element('div', {}, [element('p', {}, [text('a')]), element('div', {}, [text('b')])]),
+      element('pre', {}, [text('\nfirst line kept')]),
+    ]) {
+      const root = body(made);
+      expect(roundTrips(root)).toBe(true);
+      expect(parserRebuilt(root)).toEqual(new Set());
+    }
+  });
+
+  it('names something in every random page the parser does not give back as written', () => {
+    const tags = ['div', 'p', 'span', 'a', 'li', 'ul', 'table', 'tbody', 'tr', 'td', 'form', 'h1', 'h2', 'button', 'em', 'section'];
+    const node: fc.Arbitrary<CapturedNode> = fc.letrec<{ node: CapturedNode }>((tie) => ({
+      node: fc.oneof(
+        { depthSize: 'small', withCrossShrink: true },
+        fc.constantFrom('x', 'y z').map(text),
+        fc.record({ tag: fc.constantFrom(...tags), children: fc.array(tie('node'), { maxLength: 3 }) }).map(({ tag, children }) => element(tag, {}, children)),
+      ),
+    })).node;
+    fc.assert(fc.property(fc.array(node, { maxLength: 4 }), (children) => {
+      // adjacent text nodes are one text node to a parser: kept apart by an element
+      const separated = children.flatMap((one, index) => (index > 0 && one.kind === 'text' && children[index - 1]?.kind === 'text' ? [element('br'), one] : [one]));
+      const root = body(...separated);
+      const normalize = (value: unknown) => JSON.stringify(value).replaceAll('"},{"kind":"text","value":"', '');
+      const same = normalize(parsedShape(parsedRoot(capturedHtml(root)))) === normalize(shape(root));
+      if (!same) expect(parserRebuilt(root).size, capturedHtml(root)).toBeGreaterThan(0);
+    }), { seed: 4113, numRuns: 1000 });
   });
 });

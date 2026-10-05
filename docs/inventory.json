@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 476,
-    "lines": 83135
+    "lines": 83236
   },
   "features": [
     {
@@ -4407,7 +4407,7 @@
     },
     {
       "path": "src/core/render/captured.ts",
-      "lines": 328,
+      "lines": 429,
       "commands": [],
       "features": []
     },

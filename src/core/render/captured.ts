@@ -12,6 +12,102 @@ const RAW_TEXT = new Set(['style']);
 // is never drawn, so such content is left out of a written page rather than moving the rest.
 const HEAD_CONTENT = new Set(['base', 'basefont', 'bgsound', 'link', 'meta', 'noframes', 'noscript', 'script', 'style', 'template', 'title']);
 
+const LEADING_NEWLINE = new Set(['pre', 'textarea', 'listing']);
+
+// --------------------------------------------------------------------------------- what the parser rebuilds
+
+// A DOM a script built may hold what the HTML parser never makes from text (HTML Standard, 13.2.6 tree construction,
+// "in body", "in table" and foreign content), and written out, it comes back changed: a block inside a <p> closes the
+// paragraph, an <a> inside an <a> closes the outer one, a <tr> straight in a <table> gets a <tbody>, text in a table is
+// moved before it, an inner <form> is dropped, an HTML element inside SVG ends the SVG. The width script sets the
+// children of such an element and of its parent again from the tree, so the page is the captured one once it runs.
+const BUTTON_SCOPE = new Set(['applet', 'caption', 'html', 'table', 'td', 'th', 'marquee', 'object', 'select', 'template', 'button']);
+const LIST_SCOPE_STOP = new Set(['address', 'div', 'p']);
+const P_CLOSERS = new Set(['address', 'article', 'aside', 'blockquote', 'center', 'details', 'dialog', 'dir', 'div', 'dl', 'fieldset', 'figcaption', 'figure',
+  'footer', 'header', 'hgroup', 'main', 'menu', 'nav', 'ol', 'p', 'search', 'section', 'summary', 'ul', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'listing', 'form',
+  'plaintext', 'xmp', 'table', 'hr', 'li', 'dd', 'dt']);
+const SPECIAL = new Set(['address', 'applet', 'area', 'article', 'aside', 'base', 'basefont', 'bgsound', 'blockquote', 'body', 'br', 'button', 'caption', 'center',
+  'col', 'colgroup', 'dd', 'details', 'dir', 'div', 'dl', 'dt', 'embed', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'frame', 'frameset', 'h1', 'h2',
+  'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hgroup', 'hr', 'html', 'iframe', 'img', 'input', 'keygen', 'li', 'link', 'listing', 'main', 'marquee', 'menu', 'meta',
+  'nav', 'noembed', 'noframes', 'noscript', 'object', 'ol', 'p', 'param', 'plaintext', 'pre', 'script', 'search', 'section', 'select', 'source', 'style', 'summary',
+  'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'title', 'tr', 'track', 'ul', 'wbr', 'xmp']);
+const HEADINGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+const TABLE_CHILDREN: Readonly<Record<string, ReadonlySet<string>>> = {
+  table: new Set(['caption', 'colgroup', 'thead', 'tbody', 'tfoot', 'script', 'template', 'style']),
+  thead: new Set(['tr', 'script', 'template', 'style']),
+  tbody: new Set(['tr', 'script', 'template', 'style']),
+  tfoot: new Set(['tr', 'script', 'template', 'style']),
+  tr: new Set(['td', 'th', 'script', 'template', 'style']),
+  colgroup: new Set(['col', 'template']),
+};
+// where each table part is read as written: anywhere else the parser drops it
+const TABLE_CONTEXT: Readonly<Record<string, ReadonlySet<string>>> = {
+  caption: new Set(['table']), colgroup: new Set(['table']), thead: new Set(['table']), tbody: new Set(['table']), tfoot: new Set(['table']),
+  tr: new Set(['table', 'thead', 'tbody', 'tfoot']), td: new Set(['tr']), th: new Set(['tr']), col: new Set(['colgroup', 'table']),
+};
+const SVG = 'http://www.w3.org/2000/svg';
+const MATHML = 'http://www.w3.org/1998/Math/MathML';
+const INTEGRATION = new Set([`${SVG}|foreignObject`, `${SVG}|desc`, `${SVG}|title`, `${MATHML}|mi`, `${MATHML}|mo`, `${MATHML}|mn`, `${MATHML}|ms`, `${MATHML}|mtext`, `${MATHML}|annotation-xml`]);
+
+export function parserRebuilt(root: CapturedElement): ReadonlySet<string> {
+  const rebuilt = new Set<string>();
+  const mark = (...nodes: (CapturedElement | undefined)[]): void => {
+    for (const node of nodes) if (node !== undefined) rebuilt.add(node.id);
+  };
+  const visit = (node: CapturedElement, ancestors: readonly CapturedElement[]): void => {
+    const parent = ancestors.at(-1);
+    const html = node.namespace === HTML;
+    const nearest = (test: (one: CapturedElement) => boolean, stop: (one: CapturedElement) => boolean): CapturedElement | undefined => {
+      for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+        const one = ancestors[index] as CapturedElement;
+        if (test(one)) return one;
+        if (stop(one)) return undefined;
+      }
+      return undefined;
+    };
+    const holder = (found: CapturedElement | undefined): CapturedElement | undefined => (found === undefined ? undefined : ancestors[ancestors.indexOf(found) - 1]);
+    if (html && parent !== undefined) {
+      // a start tag that closes an open <p> in button scope
+      if (P_CLOSERS.has(node.tag)) {
+        const paragraph = nearest((one) => one.namespace === HTML && one.tag === 'p', (one) => one.namespace !== HTML || BUTTON_SCOPE.has(one.tag));
+        if (paragraph !== undefined) mark(paragraph, holder(paragraph));
+      }
+      // <li>, <dd>, <dt> close an open one of their kind before a special element other than address, div and p
+      const listLike = node.tag === 'li' ? ['li'] : node.tag === 'dd' || node.tag === 'dt' ? ['dd', 'dt'] : null;
+      if (listLike !== null) {
+        const open = nearest((one) => one.namespace === HTML && listLike.includes(one.tag), (one) => one.namespace !== HTML || (SPECIAL.has(one.tag) && !LIST_SCOPE_STOP.has(one.tag)));
+        if (open !== undefined) mark(open, holder(open));
+      }
+      // an <a> while another is open (the list of active formatting elements; markers at cells, captions, objects)
+      if (node.tag === 'a') {
+        const outer = nearest((one) => one.namespace === HTML && one.tag === 'a', (one) => one.namespace === HTML && ['applet', 'object', 'marquee', 'template', 'td', 'th', 'caption'].includes(one.tag));
+        if (outer !== undefined) mark(outer, holder(outer));
+      }
+      // an inner <form> is ignored; a <button> in a button closes it; a heading straight in a heading closes it
+      if (node.tag === 'form' && ancestors.some((one) => one.namespace === HTML && one.tag === 'form')) mark(parent, ancestors.at(-2));
+      if (node.tag === 'button') {
+        const button = nearest((one) => one.namespace === HTML && one.tag === 'button', (one) => one.namespace !== HTML || (BUTTON_SCOPE.has(one.tag) && one.tag !== 'button'));
+        if (button !== undefined) mark(button, holder(button));
+      }
+      if (HEADINGS.has(node.tag) && parent.namespace === HTML && HEADINGS.has(parent.tag)) mark(parent, ancestors.at(-2));
+      // a table part outside its table context is ignored ("in body": a caption, col, colgroup, tbody, td, tfoot, th,
+      // thead or tr start tag is a parse error and is dropped)
+      const context = TABLE_CONTEXT[node.tag];
+      if (context !== undefined && !(parent.namespace === HTML && context.has(parent.tag))) mark(parent, ancestors.at(-2));
+      // an HTML element straight inside SVG or MathML content ends it
+      if (parent.namespace !== HTML && !INTEGRATION.has(`${parent.namespace}|${parent.tag}`)) mark(parent, ancestors.at(-2));
+    }
+    // an SVG or MathML element outside its <svg> or <math> is read as an HTML element
+    if (!html && parent !== undefined && parent.namespace === HTML && !((node.namespace === SVG && node.tag === 'svg') || (node.namespace === MATHML && node.tag === 'math'))) mark(parent);
+    // what a table part may hold; anything else (text that is not white space included) moves or gains a wrapper
+    const allowed = html ? TABLE_CHILDREN[node.tag] : undefined;
+    if (allowed !== undefined && node.children.some((child) => (child.kind === 'element' ? child.namespace !== HTML || !allowed.has(child.tag) : child.kind === 'text' && child.value.trim() !== ''))) mark(node, parent);
+    for (const child of node.children) if (child.kind === 'element') visit(child, [...ancestors, node]);
+  };
+  visit(root, []);
+  return rebuilt;
+}
+
 const escapeText = (value: string): string => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 const escapeAttribute = (value: string): string => escapeText(value).replaceAll('"', '&quot;');
 const isElement = (node: CapturedNode, tag: string): node is CapturedElement => node.kind === 'element' && node.tag === tag && node.namespace === HTML;
@@ -80,7 +176,11 @@ export function capturedHtml(root: CapturedElement, options: WriteOptions = {}):
     if (node.namespace === HTML && VOID.has(node.tag)) return open;
     const shadow = node.shadow === undefined || node.shadow.mode !== 'open' ? '' : `<template shadowrootmode="open">${node.shadow.children.map((child) => write(child, null)).join('')}</template>`;
     const text = node.tag === 'textarea' && node.state?.value !== undefined ? escapeText(node.state.value) : '';
-    return `${open}${shadow}${text}${node.children.map((child) => write(child, node)).join('')}</${node.tag}>`;
+    // the parser drops a newline right after <pre>, <textarea> or <listing>: one more is written (HTML Standard, the
+    // HTML fragment serialization algorithm)
+    const firstText = text !== '' ? text : node.children[0]?.kind === 'text' ? node.children[0].value : '';
+    const newline = node.namespace === HTML && LEADING_NEWLINE.has(node.tag) && firstText.startsWith('\n') ? '\n' : '';
+    return `${open}${shadow}${newline}${text}${node.children.map((child) => write(child, node)).join('')}</${node.tag}>`;
   };
   return `<!DOCTYPE html>\n${write(root, null)}`;
 }
@@ -126,8 +226,9 @@ interface Made {
 }
 
 // What the width script needs: the elements in the static page whose attributes, children or scroll offsets differ at
-// another width, and every element the widest width lacks, to be made at the widths that have it.
-function widthData(root: CapturedElement, widths: readonly number[]): { readonly changing: Record<string, Changing>; readonly made: Record<string, Made>; readonly marked: Set<string> } {
+// another width or whose children the HTML parser rebuilds (parserRebuilt), and every element the widest width lacks,
+// to be made at the widths that have it.
+function widthData(root: CapturedElement, widths: readonly number[], rebuilt: ReadonlySet<string> = new Set()): { readonly changing: Record<string, Changing>; readonly made: Record<string, Made>; readonly marked: Set<string> } {
   const changing: Record<string, Changing> = {};
   const made: Record<string, Made> = {};
   const marked = new Set<string>();
@@ -166,7 +267,7 @@ function widthData(root: CapturedElement, widths: readonly number[]): { readonly
       continue;
     }
     const json = (record: Record<string, unknown>): string[] => Object.values(record).map((one) => JSON.stringify(one));
-    const differs = new Set(json(a)).size > 1 || new Set(json(c)).size > 1 || Object.keys(s).length > 0;
+    const differs = rebuilt.has(id) || new Set(json(a)).size > 1 || new Set(json(c)).size > 1 || Object.keys(s).length > 0;
     if (differs) {
       changing[id] = { a, c, ...(Object.keys(s).length === 0 ? {} : { s }) };
       marked.add(id);
@@ -197,13 +298,13 @@ function widthScript(widths: readonly number[], changing: Record<string, Changin
 }
 
 // The exported file of a captured page: the widest width as static HTML (seen without any script), and, when other
-// widths differ, the width script before </body>.
+// widths differ or the parser rebuilds part of it, the width script before </body>.
 export function capturedExportHtml(capture: CapturedPage, head?: CapturedHead): string {
   const root = head === undefined ? capture.root : exportedCapturedRoot(capture.root, head);
   const widest = capture.widths[0];
   if (widest === undefined) throw new Error('a captured page has no observed width');
   const staticRoot = project(root, widest) as CapturedElement;
-  const { changing, made, marked } = widthData(root, capture.widths);
+  const { changing, made, marked } = widthData(root, capture.widths, parserRebuilt(staticRoot));
   let html = capturedHtml(staticRoot, { marked });
   if (Object.keys(changing).length > 0 || Object.keys(made).length > 0) html = html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${widthScript(capture.widths, changing, made)}</body>`);
   const mark = staticRoot.children.find((one): one is CapturedElement => isElement(one, 'head'))
