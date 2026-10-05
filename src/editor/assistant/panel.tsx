@@ -4,6 +4,7 @@ import type { CommandId, FeatureId, MessageId } from '../../generated/ids.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import { doorSlots } from '../doors/placement.ts';
 import { DoorControl, useDoor } from '../doors/door.tsx';
+import { ViewTitle } from '../shell/view-title.tsx';
 import type { DoorEntry } from '../../manifest/runtime.ts';
 import { useEditorState, useStore } from '../store.ts';
 import { useT } from '../text.ts';
@@ -65,7 +66,9 @@ export function AssistantPanel(): ReactNode {
     if (name === 'assistant-bridge-connect') return <button type="button" className="door door--button" data-door={entry.ref} disabled={state.busy} onClick={() => connection.current?.click()}>{t(entry.door.labelKey as MessageId)}</button>;
     return <DoorControl entry={entry} ready={props.disabled !== true} />;
   };
+  // the one view title of the sidebar: its name, its grip and its close (LR2: the Assistant view had none)
   return <div className="view assistant-panel" data-region="assistant-panel">
+    <ViewTitle panel="assistant" title={t('panel.assistant')} />
     <input ref={connection} className="visually-hidden" type="file" accept="application/json,.json" tabIndex={-1} aria-hidden onChange={event => {
       const file = event.currentTarget.files?.[0];
       event.currentTarget.value = '';

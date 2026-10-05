@@ -35,6 +35,7 @@ export { useEditorState, useStore } from './store.ts';
 export type { EditorUi } from './state.ts';
 export { textOf, useT } from './text.ts';
 export { DoorControl, Icon, useDoor } from './doors/door.tsx';
+export { ViewTitle } from './shell/view-title.tsx';
 export { canvasFrame, geometryOf, nodeAt, nodeBox } from './canvas/coordinates.ts';
 export { BASE_BREAKPOINT, activeBreakpoint } from './view/breakpoints.ts';
 export type { Shown } from './view/breakpoints.ts';

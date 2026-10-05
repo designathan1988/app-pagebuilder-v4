@@ -4,7 +4,7 @@
 // arranged (layout.interpret), what changes at the screen size the canvas shows (layout.respond), delete and Done.
 // Every control is the door the manifest declares; nothing here changes state but through them.
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { activeBreakpoint, BASE_BREAKPOINT, breakpointName, breakpointsOf, DoorControl, Icon, imageFiles, locate, manifest, markFieldKept, recordFieldInput, useDoor, useEditorState, useStore, useT } from '../../../editor/host.ts';
+import { activeBreakpoint, BASE_BREAKPOINT, breakpointName, breakpointsOf, DoorControl, Icon, imageFiles, locate, manifest, markFieldKept, recordFieldInput, useDoor, useEditorState, useStore, useT, ViewTitle } from '../../../editor/host.ts';
 import type { CommandId, DispatchResult, DocumentJson, DoorEntry, MessageId, ProjectFile } from '../../../editor/host.ts';
 import { predict, stress, stressWidths, type Suggestion } from '../intent/analysis.ts';
 import { BUILT_IN_TEMPLATES } from '../intent/templates.ts';
@@ -182,7 +182,8 @@ export function LayoutPanel(): ReactNode {
   if (composer === null || container === null || record === null) {
     return (
       <section className="view layout-panel" data-region="layout-composer-panel" aria-label={t('panel.layoutComposer')}>
-        <div className="view__title">{t('panel.layoutComposer')}</div>
+        {/* the one view title of the sidebar: its name where every view's stands, its grip and its close (LR2) */}
+        <ViewTitle panel="layout-composer" title={t('panel.layoutComposer')} />
         <p className="layout-panel__text">{t('layout.panel.idle')}</p>
       </section>
     );
@@ -204,7 +205,7 @@ export function LayoutPanel(): ReactNode {
   const breaking = issues.length === 0 ? null : issues.reduce((a, b) => (b.viewport > a.viewport ? b : a));
   return (
     <section className="view layout-panel" data-region="layout-composer-panel" aria-label={t('panel.layoutComposer')}>
-      <div className="view__title">{t('layout.panel.container', { name: container.name })}</div>
+      <ViewTitle panel="layout-composer" title={t('layout.panel.container', { name: container.name })} />
       <p className="layout-panel__prediction" data-layout-prediction={prediction.key}>
         {t(prediction.key as MessageId, Object.fromEntries(Object.entries(prediction.params).map(([name, value]) => [name, name === 'sizing' && typeof value === 'string' && !value.endsWith('px') ? t(`layout.word.${value}` as MessageId) : value])))}
       </p>

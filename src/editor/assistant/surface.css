@@ -9,8 +9,13 @@
 .assistant-chat__message img { max-width:100%;height:auto; }
 .assistant-chat__message--tool { color:var(--color-text-subtle); }
 .assistant-preferences { display:flex;flex-direction:column;gap:var(--space-3); }
-/* a sidebar view (.view): it takes the height the stack leaves and scrolls whatever does not fit (setup help included) */
-.assistant-panel { gap:var(--space-3);padding:var(--space-3); }
+/* a sidebar view (.view): it takes the height the stack leaves and scrolls whatever does not fit (setup help included);
+   its title edge to edge as every view's, everything under it from the section titles' start, one inset for all (LR2:
+   the chat's own padding put its fields 4 px right of the words beside them) */
+.assistant-panel { gap:var(--space-3);padding:0 0 var(--space-3); }
+.assistant-panel > :not(.view__title) { margin-inline:var(--space-6); }
+.assistant-chat header,
+.assistant-chat footer { padding-inline:0; }
 .assistant-field { display:flex;flex-direction:column;gap:var(--space-1);min-width:0;flex:1; }
 .assistant-field textarea { resize:vertical; }
 .assistant-chat footer { flex-wrap:wrap; }

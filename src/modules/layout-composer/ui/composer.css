@@ -166,13 +166,19 @@
 }
 
 /* the panel (ui/panel.tsx) */
+/* the view's title edge to edge as every view's (the one view title), its content inset under it (LR2: the title
+   stood 17 px right of every other view's) */
 .layout-panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
   min-height: 0;
-  padding: var(--space-6);
+  padding: 0 0 var(--space-6);
   overflow-y: auto;
+}
+
+.layout-panel > :not(.view__title) {
+  margin-inline: var(--space-6);
 }
 
 .layout-panel__section {

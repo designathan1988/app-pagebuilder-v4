@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83468
+    "lines": 83473
   },
   "features": [
     {
@@ -4992,7 +4992,7 @@
     },
     {
       "path": "src/editor/assistant/panel.tsx",
-      "lines": 93,
+      "lines": 96,
       "commands": [],
       "features": []
     },
@@ -5531,7 +5531,7 @@
     },
     {
       "path": "src/editor/host.ts",
-      "lines": 45,
+      "lines": 46,
       "commands": [],
       "features": []
     },
@@ -7173,7 +7173,7 @@
     },
     {
       "path": "src/modules/layout-composer/ui/panel.tsx",
-      "lines": 314,
+      "lines": 315,
       "commands": [],
       "features": []
     },

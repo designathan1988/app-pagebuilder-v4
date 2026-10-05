@@ -2451,6 +2451,8 @@ None (panels can only be moved with the pointer).
    header draws **Put back in its place** before Close (`workspace.movePanel#panel-header-dock`, to the left dock: a
    sidebar view or section returns to the sidebar, a dock panel to the dock's tabs); in its place the button is not drawn.
 
+
+Every sidebar view wears the one view title (shell/view-title.tsx, ViewTitle, reached by a module through editor/host.ts): its name where every view's stands, its grip and the panel header's doors; the Layout and Assistant views drew their own (the Layout's 17 px right with no close, the Assistant's none) until the user's review of 2026-10-05 (LR2), and the content under a title is inset from the section titles' start (`tests/e2e/sidebar-view-titles.spec.ts`).
 ## gradient-editor
 
 How Pager behaves, observed by running it from `.cache/pager-run` (Chrome, window 1600×900) and read from its source. Source references are `path:line` inside Pager. Test element: a Section. The editor is `ppGradient` (`src/features/inspector/properties.js:1351-1525`), shown in Paint → Gradient (`data-prop="background"`).
