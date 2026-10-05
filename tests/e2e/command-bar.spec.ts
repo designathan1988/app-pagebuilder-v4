@@ -143,3 +143,16 @@ test('a command the query names that cannot run now is not offered, and the bar 
   await page.keyboard.type('zzzqqq');
   await expect(bar(page).locator('.command-bar__none')).toContainText('No command');
 });
+
+// Every entry's words start at one place, an entry without an icon keeping the icon's room (the user's review of
+// 2026-10-05, LR2: Paste style and New blank page, drawn without icons, started 4 px left of every other entry — their
+// placeholder was 12 px wide where an icon is 16).
+test('every palette entry\'s words start at the same place, with an icon or without', runs(CTRL_K), async ({ page }) => {
+  await openEditor(page);
+  await runDoor(page, CTRL_K);
+  const entries = page.locator('[data-region="command-palette"] .command-bar__entry');
+  await expect(entries.first()).toBeVisible();
+  const starts = await entries.evaluateAll((all) => all.filter((one) => one.getClientRects().length > 0).map((one) => Math.round(one.querySelector('.command-bar__label')?.getBoundingClientRect().left ?? -1)));
+  expect(starts.length).toBeGreaterThan(5);
+  expect(new Set(starts).size, `starts ${[...new Set(starts)].join(', ')}`).toBe(1);
+});

@@ -697,8 +697,11 @@
   flex: 1;
 }
 
+/* an entry without an icon keeps the room of the small icon the others draw (shell.css .icon--sm), so every entry's
+   words start at one place (LR2: they started 2 px left) */
 .command-bar__no-icon {
-  width: var(--space-6);
+  flex: none;
+  width: calc(var(--space-7) - var(--space-1));
 }
 
 .command-bar__chord,
