@@ -8496,6 +8496,9 @@ Every card control is a field or a button of the inspector, reached with Tab.
 
 ## motion-timeline
 
+With no timeline in the project, the list says so once ("No timeline yet…", New timeline under it) and the track area
+stays empty (the user's review of 2026-10-05, LR2: it was written twice).
+
 ### Trigger
 
 The Timeline panel shows the project's timelines on the left (each with how many interactions and actions play it, a row to show it, a delete button, New timeline, the name field of the one shown) and the timeline shown on the right.
@@ -9386,6 +9389,10 @@ Required (manifest feature `code-panel-edit-html`):
 
 Required (manifest feature `timeline-animations`):
 - The Timeline (a tab of the workbench) lists the selected element's animations over a time ruler.
+- It says one thing at a time, matching the selection (the user's review of 2026-10-05, LR2): with no element or
+  several selected, "Select an element to animate." under Animations; with one selected that holds none, "This element
+  holds no animation yet.", the + under it adding one; the track area names the playhead's offset only while an
+  animation is shown.
 - A new animation (`animation.create`) is stored on the element with a name unique in the project (its @keyframes
   name), a 1 s duration and keyframes at 0 % and 100 %; a taken name or one that is no CSS identifier is refused with
   words (`status.animation.nameTaken`, `status.animation.nameInvalid`).

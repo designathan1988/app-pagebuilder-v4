@@ -94,8 +94,10 @@ export function TimelinePanel() {
     <div className="timeline" data-region="dock-timeline" data-key-context="timeline">
       <div className="timeline__side">
         <p className="timeline__title">{t('timeline.animations')}</p>
+        {/* one empty state, saying what to do next: an element to select (none, or several, selected), else that the
+            element holds none, the + under it adding one (the user's review of 2026-10-05) */}
         {names.length === 0 ? (
-          <p className="timeline__none">{t('timeline.noAnimations')}</p>
+          <p className="timeline__none">{t(node === null || !selected ? 'timeline.empty' : 'timeline.noAnimations')}</p>
         ) : (
           <ul className="timeline__rows">
             {names.map((name) => (
@@ -212,7 +214,7 @@ export function TimelinePanel() {
             <PanelButton entry={DELETE_KEYFRAME} args={{ animation: shownName ?? '', keyframe: playhead }} label={t('command.animation.deleteKeyframe')} icon={<Icon name="trash" size="sm" />} onDone={() => undefined} />
           ) : null}
         </div>
-        <p className="timeline__hint">{shown === null ? t('timeline.empty') : t('timeline.keyframeOffset', { offset: String(Math.round(percent)) })}</p>
+        {shown === null ? null : <p className="timeline__hint">{t('timeline.keyframeOffset', { offset: String(Math.round(percent)) })}</p>}
       </div>
     </div>
   );

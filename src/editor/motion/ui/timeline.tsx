@@ -402,9 +402,8 @@ export function MotionTimelinePanel() {
           <span className="motion-timeline__readout">{t('motion.timeline.readout', { time: said.time, duration: said.duration })}</span>
           {motion.recording === true ? <span className="motion-timeline__recording">{t('motion.timeline.recording')}</span> : null}
         </div>
-        {timeline === null ? (
-          <p className="motion-timeline__none">{t('motion.timeline.empty')}</p>
-        ) : (
+        {/* no timeline: the list beside says so once, its New timeline under it (the user's review of 2026-10-05) */}
+        {timeline === null ? null : (
           <>
             <div className="motion-timeline__add">
               {(['after', 'with', 'at'] as const).map((placement) => {

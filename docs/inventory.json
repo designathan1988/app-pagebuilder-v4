@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83318
+    "lines": 83319
   },
   "features": [
     {
@@ -6019,7 +6019,7 @@
     },
     {
       "path": "src/editor/motion/ui/timeline.tsx",
-      "lines": 436,
+      "lines": 435,
       "commands": [],
       "features": []
     },
@@ -6509,7 +6509,7 @@
     },
     {
       "path": "src/editor/timeline/panel.tsx",
-      "lines": 220,
+      "lines": 222,
       "commands": [],
       "features": []
     },
