@@ -133,6 +133,9 @@ export function renderModelFromManifest(elements: ElementsFile, properties: Prop
 // (the audit's A3.38), weightless (:where) so the node's own rules win.
 // The browser's own scrollbar width, measured once in the editor's document (the same scrollbar the site shows): the
 // page keeps it free whatever the zoom, so its usable width is the site's (the user's real-use audit, item A3.22).
+// the narrowest screen whose browser keeps its scrollbar's width free (a desktop's); narrower ones are a tablet's or a
+// phone's, whose scrollbars lie over the page
+const OVERLAY_SCROLLBAR_BELOW = 1024;
 let measuredScrollbar: number | null = null;
 function scrollbarWidth(): number {
   if (measuredScrollbar !== null) return measuredScrollbar;
@@ -148,7 +151,10 @@ export function editorCss(model: RenderModel): string {
   // The page lays out at the width a real browser gives it: the scrollbar's own width stays free whatever the zoom (the
   // canvas draws no scrollbar inside the frame; the stage scrolls the page), so the usable width is the site's at any
   // zoom (the user's real-use audit, item A3.22). The frame sets the variable from the browser's own scrollbar.
-  return `html { padding-right: ${scrollbarWidth()}px; scrollbar-width: none; }\n:where([${CONTAINER_ATTRIBUTE}]:empty) { min-height: ${model.emptyContainerMinHeight}px; }\n:where([${EMPTY_TEXT_ATTRIBUTE}]) { min-height: ${model.emptyTextMinHeight}px; outline: 1px dashed currentColor; outline-offset: -1px; }\n[${HIDDEN_ATTRIBUTE}] { display: none !important; }\n[${EMBED_FRAME_ATTRIBUTE}] { display: block; width: 100%; min-height: ${model.emptyContainerMinHeight}px; border: 0; pointer-events: none; }`;
+  // A phone's or a tablet's browser draws its scrollbar over the page, taking no width, so a screen narrower than
+  // OVERLAY_SCROLLBAR_BELOW keeps its whole width: the phone breakpoint measured 375 px for its 390 (the user's audit
+  // order of 2026-10-05). The media query reads the frame's own width, the breakpoint's.
+  return `html { padding-right: ${scrollbarWidth()}px; scrollbar-width: none; }\n@media (max-width: ${OVERLAY_SCROLLBAR_BELOW - 0.02}px) { html { padding-right: 0; } }\n:where([${CONTAINER_ATTRIBUTE}]:empty) { min-height: ${model.emptyContainerMinHeight}px; }\n:where([${EMPTY_TEXT_ATTRIBUTE}]) { min-height: ${model.emptyTextMinHeight}px; outline: 1px dashed currentColor; outline-offset: -1px; }\n[${HIDDEN_ATTRIBUTE}] { display: none !important; }\n[${EMBED_FRAME_ATTRIBUTE}] { display: block; width: 100%; min-height: ${model.emptyContainerMinHeight}px; border: 0; pointer-events: none; }`;
 }
 
 // The selector of a node's element: its id quoted as a CSS string.

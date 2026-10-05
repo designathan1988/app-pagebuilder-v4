@@ -582,6 +582,11 @@ Not affected: switching the breakpoint records nothing.
 
 ### Our rule: the screen height, the fold lines and the width the site gives the page (the user's real-use audit, items 2.3 and A3.22)
 
+- A phone's or a tablet's browser draws its scrollbar over the page, taking no width: a breakpoint narrower than
+  1024 px lays the page out at its whole width (the phone's 390 px measured 375 with a desktop scrollbar kept free: the
+  user's audit order of 2026-10-05); a desktop's keeps the scrollbar's width free, as A3.22 says below
+  (`tests/e2e/overlay-scrollbar-width.spec.ts`, with Chrome's scrollbars shown).
+
 - **Each breakpoint has a screen, width and height** (`properties.json`: Desktop 1440 × 900, Laptop 1180 × 800,
   Tablet 834 × 1194, Phone 390 × 844). The canvas gives the page inside the frame that height as its viewport, so
   `vh`, `svh` and `dvh` measure the screen whatever the zoom — a hero at Height 100vh measures 900 px on Desktop and
