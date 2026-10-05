@@ -79,3 +79,21 @@ it('keeps a recorded file\'s bytes when the record holds the same address again 
   const saved = result.files.find((file) => file.path.startsWith('fonts/'));
   expect(Buffer.from(saved?.base64 ?? '', 'base64').toString()).toBe('wOF2-font-bytes');
 });
+
+// bellroy's section: --section-bg: url(…) set inline, used by a rule of its stylesheet (css/). A url() in a custom
+// property resolves where var() uses it, so the background was looked for in css/img/ and never drawn.
+it('writes a url() inside an inline custom property from the stylesheets\' folder, and any other from the page', async () => {
+  const root = page([{ kind: 'element', id: 'k3', namespace: HTML, tag: 'section', attributes: [{ name: 'style', namespace: null, value: '--section-bg: url(https://site.test/grid.png); background-image: url("https://site.test/dots.png")' }], children: [] }]);
+  const result = await captureSnapshot({
+    url: 'https://site.test/',
+    read: { title: 'Site', root, sheets: [], images: [], links: [] },
+    resources: {
+      'https://site.test/grid.png': { status: 200, type: 'image/png', base64: Buffer.from('grid').toString('base64') },
+      'https://site.test/dots.png': { status: 200, type: 'image/png', base64: Buffer.from('dots').toString('base64') },
+    },
+  });
+  const pack = JSON.parse(Buffer.from(result.files.find((file) => file.path === 'index.html.capture.json')?.base64 ?? '', 'base64').toString('utf8')) as CapturedSnapshotPackage;
+  const style = JSON.stringify(pack.format === 2 ? pack.root : null).match(/--section-bg[^"]*/)?.[0] ?? '';
+  expect(style).toContain('--section-bg: url(../img/img-1.png)');
+  expect(style).toContain('background-image: url(img/img-2.png)');
+});

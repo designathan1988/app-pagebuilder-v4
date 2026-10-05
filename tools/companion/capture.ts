@@ -182,6 +182,39 @@ const pageKey = (url: string): string => {
 };
 // a project path written from a page's own folder (img/a.png from about/index.html is ../img/a.png)
 const fromPage = (page: string, target: string): string => '../'.repeat(page.split('/').length - 1) + target;
+// A style attribute with each url() replaced by `local(raw, custom)` (custom: inside a custom property's declaration);
+// null keeps it. Declarations end at a semicolon outside parentheses and quotes.
+function localStyle(style: string, local: (raw: string, custom: boolean) => string | null): string {
+  let out = '';
+  let start = 0;
+  let depth = 0;
+  let quote: string | null = null;
+  const flush = (end: number): void => {
+    const declaration = style.slice(start, end);
+    const custom = /^\s*--/.test(declaration);
+    out += declaration.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, (all, _quote: string, raw: string) => {
+      const made = local(raw, custom);
+      return made === null ? all : `url(${made})`;
+    });
+  };
+  for (let index = 0; index < style.length; index += 1) {
+    const character = style[index];
+    if (quote !== null) {
+      if (character === quote) quote = null;
+      continue;
+    }
+    if (character === '"' || character === "'") quote = character;
+    else if (character === '(') depth += 1;
+    else if (character === ')') depth = Math.max(0, depth - 1);
+    else if (character === ';' && depth === 0) {
+      flush(index + 1);
+      start = index + 1;
+    }
+  }
+  flush(style.length);
+  return out;
+}
+
 // a link between two pages of the project, written from one's folder to the other
 function between(from: string, to: string): string {
   const base = from.split('/').slice(0, -1);
@@ -377,14 +410,19 @@ function siteBuilder(fetched: Fetcher) {
         const raw = match[2] ?? '';
         if (raw.startsWith('data:') || raw.startsWith('#') || styleUrls.has(raw) || !URL.canParse(raw, base)) continue;
         const local = await fetchAsset(new URL(raw, base).href, 'img');
-        if (local !== null) styleUrls.set(raw, fromPage(path, local));
+        if (local !== null) styleUrls.set(raw, local);
       }
     }
     if (styleUrls.size > 0) {
       root = mapTree(root, {
-        attribute: (value, name) => (name !== 'style' ? value : value.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, (all, _quote: string, raw: string) => {
+        attribute: (value, name) => (name !== 'style' ? value : localStyle(value, (raw, custom) => {
           const local = styleUrls.get(raw);
-          return local === undefined ? all : `url(${local})`;
+          if (local === undefined) return null;
+          // A url() in a custom property resolves where var() uses it, not where it is set (CSS Custom Properties,
+          // https://drafts.csswg.org/css-variables-2/): the site's rules that use it live in css/, so it is written
+          // from there (a page at the root reads ../img/a.png as img/a.png as well). Written from the page, bellroy's
+          // section background --section-bg: url(img/…) was looked for in css/img/ and never drawn.
+          return custom ? `../${local}` : fromPage(path, local);
         })),
       });
     }
