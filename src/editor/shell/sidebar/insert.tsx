@@ -115,7 +115,7 @@ export function Insert() {
                 <div className="tiles" data-region="palette-tiles" data-key-context="palette">
                   {entries.map((e, index) => (
                     <DoorControl key={e.id} entry={INSERT_TILE} args={{ entry: e.id }} className="tile" label={t(e.labelKey as MessageId)} ready={isFeatureBuilt(e.feature as FeatureId)} tabbable={index === 0}>
-                      <Icon name={elementIcon(e.element) ?? GLYPHS.folder} />
+                      <Icon name={e.icon ?? elementIcon(e.element) ?? GLYPHS.folder} />
                       <span className="tile__label">{t(e.labelKey as MessageId)}</span>
                       {density === 'list' ? <span className="tile__tag">{`<${tagOfElement(e.element) ?? ''}>`}</span> : null}
                     </DoorControl>

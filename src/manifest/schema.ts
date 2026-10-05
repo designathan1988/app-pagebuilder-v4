@@ -150,6 +150,9 @@ const paletteEntrySchema = z.strictObject({
   feature: featureId,
   // the tree a template inserts (kind "template"); absent for an element entry
   template: templateNodeSchema.optional(),
+  // the tile's icon where the element's own does not say which entry it is (every input type is an input: the audit
+  // of 2026-10-05 found eleven field tiles wearing one icon); absent: the element's icon
+  icon: iconName.optional(),
 });
 
 const paletteGroupSchema = z.strictObject({

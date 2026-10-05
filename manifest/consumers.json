@@ -205,6 +205,10 @@
       "reader": "src/editor/palette/palette.ts"
     },
     {
+      "field": "elements:palette[].entries[].icon",
+      "reader": "src/editor/shell/sidebar/insert.tsx"
+    },
+    {
       "field": "elements:palette[].entries[].kind",
       "reader": "src/editor/palette/palette.ts"
     },

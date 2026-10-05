@@ -49,6 +49,7 @@ function namedIcons(root: string): string[] {
   for (const glyph of Object.values(layout.glyphs ?? {})) add(glyph);
   for (const panel of Object.values(layout.panels ?? {})) add(panel.icon);
   for (const element of (files['elements.json'] as { elements: { icon: unknown }[] }).elements) add(element.icon);
+  for (const group of (files['elements.json'] as { palette: { entries: { icon?: unknown }[] }[] }).palette) for (const entry of group.entries) add(entry.icon);
   for (const property of (files['properties.json'] as { properties: { icons?: Record<string, unknown> }[] }).properties) for (const icon of Object.values(property.icons ?? {})) add(icon);
   return [...names].sort();
 }

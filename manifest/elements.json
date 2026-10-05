@@ -2601,7 +2601,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "text",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "text-cursor-input"
         },
         {
           "id": "input-email",
@@ -2609,7 +2610,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "email",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "at-sign"
         },
         {
           "id": "input-password",
@@ -2617,7 +2619,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "password",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "key-round"
         },
         {
           "id": "input-number",
@@ -2625,7 +2628,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "number",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "hash"
         },
         {
           "id": "input-tel",
@@ -2633,7 +2637,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "tel",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "phone"
         },
         {
           "id": "input-url",
@@ -2641,7 +2646,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "url",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "link"
         },
         {
           "id": "input-search",
@@ -2649,7 +2655,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "search",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "search"
         },
         {
           "id": "input-date",
@@ -2657,7 +2664,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "date",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "calendar"
         },
         {
           "id": "input-time",
@@ -2665,7 +2673,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "time",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "clock"
         },
         {
           "id": "input-color",
@@ -2673,7 +2682,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "color",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "palette"
         },
         {
           "id": "input-range",
@@ -2681,7 +2691,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "range",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "sliders-horizontal"
         },
         {
           "id": "input-checkbox",
@@ -2689,7 +2700,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "checkbox",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "square-check"
         },
         {
           "id": "input-radio",
@@ -2697,7 +2709,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "radio",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "circle-dot"
         },
         {
           "id": "input-file",
@@ -2705,7 +2718,8 @@
           "element": "input",
           "kind": "element",
           "inputType": "file",
-          "feature": "elements-form-inputs"
+          "feature": "elements-form-inputs",
+          "icon": "file-up"
         },
         {
           "id": "textarea",
