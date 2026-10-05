@@ -1,6 +1,7 @@
 // The Layers section (spec layers-tree): the shown page's tree, one row per node, drawn as a window of the rows in
 // view, with its search, the row's name field, colour, details, empty mark and the pick targets of the interactions
 // and the motion panel.
+import { fitNames } from './name-first.ts';
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent } from 'react';
 import { walk, type DocNode } from '../../../core/document/model.ts';
 import { layerColourCss } from '../../../core/nodes/flags.ts';
@@ -474,6 +475,18 @@ export function LayersSection() {
       el.removeEventListener('scroll', measure);
       observer.disconnect();
     };
+  }, [layersOpen]);
+  // a row's name before its details where both do not fit (name-first.ts): after every drawing, and whenever the tree's
+  // width changes
+  useLayoutEffect(() => {
+    if (scroller.current !== null) fitNames(scroller.current);
+  });
+  useLayoutEffect(() => {
+    const el = scroller.current;
+    if (el === null) return;
+    const observer = new ResizeObserver(() => fitNames(el));
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [layersOpen]);
   const primary = useEditorState((s) => s.selection[0] ?? null);
   // the row the keyboard is on (spec layers-keyboard-navigation: the arrows move the focus among the rows): the window

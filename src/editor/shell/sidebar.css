@@ -186,8 +186,10 @@
   color: var(--color-text-muted);
 }
 
+/* the name takes its words' width, the grip beside it (the window's drag band) the rest: both at flex 1, the name had
+   half the title and "Compondo Page" broke over two lines (the audit of 2026-10-05) */
 .view__name {
-  flex: 1;
+  flex: 0 1 auto;
 }
 
 .section-title {
@@ -380,7 +382,7 @@
   right: var(--space-3);
   /* never wider than the room the name leaves it (.row__page-name's margin): a long file name ends in an ellipsis
      instead of running back over the page's name (jornada03 plan, stage 5: row__meta) */
-  max-width: calc(var(--space-10) * 2 + var(--space-3));
+  max-width: 50%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -439,6 +441,12 @@
   border-radius: var(--radius-xs);
   background: var(--color-surface-sunken);
   color: var(--color-text);
+}
+
+/* a row whose name does not fit beside its details gives the name their room (sidebar/name-first.ts) */
+.row[data-name-first] > .row__meta[data-region='layers-row-details'],
+.row__main[data-name-first] > .row__meta {
+  display: none;
 }
 
 .row__meta {
@@ -689,8 +697,11 @@
 .tile {
   flex-direction: column;
   gap: var(--space-1);
-  height: calc(var(--size-target-min) * 2);
-  padding: 0 var(--space-1);
+  /* at least two targets tall; a name that takes two lines makes its row taller, never cut (the audit of 2026-10-05:
+     "Imagem responsi…", "Formulário com c…") */
+  height: auto;
+  min-height: calc(var(--size-target-min) * 2);
+  padding: var(--space-1);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -712,7 +723,7 @@
 .insert--list .tile {
   flex-direction: row;
   justify-content: flex-start;
-  height: var(--size-target-min);
+  min-height: var(--size-target-min);
   padding: 0 var(--space-2);
 }
 
@@ -731,10 +742,10 @@
 }
 
 .insert--icons .tile {
-  height: var(--size-target-min);
+  min-height: var(--size-target-min);
 }
 
-.insert--icons .tile__label {
+.insert--icons .tile .tile__label {
   display: none;
 }
 
@@ -793,8 +804,20 @@
 /* a tile's name longer than its tile is cut with an ellipsis, its tooltip holding it whole (the viewport and language
    sweep: "Formulário com campos" spilled out of its tile in pt-BR) */
 .tile .tile__label {
+  display: -webkit-box;
   max-width: 100%;
   overflow: hidden;
+  text-align: center;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* a row of the list keeps its name on its one line */
+.insert--list .tile .tile__label {
+  display: block;
+  text-align: start;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 

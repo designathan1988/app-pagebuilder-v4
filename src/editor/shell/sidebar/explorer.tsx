@@ -1,7 +1,8 @@
 // The Explorer view (archive/DESIGN.md "Regions"): the Pages section, one row per page, and the Files section, the
 // project's folders and files as a tree; Layers is its section below (sidebar/layers.tsx).
 import { isDataFile } from '../../../core/design/data.ts';
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { fitNames } from './name-first.ts';
 import type { Page } from '../../../core/document/model.ts';
 import { pageShown } from '../../../core/project/pages.ts';
 import type { DispatchResult } from '../../../core/store/store.ts';
@@ -146,9 +147,21 @@ function FileRows() {
   const document = useEditorState((s) => s.document);
   const rows = useMemo(() => treeRows(document, MODEL_RULES), [document]);
   const makers = useMemo(() => paletteDoors('explorer-files'), []);
+  // a file's name before its folder and size where both do not fit (name-first.ts): after every drawing and on a resize
+  const list = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (list.current !== null) fitNames(list.current);
+  });
+  useLayoutEffect(() => {
+    const el = list.current;
+    if (el === null) return;
+    const observer = new ResizeObserver(() => fitNames(el));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   // an image file dropped onto the folder uploads: the pointer owner listens (input/pointer.ts), this marks the place
   return (
-    <div data-region="explorer-file-rows" data-drop-zone="explorer-folder">
+    <div ref={list} data-region="explorer-file-rows" data-drop-zone="explorer-folder">
       {rows.map((row) => (
         <TreeRow key={row.path} row={row} doors={makers} />
       ))}

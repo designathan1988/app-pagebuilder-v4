@@ -5,8 +5,8 @@
     "commands": 373,
     "doors": 1362,
     "scenarios": 1831,
-    "modules": 477,
-    "lines": 83608
+    "modules": 478,
+    "lines": 83666
   },
   "features": [
     {
@@ -6389,7 +6389,7 @@
     },
     {
       "path": "src/editor/shell/sidebar/explorer.tsx",
-      "lines": 313,
+      "lines": 326,
       "commands": [],
       "features": []
     },
@@ -6401,7 +6401,13 @@
     },
     {
       "path": "src/editor/shell/sidebar/layers.tsx",
-      "lines": 568,
+      "lines": 581,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/shell/sidebar/name-first.ts",
+      "lines": 32,
       "commands": [],
       "features": []
     },
