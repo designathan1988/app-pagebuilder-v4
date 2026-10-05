@@ -13,6 +13,7 @@ import { allNodes, locate, type DocNode, type DocumentJson, type Location } from
 import type { Patch } from '../history/transaction.ts';
 import { lockRefusal } from '../nodes/flags.ts';
 import { readFieldConfig } from '../forms/config.ts';
+import type { RuleCode } from '../forms/types.ts';
 
 const TEXTUAL = ['text', 'email', 'password', 'tel', 'url', 'search'];
 export const acceptsTextMask = (node: DocNode): boolean => node.tag === 'textarea' || (node.tag === 'input' && TEXTUAL.includes(inputTypeOf(node)));
@@ -21,6 +22,34 @@ export function hasIncompatibleMask(node: DocNode): boolean {
   return mask !== undefined && mask.kind !== 'none' && !acceptsTextMask(node);
 }
 const RANGED = ['number', 'range', 'date', 'datetime-local', 'month', 'week', 'time'];
+
+// The validation rules a form control's kind can break (its Settings tab shows these and their messages alone; the
+// audit of 2026-10-05: a checkbox offered character counts, password requirements, dates and file types, with the
+// messages of all of them): a text takes counts, a pattern, a type, a match and a list of values, a password its
+// requirements, a number or a range its bounds and step, a date its earliest and latest days, a file its types and
+// sizes, a choice (a checkbox, a radio, a select) being required, a select its allowed values. Every kind can be
+// required and can be configured wrongly.
+type Rule = RuleCode;
+const ALWAYS: readonly Rule[] = ['required', 'configuration'];
+const TEXT_RULES: readonly Rule[] = [...ALWAYS, 'type', 'pattern', 'tooShort', 'tooLong', 'preset', 'equalTo', 'allowed'];
+const RULES_OF: Readonly<Record<string, readonly Rule[]>> = {
+  text: TEXT_RULES, email: TEXT_RULES, tel: TEXT_RULES, url: TEXT_RULES, search: TEXT_RULES,
+  password: [...TEXT_RULES, 'password'],
+  number: [...ALWAYS, 'minimum', 'maximum', 'step', 'equalTo', 'allowed'],
+  range: [...ALWAYS, 'minimum', 'maximum', 'step'],
+  date: [...ALWAYS, 'dateMinimum', 'dateMaximum', 'equalTo'],
+  'datetime-local': [...ALWAYS, 'dateMinimum', 'dateMaximum', 'equalTo'],
+  month: [...ALWAYS, 'dateMinimum', 'dateMaximum'],
+  week: [...ALWAYS, 'dateMinimum', 'dateMaximum'],
+  time: [...ALWAYS, 'minimum', 'maximum', 'step'],
+  file: [...ALWAYS, 'fileType', 'fileSize'],
+  checkbox: ALWAYS, radio: ALWAYS, color: ALWAYS,
+};
+export function rulesOfControl(node: DocNode): ReadonlySet<Rule> {
+  if (node.tag === 'textarea') return new Set(TEXT_RULES);
+  if (node.tag === 'select') return new Set([...ALWAYS, 'allowed']);
+  return new Set(RULES_OF[inputTypeOf(node)] ?? TEXT_RULES);
+}
 // attribute (elements.json id) → the input types that take it (HTML, "input type=..." applicability); an attribute
 // listed in neither table applies to every input type
 const APPLIES: Readonly<Record<string, readonly string[]>> = {

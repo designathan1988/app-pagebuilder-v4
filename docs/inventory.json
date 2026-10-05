@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 478,
-    "lines": 83734
+    "lines": 83782
   },
   "features": [
     {
@@ -3683,7 +3683,7 @@
     },
     {
       "path": "src/core/elements/inputs.ts",
-      "lines": 137,
+      "lines": 166,
       "commands": [
         "element.setInputType",
         "element.setLabelTarget"
@@ -5501,7 +5501,7 @@
     },
     {
       "path": "src/editor/forms/inspector.tsx",
-      "lines": 141,
+      "lines": 146,
       "commands": [],
       "features": []
     },
@@ -5519,7 +5519,7 @@
     },
     {
       "path": "src/editor/forms/settings.tsx",
-      "lines": 168,
+      "lines": 182,
       "commands": [],
       "features": []
     },

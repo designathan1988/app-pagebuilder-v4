@@ -1,7 +1,10 @@
 import { useEffect, useId, useMemo, useRef, type ReactNode } from 'react';
 import type { DocNode } from '../../core/document/model.ts';
 import { walk } from '../../core/document/model.ts';
-import { acceptsTextMask } from '../../core/elements/inputs.ts';
+import { acceptsTextMask, inputTypeOf, rulesOfControl } from '../../core/elements/inputs.ts';
+
+// the input types a text field with a mask can stand for (Use a text field for masks)
+const MASKABLE: ReadonlySet<string> = new Set(['number', 'date', 'datetime-local', 'month', 'week', 'time']);
 import { readFieldConfig, readFormConfig } from '../../core/forms/config.ts';
 import type { FieldConfig, FormConfig } from '../../core/forms/types.ts';
 import type { CommandId, MessageId } from '../../generated/ids.ts';
@@ -132,9 +135,11 @@ export function FormsInspector({ node }: { readonly node: DocNode }): ReactNode 
   };
   return <section className="settings-section" data-region="forms-settings" aria-label={t(form ? 'forms.submission.title' : 'forms.title')}>
     <div className="settings-section__header"><h3>{t(form ? 'forms.submission.title' : 'forms.title')}</h3></div>
-    {!form && node.tag === 'input' && !acceptsTextMask(node) && textForMasksDoor && <DoorControl entry={textForMasksDoor} />}
+    {/* a text field for masks where a mask means something: a number, a date, a time (never a checkbox, a radio, a range,
+        a colour or a file: the audit of 2026-10-05) */}
+    {!form && node.tag === 'input' && !acceptsTextMask(node) && MASKABLE.has(inputTypeOf(node)) && textForMasksDoor && <DoorControl entry={textForMasksDoor} />}
     {form
       ? <FormSubmissionSettings key={node.id} config={readFormConfig(node.attributes.formSubmit) ?? { destination: 'native' }} onChange={write} ports={ports} />
-      : <FieldFormSettings key={node.id} config={readFieldConfig(node.attributes.formField) ?? {}} onChange={write} ports={ports} maskAllowed={acceptsTextMask(node)} />}
+      : <FieldFormSettings key={node.id} config={readFieldConfig(node.attributes.formField) ?? {}} onChange={write} ports={ports} maskAllowed={acceptsTextMask(node)} rules={rulesOfControl(node)} />}
   </section>;
 }

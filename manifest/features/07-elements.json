@@ -28960,7 +28960,7 @@
         {
           "id": "configure-rules-minimum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-number",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29028,7 +29028,7 @@
         {
           "id": "configure-rules-maximum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-number",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29096,7 +29096,7 @@
         {
           "id": "configure-rules-step",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-number",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29232,7 +29232,7 @@
         {
           "id": "configure-rules-date-minimum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-date",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29300,7 +29300,7 @@
         {
           "id": "configure-rules-date-maximum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-date",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29436,7 +29436,7 @@
         {
           "id": "configure-rules-password-enabled",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-password",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29844,7 +29844,7 @@
         {
           "id": "configure-rules-file-accept",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-file",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29912,7 +29912,7 @@
         {
           "id": "configure-rules-file-max-bytes",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-file",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -29980,7 +29980,7 @@
         {
           "id": "configure-rules-file-max-total-bytes",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-file",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -30468,7 +30468,7 @@
         {
           "id": "configure-messages-minimum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-number",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -30536,7 +30536,7 @@
         {
           "id": "configure-messages-maximum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-number",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -30604,7 +30604,7 @@
         {
           "id": "configure-messages-step",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-number",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -30808,7 +30808,7 @@
         {
           "id": "configure-messages-password",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-password",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -30944,7 +30944,7 @@
         {
           "id": "configure-messages-date-minimum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-date",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -31012,7 +31012,7 @@
         {
           "id": "configure-messages-date-maximum",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-date",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -31080,7 +31080,7 @@
         {
           "id": "configure-messages-file-type",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-file",
             "selection": [
               "/Page/Form/Primary"
             ],
@@ -31148,7 +31148,7 @@
         {
           "id": "configure-messages-file-size",
           "setup": {
-            "fixture": "forms-proof-field-3a925b9d62b0",
+            "fixture": "forms-proof-field-file",
             "selection": [
               "/Page/Form/Primary"
             ],

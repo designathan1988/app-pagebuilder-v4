@@ -8453,6 +8453,17 @@ Submission supports the form's native action or a configured endpoint, email ser
 
 Only configured pages link the generated js/forms.js; the path is reserved against uploaded-file collisions. Preview runs exactly that runtime. The editing canvas never installs validation or submission handlers. Export obtains browser script text through the composition port; core code has no DOM dependency.
 
+
+### Our rule: a field offers the rules its kind can break (the audit of 2026-10-05)
+
+The Form section of a field's Settings tab offers the validation rules its kind can break, and their messages alone
+(core/elements/inputs.ts rulesOfControl): a text its counts, pattern, type, match and list, a password its requirements
+too, a number or a range its bounds and step, a date its earliest and latest days, a file its types and sizes, a
+checkbox or a radio being required, a select its allowed values; every kind being required and its configuration's
+message. A rule the field already holds stays shown, to be seen and taken away. "Use a text field for masks" is offered
+where a mask means something (a number, a date, a time), and the address lookup on a text (a checkbox offered counts,
+a password's requirements, dates, file types, a mask's text field and an address lookup).
+
 ## assistant-chat
 
 The Assistant sidebar uses the actual manifest command catalogue for chat and authenticated local MCP tools. Model preferences persist; changing model starts a new conversation. The default is claude-opus-5-5. Service keys are encrypted in a separate IndexedDB vault and never enter document JSON, autosave, exported files or command arguments. Connection tokens stay transient and are read from the local Companion connection file.

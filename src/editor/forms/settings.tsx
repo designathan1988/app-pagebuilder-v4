@@ -30,11 +30,14 @@ const withoutEmpty = (value: Values): Values => Object.fromEntries(Object.entrie
 const strings = (value: string): string[] => value.split('\n').map((item) => item.trim()).filter(Boolean);
 const choiceValues = (ports: FormsSettingsPorts, stem: string, values: readonly string[]) => values.map((value) => ({ value, label: ports.t(`${stem}.${value}`) }));
 
-export function FieldFormSettings({ config, onChange: commit, ports, maskAllowed = true }: {
+export function FieldFormSettings({ config, onChange: commit, ports, maskAllowed = true, rules: applies }: {
   readonly config: FieldConfig;
   readonly onChange: (next: FieldConfig) => void;
   readonly ports: FormsSettingsPorts;
-  readonly maskAllowed?: boolean
+  readonly maskAllowed?: boolean;
+  // the rules the control's kind can break (core/elements/inputs.ts rulesOfControl): the others are not offered, nor
+  // their messages, unless the field already holds one (it stays to be seen and taken away); every rule without it
+  readonly rules?: ReadonlySet<RuleCode>;
 }): ReactNode {
   const onChange = (next: FieldConfig): FieldConfig => next;
   const [trial, setTrial] = useState('');
@@ -50,6 +53,17 @@ export function FieldFormSettings({ config, onChange: commit, ports, maskAllowed
     return { kind };
   };
   const rules = config.rules ?? {};
+  const held = (code: RuleCode): boolean => {
+    const r = rules as Readonly<Record<string, unknown>>;
+    const file = (r.file ?? {}) as { readonly accept?: unknown; readonly maxBytes?: unknown; readonly maxTotalBytes?: unknown };
+    const by: Readonly<Partial<Record<RuleCode, unknown>>> = {
+      required: r.required, type: r.type, pattern: r.pattern, tooShort: r.minLength, tooLong: r.maxLength, minimum: r.minimum,
+      maximum: r.maximum, step: r.step, equalTo: r.equalTo, allowed: r.allowed, password: r.password,
+      dateMinimum: r.dateMinimum, dateMaximum: r.dateMaximum, fileType: file.accept, fileSize: file.maxBytes ?? file.maxTotalBytes,
+    };
+    return (by[code] ?? '') !== '' || (config.messages?.[locale]?.[code] ?? '') !== '';
+  };
+  const shows = (code: RuleCode): boolean => applies === undefined || applies.has(code) || held(code);
   const address = config.address;
   const changeMask = (patch: Values) => onChange({ ...config, mask: withoutEmpty({ ...mask, ...patch }) as unknown as MaskConfig });
   const changeRules = (patch: Values) => onChange({ ...config, rules: withoutEmpty({ ...rules, ...patch }) as ValidationRules });
@@ -112,34 +126,34 @@ export function FieldFormSettings({ config, onChange: commit, ports, maskAllowed
     {field('preview.input', 'text', trial, setTrial)}{/* a preview, not a status: the status bar is the editor's one status region */}<span className="forms-preview">{preview}</span>
     </>}
     {field('when', 'select', config.when ?? 'blur', (value) => onChange({ ...config, when: value as NonNullable<FieldConfig['when']> }), choiceValues(ports, 'forms.when', ['input', 'blur', 'submit']))}
-    {field('rules.required', 'boolean', rules.required ?? false, (value) => changeRules({ required: value === 'true' }))}
-    {field('rules.type', 'select', rules.type, (value) => changeRules({ type: value }), [{ value: '', label: ports.t('forms.none') }, ...choiceValues(ports, 'forms.rules.type', ['email', 'url', 'number'])])}
-    {field('rules.pattern', 'text', rules.pattern, (value) => changeRules({ pattern: value }))}
-    {numberRule('minLength')}{numberRule('maxLength')}{numberRule('minimum')}{numberRule('maximum')}{numberRule('step')}
-    {field('rules.equalTo', 'select', rules.equalTo, (value) => changeRules({ equalTo: value }), [{ value: '', label: ports.t('forms.none') }, ...ports.fields])}
-    {field('rules.allowed', 'textarea', rules.allowed?.join('\n'), (value) => changeRules({ allowed: value ? strings(value) : undefined }), undefined, ports.t('forms.rules.onePerLine'))}
-    {field('rules.password.enabled', 'boolean', rules.password !== undefined, (value) => changeRules({ password: value === 'true' ? { minLength: 8 } : undefined }))}
+    {shows('required') && field('rules.required', 'boolean', rules.required ?? false, (value) => changeRules({ required: value === 'true' }))}
+    {shows('type') && field('rules.type', 'select', rules.type, (value) => changeRules({ type: value }), [{ value: '', label: ports.t('forms.none') }, ...choiceValues(ports, 'forms.rules.type', ['email', 'url', 'number'])])}
+    {shows('pattern') && field('rules.pattern', 'text', rules.pattern, (value) => changeRules({ pattern: value }))}
+    {shows('tooShort') && numberRule('minLength')}{shows('tooLong') && numberRule('maxLength')}{shows('minimum') && numberRule('minimum')}{shows('maximum') && numberRule('maximum')}{shows('step') && numberRule('step')}
+    {shows('equalTo') && field('rules.equalTo', 'select', rules.equalTo, (value) => changeRules({ equalTo: value }), [{ value: '', label: ports.t('forms.none') }, ...ports.fields])}
+    {shows('allowed') && field('rules.allowed', 'textarea', rules.allowed?.join('\n'), (value) => changeRules({ allowed: value ? strings(value) : undefined }), undefined, ports.t('forms.rules.onePerLine'))}
+    {shows('password') && field('rules.password.enabled', 'boolean', rules.password !== undefined, (value) => changeRules({ password: value === 'true' ? { minLength: 8 } : undefined }))}
     {rules.password && <div>
       {field('rules.password.minLength', 'number', rules.password.minLength, (value) => changeRules({ password: { ...rules.password, minLength: Number(value) } }))}
       {(['uppercase', 'lowercase', 'digit', 'symbol'] as const).map((key) => <div key={key}>{field(`rules.password.${key}`, 'boolean', rules.password?.[key] ?? false, (value) => changeRules({ password: { ...rules.password, [key]: value === 'true' } }))}</div>)}
     </div>}
-    {field('rules.dateMinimum', 'text', rules.dateMinimum, (value) => changeRules({ dateMinimum: value }), undefined, ports.t('forms.rules.dateFormat'))}
-    {field('rules.dateMaximum', 'text', rules.dateMaximum, (value) => changeRules({ dateMaximum: value }), undefined, ports.t('forms.rules.dateFormat'))}
-    {field('rules.file.accept', 'textarea', rules.file?.accept?.join('\n'), (value) => changeRules({ file: withoutEmpty({ ...rules.file, accept: value ? strings(value) : undefined }) }), undefined, ports.t('forms.rules.fileTypesFormat'))}
-    {(['maxBytes', 'maxTotalBytes'] as const).map((key) => <div key={key}>{field(`rules.file.${key}`, 'number', rules.file?.[key], (value) => changeRules({ file: withoutEmpty({ ...rules.file, [key]: value === '' ? undefined : Number(value) }) }))}</div>)}
+    {shows('dateMinimum') && field('rules.dateMinimum', 'text', rules.dateMinimum, (value) => changeRules({ dateMinimum: value }), undefined, ports.t('forms.rules.dateFormat'))}
+    {shows('dateMaximum') && field('rules.dateMaximum', 'text', rules.dateMaximum, (value) => changeRules({ dateMaximum: value }), undefined, ports.t('forms.rules.dateFormat'))}
+    {shows('fileType') && field('rules.file.accept', 'textarea', rules.file?.accept?.join('\n'), (value) => changeRules({ file: withoutEmpty({ ...rules.file, accept: value ? strings(value) : undefined }) }), undefined, ports.t('forms.rules.fileTypesFormat'))}
+    {shows('fileSize') && (['maxBytes', 'maxTotalBytes'] as const).map((key) => <div key={key}>{field(`rules.file.${key}`, 'number', rules.file?.[key], (value) => changeRules({ file: withoutEmpty({ ...rules.file, [key]: value === '' ? undefined : Number(value) }) }))}</div>)}
     {field('errorId', 'select', config.errorId, (value) => onChange(withoutEmpty({ ...config, errorId: value }) as FieldConfig), [{ value: '', label: ports.t('forms.error.automatic') }, ...ports.elements])}
     {field('messages.locale', 'select', locale, setLocale, ports.locales.map((value) => ({ value, label: value })))}
     {/* each message named by when it shows (the user's review of 2026-10-05, LR2: each name was "Message: " and that
         whole message), in the language the messages are in; while it is empty, the message it shows then is written
         whole under it (as its placeholder it was cut in the one-line field: the audit of 2026-10-05) */}
-    {(Object.keys(validationMessageKeys) as RuleCode[]).map((code) => {
+    {(Object.keys(validationMessageKeys) as RuleCode[]).filter(shows).map((code) => {
       const written = config.messages?.[locale]?.[code];
       return <div key={code}>
         {field(`messages.${code}`, 'text', written, (value) => onChange({ ...config, messages: { ...config.messages, [locale]: withoutEmpty({ ...config.messages?.[locale], [code]: value }) } }))}
         {written === undefined || written === '' ? <p className="settings-default-message">{ports.defaultMessage(locale, code)}</p> : null}
       </div>;
     })}
-    {field('address.enabled', 'boolean', config.address !== undefined, (value) => onChange(withoutEmpty({ ...config, address: value === 'true' ? { endpoint: 'https://viacep.com.br/ws/{cep}/json/', fields: {} } : undefined }) as FieldConfig))}
+    {(maskAllowed || config.address !== undefined) && field('address.enabled', 'boolean', config.address !== undefined, (value) => onChange(withoutEmpty({ ...config, address: value === 'true' ? { endpoint: 'https://viacep.com.br/ws/{cep}/json/', fields: {} } : undefined }) as FieldConfig))}
     {address && <div>
       {field('address.endpoint', 'text', address.endpoint, (endpoint) => onChange({ ...config, address: { ...address, endpoint } }))}
       {Object.entries(address.fields).map(([key, name]) => <div key={key}><span>{key}</span>
