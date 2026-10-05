@@ -97,3 +97,16 @@ it('writes a url() inside an inline custom property from the stylesheets\' folde
   expect(style).toContain('--section-bg: url(../img/img-1.png)');
   expect(style).toContain('background-image: url(img/img-2.png)');
 });
+
+// w3c: the image's 920w candidate was in the record, its 360w, 580w and 1520w ones were not; left remote, the export at
+// 390 px fetched the 580w one from the site, a file of other proportions than the page showed.
+it('keeps in a srcset only the candidates the capture holds', async () => {
+  const root = page([{ kind: 'element', id: 'k3', namespace: HTML, tag: 'img', attributes: [{ name: 'src', namespace: null, value: '__capture_image_0__' }, { name: 'srcset', namespace: null, value: '__capture_image_1__ 360w, __capture_image_2__ 920w' }], children: [] }]);
+  const result = await captureSnapshot({
+    url: 'https://site.test/',
+    read: { title: 'Site', root, sheets: [], links: [], images: [{ index: 0, src: 'https://site.test/a-920.jpg' }, { index: 1, src: 'https://site.test/a-360.jpg' }, { index: 2, src: 'https://site.test/a-920.jpg' }] },
+    resources: { 'https://site.test/a-920.jpg': { status: 200, type: 'image/jpeg', base64: Buffer.from('jpg').toString('base64') } },
+  });
+  const pack = JSON.parse(Buffer.from(result.files.find((file) => file.path === 'index.html.capture.json')?.base64 ?? '', 'base64').toString('utf8')) as CapturedSnapshotPackage;
+  expect(JSON.stringify(pack.format === 2 ? pack.root : null)).toContain('"name":"srcset","namespace":null,"value":"img/img-1.jpg 920w"');
+});

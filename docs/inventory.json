@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 476,
-    "lines": 83270
+    "lines": 83301
   },
   "features": [
     {
@@ -3902,7 +3902,7 @@
     },
     {
       "path": "src/core/files/srcset.ts",
-      "lines": 29,
+      "lines": 60,
       "commands": [],
       "features": []
     },

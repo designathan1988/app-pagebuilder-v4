@@ -19,8 +19,9 @@ import { mergeWidths } from '../../src/core/capture/merge.ts';
 import { sequentialIds } from '../../src/core/ports/ids.ts';
 import { capturedExportHtml } from '../../src/core/render/captured.ts';
 import { attributeValues, element, mapTree, prependToHead } from './tree.ts';
+import { keptSrcset } from '../../src/core/files/srcset.ts';
 
-export { serializePage, type PageRead } from './serialize.ts';
+export {  type PageRead } from './serialize.ts';
 
 export interface CapturedFile {
   readonly path: string;
@@ -395,7 +396,10 @@ function siteBuilder(fetched: Fetcher) {
       return out;
     };
     let root = mapTree(read.root as CapturedElement, {
-      attribute: resolved,
+      // A srcset keeps the candidates the capture holds: one the page never loaded at any observed width is not in its
+      // record, and left remote it made the export choose another file than the page showed (w3c: the 580w image
+      // where the page showed its 920w one, 0.17 px taller, every row below one pixel off) and fetch it from the site.
+      attribute: (value, name) => (name !== 'srcset' ? resolved(value) : keptSrcset(resolved(value), (url) => url.startsWith('data:') || !/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(url))),
       comment: (node) => {
         const sheet = /^__capture_sheet_(\d+)__$/.exec(node.value);
         if (sheet === null) return node;

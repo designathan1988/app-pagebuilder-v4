@@ -26,3 +26,34 @@ export function rewriteSrcsetUrls(value: string, rewrite: (url: string) => strin
   for (const one of replacements.reverse()) result = result.slice(0, one.start) + one.value + result.slice(one.end);
   return result;
 }
+
+// The candidates of a srcset whose URL `keep` accepts, written again with their descriptors (the same grammar); the
+// value as it is when none would remain, so an image never loses every candidate.
+export function keptSrcset(value: string, keep: (url: string) => boolean): string {
+  const candidates: { readonly url: string; readonly text: string }[] = [];
+  const space = (character: string | undefined): boolean => character !== undefined && /[\t\n\f\r ]/.test(character);
+  let at = 0;
+  while (at < value.length) {
+    while (at < value.length && (space(value[at]) || value[at] === ',')) at += 1;
+    const start = at;
+    while (at < value.length && !space(value[at])) at += 1;
+    let end = at;
+    while (end > start && value[end - 1] === ',') end -= 1;
+    let close = end;
+    if (end === at) {
+      let depth = 0;
+      while (at < value.length) {
+        const character = value[at];
+        if (character === ',' && depth === 0) break;
+        at += 1;
+        if (character === '(') depth += 1;
+        else if (character === ')') depth = Math.max(0, depth - 1);
+      }
+      close = at;
+      at += 1;
+    }
+    if (end > start) candidates.push({ url: value.slice(start, end), text: value.slice(start, close).trim() });
+  }
+  const kept = candidates.filter((one) => keep(one.url));
+  return kept.length === 0 || kept.length === candidates.length ? value : kept.map((one) => one.text).join(', ');
+}
