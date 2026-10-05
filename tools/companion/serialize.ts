@@ -170,7 +170,6 @@ export function serializePage(origin: string): PageRead {
       let value = attribute.value;
       if (name === 'data-capture-runtime') continue;
       if (html && tag === 'img' && name === 'src') continue;
-      if (html && tag === 'img' && name === 'loading') continue;
       if ((html && (tag === 'img' || tag === 'source') && name === 'srcset')) value = markedSrcset(value);
       else if (html && (tag === 'video' || tag === 'iframe') && (name === 'src' || name === 'srcdoc' || name === 'autoplay')) continue;
       else if (html && tag === 'video' && name === 'poster') continue;

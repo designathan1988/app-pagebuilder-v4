@@ -94,3 +94,11 @@ it('leaves out scripts, noscript and resource hints', () => {
   expect(byId(read.root, 'kept')).not.toBeNull();
   expect(JSON.stringify(read.root)).not.toContain('No script');
 });
+
+// every-layout.dev: the testimonials' avatars outside the carousel's view are loading="lazy" and the page never loads
+// them; dropped, the export loaded every one, and each testimonial's text went below its avatar.
+it('keeps an image\'s loading attribute as the page wrote it', () => {
+  document.body.innerHTML = '<img id="lazy" src="https://site.test/a.png" loading="lazy" alt="A">';
+  const read = serializePage('https://site.test');
+  expect(byId(read.root, 'lazy')?.attributes).toContainEqual({ name: 'loading', namespace: null, value: 'lazy' });
+});
