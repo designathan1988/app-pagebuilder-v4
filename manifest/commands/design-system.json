@@ -484,7 +484,7 @@
           "feature": "command-bar-find",
           "labelKey": "commandBar.applyClass",
           "faceLabelKey": null,
-          "icon": "palette",
+          "icon": "tag",
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "command-palette",
@@ -776,7 +776,7 @@
           "feature": "reusable-components",
           "labelKey": "command.components.create",
           "faceLabelKey": null,
-          "icon": "box",
+          "icon": "component",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "context-menu",
@@ -796,7 +796,7 @@
           "feature": "command-bar",
           "labelKey": "command.components.create",
           "faceLabelKey": null,
-          "icon": "box",
+          "icon": "component",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "command-palette",
@@ -1153,7 +1153,7 @@
           "feature": "repeat-element",
           "labelKey": "command.components.repeat",
           "faceLabelKey": null,
-          "icon": "copy-plus",
+          "icon": "repeat",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "context-menu",
@@ -1175,7 +1175,7 @@
           "checked": null,
           "labelKey": "command.components.repeat",
           "faceLabelKey": null,
-          "icon": "copy-plus",
+          "icon": "repeat",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "menu:arrange",
@@ -1196,7 +1196,7 @@
           "entry": "command",
           "labelKey": "command.components.repeat",
           "faceLabelKey": null,
-          "icon": "copy-plus",
+          "icon": "repeat",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "command-palette",

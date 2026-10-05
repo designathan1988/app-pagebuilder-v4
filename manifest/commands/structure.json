@@ -1281,7 +1281,7 @@
           "feature": "promote-out",
           "labelKey": "command.promote",
           "faceLabelKey": null,
-          "icon": "share",
+          "icon": "arrow-up-from-line",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "context-menu",
@@ -1303,7 +1303,7 @@
           "checked": null,
           "labelKey": "command.promote",
           "faceLabelKey": null,
-          "icon": "share",
+          "icon": "arrow-up-from-line",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "menu:arrange",
@@ -1324,7 +1324,7 @@
           "entry": "command",
           "labelKey": "command.promote",
           "faceLabelKey": null,
-          "icon": "share",
+          "icon": "arrow-up-from-line",
           "disabledReasonKey": "status.needsSingleSelection",
           "placement": {
             "region": "command-palette",
@@ -1391,7 +1391,7 @@
           "feature": "duplicate",
           "labelKey": "command.duplicate",
           "faceLabelKey": null,
-          "icon": "copy",
+          "icon": "copy-plus",
           "disabledReasonKey": "refusal.nothingSelected",
           "placement": {
             "region": "context-menu",
@@ -1413,7 +1413,7 @@
           "checked": null,
           "labelKey": "command.duplicate",
           "faceLabelKey": null,
-          "icon": "copy",
+          "icon": "copy-plus",
           "disabledReasonKey": "refusal.nothingSelected",
           "placement": {
             "region": "menu:edit",
@@ -1434,7 +1434,7 @@
           "entry": "command",
           "labelKey": "command.duplicate",
           "faceLabelKey": null,
-          "icon": "copy",
+          "icon": "copy-plus",
           "disabledReasonKey": "refusal.nothingSelected",
           "placement": {
             "region": "command-palette",

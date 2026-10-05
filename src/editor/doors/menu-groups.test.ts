@@ -39,6 +39,24 @@ describe('the groups of the menus', () => {
     }
   });
 
+  // one icon, one command: in a menu, the context menu and the palette two commands never wear the same icon (the
+  // user's review of 2026-10-05, LR2: Copy and Duplicate both the copy icon, Create a component and Wrap in a container
+  // both the box, Export and Move out of parent both the share icon, Wrap in a grid and Edit this grid both the grid)
+  it('gives two commands of one menu never the same icon', () => {
+    const regions = new Map<string, Map<string, Set<string>>>();
+    for (const entry of manifest.doors) {
+      const placement = entry.door.placement;
+      if (entry.door.icon === null || typeof placement !== 'object') continue;
+      if (!/^menu:|^context-menu$|^command-palette$/.test(placement.region)) continue;
+      const icons = regions.get(placement.region) ?? new Map<string, Set<string>>();
+      regions.set(placement.region, icons);
+      const commands = icons.get(entry.door.icon) ?? new Set<string>();
+      icons.set(entry.door.icon, commands.add(entry.command.id));
+    }
+    const shared = [...regions].flatMap(([region, icons]) => [...icons].filter(([, commands]) => commands.size > 1).map(([icon, commands]) => `${region} ${icon}: ${[...commands].join(', ')}`));
+    expect(shared).toEqual([]);
+  });
+
   it('draws the Code view as a choice, checked while it is the view, as the toolbar presses its segment', () => {
     const code = slotsIn('menu:view').find((slot) => slot.kind === 'door' && slot.entry.command.id === 'view.setEditorView');
     expect(code?.kind === 'door' ? code.entry.door : null).toMatchObject({ kind: 'menu', checked: 'radio' });

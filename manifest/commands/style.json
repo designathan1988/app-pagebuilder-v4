@@ -10669,7 +10669,7 @@
           "checked": null,
           "labelKey": "command.grid.enterEdit",
           "faceLabelKey": null,
-          "icon": "layout-grid",
+          "icon": "pencil-ruler",
           "disabledReasonKey": "status.gridEdit.unavailable",
           "placement": {
             "region": "menu:arrange",

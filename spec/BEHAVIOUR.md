@@ -1195,6 +1195,8 @@ None in Pager (no `Shift+F10` / ContextMenu key handling). The same commands exi
 6. **Two lists of the same actions** (this menu and the More actions strip) with different items, tooltips and availability rules; the strip hides actions that cannot apply instead of disabling them, overlaps its own text and is out of the Tab order. Required: no separate action strip; the quick panel's More actions opens this menu at the button (manifest feature `quick-panel`). The strip's drag button has no counterpart: an element is moved by dragging it (`drag-reorder-canvas.md`) or with Take into the hand.
 7. **Paste style drew no icon** while Copy style draws the palette (the audit's AUD-28). Required: Paste style draws the brush, so the two read as a pair; the layout tool's item says Layout, the name the activity bar gives it.
 
+
+One icon, one command: in a menu, the context menu and the palette no two commands wear the same icon (the user's review of 2026-10-05, LR2: Copy and Duplicate both wore the copy icon, Create a component and Wrap in a container the box, Export and Move out of parent the share icon, Wrap in a grid and Edit this grid the grid). Duplicate wears copy-plus, Repeat (linked copy) repeat, Create a component component, Move out of parent arrow-up-from-line, Edit this grid pencil-ruler, Apply a class tag (`src/editor/doors/menu-groups.test.ts`).
 ## copy-paste-styles
 
 How Pager behaves, read from its source and observed by running it from `.cache/pager-run` (Chrome, window 1600×900). Source references are `path:line` inside Pager.
