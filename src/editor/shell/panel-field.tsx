@@ -116,7 +116,8 @@ export function PanelField({
           // left without keeping it, the typing goes and the document's value shows again (the audit's FD2)
           onBlur={() => setEdited(false)}
         />
-        {curve ? <EasingCurveButton value={value} label={label} disabled={!ready} run={runWith} /> : null}
+        {/* the curve that applies: the value, else what the empty field shows it takes (its placeholder) */}
+        {curve ? <EasingCurveButton value={value === '' && placeholder !== undefined ? placeholder : value} label={label} disabled={!ready} run={runWith} /> : null}
         <button type="submit" className="visually-hidden" tabIndex={-1}>
           {label}
         </button>

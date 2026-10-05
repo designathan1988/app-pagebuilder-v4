@@ -138,7 +138,9 @@ export function TimelinePanel() {
           </>
         ) : null}
       </div>
-      <div className="timeline__track-area" style={{ width: width + 40 } as CSSProperties}>
+      {/* the track area takes the panel's width beside the side; its track keeps its own width, scrolled across when the
+          panel is narrower (interactions.json timeline.trackWidth) */}
+      <div className="timeline__track-area">
         <div className="timeline__controls">
           {PLAY !== null ? (
             <PanelButton entry={PLAY} args={{ animation: shownName ?? '' }} pressed={timeline.playing === true} disabled={shown === null}>
@@ -195,10 +197,9 @@ export function TimelinePanel() {
               entry={ADD_KEYFRAME}
               args={{ animation: shownName ?? '', offset: Math.round(percent) }}
               label={t('timeline.addKeyframe')}
+              icon={<Icon name="diamond" size="sm" />}
               onDone={() => undefined}
-            >
-              <Icon name="diamond" size="sm" /> {t('timeline.addKeyframe')}
-            </PanelButton>
+            />
           ) : null}
           {KEYFRAME_EASING !== null && shown !== null && playhead !== null ? (
             <PanelField
@@ -206,6 +207,8 @@ export function TimelinePanel() {
               args={{ animation: shownName ?? '', keyframe: playhead }}
               value={shown.animation.keyframes.find((k) => k.offset === playhead)?.easing ?? ''}
               label={t('command.animation.easing')}
+              // empty, the keyframe eases as the animation does: its timing shows, as an empty field shows what applies
+              placeholder={settingValue(shown.animation, 'timing') || defaultSetting('timing')}
               offered={offeredValues(KEYFRAME_EASING)}
               curve
             />
