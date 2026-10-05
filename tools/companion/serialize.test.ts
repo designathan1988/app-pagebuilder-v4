@@ -77,6 +77,15 @@ it('keeps what a person typed and checked, which the markup does not hold', () =
   expect(byId(read.root, 'agree')?.state).toEqual({ checked: true });
 });
 
+// vuejs.org (VitePress): its whole stylesheet is a link that is a hint and a sheet at once; dropped as a hint, the page
+// lost every rule (5 % of its pixels alike).
+it('keeps a stylesheet linked as rel="preload stylesheet"', () => {
+  document.head.innerHTML = '<link rel="preload stylesheet" href="https://site.test/assets/style.css" as="style">';
+  const read = serializePage('https://site.test');
+  expect(read.sheets).toEqual([expect.objectContaining({ href: 'https://site.test/assets/style.css' })]);
+  expect(head(read.root)?.children).toEqual([expect.objectContaining({ kind: 'comment', value: '__capture_sheet_0__' })]);
+});
+
 it('leaves out scripts, noscript and resource hints', () => {
   document.head.innerHTML = '<link rel="preload" href="/a.js"><link rel="preconnect" href="https://cdn.test"><script>1</script>';
   document.body.innerHTML = '<noscript><p>No script</p></noscript><p id="kept">Kept</p>';

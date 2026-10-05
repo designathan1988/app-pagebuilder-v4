@@ -155,8 +155,9 @@ export function serializePage(origin: string): PageRead {
     if (html && (tag === 'script' || tag === 'noscript')) return null;
     if (html && tag === 'link') {
       const rel = (node.getAttribute('rel') ?? '').toLowerCase().split(/\s+/);
-      if (rel.some((one) => HINTS.has(one))) return null;
+      // a stylesheet first: VitePress links its sheet as rel="preload stylesheet", a hint and a sheet at once
       if (rel.includes('stylesheet') && node.hasAttribute('href')) return sheetPlaceholder({ href: (node as HTMLLinkElement).href, text: null, media: node.getAttribute('media')?.trim() || null });
+      if (rel.some((one) => HINTS.has(one))) return null;
     }
     if (html && tag === 'style') {
       const style = node as HTMLStyleElement;
