@@ -299,8 +299,22 @@ function widthScript(widths: readonly number[], changing: Record<string, Changin
 
 // The exported file of a captured page: the widest width as static HTML (seen without any script), and, when other
 // widths differ or the parser rebuilds part of it, the width script before </body>.
+// The written file is UTF-8 (TextEncoder), so it says so first in its head: a site may declare its encoding only in its
+// HTTP header (bellroy), and a file opened or served without one is read as windows-1252 ("We’re" became "Weâ€™re").
+// The declaration must be within the first 1024 bytes (HTML Standard, 4.2.5.4 Specifying the document's character
+// encoding); the source's own <meta charset> is not written again (one declaration per document).
+function withUtf8(root: CapturedElement): CapturedElement {
+  const children = root.children.map((child) => {
+    if (!isElement(child, 'head')) return child;
+    const rest = child.children.filter((one) => !(isElement(one, 'meta') && one.attributes.some((attribute) => attribute.name === 'charset')));
+    const charset: CapturedNode = { kind: 'element', id: `${child.id}-charset`, namespace: HTML, tag: 'meta', attributes: [{ name: 'charset', namespace: null, value: 'utf-8' }], children: [] };
+    return { ...child, children: [charset, ...rest] };
+  });
+  return { ...root, children };
+}
+
 export function capturedExportHtml(capture: CapturedPage, head?: CapturedHead): string {
-  const root = head === undefined ? capture.root : exportedCapturedRoot(capture.root, head);
+  const root = withUtf8(head === undefined ? capture.root : exportedCapturedRoot(capture.root, head));
   const widest = capture.widths[0];
   if (widest === undefined) throw new Error('a captured page has no observed width');
   const staticRoot = project(root, widest) as CapturedElement;

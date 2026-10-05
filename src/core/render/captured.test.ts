@@ -135,8 +135,10 @@ describe('the exported file of a captured page', () => {
     expect(html).toContain('height: 520px');
     expect(html).toContain('Menu');
     expect(html.indexOf('<script>')).toBeLessThan(html.lastIndexOf('</body>'));
-    // its static page parses back into the widest projection (marks aside)
-    const parsed = JSON.stringify(parsedShape(parsedRoot(html.replace(/<script>[\s\S]*?<\/script>/g, '')))).replace(/,\["data-capture-node","[^"]+"\]|\["data-capture-node","[^"]+"\],?/g, '');
+    // its static page parses back into the widest projection (marks and the file's own UTF-8 declaration aside)
+    const parsed = JSON.stringify(parsedShape(parsedRoot(html.replace(/<script>[\s\S]*?<\/script>/g, ''))))
+      .replace(/,\["data-capture-node","[^"]+"\]|\["data-capture-node","[^"]+"\],?/g, '')
+      .replace('{"tag":"meta","attributes":[["charset","utf-8"]],"children":[]},', '');
     expect(parsed).toBe(JSON.stringify(shape(exportedCapturedRoot(capturedAt(capture, 1440), HEAD))));
   });
 });
@@ -204,4 +206,13 @@ describe('what the HTML parser rebuilds from a written page (HTML Standard, tree
       if (!same) expect(parserRebuilt(root).size, capturedHtml(root)).toBeGreaterThan(0);
     }), { seed: 4113, numRuns: 1000 });
   });
+});
+
+// bellroy declares its encoding only in its HTTP header: its exported file, read without one, showed "Weâ€™re".
+it('declares the file\'s UTF-8 encoding first in its head, once', () => {
+  const root = element('html', {}, [element('head', {}, [element('title', {}, [text('Shop')]), element('meta', { charset: 'UTF-8' })]), element('body', {}, [element('p', {}, [text('We’re here')])])]);
+  const html = capturedExportHtml({ widths: [1440], root }, HEAD);
+  expect(html).toMatch(/^<!DOCTYPE html>\n<html[^>]*><head><meta charset="utf-8">/);
+  expect(html.match(/<meta charset/gi)).toHaveLength(1);
+  expect(html.indexOf('<meta charset="utf-8">')).toBeLessThan(1024);
 });
