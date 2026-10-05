@@ -120,6 +120,10 @@ test('a whole <svg> pasted into the markup is unwrapped, and an SVG that draws m
 });
 
 test('an Embed says its code runs in the published page', runs(INSERT, TILE, SETTINGS, EMBED_MARKUP), async ({ page }) => {
+  // the canvas shows an embed without its scripts, which never run there: the frame blocked each one and logged a
+  // console error (the user's audit order of 2026-10-05); the document keeps them
+  const errors: string[] = [];
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   await openEditor(page);
   await runDoor(page, INSERT);
   await runDoor(page, TILE, { args: { entry: 'embed-html' } });
@@ -128,4 +132,7 @@ test('an Embed says its code runs in the published page', runs(INSERT, TILE, SET
   await expect(control(page, EMBED_MARKUP).locator('.field-row__warning')).toHaveCount(0);
   await typeInto(page, EMBED_MARKUP, '<script>alert(1)</script>', 'tab');
   await expect(control(page, EMBED_MARKUP).locator('.field-row__warning')).toContainText('runs in the published page');
+  await expect(page.frameLocator('.frame__page').locator('iframe[data-embed-frame]')).toHaveAttribute('srcdoc', '');
+  expect(JSON.stringify(await tree(page)), 'the document keeps the script').toContain('<script>alert(1)</script>');
+  expect(errors, 'no console error').toEqual([]);
 });

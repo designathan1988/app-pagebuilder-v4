@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83583
+    "lines": 83593
   },
   "features": [
     {
@@ -5201,7 +5201,7 @@
     },
     {
       "path": "src/editor/canvas/render/render.ts",
-      "lines": 877,
+      "lines": 887,
       "commands": [],
       "features": []
     },

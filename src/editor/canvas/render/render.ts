@@ -77,6 +77,15 @@ const BASE_STYLE_ATTRIBUTE = 'data-base-style';
 const EDITABLE_ATTRIBUTE = 'contenteditable';
 // editor-only: the sandboxed frame that shows an embed's markup on the canvas
 const EMBED_FRAME_ATTRIBUTE = 'data-embed-frame';
+// An embed's markup without its script elements: parsed in a template, where nothing runs and nothing loads, in the
+// page's own document (the realm the frame is drawn in)
+function withoutScripts(target: Document, markup: string): string {
+  if (!/<script/i.test(markup)) return markup;
+  const template = target.createElement('template');
+  template.innerHTML = markup;
+  for (const script of template.content.querySelectorAll('script')) script.remove();
+  return template.innerHTML;
+}
 // the style element of the project's design tokens (core/design/tokens.ts): the :root rule of its variables, after the
 // editor's, before every node's (the export writes the same rule first in its stylesheet)
 const TOKENS_STYLE_ATTRIBUTE = 'data-tokens-style';
@@ -730,10 +739,11 @@ export class PageRenderer {
     }
     if (tag === SVG_TAG) this.drawSvgMarkup(element, node);
     // editor-only (feature embed-html): an embed's markup is shown inside a sandboxed frame, where its scripts never
-    // run; the document and the export keep the markup as it is
+    // run, so they are left out of what it shows: each one the frame blocked logged a console error (the user's audit
+    // order of 2026-10-05); the document and the export keep the markup as it is
     if (this.model.elements.get(node.type)?.content === 'markup') {
       const frame = element.firstElementChild?.localName === 'iframe' ? element.firstElementChild : null;
-      const markup = node.text ?? '';
+      const markup = withoutScripts(this.target, node.text ?? '');
       if (frame !== null && frame.getAttribute('srcdoc') === markup) return;
       const shown = frame ?? this.target.createElement('iframe');
       shown.setAttribute('sandbox', '');
