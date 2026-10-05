@@ -5086,6 +5086,8 @@ export const MESSAGE_IDS = [
   "styleState.placeholderShown",
   "styleState.visited",
   "styles.classes",
+  "styles.noClasses",
+  "styles.noVariables",
   "styles.count.one",
   "styles.count.other",
   "styles.deleteClassUsedBy",

@@ -155,6 +155,8 @@ export function Variables() {
         <span className="section-title__text">{t('panel.variables')}</span>
         <span className="section-title__actions">{ADD !== undefined ? <NewVariable entry={ADD} tokens={tokens} /> : null}</span>
       </div>
+      {/* none yet: how one is made (LR2: an empty project's view was a title over nothing) */}
+      {tokens.length === 0 ? <p className="styles__none">{t('styles.noVariables')}</p> : null}
       {KINDS.map((kind, i) => {
         const group = tokens.filter((token) => token.kind === kind);
         if (group.length === 0) return null;

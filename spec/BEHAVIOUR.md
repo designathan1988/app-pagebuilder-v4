@@ -7001,6 +7001,8 @@ Read from Pager's source (`reference/Pager`, run from `.cache/pager-run`); refer
 - A style write to a class target is one undo step.
 - Undo restores the document as it was, the selection with it.
 
+
+The Styles view (the user's review of 2026-10-05, LR2): with no class, under Classes, "No class yet: select an element and press + Class in the inspector to make one."; with no variable, under Variables, "No variable yet: + makes one (a colour, a size, a font)." — never a title over nothing. A variable's row names it first: its name takes what its value leaves, the value as wide as it holds (field-sizing: content) up to half the row, its delete over the row's end while the row is hovered or holds the focus, as a class's (`tests/e2e/styles-view.spec.ts`).
 ## shortcuts-e2e-sweep
 
 How Pager behaves, observed by running it from `.cache/pager-run` (Chrome, window 1600×900) and read from its source. Each binding below was pressed with the real keyboard in its context. Source references are `path:line` inside Pager. Test page: Section > [Heading, Paragraph, Container > Paragraph 2].

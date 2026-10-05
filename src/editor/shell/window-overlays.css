@@ -7,29 +7,64 @@
   padding: var(--space-1);
 }
 
+/* an empty section's words (the Styles view's classes and variables): what to do to have one, under its title */
+.styles__none {
+  margin: 0;
+  padding: 0 var(--space-6) var(--space-3);
+  color: var(--color-text-muted);
+  font: var(--fw-caption) var(--fs-caption) / var(--lh-caption) var(--font-ui);
+}
+
 .variables__group-title {
-  padding: var(--space-2) var(--space-4) var(--space-1);
+  padding: var(--space-2) var(--space-6) var(--space-1);
   color: var(--color-text-muted);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
 }
 
 .variables__field .input:not(:focus) {
+  padding-inline: var(--space-1);
   border-color: transparent;
   background: transparent;
 }
 
+/* a variable's row: its name takes what its value leaves, the value as wide as it is up to half the row, and its
+   delete over the row's end while the row is hovered or holds the focus, as a class's (LR2: in the sidebar's 224 px
+   "terracota-escuro" was cut in half the row beside a value that needed a third of its own and a trash that is
+   pressed once in a while; the canonical row names the variable first); from the section titles' start */
 .variables__row {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) fit-content(50%);
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-4);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-6);
 }
 
 /* a colour variable's row: its swatch, then its name and value (variables.tsx) */
 .variables__row--colour {
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) fit-content(50%);
+}
+
+/* the value's field as wide as what it holds (MDN field-sizing: content), within its column */
+.variables__row > .variables__field:last-of-type .input {
+  field-sizing: content;
+  min-width: calc(var(--space-9) * 2);
+  max-width: 100%;
+}
+
+.variables__row > .door {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  translate: 0 -50%;
+  background: var(--color-surface);
+  opacity: 0;
+}
+
+.variables__row:hover > .door,
+.variables__row:focus-within > .door {
+  opacity: 1;
 }
 
 .variables__swatch {

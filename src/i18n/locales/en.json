@@ -2048,6 +2048,8 @@
   "styleState.placeholderShown": "Placeholder shown",
   "styleState.visited": "Visited",
   "styles.classes": "Classes",
+  "styles.noClasses": "No class yet: select an element and press + Class in the inspector to make one.",
+  "styles.noVariables": "No variable yet: + makes one (a colour, a size, a font).",
   "styles.count.one": "1 element",
   "styles.count.other": "{count} elements",
   "styles.deleteClassUsedBy": "Delete class used by {count} elements",

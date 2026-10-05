@@ -38,6 +38,8 @@ function StyleClasses() {
   const t = useT();
   const text = useEditorState((s) => JSON.stringify(classesOf(s.document).map((c) => [c.name, usesOfClass(s.document, c.name)])));
   const rows = JSON.parse(text) as [string, number][];
+  // none yet: how one is made (LR2: an empty project's view was a title over nothing)
+  if (rows.length === 0) return <p className="styles__none">{t('styles.noClasses')}</p>;
   const rename = doorSlots('styles').find((entry) => entry.command.args.nextName !== undefined);
   const remove = doorSlots('styles').find((entry) => entry.command.args.className !== undefined && entry.command.args.nextName === undefined);
   return (

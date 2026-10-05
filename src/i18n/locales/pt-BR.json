@@ -2048,6 +2048,8 @@
   "styleState.placeholderShown": "Texto de exemplo visível",
   "styleState.visited": "Visitado",
   "styles.classes": "Classes",
+  "styles.noClasses": "Nenhuma classe ainda: selecione um elemento e use + Classe no inspetor para criar uma.",
+  "styles.noVariables": "Nenhuma variável ainda: + cria uma (uma cor, um tamanho, uma fonte).",
   "styles.count.one": "1 elemento",
   "styles.count.other": "{count} elementos",
   "styles.deleteClassUsedBy": "Apagar classe usada por {count} elementos",
