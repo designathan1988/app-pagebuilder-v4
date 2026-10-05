@@ -293,7 +293,9 @@ function widthScript(widths: readonly number[], changing: Record<string, Changin
     + 'function make(id,w){var m=d.m[id];if(!m||!m.a[w])return null;var e=m.n==="http://www.w3.org/1999/xhtml"?document.createElement(m.t):document.createElementNS(m.n,m.t);'
     + 'el(id);cache[id]=e;attrs(e,m.a[w],id);kids(e,m.c[w],w);return e}'
     + 'function apply(){var w=near();if(w===cur)return;cur=w;for(var id in d.g){var g=d.g[id],e=el(id);if(!e||!g.a[w])continue;attrs(e,g.a[w],id);kids(e,g.c[w],w)}'
-    + 'for(var id2 in d.g){var s=d.g[id2].s&&d.g[id2].s[w],e2=el(id2);if(s&&e2){e2.scrollLeft=s[0];e2.scrollTop=s[1]}}}'
+    + 'for(var id2 in d.g){var s=d.g[id2].s&&d.g[id2].s[w],e2=el(id2);if(s&&e2){e2.scrollLeft=s[0];e2.scrollTop=s[1]}}'
+    // a width's attributes replace what the paint script gave a canvas or a frame: it paints them again
+    + 'if(window.__builderCapturePaint)window.__builderCapturePaint()}'
     + 'if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",apply);else apply();window.addEventListener("resize",apply)})()</script>';
 }
 
@@ -339,7 +341,9 @@ export function capturedExportHtml(capture: CapturedPage, head?: CapturedHead): 
   const hasPaint = (node: CapturedNode): boolean => node.kind === 'element' &&
     (node.attributes.some((one) => one.name === 'data-capture-paint') || node.children.some(hasPaint));
   if (hasPaint(root)) {
-    const paint = `<script>(function(){for(const canvas of document.querySelectorAll('canvas[data-capture-paint]')){const image=new Image();image.onload=function(){const context=canvas.getContext('2d');if(context)context.drawImage(image,0,0,canvas.width,canvas.height)};image.src=canvas.getAttribute('data-capture-paint')}for(const frame of document.querySelectorAll('iframe[data-capture-paint]')){const src=frame.getAttribute('data-capture-paint');if(!src)continue;const safe=src.replaceAll('&','&amp;').replaceAll('"','&quot;');frame.setAttribute('sandbox','');frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%}img{display:block;width:100%;height:100%;object-fit:fill}</style></head><body><img src="'+safe+'"></body></html>'}})()</script>`;
+    // run at once, and again by the width script after it gives a width's attributes (vue's banner frame was blank at
+    // 1180 px: its 1180 px attributes had replaced the frame's painted document)
+    const paint = `<script>(window.__builderCapturePaint=function(){for(const canvas of document.querySelectorAll('canvas[data-capture-paint]')){const image=new Image();image.onload=function(){const context=canvas.getContext('2d');if(context)context.drawImage(image,0,0,canvas.width,canvas.height)};image.src=canvas.getAttribute('data-capture-paint')}for(const frame of document.querySelectorAll('iframe[data-capture-paint]')){const src=frame.getAttribute('data-capture-paint');if(!src)continue;const safe=src.replaceAll('&','&amp;').replaceAll('"','&quot;');frame.setAttribute('sandbox','');frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%}img{display:block;width:100%;height:100%;object-fit:fill}</style></head><body><img src="'+safe+'"></body></html>'}})()</script>`;
     html = html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${paint}</body>`);
   }
   return html;

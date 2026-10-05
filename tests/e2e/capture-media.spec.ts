@@ -7,6 +7,9 @@ import { unzip } from '../../tools/runner/unzip.ts';
 import { markRuntime } from '../../tools/companion/capture.ts';
 import { completeOpaquePaint } from '../../tools/companion/paint.ts';
 import { serializePage } from '../../tools/companion/serialize.ts';
+import { mergeWidths } from '../../src/core/capture/merge.ts';
+import { sequentialIds } from '../../src/core/ports/ids.ts';
+import { capturedExportHtml } from '../../src/core/render/captured.ts';
 
 const IMPORT = 'project.importHtml#menu-file';
 const EXPORT = 'project.export#toolbar-top-bar-export';
@@ -109,4 +112,25 @@ test('a captured video\'s poster keeps the video\'s proportions, so the page kee
   // the poster alone gives the video its height again
   await page.setContent(`<!doctype html><html><body style="margin:0"><video poster="${poster}" style="width:358px;display:block"></video></body></html>`);
   await expect.poll(() => page.locator('video').evaluate((video) => video.getBoundingClientRect().height)).toBeCloseTo(height, 2);
+});
+
+// vuejs.org's banner is a frame of another site, drawn from its same-moment picture (data-capture-paint), a picture per
+// width. The width script gave the frame its 1180 px attributes after the paint script had drawn it: blank at 1180 px.
+test('a painted frame shows its width\'s picture once the width script has run', async ({ page }) => {
+  const HTML = 'http://www.w3.org/1999/xhtml';
+  const picture = (colour: string) => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="40"><rect width="100" height="40" fill="${colour}"/></svg>`)}`;
+  const frame = (colour: string) => [{ name: 'data-capture-paint', namespace: null, value: picture(colour) }, { name: 'style', namespace: null, value: 'width:300px;height:60px;border:0' }];
+  const page2 = (colour: string) => ({ kind: 'element' as const, id: 'r', namespace: HTML, tag: 'html', attributes: [], children: [
+    { kind: 'element' as const, id: 'h', namespace: HTML, tag: 'head', attributes: [], children: [] },
+    { kind: 'element' as const, id: 'b', namespace: HTML, tag: 'body', attributes: [], children: [{ kind: 'element' as const, id: 'f', namespace: HTML, tag: 'iframe', attributes: frame(colour), children: [] }] },
+  ] });
+  const capture = mergeWidths([{ width: 1440, root: page2('rgb(200, 0, 0)') }, { width: 1180, root: page2('rgb(0, 160, 0)') }], sequentialIds('p'));
+  const html = capturedExportHtml(capture);
+  for (const [width, colour] of [[1440, 'rgb(200, 0, 0)'], [1180, 'rgb(0, 160, 0)']] as const) {
+    await page.setViewportSize({ width, height: 400 });
+    await page.route('http://paint.test/', (route) => route.fulfill({ contentType: 'text/html', body: html }));
+    await page.goto('http://paint.test/');
+    const srcdoc = await page.locator('iframe').evaluate((element) => (element as HTMLIFrameElement).srcdoc);
+    expect(srcdoc, `${width}px`).toContain(encodeURIComponent(colour));
+  }
 });
