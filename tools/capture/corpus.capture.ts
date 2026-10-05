@@ -69,7 +69,7 @@ for (const site of SITES.filter((one) => only.length === 0 || only.includes(one.
     const write = (value: SiteRecord) => fs.writeFileSync(path.join(RECORDS, `${site.id}.json`), `${JSON.stringify(value, null, 2)}\n`);
     try {
       const manifestFile = path.join(reference, 'manifest.json');
-      const currentReference = fs.existsSync(manifestFile) && [5, 6].includes((JSON.parse(fs.readFileSync(manifestFile, 'utf8')) as { format?: number }).format ?? 0);
+      const currentReference = fs.existsSync(manifestFile) && [7].includes((JSON.parse(fs.readFileSync(manifestFile, 'utf8')) as { format?: number }).format ?? 0);
       if (!fs.existsSync(har) || !currentReference || process.env.CORPUS_RECORD === '1') await recordReference(browser, site.url, har, reference, WIDTHS);
       const manifest = readReferenceManifest(site.url, har, reference);
       const referenceManifestSha256 = createHash('sha256').update(fs.readFileSync(manifestFile)).digest('hex');
@@ -123,14 +123,14 @@ for (const site of SITES.filter((one) => only.length === 0 || only.includes(one.
       fs.writeFileSync(path.join(out, 'document.json'), `${JSON.stringify(importedDocument)}\n`);
       const elements = await page.evaluate(() => {
         type Captured = { kind: string; tag?: string; children?: Captured[] };
-        const port = (window as unknown as { __builderTestPort?: { document(): { pages: { tree: unknown; capture?: { viewports: { root: Captured }[] } }[] } } }).__builderTestPort;
+        const port = (window as unknown as { __builderTestPort?: { document(): { pages: { tree: unknown; capture?: { root: Captured } }[] } } }).__builderTestPort;
         let count = 0;
         const visit = (node: { children?: unknown[] }) => {
           count += 1;
           for (const child of node.children ?? []) visit(child as { children?: unknown[] });
         };
         for (const one of port?.document().pages ?? []) {
-          const root = one.capture?.viewports[0]?.root;
+          const root = one.capture?.root;
           if (root === undefined) {
             visit(one.tree as { children?: unknown[] });
             continue;
@@ -170,7 +170,7 @@ for (const site of SITES.filter((one) => only.length === 0 || only.includes(one.
       }
       const unstable = referenceStability.filter((one) => one.pixelMatchCommon < 99);
       const failures = [
-        ...(unstable.length === 0 ? [] : [`Live page changes across fixed-time, fixed-seed loads at ${unstable.map((one) => `${one.width}px (${one.pixelMatchCommon.toFixed(1)}%)`).join(', ')}`]),
+        ...(unstable.length === 0 ? [] : [`Live page changes across loads from the same start time and seed at ${unstable.map((one) => `${one.width}px (${one.pixelMatchCommon.toFixed(1)}%)`).join(', ')}`]),
         ...(referenceReadiness.filter((one) => !one.quiescent || one.pendingImages > 0 || one.scrollTruncated).length === 0 ? [] : [`Live page did not settle at ${referenceReadiness.filter((one) => !one.quiescent || one.pendingImages > 0 || one.scrollTruncated).map((one) => `${one.width}px`).join(', ')}`]),
         ...((captured.problems?.length ?? 0) === 0 ? [] : [`${captured.problems?.length} captured resources unavailable or blocked; see capture snapshot package`]),
       ];

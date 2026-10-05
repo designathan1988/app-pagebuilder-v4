@@ -105,7 +105,8 @@ export async function readLayoutSnapshot(page: Page, includeAll = false): Promis
 }
 
 export interface ReferenceManifest {
-  readonly format: 5 | 6;
+  // format 7: the page observed as a tree of nodes, its clock running from the reference moment (DEC-61)
+  readonly format: 7;
   readonly source: 'live-navigation';
   readonly url: string;
   readonly recordedAt: string;
@@ -191,7 +192,7 @@ export async function recordReference(browser: Browser, url: string, har: string
     await context.close();
   }
   const harBytes = fs.readFileSync(pendingHar);
-  const manifest: ReferenceManifest = { format: 6, source: 'live-navigation', url, recordedAt: new Date().toISOString(), harSha256: sha256(harBytes), widths: photographed };
+  const manifest: ReferenceManifest = { format: 7, source: 'live-navigation', url, recordedAt: new Date().toISOString(), harSha256: sha256(harBytes), widths: photographed };
   fs.copyFileSync(pendingHar, har);
   for (const one of photographed) for (const file of [one.file, one.snapshot, one.repeat, one.repeatLayout]) fs.copyFileSync(path.join(pending, file), path.join(reference, file));
   // Last write makes a partially refreshed reference unusable rather than silently pairing old PNGs with a new HAR.
@@ -203,7 +204,7 @@ export function readReferenceManifest(url: string, har: string, reference: strin
   const file = path.join(reference, 'manifest.json');
   if (!fs.existsSync(file)) throw new Error(`No live reference manifest for ${url}; re-record the site before measuring`);
   const manifest = JSON.parse(fs.readFileSync(file, 'utf8')) as ReferenceManifest;
-  if (![5, 6].includes(manifest.format) || manifest.source !== 'live-navigation' || manifest.url !== url) throw new Error(`Reference metadata does not name ${url} with same-load layout and equivalent live history`);
+  if (manifest.format !== 7 || manifest.source !== 'live-navigation' || manifest.url !== url) throw new Error(`Reference metadata does not name ${url} with same-load layout and equivalent live history`);
   if (sha256(fs.readFileSync(har)) !== manifest.harSha256) throw new Error(`Reference HAR changed for ${url}; re-record before measuring`);
   return manifest;
 }
