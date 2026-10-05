@@ -66,7 +66,7 @@
   --size-panel-window-height: 320px;
   --size-right-dock: 260px;
   --size-panel-stacked: 72px;
-  --size-inspector: 288px;
+  --size-inspector: 304px;
   --size-file-tabs: 34px;
   --size-canvas-toolbar: 36px;
   --size-frame-tabs: 28px;
@@ -79,7 +79,7 @@
   --size-chip: 26px;
   --size-header: 32px;
   --size-tile: 48px;
-  --size-label-column: 100px;
+  --size-label-column: 116px;
   --size-label-column-card: 72px;
   --size-timeline-side: 236px;
   --size-menu-min: 240px;

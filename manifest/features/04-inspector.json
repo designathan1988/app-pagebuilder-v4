@@ -23758,7 +23758,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border top",
+                    "property": "Top border",
                     "name": "Actions",
                     "value": "4px dashed"
                   }
@@ -23842,7 +23842,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border right",
+                    "property": "Right border",
                     "name": "Actions",
                     "value": "4px dashed"
                   }
@@ -23926,7 +23926,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border bottom",
+                    "property": "Bottom border",
                     "name": "Actions",
                     "value": "4px dashed"
                   }
@@ -24010,7 +24010,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border left",
+                    "property": "Left border",
                     "name": "Actions",
                     "value": "4px dashed"
                   }
@@ -24088,7 +24088,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border top width",
+                    "property": "Top border width",
                     "name": "Actions",
                     "value": "5px"
                   }
@@ -24166,7 +24166,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border right width",
+                    "property": "Right border width",
                     "name": "Actions",
                     "value": "5px"
                   }
@@ -24244,7 +24244,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border bottom width",
+                    "property": "Bottom border width",
                     "name": "Actions",
                     "value": "5px"
                   }
@@ -24322,7 +24322,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border left width",
+                    "property": "Left border width",
                     "name": "Actions",
                     "value": "5px"
                   }
@@ -24724,7 +24724,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Radius top left",
+                    "property": "Top left radius",
                     "name": "Actions",
                     "value": "24px"
                   }
@@ -24797,7 +24797,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Radius top right",
+                    "property": "Top right radius",
                     "name": "Actions",
                     "value": "24px"
                   }
@@ -24870,7 +24870,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Radius bottom right",
+                    "property": "Bottom right radius",
                     "name": "Actions",
                     "value": "24px"
                   }
@@ -24943,7 +24943,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Radius bottom left",
+                    "property": "Bottom left radius",
                     "name": "Actions",
                     "value": "24px"
                   }

@@ -2985,7 +2985,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border top width",
+                    "property": "Top border width",
                     "name": "Hero",
                     "value": "10px"
                   }
@@ -3073,7 +3073,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border right width",
+                    "property": "Right border width",
                     "name": "Hero",
                     "value": "10px"
                   }
@@ -3156,7 +3156,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border bottom width",
+                    "property": "Bottom border width",
                     "name": "Hero",
                     "value": "10px"
                   }
@@ -3239,7 +3239,7 @@
                 {
                   "key": "status.style.set",
                   "params": {
-                    "property": "Border left width",
+                    "property": "Left border width",
                     "name": "Hero",
                     "value": "10px"
                   }

@@ -261,8 +261,8 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
 .sec-h .has.from-st { background: var(--color-origin-state); }
 .sec-h .end { margin-left: auto; display: inline-flex; }
 .sec-sum { margin-left: var(--space-3); font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-mono); letter-spacing: 0; text-transform: none; color: var(--color-text-subtle); white-space: nowrap; }
-.prop { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: center; gap: 0 var(--space-3); min-height: var(--size-row); }
-.prop.two { grid-template-columns: 100px minmax(0, 1fr) minmax(0, 1fr); }
+.prop { display: grid; grid-template-columns: var(--size-label-column) minmax(0, 1fr); align-items: center; gap: 0 var(--space-3); min-height: var(--size-row); }
+.prop.two { grid-template-columns: var(--size-label-column) minmax(0, 1fr) minmax(0, 1fr); }
 .prop > label { color: var(--color-text-muted); line-height: var(--lh-caption); }
 .prop > label.o-here { color: var(--color-origin-here); background: none; font-weight: var(--weight-semibold); }
 .prop > label.o-bp { color: var(--color-origin-breakpoint); background: none; }
@@ -279,7 +279,7 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
 .icons { display: flex; gap: var(--space-1); padding: 1px; border-radius: var(--radius-sm); background: var(--color-surface-sunken); justify-self: start; }
 .icons button { display: grid; place-items: center; width: 28px; height: var(--size-target-min); border: 0; border-radius: var(--radius-xs); background: none; color: var(--color-text-muted); }
 .icons button.is-on { background: var(--color-surface); color: var(--color-origin-here); box-shadow: var(--shadow-1); }
-.align { display: grid; grid-template-columns: 100px 1fr; gap: var(--space-3); align-items: start; padding: var(--space-1) 0; }
+.align { display: grid; grid-template-columns: var(--size-label-column) 1fr; gap: var(--space-3); align-items: start; padding: var(--space-1) 0; }
 .matrix { display: grid; grid-template-columns: repeat(3, 24px); grid-template-rows: repeat(3, 24px); padding: var(--space-1); border-radius: var(--radius-sm); background: var(--color-surface-sunken); }
 .matrix span { display: grid; place-items: center; }
 .matrix span::after { content: ""; width: 4px; height: 4px; border-radius: var(--radius-pill); background: var(--color-border-strong); }

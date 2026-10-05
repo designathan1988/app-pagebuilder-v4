@@ -546,9 +546,11 @@ export interface NumberFieldProps {
   readonly bare?: boolean;
   readonly labelled?: boolean;
   readonly prefix?: string | null;
+  // the text a pair row's first field shows where its label stands: the row's own (Size), the field keeping its name
+  readonly rowText?: string | null;
 }
 
-export function NumberField({ entry, door, property, label, bare = false, labelled = false, prefix = null }: NumberFieldProps) {
+export function NumberField({ entry, door, property, label, bare = false, labelled = false, prefix = null, rowText = null }: NumberFieldProps) {
   const store = useStore();
   const draft = useRef<{ typed: boolean; message: EditorState['message'] }>({ typed: false, message: store.getState().message });
   const primary = useEditorState((s) => s.selection[0] ?? null);
@@ -632,7 +634,7 @@ export function NumberField({ entry, door, property, label, bare = false, labell
     element.dataset.draft = DRAFT_KEPT;
     keepValue(store, command, property, value, store.getState().selection);
   };
-  const scrub = SCRUB === null ? null : <ScrubLabel entry={SCRUB} property={property} shown={base} label={label} ready={available} origin={appearance.kind} />;
+  const scrub = SCRUB === null ? null : <ScrubLabel entry={SCRUB} property={property} shown={base} label={rowText ?? label} ready={available} origin={appearance.kind} />;
   const refused = useFieldRefusal(command, property);
   const state = `${available ? '' : ' is-unavailable'}${stored !== undefined ? ' is-set' : ''}${refused.text !== null ? ' is-invalid' : ''}`;
   const cell = (
@@ -679,7 +681,7 @@ export function NumberField({ entry, door, property, label, bare = false, labell
   if (bare) {
     return (
       <>
-        {labelled ? (scrub ?? <span className="field-row__label">{label}</span>) : null}
+        {labelled ? (scrub ?? <span className="field-row__label">{rowText ?? label}</span>) : null}
         <span className={`field-cell${state}`} data-origin={appearance.kind} data-door={entry.ref} data-args={JSON.stringify({ property })} data-number-field title={door.title}>
           {cell}
           {refusedText}
@@ -879,6 +881,7 @@ export function TextStyleField({
   bare = false,
   labelled = false,
   prefix = null,
+  rowText = null,
 }: {
   readonly entry: DoorEntry;
   readonly door: DoorState;
@@ -905,6 +908,8 @@ export function TextStyleField({
   readonly bare?: boolean;
   readonly labelled?: boolean;
   readonly prefix?: string | null;
+  // the text a pair row's first field shows where its label stands: the row's own (Size), the field keeping its name
+  readonly rowText?: string | null;
 }) {
   const store = useStore();
   const draft = useRef<{ typed: boolean; message: EditorState['message'] }>({ typed: false, message: store.getState().message });
@@ -1131,7 +1136,7 @@ export function TextStyleField({
       <>
         {labelled ? (
           <span className="field-row__label" data-origin={appearance.kind} title={property}>
-            {label}
+            {rowText ?? label}
           </span>
         ) : null}
         <span className={`field-cell${state}`} data-origin={appearance.kind} data-door={entry.ref} data-args={JSON.stringify({ property })} title={door.title}>

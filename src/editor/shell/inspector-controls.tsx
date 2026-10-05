@@ -144,16 +144,19 @@ export function Field(props: FieldProps) {
 function FieldControl({ entry, bare = false, labelled = false, prefix = null, rowLabel = null }: FieldProps) {
   const t = useT();
   const target = targetOf(entry);
-  // labelled as fieldLabelKey says, or by the row's own label when it has one (a pair row of the gap reads "Gap"). A
-  // field is usable only once its own feature is registered as built (archive/DESIGN.md "Build order"): style.set runs
-  // Width and Height long before Display or Color.
+  // named as fieldLabelKey says, what a screen reader reads and its step buttons are named after ("Step Width up"); a
+  // pair row's first field shows the row's own label (Size) where its label stands, and keeps its own name, so no two
+  // controls share one (the Size row's Width and the background's Size). A field is usable only once its own feature
+  // is registered as built (archive/DESIGN.md "Build order"): style.set runs Width and Height long before Display or
+  // Color.
   const own = entry.door.labelKey !== entry.command.labelKey;
-  const door = useDoor(entry, {}, rowLabel !== null ? t(rowLabel) : target && !own ? t(fieldLabelKey(entry)) : undefined, isFeatureBuilt(entry.door.feature as FeatureId));
+  const door = useDoor(entry, {}, target && !own ? t(fieldLabelKey(entry)) : undefined, isFeatureBuilt(entry.door.feature as FeatureId));
+  const rowText = rowLabel === null ? null : t(rowLabel);
   if (!target) return null;
   const cssName = entry.door.kind === 'inspector-field' ? (entry.door.property ?? target.id) : target.id;
   // a composite of lengths (gap: row-gap and column-gap) is a text field of its longhands, one or two lengths
   if (target.control === 'length-field' && entry.door.kind === 'inspector-field' && entry.door.drawnAs === 'field' && entry.door.composite !== null && 'property' in entry.command.args) {
-    return <TextStyleField entry={entry} door={door} property={entry.door.composite} longhands={target.longhands ?? null} label={door.label} bare={bare} labelled={labelled} prefix={prefix} />;
+    return <TextStyleField entry={entry} door={door} property={entry.door.composite} longhands={target.longhands ?? null} label={door.label} rowText={rowText} bare={bare} labelled={labelled} prefix={prefix} />;
   }
   // the shadow editor's controls (shadow.tsx)
   if (isShadowControl(entry)) return <ShadowControl entry={entry} door={door} />;
@@ -178,7 +181,7 @@ function FieldControl({ entry, bare = false, labelled = false, prefix = null, ro
     );
   }
   // a length field is the field component: typing, units, steps and the scrub (spec inspector-number-fields)
-  if (target.control === 'length-field' && entry.door.kind === 'inspector-field' && entry.door.property !== null) return <NumberField entry={entry} door={door} property={entry.door.property} label={door.label} bare={bare} labelled={labelled} prefix={prefix} />;
+  if (target.control === 'length-field' && entry.door.kind === 'inspector-field' && entry.door.property !== null) return <NumberField entry={entry} door={door} property={entry.door.property} label={door.label} rowText={rowText} bare={bare} labelled={labelled} prefix={prefix} />;
   // keyword buttons: one button per value the property offers (field.tsx)
   if (target.control === 'keyword-buttons' && entry.door.kind === 'inspector-field' && entry.door.control === 'field' && entry.door.property !== null && 'property' in entry.command.args) {
     return <KeywordButtons entry={entry} door={door} property={entry.door.property} values={offered(entry)} icons={target.icons} label={door.label} />;
