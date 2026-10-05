@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83321
+    "lines": 83387
   },
   "features": [
     {
@@ -5412,7 +5412,7 @@
     },
     {
       "path": "src/editor/doors/menu.tsx",
-      "lines": 284,
+      "lines": 330,
       "commands": [],
       "features": []
     },
@@ -6245,7 +6245,7 @@
     },
     {
       "path": "src/editor/shell/float.ts",
-      "lines": 36,
+      "lines": 56,
       "commands": [],
       "features": []
     },

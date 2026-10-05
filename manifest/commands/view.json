@@ -1087,14 +1087,14 @@
           "kind": "menu",
           "feature": "code-panel-view",
           "menu": "view",
-          "checked": null,
+          "checked": "radio",
           "labelKey": "editorView.code",
           "faceLabelKey": null,
-          "icon": "columns-2",
+          "icon": null,
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 5
+            "order": 12
           },
           "adapter": {
             "selection": "none",
@@ -3008,7 +3008,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 10
+            "order": 15
           },
           "adapter": {
             "selection": "none",
@@ -3056,7 +3056,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 20
+            "order": 16
           },
           "adapter": {
             "selection": "none",
@@ -3245,7 +3245,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 21
+            "order": 13
           },
           "adapter": {
             "selection": "none",

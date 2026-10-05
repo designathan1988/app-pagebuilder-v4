@@ -99,8 +99,24 @@
   font-size: var(--fs-caption);
 }
 
+/* a menu held to the window's height scrolls, its scroll bar thin as the panels': its items keep their height, never
+   squeezed to fit */
+.menu {
+  scrollbar-width: thin;
+}
+
+.menu > * {
+  flex-shrink: 0;
+}
+
 .menu__sub {
   position: relative;
+}
+
+/* a submenu's item spans the menu's width as every item does (a button shrinks to its content otherwise): its hover
+   fills the row, its chevron ends it, and its submenu opens at the menu's edge */
+.menu__sub > .menu__item {
+  width: 100%;
 }
 
 /* the backdrop under an open menu (ui.dismiss#overlay-backdrop): the whole window, transparent, under the menu */
@@ -129,10 +145,11 @@
   position: fixed;
 }
 
-/* a submenu shows while the pointer is over its item or the focus is in it, or once its item is clicked */
+/* a submenu shows while the pointer is over its item or the focus is in it, or once its item is clicked; fixed to the
+   window, placed beside its item when it shows (menu.tsx, floatBeside), so the scroll of a menu held to the window's
+   height never cuts it */
 .menu__sub > .menu {
-  top: 0;
-  left: 100%;
+  position: fixed;
   display: none;
 }
 

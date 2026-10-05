@@ -91,7 +91,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 2
+            "order": 5
           },
           "adapter": {
             "selection": "none",
@@ -116,7 +116,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 3
+            "order": 6
           },
           "adapter": {
             "selection": "none",
@@ -141,7 +141,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 4
+            "order": 2
           },
           "adapter": {
             "selection": "none",
@@ -166,7 +166,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 6
+            "order": 9
           },
           "adapter": {
             "selection": "none",
@@ -191,7 +191,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 19
+            "order": 10
           },
           "adapter": {
             "selection": "none",
@@ -216,7 +216,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 7
+            "order": 3
           },
           "adapter": {
             "selection": "none",
@@ -241,7 +241,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 8
+            "order": 11
           },
           "adapter": {
             "selection": "none",
@@ -266,7 +266,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 9
+            "order": 8
           },
           "adapter": {
             "selection": "none",
@@ -291,7 +291,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 11
+            "order": 7
           },
           "adapter": {
             "selection": "none",
@@ -649,7 +649,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 32
+            "order": 4
           },
           "adapter": {
             "selection": "none",
@@ -758,7 +758,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 12
+            "order": 18
           },
           "adapter": {
             "selection": "none",
@@ -838,7 +838,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 13
+            "order": 19
           },
           "adapter": {
             "selection": "none",
@@ -918,7 +918,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 14
+            "order": 20
           },
           "adapter": {
             "selection": "none",
@@ -958,7 +958,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 15
+            "order": 29
           },
           "adapter": {
             "selection": "none",
@@ -998,7 +998,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 16
+            "order": 30
           },
           "adapter": {
             "selection": "none",
@@ -1443,7 +1443,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 24
+            "order": 21
           },
           "adapter": {
             "selection": "none",
@@ -1468,7 +1468,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 25
+            "order": 22
           },
           "adapter": {
             "selection": "none",
@@ -1493,7 +1493,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 26
+            "order": 23
           },
           "adapter": {
             "selection": "none",
@@ -1518,7 +1518,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 27
+            "order": 24
           },
           "adapter": {
             "selection": "none",
@@ -1543,7 +1543,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 28
+            "order": 25
           },
           "adapter": {
             "selection": "none",
@@ -1568,7 +1568,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 29
+            "order": 26
           },
           "adapter": {
             "selection": "none",

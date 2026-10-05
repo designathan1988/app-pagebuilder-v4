@@ -3301,7 +3301,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "menu:view",
-            "order": 23
+            "order": 14
           },
           "adapter": {
             "selection": "none",

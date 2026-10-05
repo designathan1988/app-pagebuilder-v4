@@ -8,6 +8,7 @@
 // button. The context menu (ContextMenu, at the end) is drawn here too, from the doors the manifest places in the
 // context-menu region; its opening is a command (menus/context-menu.ts).
 import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { flushSync } from 'react-dom';
 import { locate } from '../../core/document/model.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { CommandId, KeyContextId, MenuId, MessageId } from '../../generated/ids.ts';
@@ -19,7 +20,7 @@ import { useT } from '../text.ts';
 import { stateOf } from '../view/style-state.ts';
 import { Icon, useDoor, isDoorBuilt } from './door.tsx';
 import { useOutsideLayer } from '../shell/outside-layer.ts';
-import { floatBelow, pointAnchor } from '../shell/float.ts';
+import { floatBelow, floatBeside, pointAnchor, type Placed } from '../shell/float.ts';
 import { GLYPHS, doorSlots, menuOf, slotsIn, type Anchor } from './placement.ts';
 import { usePointerValue, usePointerViews } from '../input/pointer/use-views.ts';
 
@@ -66,32 +67,76 @@ function MenuItem({ entry, onDone, keysIn = 'global' }: { readonly entry: DoorEn
   );
 }
 
+// what a layer's style takes from where it was placed: its place, and when it was held to a height, that height and a
+// scroll for the rest
+const placedStyle = (at: Placed) => ({ left: at.left, top: at.top, ...(at.maxHeight === undefined ? {} : { maxHeight: at.maxHeight, overflowY: 'auto' as const }) });
+
+// a layer's height as drawn whole, whatever height it is held to now: its content's and its borders'
+function naturalHeight(element: HTMLElement): number {
+  const style = getComputedStyle(element);
+  return element.scrollHeight + (parseFloat(style.borderTopWidth) || 0) + (parseFloat(style.borderBottomWidth) || 0);
+}
+
+
 // A menu's items. A menu opened from its button takes the focus on its first item, and opens at fixed window
 // coordinates under that button, inside the window with the --space-4 token between it and the window's edge, so no
-// panel that clips its content (the inspector) cuts it; a submenu is drawn with its menu and shown while the pointer
-// is over its item, the focus is in it, or its item was run (shell.css).
-function MenuList({ menu, onDone, focusFirst, anchor }: { readonly menu: MenuId; readonly onDone: () => void; readonly focusFirst: boolean; readonly anchor?: { readonly current: HTMLElement | null } }) {
+// panel that clips its content (the inspector) cuts it; a menu taller than the window's room is held to that room and
+// scrolls (the View menu in a 1280 × 720 window: the user's review of 2026-10-05, LR2). A submenu is drawn with its
+// menu and shown while the pointer is over its item, the focus is in it, or its item was run (menus.css), at fixed
+// window coordinates beside its item (floatBeside), so the menu's scroll never cuts it.
+interface MenuListProps {
+  readonly menu: MenuId;
+  readonly onDone: () => void;
+  readonly focusFirst: boolean;
+  // the button it opens under (a menu of the bar), or the item it opens beside (a submenu)
+  readonly anchor?: { readonly current: HTMLElement | null };
+  readonly beside?: RefObject<HTMLElement | null>;
+}
+function MenuList({ menu, onDone, focusFirst, anchor, beside }: MenuListProps) {
   const list = useRef<HTMLDivElement>(null);
   const t = useT();
   // Commands may enter a canvas mode or open another surface; only Escape returns to this menu's trigger.
   useOutsideLayer(list, anchor !== undefined, onDone, anchor, false);
-  const [at, setAt] = useState<{ readonly left: number; readonly top: number } | null>(null);
+  const [at, setAt] = useState<Placed | null>(null);
   useLayoutEffect(() => {
     const button = anchor?.current;
     const own = list.current;
     if (!button || !own) return;
     const edge = parseFloat(getComputedStyle(own).getPropertyValue('--space-4')) || 0;
-    const { width, height } = own.getBoundingClientRect();
+    const { width } = own.getBoundingClientRect();
     // under the button, inside the window, above it when there is no room below (a menu of the status bar): float.ts
-    setAt(floatBelow(button.getBoundingClientRect(), { width, height }, { width: window.innerWidth, height: window.innerHeight }, edge));
+    setAt(floatBelow(button.getBoundingClientRect(), { width, height: naturalHeight(own) }, { width: window.innerWidth, height: window.innerHeight }, edge));
   }, [anchor]);
+  // a submenu, each time it shows (no box while hidden, a size once shown: a resize observer sees it, after the layout
+  // and before the paint): beside its item, measured as it is drawn, placed before it is painted
+  const [side, setSide] = useState<Placed | null>(null);
+  useLayoutEffect(() => {
+    const own = list.current;
+    if (beside === undefined || own === null) return undefined;
+    const place = () => {
+      const item = beside.current;
+      const { width } = own.getBoundingClientRect();
+      if (item === null || width === 0) return;
+      const style = getComputedStyle(own);
+      const edge = parseFloat(style.getPropertyValue('--space-4')) || 0;
+      // its first item level with the item it opens from: up by its border and its padding
+      const inset = (parseFloat(style.borderTopWidth) || 0) + (parseFloat(style.paddingTop) || 0);
+      const view = { width: window.innerWidth, height: window.innerHeight };
+      flushSync(() => setSide(floatBeside(item.getBoundingClientRect(), { width, height: naturalHeight(own) }, view, edge, inset)));
+    };
+    const sizes = new ResizeObserver(place);
+    sizes.observe(own);
+    return () => sizes.disconnect();
+  }, [beside]);
   // the first item takes the focus once the menu shows (a menu opened from a button, once it is placed)
   const shown = anchor === undefined || at !== null;
   useEffect(() => {
     if (focusFirst && shown) list.current?.querySelector<HTMLElement>('[role^="menuitem"]')?.focus();
   }, [focusFirst, shown]);
   const stateType = useEditorState((s) => (s.selection[0] === undefined ? null : (locate(s.document, s.selection[0])?.node.type ?? null)));
-  const placed = anchor === undefined ? undefined : at === null ? { position: 'fixed' as const, visibility: 'hidden' as const } : { position: 'fixed' as const, left: at.left, top: at.top, right: 'auto', bottom: 'auto' };
+  const placed = beside !== undefined
+    ? side === null ? undefined : { position: 'fixed' as const, ...placedStyle(side) }
+    : anchor === undefined ? undefined : at === null ? { position: 'fixed' as const, visibility: 'hidden' as const } : { position: 'fixed' as const, ...placedStyle(at), right: 'auto', bottom: 'auto' };
   return (
     <div className="menu" role="menu" ref={list} style={placed} aria-label={t(menuOf(menu).labelKey as MessageId)} data-region={`menu:${menu}`} data-key-context="menu">
       {slotsIn(`menu:${menu}`)
@@ -113,14 +158,15 @@ function MenuList({ menu, onDone, focusFirst, anchor }: { readonly menu: MenuId;
 function SubMenu({ menu, onDone }: { readonly menu: MenuId; readonly onDone: () => void }) {
   const [open, setOpen] = useState(false);
   const t = useT();
+  const item = useRef<HTMLButtonElement>(null);
   return (
     <div className={`menu__sub${open ? ' is-open' : ''}`}>
-      <button type="button" role="menuitem" aria-haspopup="menu" aria-expanded={open} className="menu__item" onClick={() => setOpen(!open)}>
+      <button ref={item} type="button" role="menuitem" aria-haspopup="menu" aria-expanded={open} className="menu__item" onClick={() => setOpen(!open)}>
         <span className="menu__icon" />
         <span className="menu__label">{t(menuOf(menu).labelKey as MessageId)}</span>
         <Icon name={GLYPHS.submenu} size="sm" />
       </button>
-      <MenuList menu={menu} onDone={onDone} focusFirst={false} />
+      <MenuList menu={menu} onDone={onDone} focusFirst={false} beside={item} />
     </div>
   );
 }
@@ -259,13 +305,13 @@ function OpenContextMenu() {
   const views = usePointerViews();
   const start = views.pressPoint() ?? { x: 0, y: 0 };
   // where the menu is drawn: at the pointer, then moved inside the window once its size is known (a layout measure)
-  const [at, setAt] = useState({ left: start.x, top: start.y });
+  const [at, setAt] = useState<Placed>({ left: start.x, top: start.y });
   useLayoutEffect(() => {
     const menu = list.current;
     if (!menu) return;
     const edge = parseFloat(getComputedStyle(menu).getPropertyValue('--space-4')) || 0;
-    const { width, height } = menu.getBoundingClientRect();
-    setAt(floatBelow(pointAnchor(start.x, start.y), { width, height }, { width: window.innerWidth, height: window.innerHeight }, edge));
+    const { width } = menu.getBoundingClientRect();
+    setAt(floatBelow(pointAnchor(start.x, start.y), { width, height: naturalHeight(menu) }, { width: window.innerWidth, height: window.innerHeight }, edge));
   }, [start.x, start.y]);
   useEffect(() => {
     list.current?.querySelector<HTMLElement>('[role^="menuitem"]')?.focus();
@@ -273,7 +319,7 @@ function OpenContextMenu() {
   if (items.length === 0) return null;
   return (
     <div className="context-menu" data-context-menu>
-      <div className="menu" role="menu" ref={list} aria-label={t('contextMenu.label')} data-region="context-menu" data-key-context="menu" style={{ left: at.left, top: at.top }}>
+      <div className="menu" role="menu" ref={list} aria-label={t('contextMenu.label')} data-region="context-menu" data-key-context="menu" style={placedStyle(at)}>
         {items.map((entry) => (
           <MenuItem key={entry.ref} entry={entry} onDone={dismiss} keysIn="canvas" />
         ))}

@@ -59,7 +59,7 @@ Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests pas
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `app-menu` | Application menu: File, Edit, Arrange, View, Help, Theme and Language | yes | 21 | 21 | [app-menu](../spec/BEHAVIOUR.md#app-menu) | 8 | passes 21/21 |
+| `app-menu` | Application menu: File, Edit, Arrange, View, Help, Theme and Language | yes | 21 | 21 | [app-menu](../spec/BEHAVIOUR.md#app-menu) | 9 | passes 21/21 |
 | `ui-language` | UI language: Brazilian Portuguese by default, English available | yes | 2 | 2 | [ui-language](../spec/BEHAVIOUR.md#ui-language) | 4 | passes 2/2 |
 | `autosave-restore` | Autosave to IndexedDB and restore the work after a reload | yes | 4 | 6 | [autosave-restore](../spec/BEHAVIOUR.md#autosave-restore) | 4 | passes 6/6 |
 | `unsaved-work-guard` | Never lose an edit that is not yet saved | yes | 2 | 2 | [unsaved-work-guard](../spec/BEHAVIOUR.md#unsaved-work-guard) | 3 | passes 2/2 |
