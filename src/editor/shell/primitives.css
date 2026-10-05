@@ -3,6 +3,16 @@
    for its region; how a primitive looks at rest, hovered, pressed, current and disabled is written here once.
    src/main.tsx loads this file right after shell.css, before every region's stylesheet. */
 
+/* ---------------------------------------------------------------- native choices */
+
+/* a native check box or radio button (Snap settings' targets, the pages a data collection makes) in the accent of the
+   interface, not the browser's own blue (the user's review of 2026-10-05, LR2; MDN accent-color: check boxes, radio
+   buttons, ranges and progress bars take it); a range keeps the accent its own region gives it */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--color-accent);
+}
+
 /* ---------------------------------------------------------------- doors */
 
 .door {
