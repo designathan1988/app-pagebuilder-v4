@@ -1840,7 +1840,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 5
+            "order": 6
           },
           "adapter": {
             "selection": "none",
@@ -1884,7 +1884,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 6
+            "order": 7
           },
           "adapter": {
             "selection": "none",
@@ -1973,12 +1973,12 @@
           "modifier": null,
           "gesture": null,
           "labelKey": "command.grid.columns",
-          "faceLabelKey": null,
+          "faceLabelKey": "guidesGrids.show",
           "icon": null,
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 7
+            "order": 8
           },
           "adapter": {
             "selection": "none",
@@ -2047,12 +2047,12 @@
           "modifier": null,
           "gesture": null,
           "labelKey": "command.grid.rows",
-          "faceLabelKey": null,
+          "faceLabelKey": "guidesGrids.show",
           "icon": null,
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 9
+            "order": 10
           },
           "adapter": {
             "selection": "none",
@@ -2121,12 +2121,12 @@
           "modifier": null,
           "gesture": null,
           "labelKey": "command.grid.dots",
-          "faceLabelKey": null,
+          "faceLabelKey": "guidesGrids.show",
           "icon": null,
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 11
+            "order": 12
           },
           "adapter": {
             "selection": "none",
@@ -2169,12 +2169,12 @@
           "modifier": null,
           "gesture": null,
           "labelKey": "command.toggleFolds",
-          "faceLabelKey": null,
+          "faceLabelKey": "guidesGrids.foldLines",
           "icon": null,
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 13
+            "order": 3
           },
           "adapter": {
             "selection": "none",
@@ -2251,7 +2251,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 8
+            "order": 9
           },
           "adapter": {
             "selection": "none",
@@ -2279,7 +2279,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 10
+            "order": 11
           },
           "adapter": {
             "selection": "none",
@@ -2307,7 +2307,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 12
+            "order": 13
           },
           "adapter": {
             "selection": "none",
@@ -2413,7 +2413,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 3
+            "order": 4
           },
           "adapter": {
             "selection": "none",
@@ -2696,7 +2696,7 @@
           "disabledReasonKey": "common.notAvailableYet",
           "placement": {
             "region": "guides-grids-dialog",
-            "order": 4
+            "order": 5
           },
           "adapter": {
             "selection": "none",

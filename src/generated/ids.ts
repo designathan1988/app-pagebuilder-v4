@@ -3931,6 +3931,8 @@ export const MESSAGE_IDS = [
   "guidesGrids.none",
   "guidesGrids.place",
   "guidesGrids.section.columns",
+  "guidesGrids.show",
+  "guidesGrids.foldLines",
   "guidesGrids.section.columnsHint",
   "guidesGrids.section.dots",
   "guidesGrids.section.dotsHint",

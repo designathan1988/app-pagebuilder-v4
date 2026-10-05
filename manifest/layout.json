@@ -200,11 +200,11 @@
       "id": "guides-grids-dialog",
       "area": "overlay",
       "breaks": [
-        3,
-        5,
-        7,
-        9,
-        11
+        4,
+        6,
+        8,
+        10,
+        12
       ]
     },
     {

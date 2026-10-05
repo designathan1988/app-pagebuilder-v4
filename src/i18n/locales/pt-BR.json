@@ -893,6 +893,8 @@
   "guidesGrids.none": "Nenhuma guia ainda.",
   "guidesGrids.place": "Posição (px)",
   "guidesGrids.section.columns": "Grade de colunas",
+  "guidesGrids.show": "Mostrar",
+  "guidesGrids.foldLines": "Linhas de dobra",
   "guidesGrids.section.columnsHint": "Colunas na página, centralizadas, com a largura da grade, o espaçamento e a margem.",
   "guidesGrids.section.dots": "Grade de pontos",
   "guidesGrids.section.dotsHint": "Pontos num espaçamento fixo sobre a página.",

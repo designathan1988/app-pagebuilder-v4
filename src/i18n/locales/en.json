@@ -893,6 +893,8 @@
   "guidesGrids.none": "No guide yet.",
   "guidesGrids.place": "Place (px)",
   "guidesGrids.section.columns": "Column grid",
+  "guidesGrids.show": "Show",
+  "guidesGrids.foldLines": "Fold lines",
   "guidesGrids.section.columnsHint": "Columns across the page, centred, their width set by the grid width, gutter and margin.",
   "guidesGrids.section.dots": "Dot grid",
   "guidesGrids.section.dotsHint": "Dots at a fixed spacing over the page.",
