@@ -188,6 +188,14 @@ export function composedText(property: string, values: readonly string[], rules:
   return new Set(values).size === 1 ? (values[0] ?? '') : values.join(' ');
 }
 
+// Whether the longhands of a composite with a shorthand of its own (a border's sides) differ so no shorthand writes
+// them: the field says Mixed then, as for several elements that differ, never their values strung together (a header's
+// bottom border alone read "  1px    solid    #eadfce ": the audit of 2026-10-05).
+export function composesNot(property: string, values: readonly string[], rules: ModelRules): boolean {
+  const compose = codecFor(property, rules)?.compose;
+  return compose !== undefined && new Set(values).size > 1 && (compose(values) ?? null) === null;
+}
+
 // What a refused edit typed, as the refusal quotes it once (spec inspector-number-fields, Problems in Pager 3): a text
 // as it is, the values an edit names one after the other (a filter's { blur: "2" } is 2), never JSON.
 export function typedText(typed: unknown): string {

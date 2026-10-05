@@ -23,7 +23,7 @@ import type { DispatchResult } from '../../core/store/store.ts';
 import { locate, type DocNode, type NodeId } from '../../core/document/model.ts';
 import { DEFAULT_UNIT, codecOf } from '../../core/style/codecs.ts';
 import { borderArgs } from '../../core/style/border.ts';
-import { composedText, lineStyles, propertyName, shownText } from '../../core/style/set.ts';
+import { composedText, composesNot, lineStyles, propertyName, shownText } from '../../core/style/set.ts';
 import { storedLayers, storedValue } from '../../core/style/stored.ts';
 import type { AttributeId, CommandId, FeatureId, KeyContextId, MessageId, StyleTargetId } from '../../generated/ids.ts';
 import type { CommandArgs } from '../../generated/commands.ts';
@@ -187,17 +187,22 @@ function useFieldRefusal(command: CommandId, property: string): { readonly text:
 // the cascade (another breakpoint or state), else what the page computes (inherited or the default), composed as a
 // value is (composedText). Nothing while the element holds its own.
 export function useEffectiveText(property: string, parts: readonly string[], own: boolean): string {
+  // the word for longhands no shorthand writes, as for several elements that differ
+  const MIXED = useT()('inspector.mixedValue');
   const primary = useEditorState((s) => s.selection[0] ?? null);
   const cascaded = useEditorState((s) => {
     const node = own ? null : styleSource(s);
     if (!node) return undefined;
     const values = parts.map((p) => shownText(node, p, layeredRules(s)));
-    return values.every((v) => v === undefined) ? undefined : composedText(property, values.map((v) => v ?? ''), MODEL_RULES);
+    if (values.every((v) => v === undefined)) return undefined;
+    const texts = values.map((v) => v ?? '');
+    return composesNot(property, texts, MODEL_RULES) ? MIXED : composedText(property, texts, MODEL_RULES);
   });
   const computed = usePageValues(own || cascaded !== undefined ? null : primary, parts);
   if (own) return '';
   if (cascaded !== undefined) return cascaded;
-  const shown = computed === null ? '' : composedText(property, parts.map((p) => computed[p] ?? ''), MODEL_RULES);
+  const pageTexts = computed === null ? null : parts.map((p) => computed[p] ?? '');
+  const shown = pageTexts === null ? '' : composesNot(property, pageTexts, MODEL_RULES) ? MIXED : composedText(property, pageTexts, MODEL_RULES);
   // what the page computes nothing for (Chrome reads no line-clamp) shows the property's initial value: an empty field
   // read as a missing value (the user's review of 2026-10-05)
   return shown === '' && computed !== null ? (INITIAL_VALUES[property] ?? '') : shown;
@@ -712,12 +717,14 @@ export function NumberField({ entry, door, property, label, bare = false, labell
 // composite's longhands composed, a part's own piece), the value the page computes as its placeholder, Mixed when the
 // selected elements differ, and whether the element, or another selected one, holds a value of its own.
 function useStyleFieldValue(property: string, parts: readonly string[], part: FieldPart | null) {
+  const MIXED = useT()('inspector.mixedValue');
   const storedText = useEditorState((s) => {
     const node = styleSource(s);
     if (!node) return undefined;
     const values = parts.map((p) => storedValue(node, p, layeredRules(s)));
     if (values.every((v) => v === undefined)) return undefined;
-    return composedText(property, values.map((v) => v ?? ''), MODEL_RULES);
+    const texts = values.map((v) => v ?? '');
+    return composesNot(property, texts, MODEL_RULES) ? MIXED : composedText(property, texts, MODEL_RULES);
   });
   const effective = useEffectiveText(property, parts, storedText !== undefined);
   const held = useEditorState((s) => {
