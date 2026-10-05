@@ -1210,6 +1210,7 @@
   "language.ptBR": "Português (Brasil)",
   "layers.collapseAll": "Collapse every branch",
   "layers.empty": "empty",
+  "layers.nameTip": "{name} — {action}",
   "layers.expandAll": "Expand every branch",
   "layers.key.nextRow": "Next row",
   "layers.key.previousRow": "Previous row",

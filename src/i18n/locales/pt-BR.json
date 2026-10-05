@@ -1210,6 +1210,7 @@
   "language.ptBR": "Português (Brasil)",
   "layers.collapseAll": "Recolher todos os ramos",
   "layers.empty": "vazio",
+  "layers.nameTip": "{name} — {action}",
   "layers.expandAll": "Expandir todos os ramos",
   "layers.key.nextRow": "Próxima linha",
   "layers.key.previousRow": "Linha anterior",

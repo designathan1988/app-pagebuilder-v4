@@ -311,7 +311,8 @@ const LayersRow = memo(function LayersRow({ node, depth, view }: { readonly node
             data-args={JSON.stringify({ target: node.id })}
             tabIndex={-1}
             aria-disabled={rename.built ? undefined : true}
-            title={rename.built ? rename.label : rename.title}
+            // the whole name first, which a long one at a deep level ends in an ellipsis for (the audit of 2026-10-05)
+            title={rename.built ? t('layers.nameTip', { name: node.name, action: rename.label }) : rename.title}
           >
             {node.name}
           </span>

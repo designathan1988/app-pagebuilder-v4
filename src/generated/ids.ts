@@ -4246,6 +4246,7 @@ export const MESSAGE_IDS = [
   "language.ptBR",
   "layers.collapseAll",
   "layers.empty",
+  "layers.nameTip",
   "layers.expandAll",
   "layers.key.nextRow",
   "layers.key.previousRow",
