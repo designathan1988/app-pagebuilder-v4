@@ -285,6 +285,8 @@
 .style-classes__field {
   flex: 1;
   min-width: 0;
+  /* the name's field, framed while it holds the focus, keeps clear of the count beside it (its frame ran over "3") */
+  margin-right: var(--space-2);
 }
 
 .style-classes__field .input {
@@ -314,17 +316,19 @@
   white-space: nowrap;
 }
 
+/* a class's delete always drawn, in the subtle ink until its row is hovered or focused, as a variable's: unseen at rest
+   it still took the press (the audit of 2026-10-05) */
 .style-classes__row > .door {
   flex: none;
   width: var(--size-target-min);
   height: var(--size-target-min);
   padding: 0;
-  opacity: 0;
+  color: var(--color-text-subtle);
 }
 
 .style-classes__row:hover > .door,
 .style-classes__row:focus-within > .door {
-  opacity: 1;
+  color: var(--color-text);
 }
 
 .state-picker .menu-button {
