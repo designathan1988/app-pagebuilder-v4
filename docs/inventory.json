@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 478,
-    "lines": 83702
+    "lines": 83708
   },
   "features": [
     {
@@ -5081,7 +5081,7 @@
     },
     {
       "path": "src/editor/canvas/chrome.tsx",
-      "lines": 1146,
+      "lines": 1152,
       "commands": [],
       "features": []
     },

@@ -250,6 +250,9 @@ interface Layout {
   // keeps its hit area out of them (handleHitBox, the canvas audit of 2026-09-28), so the element below the edge
   // keeps being its own press
   readonly neighbours: readonly Box[];
+  // the selection this layout was measured for: a label measured for another is not drawn yet (for a frame after a new
+  // selection the label showed its new name where the last one stood, and the quick panel's chip followed it there)
+  readonly measuredFor: string;
   // --space-6: the side of a resize handle's square, read with the rest of the layer's own measures
   readonly handleSize: number;
 }
@@ -334,7 +337,7 @@ const startHeld = (handle: string, starts: Layout['starts']): boolean => {
   return (side.includes('n') && !starts.y) || (side.includes('w') && !starts.x);
 };
 
-const EMPTY: Layout = { selected: [], union: null, hovered: null, label: null, toolbar: null, band: null, rotate: null, starts: null, size: null, rotation: 0, hoverSize: null, distances: [], neighbours: [], handleSize: 24 };
+const EMPTY: Layout = { selected: [], union: null, hovered: null, label: null, toolbar: null, band: null, rotate: null, starts: null, size: null, rotation: 0, hoverSize: null, distances: [], neighbours: [], handleSize: 24, measuredFor: '' };
 
 // whether two pieces of what the chrome draws read the same (the layout is compared as its text, so an unchanged
 // measure is not drawn again)
@@ -802,6 +805,7 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
           union,
           hovered: hoveredBox,
           label: placed,
+          measuredFor: selection.join(' '),
           toolbar: placedToolbar,
           band: local(drawnBand),
           rotate,
@@ -945,15 +949,17 @@ function SelectionLabel({ labelRef, selection, node, targets, shown, dropping, e
   readonly breakpoint: ReturnType<typeof activeBreakpoint>;
 }) {
   const t = useT();
+  // a layout measured for another selection places nothing yet: the label waits, measuring, for its own
+  const placed = shown.measuredFor === selection.join(' ') ? shown.label : null;
   // fixed in the window (DEC-70): the chrome layer's place on the screen plus the label's in the layer
-  const at = shown.label ? { left: origin.x + shown.label.box.x, top: origin.y + shown.label.box.y } : undefined;
-  const away = shown.label?.seen === false ? ' is-away' : '';
+  const at = placed ? { left: origin.x + placed.box.x, top: origin.y + placed.box.y } : undefined;
+  const away = placed?.seen === false ? ' is-away' : '';
   return selection.length > 1 ? (
     <div
       ref={labelRef}
-      className={`chrome__label${shown.label ? '' : ' is-measuring'}${away}`}
+      className={`chrome__label${placed ? '' : ' is-measuring'}${away}`}
       data-chrome="label"
-      data-placement={shown.label?.placement}
+      data-placement={placed?.placement}
       style={at}
     >
       <span className="chrome__name">{t('canvas.selectedCount', { count: selection.length })}</span>
@@ -966,10 +972,10 @@ function SelectionLabel({ labelRef, selection, node, targets, shown, dropping, e
   ) : node !== null && targets.includes(node.id) ? (
     <div
       ref={labelRef}
-      className={`chrome__label is-target${shown.label ? '' : ' is-measuring'}${shown.label?.covers === true ? ' is-covering' : ''}${dropping ? ' is-hidden' : ''}${editing ? ' is-editing' : ''}${away}`}
+      className={`chrome__label is-target${placed ? '' : ' is-measuring'}${placed?.covers === true ? ' is-covering' : ''}${dropping ? ' is-hidden' : ''}${editing ? ' is-editing' : ''}${away}`}
       data-chrome="label"
       data-label-for={node.id}
-      data-placement={shown.label?.placement}
+      data-placement={placed?.placement}
       style={at}
     >
       {editing ? (
