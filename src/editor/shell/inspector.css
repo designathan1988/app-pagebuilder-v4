@@ -1428,10 +1428,14 @@ textarea.input {
 }
 
 /* Ready-made values (value-presets.tsx, spec value-presets): a row of thumbnails under the property's field, each a
-   square wearing the value it writes, its name under it */
+   square wearing the value it writes, its name under it. One row whatever the language: each thumbnail takes an equal
+   share of it and a long name wraps under its own thumbnail (the user's review of 2026-10-05: in Portuguese the
+   filters' fourth, "Escala de cinza", fell to a line of its own while the shadows' four stood in one) */
 .value-presets {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: start;
   gap: var(--space-3);
   padding: var(--space-2) 0 var(--space-3);
 }
@@ -1439,9 +1443,11 @@ textarea.input {
 .value-preset {
   /* the value the thumbnail wears, set on each thumbnail (value-presets.tsx); the property's initial value without it */
   --preset-value: initial;
+  min-width: 0;
   display: flex;
   height: auto;
   flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
@@ -1456,6 +1462,12 @@ textarea.input {
 .value-preset:focus-visible {
   border-color: var(--color-border-strong);
   color: var(--color-text);
+}
+
+.value-preset__name {
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
 }
 
 .value-preset__thumb {
