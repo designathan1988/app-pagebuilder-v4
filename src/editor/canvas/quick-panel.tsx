@@ -319,6 +319,9 @@ interface Placed {
   readonly element: Box;
   // the widest the panel may be: the stage less its inset on both sides
   readonly widest: number;
+  // the tallest it may be: down to the window's bottom less the inset, from where it stands beside the label (DEC-70),
+  // what it holds scrolled inside it (it reached past the window: the audit of 2026-10-05)
+  readonly tallest: number;
 }
 
 const token = (element: Element, name: string) => parseFloat(getComputedStyle(element).getPropertyValue(name)) || 0;
@@ -407,7 +410,7 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
         }
         if (!open) revealed.current = null;
         const placedBox = at === undefined || !seen ? null : placeQuickPanel({ x: at.x, y: at.y, width: at.width, height: at.height }, element, size, open, whole, inset, offset);
-        const next = placedBox === null ? null : { id, open, box: placedBox, element, widest: Math.max(0, window.innerWidth - 2 * inset) };
+        const next = placedBox === null ? null : { id, open, box: placedBox, element, widest: Math.max(0, window.innerWidth - 2 * inset), tallest: Math.max(0, window.innerHeight - placedBox.y - inset) };
         setPlaced((before) => (JSON.stringify(before) === JSON.stringify(next) ? before : next));
       }
       request = requestAnimationFrame(measure);
@@ -470,7 +473,7 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
     <div
       ref={panel}
       className={`quick-panel${measuring}`}
-      style={{ ...at, maxWidth: current?.widest }}
+      style={{ ...at, maxWidth: current?.widest, maxHeight: current === null ? undefined : `min(75vh, ${current.tallest}px)` }}
       data-region={REGION}
       data-key-context={PANEL_KEYS}
       role="dialog"
