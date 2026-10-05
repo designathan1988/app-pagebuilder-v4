@@ -183,7 +183,7 @@
   width: 100%;
 }
 
-/* a setting is a field row of a dialog (jornada02 pairing 5.2): its label in the card's 72 px column, its field beside
+/* a setting is a field row of a dialog (jornada02 pairing 5.2): its label in the card's column, its field beside
    it, 24 px high — never its label stacked over a 28 px box */
 .guides-grids__field {
   display: grid;
@@ -862,7 +862,7 @@
   min-width: 0;
 }
 
-/* the name and the settings: one per line, the label in the card's 72 px column (the canonical .prop) */
+/* the name and the settings: one per line, the label in the card's column (the canonical .prop) */
 .timeline__settings {
   display: flex;
   flex-direction: column;
@@ -1192,7 +1192,7 @@
   line-height: var(--lh-caption);
 }
 
-/* a card's rows: the 72 px label column of a card (jornada02 R-06 .ix), its values in the UI font */
+/* a card's rows: the label column of a card (jornada02 R-06 .ix; 116 px since LR2), its values in the UI font */
 .interaction-card .panel-field,
 .interaction-card .interaction-card__target,
 .interaction-card .field-row {

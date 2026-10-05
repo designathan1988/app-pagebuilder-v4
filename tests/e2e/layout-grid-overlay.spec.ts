@@ -89,8 +89,8 @@ test('Ctrl+wheel keeps the page point under the pointer (A3.21)', runs(OPEN, ZOO
   expect(Math.abs(moved.y), 'and down the page (the audit: it drifted by dozens of px)').toBeLessThan(2);
 });
 
-// Each setting of Guides & Grids is a field row: its label in the card's 72 px column, its field beside it on the same
-// line (spec layout-grid-overlay; jornada02 pairing 5.2).
+// Each setting of Guides & Grids is a field row: its label in the card's column (the token; 116 px since LR2, 72 before),
+// its field beside it on the same line (spec layout-grid-overlay; jornada02 pairing 5.2).
 test('the Guides & Grids settings are field rows, the label beside its field', runs('workspace.openDialog#menu-view-guides-grids'), async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openEditor(page);
@@ -99,7 +99,9 @@ test('the Guides & Grids settings are field rows, the label beside its field', r
   await expect(field).toBeVisible();
   const [label, input] = await Promise.all([field.locator('.guides-grids__label').boundingBox(), field.locator('input').boundingBox()]);
   if (label === null || input === null) throw new Error('the field is not laid out');
-  expect(Math.round(label.width)).toBeLessThanOrEqual(72);
+  const column = await field.evaluate((element) => parseFloat(getComputedStyle(element).getPropertyValue('--size-label-column-card')));
+  expect(column).toBeGreaterThan(0);
+  expect(Math.round(label.width)).toBeLessThanOrEqual(column);
   expect(input.x).toBeGreaterThan(label.x + label.width);
   expect(Math.abs(input.y + input.height / 2 - (label.y + label.height / 2))).toBeLessThan(4);
   expect(Math.round(input.height)).toBe(24);

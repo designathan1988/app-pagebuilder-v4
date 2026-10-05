@@ -3772,7 +3772,7 @@ The overlay is in page px and scales with the page.
 
 1. **The column bands are opaque and cover the page content** (dark theme). Required: overlays are translucent (design token for overlay colour) and never hide the content beneath.
 2. **Turning the grid on also turns on element outlines.** Required: the grid overlay is independent of element outlines; `Ctrl+'` toggles only the column grid.
-3. **The Guides & Grids settings stacked each label over a 28 px box** (jornada02 pairing 5.2). Required: each setting of the dialog is a field row: its label in the card's 72 px column, its 24 px field beside it, two settings to a line.
+3. **The Guides & Grids settings stacked each label over a 28 px box** (jornada02 pairing 5.2). Required: each setting of the dialog is a field row: its label in the card's column, its 24 px field beside it, two settings to a line. The card's column is the inspector's 116 px since the user's review of 2026-10-05 (LR2: in the 72 px column "Pages of the site", "Snap distance (px)", "Animation direction" and five Portuguese names took two lines), so every name of a dialog, of the Timeline's settings and of an interaction's card fits one line in both languages, a name too long said shorter ("Espaçamento" for the dots, "Distância (px)" for the snap; `tests/e2e/card-labels-fit.spec.ts`).
 
 ## lock-element
 
@@ -7821,7 +7821,7 @@ None in Pager.
 2. **The Inspector cannot edit keyframe values.** Required:
    - While the playhead sits on a keyframe, the Inspector edits that keyframe's values (e.g. opacity, Move Y) and not the base styles, and a badge in the Inspector says so.
    - Keyframe offsets, values and per-keyframe easing are stored in the document JSON.
-3. **The panel was boxes floating in the dock's padding** (jornada02 pairing 5.6): 28 px transport buttons in frames, a track in a rounded well, two settings to a line squeezed to nothing in the side, an animation's delete spelled out. Required: the canonical anatomy — a 236 px side (the animations, their small trash buttons, the name and the settings one per line with their labels in the 72 px column) beside the track area: a 32 px transport bar of 24 px buttons, the ruler and the lane under it, and a bar for the keyframe's actions.
+3. **The panel was boxes floating in the dock's padding** (jornada02 pairing 5.6): 28 px transport buttons in frames, a track in a rounded well, two settings to a line squeezed to nothing in the side, an animation's delete spelled out. Required: the canonical anatomy — a 288 px side (236 until LR2, which gave the labels the cards' 116 px column and the values their room; the animations, their small trash buttons, the name and the settings one per line) beside the track area: a 32 px transport bar of 24 px buttons, the ruler and the lane under it, and a bar for the keyframe's actions.
 
 ## timeline-preview
 
@@ -8444,8 +8444,8 @@ The Interactions tab holds two lists, each under its title (jornada03 plan, stag
 **Motion**, then the behaviours; each list says when it is empty ("No event on this element yet.", "No motion on this
 element yet."), and one note ends the tab with what runs where: Run interactions plays the motion on the canvas, Preview
 runs the events and the motion (the two notes it had contradicted each other). A motion card is drawn as an event's card
-(design/final `.ix`): its trigger and what it plays as the head, the trash as an icon, the fields in the 72 px label
-column.
+(design/final `.ix`): its trigger and what it plays as the head, the trash as an icon, the fields in the card's label
+column (116 px since LR2).
 
 Under the events: **Motion** (`motion.add#inspector-motion-add`) adds one to the single selected element. A new interaction starts with the first trigger the element offers (click, which every element offers) and plays a **new timeline of the project named after the element and the trigger** ("Hero click"), holding one animation of the element itself, from 0 s for 0.6 s, eased out, keying nothing yet (as a new CSS animation's keyframes hold nothing).
 

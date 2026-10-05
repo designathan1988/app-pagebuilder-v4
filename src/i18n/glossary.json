@@ -131,7 +131,7 @@
       "property": "animation-fill-mode",
       "terms": {
         "en": "Fill mode",
-        "pt-BR": "Estado fora da animação"
+        "pt-BR": "Fora da animação"
       },
       "note": "What the element shows before the animation starts and after it ends."
     },
