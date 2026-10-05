@@ -276,7 +276,7 @@ Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests pas
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
 | `timeline-animations` | Timeline panel: create animations for an element | yes | 3 | 2 | [timeline-animations](../spec/BEHAVIOUR.md#timeline-animations) | 1 | passes 3/3 |
-| `timeline-keyframes` | Add, edit, move and delete keyframes on the timeline | yes | 4 | 5 | [timeline-keyframes](../spec/BEHAVIOUR.md#timeline-keyframes) | 4 | passes 5/5 |
+| `timeline-keyframes` | Add, edit, move and delete keyframes on the timeline | yes | 4 | 5 | [timeline-keyframes](../spec/BEHAVIOUR.md#timeline-keyframes) | 5 | passes 5/5 |
 | `timeline-animation-settings` | Animation duration, delay, repeat, direction and fill | yes | 2 | 2 | [timeline-animation-settings](../spec/BEHAVIOUR.md#timeline-animation-settings) | 1 | passes 2/2 |
 | `timeline-preview` | Preview animations by playing and scrubbing the timeline | yes | 5 | 5 | [timeline-preview](../spec/BEHAVIOUR.md#timeline-preview) | 2 | passes 5/5 |
 | `export-keyframes` | Export animations as @keyframes | yes | 2 | 1 | [export-keyframes](../spec/BEHAVIOUR.md#export-keyframes) | 1 | passes 2/2 |

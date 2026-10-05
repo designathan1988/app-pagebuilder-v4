@@ -942,8 +942,35 @@
   color: var(--color-text-subtle);
   font-size: var(--fs-caption);
   cursor: pointer;
-  background: repeating-linear-gradient(to right, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent 10%);
+  /* a line at each quarter, its time just after it (the labels below), none through a label */
+  background: repeating-linear-gradient(to right, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent 25%);
   border-bottom: 1px solid var(--color-border);
+}
+
+/* the ruler's quarters in seconds (the canonical .tl-ruler span), the last ending at the ruler's end */
+.timeline__ruler-label {
+  position: absolute;
+  top: var(--space-1);
+  translate: var(--space-1) 0;
+  pointer-events: none;
+  white-space: nowrap;
+  font: var(--fw-caption) var(--fs-caption) / var(--lh-caption) var(--font-ui);
+}
+
+.timeline__ruler-label:last-child {
+  translate: calc(-100% - var(--space-1)) 0;
+}
+
+/* the playhead's time over the animation's length, after the transport (the canonical .tl-time and its subtle length) */
+.timeline__time {
+  padding: 0 var(--space-3);
+  white-space: nowrap;
+  font: var(--weight-semibold) var(--fs-code) / var(--lh-code) var(--font-mono);
+}
+
+.timeline__length {
+  color: var(--color-text-subtle);
+  font-weight: var(--weight-regular);
 }
 
 .timeline__playhead {

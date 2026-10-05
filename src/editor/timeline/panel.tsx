@@ -6,7 +6,8 @@
 // animation.moveKeyframe, addKeyframe, setKeyframeEasing and deleteKeyframe). The two drags (the playhead along the
 // ruler, a keyframe along the track) are the pointer owner's; this panel only draws them and runs their doors' clicks.
 import { useState, type CSSProperties } from 'react';
-import { animationsOf, defaultSetting, SETTINGS, settingLabel } from '../../core/animation/animation.ts';
+import { animationsOf, defaultSetting, durationMs, SETTINGS, settingLabel } from '../../core/animation/animation.ts';
+import { seconds } from '../../core/motion/view.ts';
 import { locate, type Animation } from '../../core/document/model.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';
 import { manifest } from '../../manifest/runtime.ts';
@@ -74,6 +75,9 @@ function NewAnimation({ ready }: { readonly ready: boolean }) {
   return <PanelField entry={NEW_ANIMATION} value="" label={t('timeline.name')} disabled={!ready} autoFocus onDone={() => setAsking(false)} />;
 }
 
+// the ruler's quarters, where the canonical ruler names its times (design/final .tl-ruler: 0 s, 0.3 s … 1.2 s)
+const QUARTERS = [0, 25, 50, 75, 100] as const;
+
 export function TimelinePanel() {
   const t = useT();
   const state = useEditorState((s) => s);
@@ -89,6 +93,9 @@ export function TimelinePanel() {
   const width = trackWidth();
   const playhead = keyframeUnder;
   const shownName = shown?.animation.name ?? null;
+  // the shown animation's length and the playhead's time in it, in milliseconds
+  const length = shown === null ? 0 : durationMs(shown.animation);
+  const at = (length * percent) / 100;
 
   return (
     <div className="timeline" data-region="dock-timeline" data-key-context="timeline">
@@ -162,6 +169,13 @@ export function TimelinePanel() {
               <Icon name="repeat" size="sm" />
             </PanelButton>
           ) : null}
+          {/* where the playhead stands, over the animation's length (the canonical .tl-time: "0.48 s / 1.20 s") */}
+          {shown === null ? null : (
+            <span className="timeline__time">
+              {t('timeline.time', { time: (at / 1000).toFixed(2) })}
+              <span className="timeline__length"> {t('timeline.length', { length: (length / 1000).toFixed(2) })}</span>
+            </span>
+          )}
         </div>
         <div className="timeline__track" style={{ width } as CSSProperties} data-track="">
           <div
@@ -172,6 +186,14 @@ export function TimelinePanel() {
             title={t('command.timeline.playhead')}
           >
             <span className="timeline__playhead" data-playhead="" style={{ left: `${(percent / 100) * 100}%` } as CSSProperties} />
+            {/* the quarters of the shown animation in seconds, the last ending at the ruler's end */}
+            {shown === null
+              ? null
+              : QUARTERS.map((quarter) => (
+                  <span key={quarter} className="timeline__ruler-label" style={{ left: `${quarter}%` } as CSSProperties}>
+                    {t('timeline.rulerTime', { time: seconds((length * quarter) / 100) })}
+                  </span>
+                ))}
           </div>
           <div className="timeline__lane">
             {shown !== null
