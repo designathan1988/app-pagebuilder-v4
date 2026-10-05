@@ -1,6 +1,6 @@
 // The project path a captured page takes from its address (tools/companion/capture.ts pagePath, spec capture-url).
 import { describe, expect, it } from 'vitest';
-import { captureSnapshot, pagePath } from './capture.ts';
+import { captureRecorded, captureSnapshot, pagePath } from './capture.ts';
 import type { CapturedSnapshotPackage } from '../../src/core/document/captured.ts';
 import type { ObservedElement } from './serialize.ts';
 
@@ -61,4 +61,21 @@ it('packages a page as one tree: its sheets linked at their places, its images l
   const html = Buffer.from(result.files.find((file) => file.path === 'index.html')?.base64 ?? '', 'base64').toString('utf8');
   expect(html).toContain('<link rel="stylesheet" href="css/inline-1.css">');
   expect(html).not.toContain('portal');
+});
+
+// bellroy's record held each font twice: the response with its bytes, then the same address again from the browser's
+// cache, a 200 with no body (content.size -1). The empty one won, and every font of the page was 0 bytes.
+it('keeps a recorded file\'s bytes when the record holds the same address again without them', async () => {
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'har-'));
+  const har = path.join(dir, 'site.har');
+  const font = Buffer.from('wOF2-font-bytes');
+  const entry = (text: string | undefined, size: number) => ({ request: { url: 'https://site.test/font.woff2' }, response: { status: 200, content: { mimeType: 'font/woff2', size, ...(text === undefined ? {} : { text, encoding: 'base64' }) } } });
+  fs.writeFileSync(har, JSON.stringify({ log: { entries: [entry(font.toString('base64'), font.length), entry(undefined, -1)] } }));
+  const root = page([], [{ kind: 'comment', id: 'k3', value: '__capture_sheet_0__' }]);
+  const result = await captureRecorded('https://site.test/', [{ width: 1440, inline: [], read: { title: 'Site', root, sheets: [{ href: null, text: '@font-face{font-family:Brand;src:url("/font.woff2") format("woff2")}' }], images: [], links: [] } }], har);
+  const saved = result.files.find((file) => file.path.startsWith('fonts/'));
+  expect(Buffer.from(saved?.base64 ?? '', 'base64').toString()).toBe('wOF2-font-bytes');
 });

@@ -450,9 +450,13 @@ function harEntries(file: string): Map<string, Recorded> {
     const text = response.content.text ?? '';
     const next = { status: response.status, type: response.content.mimeType ?? '', body: Buffer.from(text, response.content.encoding === 'base64' ? 'base64' : 'utf8') };
     const previous = out.get(request.url);
-    // A later aborted retry is not evidence that an earlier successful response ceased to exist. Keep the
-    // latest successful body for Companion assets and do not install an abort route over it for HAR replay.
-    if (previous === undefined || (next.status >= 200 && next.status < 300) || previous.status < 200 || previous.status >= 300) out.set(request.url, next);
+    // A later aborted retry is not evidence that an earlier successful response ceased to exist, and neither is a later
+    // success recorded without its body (a response served from the browser's cache: content.size -1, no text; the
+    // HAR 1.2 content.text is left out when it is not available). Keep the latest successful body for Companion
+    // assets and do not install an abort route over it for HAR replay. (bellroy: each font twice, the second one
+    // empty, and the empty one won: every font of the page was 0 bytes.)
+    const ok = (one: Recorded): boolean => one.status >= 200 && one.status < 300;
+    if (previous === undefined || !ok(previous) || (ok(next) && (next.body.length > 0 || previous.body.length === 0))) out.set(request.url, next);
   }
   return out;
 }
