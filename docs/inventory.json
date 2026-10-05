@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 476,
-    "lines": 83205
+    "lines": 83203
   },
   "features": [
     {
@@ -6795,7 +6795,7 @@
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6609,
+      "lines": 6607,
       "commands": [],
       "features": []
     },

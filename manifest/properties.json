@@ -5306,8 +5306,7 @@
         "style.setGridTracks#inspector-grid-template-columns-remove-track"
       ],
       "details": [
-        "style.set#inspector-grid-template-columns",
-        "style.set#inspector-grid-auto-flow"
+        "style.set#inspector-grid-template-columns"
       ]
     },
     {
@@ -5320,8 +5319,7 @@
         "style.setGridTracks#inspector-grid-template-rows-remove-track"
       ],
       "details": [
-        "style.set#inspector-grid-template-rows",
-        "style.set#inspector-grid-template-areas"
+        "style.set#inspector-grid-template-rows"
       ]
     },
     {
@@ -5364,37 +5362,27 @@
       "id": "scroll",
       "section": "layout",
       "labelKey": "inspector.row.scroll",
-      "head": [
-        "style.set#inspector-scroll-behavior"
-      ],
+      "head": [],
       "details": [
+        "style.set#inspector-scroll-behavior",
         "style.set#inspector-scroll-snap-type",
         "style.set#inspector-scroll-snap-align"
-      ]
+      ],
+      "shortLabels": {
+        "style.set#inspector-scroll-behavior": "inspector.row.scroll.behaviour"
+      }
     },
     {
       "id": "table",
       "section": "layout",
       "labelKey": "inspector.row.table",
-      "head": [
-        "style.set#inspector-border-collapse"
-      ],
+      "head": [],
       "details": [
+        "style.set#inspector-border-collapse",
         "style.set#inspector-border-spacing",
         "style.set#inspector-table-layout",
         "style.set#inspector-caption-side",
         "style.set#inspector-empty-cells"
-      ]
-    },
-    {
-      "id": "limits",
-      "section": "size",
-      "labelKey": "inspector.row.limits",
-      "head": [
-        "pair:size-min"
-      ],
-      "details": [
-        "pair:size-max"
       ]
     },
     {
@@ -5436,17 +5424,6 @@
       ]
     },
     {
-      "id": "float",
-      "section": "position",
-      "labelKey": "inspector.row.float",
-      "head": [
-        "style.set#inspector-float"
-      ],
-      "details": [
-        "style.set#inspector-clear"
-      ]
-    },
-    {
       "id": "background-layers",
       "section": "paint",
       "labelKey": "inspector.row.backgroundLayers",
@@ -5482,18 +5459,6 @@
         "style.set#inspector-background-blend-mode": "inspector.row.backgroundLayers.blendMode",
         "style.set#inspector-background-position": "inspector.row.backgroundLayers.position"
       }
-    },
-    {
-      "id": "svg-paint",
-      "section": "paint",
-      "labelKey": "inspector.row.svgPaint",
-      "head": [
-        "style.set#inspector-fill"
-      ],
-      "details": [
-        "style.set#inspector-stroke",
-        "style.set#inspector-stroke-width"
-      ]
     },
     {
       "id": "border",
