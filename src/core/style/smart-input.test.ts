@@ -2,7 +2,7 @@
 // keywords typed and shown in the person's language.
 import { describe, expect, it } from 'vitest';
 import { lengthPercentage, workOutLengths, type ValueFacts } from './codecs.ts';
-import { keywordOfWord, wordOfKeyword } from './keyword-words.ts';
+import { keywordOfWord } from './keyword-words.ts';
 import { translate } from '../../i18n/index.ts';
 
 const facts: ValueFacts = { units: ['px', '%', 'rem', 'em', 'vh'], keywords: ['auto', 'none'], defaultUnit: 'px' };
@@ -36,11 +36,5 @@ describe('keywords in the person’s language', () => {
     expect(keywordOfWord('nenhum', facts.keywords, pt)).toBe('none');
     expect(keywordOfWord('negrito', facts.keywords, pt)).toBeNull();
     expect(keywordOfWord('auto', facts.keywords, en)).toBe('auto');
-  });
-  it('shows a stored keyword as its word, any other text as it is', () => {
-    expect(wordOfKeyword('auto', pt)).toBe('automático');
-    expect(wordOfKeyword('none', pt)).toBe('nenhum');
-    expect(wordOfKeyword('auto', en)).toBe('auto');
-    expect(wordOfKeyword('12px', pt)).toBe('12px');
   });
 });

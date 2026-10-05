@@ -1,7 +1,8 @@
-// The CSS keywords a field shows and takes in the person's language (the plan's stage 3, "entrada inteligente":
-// "automático", "nenhum"): each has a catalogue text, keyword.<keyword>, which is the keyword itself in English. A
-// field shows a stored keyword as its word; a word typed in any case, with or without its accents, stands for the
-// keyword wherever the property offers that keyword. The document and the export keep the CSS keyword.
+// The CSS keywords a field takes in the person's language (the plan's stage 3, "entrada inteligente": "automático",
+// "nenhum"): each has a catalogue text, keyword.<keyword>, which is the keyword itself in English. A word typed in any
+// case, with or without its accents, stands for the keyword wherever the property offers that keyword. A field shows a
+// stored keyword as CSS writes it, in every language (the user's choice of 2026-10-05, DEC-65: what a professional
+// types and reads in the code; only the fields' names are translated). The document and the export keep the keyword.
 import type { MessageId } from '../../generated/ids.ts';
 
 // (keyword values, written as one list: some share their name with a property, which they are not)
@@ -19,10 +20,4 @@ export function keywordOfWord(typed: string, keywords: readonly string[], words:
   const wanted = folded(typed);
   if (wanted === '') return null;
   return keywords.find((keyword) => WORDS.has(keyword) && folded(words(keywordKey(keyword))) === wanted) ?? null;
-}
-
-// How a field shows a stored value: a keyword of the list as its word, any other text as it is.
-export function wordOfKeyword(text: string, words: (key: MessageId) => string): string {
-  const keyword = text.trim().toLowerCase();
-  return WORDS.has(keyword) ? words(keywordKey(keyword)) : text;
 }

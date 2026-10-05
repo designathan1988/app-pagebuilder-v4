@@ -2931,8 +2931,9 @@ How Pager behaves, observed by running it from `.cache/pager-run` (Chrome, windo
 
 - **Smart input (stage 3):** a sum in one unit is worked out (`16px*2` → `32px`, `10px + 4` → `14px`); lengths of
   different units added or taken away are written as `calc()` (`100% - 20px` → `calc(100% - 20px)`). Common keywords
-  are shown and typed in the person's language (`automático` is `auto`, `nenhum` is `none`; case and accents aside);
-  the document keeps the CSS keyword. The wheel over a field that holds the focus steps it as ArrowUp/ArrowDown do.
+  are typed in the person's language (`automático` is `auto`, `nenhum` is `none`; case and accents aside) and shown
+  as CSS writes them in every language (DEC-65: the panel read "automático" beside "border-box"); the document keeps
+  the CSS keyword. The wheel over a field that holds the focus steps it as ArrowUp/ArrowDown do.
 
 Observed with Width = 300px: ArrowUp → `301px`, Shift+ArrowUp → `311px`, Alt+ArrowUp → `311.1px`; `Step up` 240→241, `Step down` twice → 239; typing `64/2` + Enter → `32px`. Scrubbing the shadow Blur glyph (starting at 12): +50 px → 37; Shift, +20 px → 137; Alt, +20 px → 138; −400 px → 0 (min 0).
 

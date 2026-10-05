@@ -29,16 +29,13 @@ export function messageText(locale: Locale, message: Message): string {
 }
 
 // The name a value shows with in a menu when the catalogue has one (the font weights: "Thin 100"), else the value
-// itself (a keyword is its own name).
+// itself: a keyword is its own name, as CSS writes it, in every language (DEC-65).
 export function useValueLabel(): (property: string, value: string) => string {
   const locale = useLocale();
   return useCallback(
     (property, value) => {
       const key = `value.${property}.${value}`;
-      if (hasText(locale, key)) return textOf(locale, key as MessageId);
-      // a keyword the person's language names (keyword-words.ts: "automático")
-      const word = `keyword.${value}`;
-      return hasText(locale, word) ? textOf(locale, word as MessageId) : value;
+      return hasText(locale, key) ? textOf(locale, key as MessageId) : value;
     },
     [locale],
   );

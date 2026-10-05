@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import { expect, test } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
-import { openMenu, runs } from './door.ts';
+import { control, openEverySection, openMenu, runs } from './door.ts';
 
 test.use({ locale: 'pt-BR' });
 
@@ -76,4 +76,36 @@ test('without the browser storage, the save state says why in the editor languag
   await openEditor(page);
   await page.locator('[data-door="element.insert#elements-tile"]').first().click();
   await expect(page.locator('.status-bar__save')).toHaveText('Não salvo: o navegador não guarda dados desta página (o IndexedDB não está disponível)');
+});
+
+// The user's choice of 2026-10-05 (DEC-65): a CSS value is shown as CSS writes it in every language — what a
+// professional types and reads in the code (Firefox's DevTools: "CSS properties and values … should not be
+// translated"); only the names of the fields are translated. In Portuguese the panel read "automático" beside
+// "border-box" and "L auto" beside "A automático". A word of the person's language typed in a field still reads as
+// its keyword (the plan's smart input).
+test('a Portuguese editor shows CSS values as CSS writes them, and reads a Portuguese word typed as its keyword', runs('project.open#menu-file', 'selection.select#layers-row', 'style.set#inspector-width'), async ({ page }) => {
+  await openEditor(page);
+  await openMenu(page, 'file');
+  const chooser = page.waitForEvent('filechooser');
+  await page.locator('[data-door="project.open#menu-file"]').click();
+  await (await chooser).setFiles({ name: 'aurora.json', mimeType: 'application/json', buffer: fs.readFileSync('manifest/features/fixtures/aurora.json') });
+  await control(page, 'selection.select#layers-row', { args: { target: 'n-title' } }).click();
+  await openEverySection(page);
+  const width = control(page, 'style.set#inspector-width');
+  await expect(width.locator('.field__rest-value')).toHaveText('auto');
+  // a value the element does not hold: the page's own, shown in the field as its placeholder
+  await expect(control(page, 'style.set#inspector-overflow').locator('input')).toHaveAttribute('placeholder', 'visible');
+  // typed in Portuguese, kept as the CSS keyword, and shown as CSS writes it
+  await width.locator('input').fill('240px');
+  await width.locator('input').press('Enter');
+  await width.locator('input').fill('automático');
+  await width.locator('input').press('Enter');
+  const stored = () => page.evaluate(() => {
+    type Node = { id: string; styles?: { desktop?: { base?: Record<string, string> } }; children: Node[] };
+    const tree = (window as unknown as { __builderTestPort: { document: () => { pages: { tree: Node }[] } } }).__builderTestPort.document().pages[0]?.tree;
+    const find = (n: Node): Node | undefined => (n.id === 'n-title' ? n : n.children.map(find).find((x) => x !== undefined));
+    return tree === undefined ? null : (find(tree)?.styles?.desktop?.base?.width ?? null);
+  });
+  await expect.poll(stored).toBe('auto');
+  await expect(width.locator('input')).toHaveValue('auto');
 });

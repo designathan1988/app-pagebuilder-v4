@@ -57,7 +57,6 @@ import { restoreFieldDraft } from '../persistence/drafts.ts';
 import { DRAFT_KEPT, markFieldKept, recordFieldInput } from '../input/drafts.ts';
 // A cleared status is still a change for a field with typing pending; one stable value keeps the store snapshot pure.
 const CLEARED_MESSAGE = Symbol('cleared field message');
-import { wordOfKeyword } from '../../core/style/keyword-words.ts';
 import { floatBelow, type Placed } from './float.ts';
 import { onPageChange } from '../canvas/page-clock.ts';
 import { VariableSuggestions } from './variable-suggestions.tsx';
@@ -582,8 +581,9 @@ export function NumberField({ entry, door, property, label, bare = false, labell
   useEffect(() => {
     const element = input.current;
     if (element === null) return;
-    // a keyword is shown in the person's language ("automático"), and read back as its keyword (keyword-words.ts)
-    const face = wordOfKeyword(shown, t);
+    // a keyword is shown as CSS writes it in every language, a word of the person's language typed is read back as its
+    // keyword (keyword-words.ts)
+    const face = shown;
     element.value = face;
     draft.current.typed = false;
     markFieldKept(element, face);
@@ -638,7 +638,7 @@ export function NumberField({ entry, door, property, label, bare = false, labell
   const cell = (
     <span ref={cellRef} className="input-wrap input-wrap--number" data-face="" data-origin={appearance.kind}>
       {prefix !== null ? <span className="field__prefix">{prefix}</span> : null}
-      <FieldValueSlot value={mixed ? t('inspector.mixedValue') : wordOfKeyword(compactFieldValue(base, true).value, t)}>
+      <FieldValueSlot value={mixed ? t('inspector.mixedValue') : compactFieldValue(base, true).value}>
         <input ref={input} className="input" role="spinbutton" disabled={!available} aria-label={label} inputMode="decimal" spellCheck={false} data-key-context={NUMBER_FIELD_CONTEXT} placeholder={mixed ? t('inspector.mixedValue') : effective || undefined} aria-invalid={refused.text !== null ? true : undefined} onInput={refused.dismiss} />
         {/* the step buttons lie over the value's end, so they take no room from the number (inspector.css
            .field__steps) */}
@@ -970,8 +970,9 @@ export function TextStyleField({
   useEffect(() => {
     const element = input.current;
     if (element === null) return;
-    // a keyword is shown in the person's language, and read back as its keyword (keyword-words.ts)
-    const face = wordOfKeyword(shown, t);
+    // a keyword is shown as CSS writes it, and a word typed in the person's language read back as its keyword
+    // (keyword-words.ts)
+    const face = shown;
     element.value = face;
     draft.current.typed = false;
     markFieldKept(element, face);
@@ -1059,7 +1060,7 @@ export function TextStyleField({
   const state = `${available ? '' : ' is-unavailable'}${set ? ' is-set' : ''}${refused.text !== null ? ' is-invalid' : ''}`;
   const visible = mixed ? t('inspector.mixedValue') : shown || placeholder || '';
   const percent = sliderRange?.min === 0 && sliderRange.max === 1 && visible.trim() !== '' && Number.isFinite(Number(visible));
-  const face = percent ? { value: String(Math.round(Number(visible) * 100)), unit: '%' } : compactFieldValue(wordOfKeyword(visible, t), sliderRange !== undefined, colour);
+  const face = percent ? { value: String(Math.round(Number(visible) * 100)), unit: '%' } : compactFieldValue(visible, sliderRange !== undefined, colour);
   const cell = (
     <span ref={valueScope} className="input-wrap" data-face="" data-origin={appearance.kind}>
         {prefix !== null ? <span className="field__prefix">{prefix}</span> : null}
