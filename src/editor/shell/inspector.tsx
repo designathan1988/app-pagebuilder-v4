@@ -697,8 +697,21 @@ function StyleTab() {
   );
 }
 
+// The Settings tab under the selected element's head, as the Style tab's selector bar and the Interactions tab's head
+// name it (the user's audit order of 2026-10-05: the Settings tab did not say whose settings it showed); with nothing
+// or several selected the tab says so itself
+function SettingsWithHead() {
+  const single = useSingleNode() !== null;
+  return (
+    <>
+      {single ? <div className="selector-bar selector-bar--head" data-region="inspector-settings-head"><SelectedElement /></div> : null}
+      <SettingsTab />
+    </>
+  );
+}
+
 // The body of each inspector tab the editor draws; the tab of any other is not available yet.
-const TAB_BODIES: Readonly<Record<string, ComponentType>> = { style: StyleTab, settings: SettingsTab, interactions: InteractionsTab };
+const TAB_BODIES: Readonly<Record<string, ComponentType>> = { style: StyleTab, settings: SettingsWithHead, interactions: InteractionsTab };
 
 export function Inspector() {
   const t = useT();
