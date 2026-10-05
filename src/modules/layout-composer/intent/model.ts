@@ -85,8 +85,6 @@ export type Constraint =
   | { readonly id: string; readonly kind: 'align'; readonly axis: Axis; readonly regions: readonly string[]; readonly edge: 'start' | 'center' | 'end' }
   | { readonly id: string; readonly kind: 'size'; readonly axis: Axis; readonly regions: readonly string[]; readonly dimension: Dimension; readonly value?: LayoutValue };
 
-export type ConstraintKind = Constraint['kind'];
-
 // What changes at and below a width (spec "Responsive Continuum"): a behaviour recorded where the person changed it,
 // compiled to the project breakpoint that holds that width. Absent fields keep the wider layout's choice.
 export interface ResponsiveRule {

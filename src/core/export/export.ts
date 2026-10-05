@@ -52,7 +52,7 @@ import { capturedExportHtml, exportedCapturedRoot, type CapturedHead } from '../
 import { captureSnapshotPath, type CapturedSnapshotPackage } from '../document/captured.ts';
 import { FORMS_SCRIPT, INTERACTIONS_SCRIPT, LOTTIE_SCRIPT, MOTION_SCRIPT, STYLESHEET } from './paths.ts';
 
-export const SITE_ARCHIVE = 'site.zip';
+const SITE_ARCHIVE = 'site.zip';
 // the generated files' paths (paths.ts, the one list the file tree reads too), published here for the editor
 export { FORMS_SCRIPT, INTERACTIONS_SCRIPT, LOTTIE_SCRIPT, MOTION_SCRIPT, STYLESHEET } from './paths.ts';
 const pageUsesForms = (tree: DocNode): boolean => [...walk(tree)].some(node => node.attributes.formField !== undefined || node.attributes.formSubmit !== undefined);

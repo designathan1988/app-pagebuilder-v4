@@ -82,7 +82,7 @@ function argType(arg: Command['args'][string]): string {
   }
 }
 
-export function generateTypes(root: string): { file: string; content: string }[] {
+function generateTypes(root: string): { file: string; content: string }[] {
   // the manifest as tools/manifest/load.ts reads it for manifest:check: one reader of the files
   const { input } = loadManifest(root);
   const file = (name: string) => input.files[name];

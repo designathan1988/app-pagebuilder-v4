@@ -97,7 +97,7 @@ export interface DocNode {
   readonly authoring?: Authoring;
 }
 
-export interface LayerColor {
+interface LayerColor {
   readonly node: NodeId;
   readonly colour: string;
 }
@@ -142,7 +142,7 @@ export interface Interaction {
   readonly delay?: number;
 }
 
-export interface GridSettings {
+interface GridSettings {
   readonly columns?: { readonly count?: number; readonly width?: number; readonly gutter?: number; readonly margin?: number };
   readonly rows?: { readonly height?: number; readonly gutter?: number };
   readonly dots?: { readonly spacing?: number };

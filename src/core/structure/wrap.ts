@@ -25,7 +25,7 @@ import { freshName, nodeMaker } from './node-maker.ts';
 import { selectionRoots } from './remove.ts';
 
 // the styles as the status names them: "display: flex; flex-direction: row"
-export const stylesText = (styles: Readonly<Record<string, string>>): string =>
+const stylesText = (styles: Readonly<Record<string, string>>): string =>
   Object.entries(styles)
     .map(([property, value]) => `${property}: ${value}`)
     .join('; ');

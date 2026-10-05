@@ -69,7 +69,7 @@ const inQuickGroup = (entry: DoorEntry, group: (typeof QUICK_GROUPS)[number]): b
 // refuses — but a bare number is the field's guided form, a blur radius in px (`2` is blur(2px); the user's real-use
 // audit, item 6.4), through the same bare-unit rule the per-function fields use.
 const BARE_NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)$/;
-export function functionsTyped(text: string, held: string | undefined): unknown {
+function functionsTyped(text: string, held: string | undefined): unknown {
   const trimmed = text.trim();
   if (trimmed === '' || trimmed.toLowerCase() === 'none') return 'none';
   if (BARE_NUMBER.test(trimmed)) return { blur: withBareUnit('blur', trimmed) };

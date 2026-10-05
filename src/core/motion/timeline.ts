@@ -274,7 +274,7 @@ export const removeMarker = (timeline: MotionTimeline, id: string): MotionTimeli
 // ---------------------------------------------------------------- reading
 
 // A keyframe's absolute time on the timeline.
-export const absoluteTime = (action: TimelineAction, keyframe: MotionKeyframe): number => action.start + keyframe.time;
+const absoluteTime = (action: TimelineAction, keyframe: MotionKeyframe): number => action.start + keyframe.time;
 
 // Every keyframe of a timeline, with what it belongs to and where it sits.
 export function allKeyframes(timeline: MotionTimeline): { readonly ref: KeyframeRef; readonly property: string; readonly time: number; readonly keyframe: MotionKeyframe }[] {
@@ -286,5 +286,3 @@ export function allKeyframes(timeline: MotionTimeline): { readonly ref: Keyframe
   }
   return found;
 }
-
-export const tracksOf = keyframesOf;

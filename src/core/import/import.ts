@@ -64,8 +64,8 @@ import { capturedPageStylePath } from './capture-styles.ts';
 import { capturedFromPackage, captureSnapshotPath, captureTree, type CapturedNode } from '../document/captured.ts';
 
 // the entries this module published before the markup reading moved out stay published here: consumers need not change
-export { parseMarkup, parsePage, lineOf } from './markup.ts';
-export type { MarkupChild, MarkupNode, MarkupPage } from './markup.ts';
+;
+;
 
 
 // ---------------------------------------------------------------- the picked files
@@ -212,7 +212,7 @@ export interface ImportProblem {
 }
 
 // what the strict reader (element.applyHtml) did with what the model has no place for
-export interface Dropped {
+interface Dropped {
   readonly elements: number;
   readonly attributes: number;
 }
@@ -1384,7 +1384,7 @@ function unusedClasses(pages: readonly Page[], authors: ReadonlySet<string>): re
 // only in font sizes is a font size), else the first in the manifest's order (a colour, a length). A value of no kind
 // the project's variables have is reported with its line, never guessed.
 const ROOT = ':root';
-export function isRootTokenRule(rule: CssRule): boolean {
+function isRootTokenRule(rule: CssRule): boolean {
   return rule.media.length === 0 && rule.selector.trim() === ROOT && rule.declarations.length > 0 && rule.declarations.every((declaration) => declaration.text.trim().startsWith('--'));
 }
 
@@ -1834,7 +1834,7 @@ function countOf(node: DocNode): number {
 // @layer, @supports), and a declaration the editor does not store (a custom property, a vendor prefix) — in a residual
 // stylesheet the page links before the project's own (capture-styles.ts capturedPageStylePath), so the page looks as
 // it did and what the person edits in the inspector still wins.
-export const isCapturedPage = (markup: string): boolean => /<meta\b[^>]*\bname\s*=\s*["']?builder-capture\b/i.test(markup);
+const isCapturedPage = (markup: string): boolean => /<meta\b[^>]*\bname\s*=\s*["']?builder-capture\b/i.test(markup);
 
 // whether this importer maps a selector, as applyStyles decides it
 function mapsSelector(text: string, rules: ModelRules): boolean {
@@ -1872,7 +1872,7 @@ function movedUrl(value: string, from: string, at: string): string {
 }
 
 // The part of one sheet the model does not hold, as CSS, its addresses written from the residual stylesheet's place.
-export function residualCss(text: string, from: string, at: string, context: HandlerContext<never>, rules: ModelRules, deferred: ReadonlySet<string> = new Set()): string {
+function residualCss(text: string, from: string, at: string, context: HandlerContext<never>, rules: ModelRules, deferred: ReadonlySet<string> = new Set()): string {
   let ast: CssTreeNode;
   try {
     ast = parseCssTree(text, { parseValue: true, parseCustomProperty: false });

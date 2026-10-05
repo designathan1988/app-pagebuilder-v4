@@ -27,7 +27,7 @@ export interface FolderFile extends UploadedFile {
   readonly path: string;
 }
 
-export interface FolderImport {
+interface FolderImport {
   readonly name: string;
   readonly files: readonly FolderFile[];
 }
@@ -90,7 +90,7 @@ function freePath(path: string, taken: ReadonlySet<string>): string {
 
 // The folder's files read into a project document, with the report; or the refusal that names why it cannot be (no
 // file at all, no HTML page, an archive the reader refused).
-export function importFolder<Ui>(folder: FolderImport, context: HandlerContext<Ui>): { readonly document: DocumentJson; readonly report: FolderReport } | { readonly refused: Message } {
+function importFolder<Ui>(folder: FolderImport, context: HandlerContext<Ui>): { readonly document: DocumentJson; readonly report: FolderReport } | { readonly refused: Message } {
   const { rules, ids, words } = context;
   const files = folder.files.filter((file) => file.path !== '');
   if (files.length === 0) return { refused: message('status.folder.unsupported') };
@@ -172,7 +172,7 @@ export function importFolder<Ui>(folder: FolderImport, context: HandlerContext<U
 
 // the words the import report is told in (status.folder.imported): the files by role, and what the importer reports
 const listOf = (entries: readonly string[]): MessageParam => (entries.length === 0 ? { key: 'status.folder.none' } : entries.join(', '));
-export function reportMessage(folder: string, report: FolderReport): Message {
+function reportMessage(folder: string, report: FolderReport): Message {
   return message('status.folder.imported', {
     folder: folder === '' ? { key: 'status.folder.unnamed' } : folder,
     pages: listOf(report.pages.map((page) => `${page.path} → ${page.name}`)),

@@ -24,7 +24,7 @@ const snapped = (p: Point): Point => ({ x: Math.round(p.x / EPS) * EPS, y: Math.
 const keyOf = (p: Point): string => `${Math.round(p.x / EPS)}:${Math.round(p.y / EPS)}`;
 const at = <T>(list: readonly T[], index: number): T => list[((index % list.length) + list.length) % list.length] as T;
 
-export function signedArea(ring: readonly Point[]): number {
+function signedArea(ring: readonly Point[]): number {
   let sum = 0;
   ring.forEach((p, i) => {
     sum += crossOf(p, at(ring, i + 1));
@@ -33,7 +33,7 @@ export function signedArea(ring: readonly Point[]): number {
 }
 
 export const shapeArea = (shape: PolygonShape): number => Math.abs(signedArea(shape.outer)) - shape.holes.reduce((s, h) => s + Math.abs(signedArea(h)), 0);
-export const shapeContains = (shape: PolygonShape, p: Point): boolean => polygonContains(p, shape.outer) && !shape.holes.some((h) => polygonContains(p, h));
+const shapeContains = (shape: PolygonShape, p: Point): boolean => polygonContains(p, shape.outer) && !shape.holes.some((h) => polygonContains(p, h));
 
 export function boxShape(b: Box): PolygonShape {
   return {

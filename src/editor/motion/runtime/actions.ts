@@ -9,9 +9,9 @@
 import type { Effect } from '../../../core/motion/model.ts';
 import type { MotionKit } from './kit.ts';
 
-export type Undo = () => void;
+type Undo = () => void;
 
-export interface DisplayStart {
+interface DisplayStart {
   // whether the action shows its target (false: it hides it)
   readonly showing: boolean;
   // the transition's keyframes, from the hidden look to the shown one when showing, the other way when hiding; null

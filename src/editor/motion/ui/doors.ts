@@ -13,12 +13,6 @@ export function motionDoor(id: string): DoorEntry {
   return found;
 }
 
-// the values a door's command offers for one of its arguments (an enum of the manifest)
-export function offered(id: string, argument: string): readonly string[] {
-  const values = (motionDoor(id).command.args as Record<string, { readonly values?: readonly string[] }>)[argument]?.values;
-  return values ?? [];
-}
-
 const kebab = (field: string): string => field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 
 // The motion doors by their ids (manifest/commands/motion.json entryPoints), a function where the id carries what the

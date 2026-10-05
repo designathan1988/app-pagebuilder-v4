@@ -57,7 +57,7 @@ export interface Codec {
   compose?(values: readonly string[]): string | null;
 }
 
-export function registerCodec(id: CodecId, codec: Omit<Codec, 'id'>): Codec {
+function registerCodec(id: CodecId, codec: Omit<Codec, 'id'>): Codec {
   return Object.freeze({ id, read: codec.read, write: codec.write, ...(codec.compose ? { compose: codec.compose } : {}) });
 }
 
@@ -223,7 +223,7 @@ export const lengthPercentage = registerCodec('length-percentage', {
   },
 });
 
-export const keyword = registerCodec('keyword', {
+const keyword = registerCodec('keyword', {
   read(text, facts) {
     const typed = text.trim().toLowerCase();
     return facts.keywords.includes(typed) ? { kind: 'keyword', keyword: typed } : null;
@@ -234,7 +234,7 @@ export const keyword = registerCodec('keyword', {
 });
 
 const RATIO = /^(\d+(?:\.\d+)?|\.\d+)\s*(?:\/\s*(\d+(?:\.\d+)?|\.\d+))?$/;
-export const ratio = registerCodec('ratio', {
+const ratio = registerCodec('ratio', {
   read(text, facts) {
     const typed = text.trim().toLowerCase();
     if (facts.keywords.includes(typed)) return { kind: 'keyword', keyword: typed };
@@ -250,7 +250,7 @@ export const ratio = registerCodec('ratio', {
   },
 });
 
-export const axisPair = registerCodec('axis-pair', {
+const axisPair = registerCodec('axis-pair', {
   read(text, facts) {
     // each word a keyword the composite offers, or a length or percentage in one of its units (a bare number in the
     // field's unit: gap 8 is 8px)
@@ -271,7 +271,7 @@ export const axisPair = registerCodec('axis-pair', {
 });
 
 const FAMILY = /^(?:"[^"]+"|'[^']+'|[A-Za-z_][\w -]*)$/;
-export const fontFamilyList = registerCodec('font-family-list', {
+const fontFamilyList = registerCodec('font-family-list', {
   read(text) {
     const families = text.split(',').map((f) => f.trim());
     if (families.length === 0 || families.some((f) => f === '' || !FAMILY.test(f))) return null;
@@ -282,7 +282,7 @@ export const fontFamilyList = registerCodec('font-family-list', {
   },
 });
 
-export const fontWeight = registerCodec('font-weight', {
+const fontWeight = registerCodec('font-weight', {
   read(text, facts) {
     const typed = text.trim().toLowerCase();
     if (facts.keywords.includes(typed)) return { kind: 'keyword', keyword: typed };
@@ -295,7 +295,7 @@ export const fontWeight = registerCodec('font-weight', {
 });
 
 const OBLIQUE = /^oblique\s+(-?\d+(?:\.\d+)?)(deg|grad|rad|turn)$/;
-export const fontStyle = registerCodec('font-style', {
+const fontStyle = registerCodec('font-style', {
   read(text, facts) {
     const typed = text.trim().toLowerCase().replace(/\s+/g, ' ');
     if (facts.keywords.includes(typed)) return { kind: 'keyword', keyword: typed };
@@ -306,7 +306,7 @@ export const fontStyle = registerCodec('font-style', {
   },
 });
 
-export const lineHeight = registerCodec('line-height', {
+const lineHeight = registerCodec('line-height', {
   read(text, facts) {
     const typed = text.trim();
     // a bare number is a multiplier of the font size, never a length
@@ -322,7 +322,7 @@ export const lineHeight = registerCodec('line-height', {
 // generated list names, or one that only goes with another (mandatory, which is no value alone, so the list, made of
 // the values each keyword is alone, leaves it out): any keyword, the CSS support port then deciding whether the
 // browser takes the whole.
-export const keywordSet = registerCodec('keyword-set', {
+const keywordSet = registerCodec('keyword-set', {
   read(text, facts) {
     const words = text.trim().toLowerCase().split(/\s+/).filter((w) => w !== '');
     if (words.length === 0 || new Set(words).size !== words.length || !words.every((w) => facts.keywords.includes(w) || (words.length > 1 && /^[a-z][a-z-]*$/.test(w)))) return null;
@@ -333,15 +333,15 @@ export const keywordSet = registerCodec('keyword-set', {
   },
 });
 
-export const textIndent = registerCodec('text-indent', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
-export const verticalAlign = registerCodec('vertical-align', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
+const textIndent = registerCodec('text-indent', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
+const verticalAlign = registerCodec('vertical-align', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
 
 // the line, style and thickness keywords of text-decoration (CSS Text Decoration 3/4), and the initial values
 const DECORATION_LINES = ['none', 'underline', 'overline', 'line-through', 'spelling-error', 'grammar-error'];
 const DECORATION_STYLES = ['solid', 'double', 'dotted', 'dashed', 'wavy'];
 const DECORATION_THICKNESS = ['auto', 'from-font'];
 const DECORATION_INITIAL = { line: 'none', thickness: 'auto', style: 'solid', color: 'currentcolor' };
-export const textDecoration = registerCodec('text-decoration', {
+const textDecoration = registerCodec('text-decoration', {
   read(text) {
     const words = text.trim().toLowerCase().split(/\s+/).filter((w) => w !== '');
     if (words.length === 0) return null;
@@ -374,7 +374,7 @@ const WHITE_SPACE: Readonly<Record<string, readonly [string, string]>> = {
   'pre-line': ['preserve-breaks', 'wrap'],
   'break-spaces': ['break-spaces', 'wrap'],
 };
-export const whiteSpace = registerCodec('white-space', {
+const whiteSpace = registerCodec('white-space', {
   read(text) {
     const typed = text.trim().toLowerCase();
     const pair = WHITE_SPACE[typed];
@@ -387,7 +387,7 @@ export const whiteSpace = registerCodec('white-space', {
 
 // color: any text the browser takes as a colour (the CSS support port decides), kept as typed; one of the property's
 // keywords (currentcolor, transparent) in lower case.
-export const color = registerCodec('color', {
+const color = registerCodec('color', {
   read(text, facts) {
     const typed = text.trim();
     if (typed === '') return null;
@@ -401,7 +401,7 @@ export const color = registerCodec('color', {
 
 // paint (SVG's fill and stroke, spec elements-svg-shapes): one of the property's keywords (none) in lower case, or any
 // text the browser takes as a paint (a colour), kept as typed: read and written as a colour is.
-export const paint = registerCodec('paint', { read: (text, facts) => color.read(text, facts), write: (value) => color.write(value) });
+const paint = registerCodec('paint', { read: (text, facts) => color.read(text, facts), write: (value) => color.write(value) });
 
 // A length or a percentage in one of the units the property offers (a bare 0 too), as written; null for anything else.
 function lengthText(word: string, units: readonly string[]): string | null {
@@ -416,7 +416,7 @@ function lengthText(word: string, units: readonly string[]): string | null {
 // Problems in Pager 4): one keyword names its own axis and centres the other (top: x center, y top); two words may
 // come in either order (top left: x left, y top); a length or a percentage is x first. Written x then y.
 // The keywords of each axis are the composite's facts (properties.json); the one both axes share is the centre.
-export const position = registerCodec('position', {
+const position = registerCodec('position', {
   read(text, facts) {
     const words = text.trim().toLowerCase().split(/\s+/).filter((w) => w !== '');
     // a position of a property of its own (transform-origin, object-position) has no axes to tell its words by: the
@@ -441,7 +441,7 @@ export const position = registerCodec('position', {
 });
 
 // A background size (CSS Backgrounds 3, <bg-size>): cover or contain, or one or two of auto, a length or a percentage.
-export const backgroundSize = registerCodec('background-size', {
+const backgroundSize = registerCodec('background-size', {
   read(text, facts) {
     const words = text.trim().toLowerCase().split(/\s+/).filter((w) => w !== '');
     const [only] = words;
@@ -473,7 +473,7 @@ export function imageAddress(text: string): string | null {
   }
   return /^[^\s"'()]+$/.test(typed) && typed.toLowerCase() !== 'none' ? typed : null;
 }
-export const imageLayers = registerCodec('image-layers', {
+const imageLayers = registerCodec('image-layers', {
   read(text, facts) {
     const typed = text.trim().toLowerCase();
     if (facts.keywords.includes(typed)) return { kind: 'keyword', keyword: typed };
@@ -501,9 +501,9 @@ export const imageLayers = registerCodec('image-layers', {
 
 // A length (outline-offset), a line width (thin, medium, thick or a length: a border side's width) and a corner's
 // radius read as a length or percentage does: a number with a unit the property offers, a keyword it offers.
-export const length = registerCodec('length', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
-export const lineWidth = registerCodec('line-width', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
-export const radius = registerCodec('radius', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
+const length = registerCodec('length', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
+const lineWidth = registerCodec('line-width', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
+const radius = registerCodec('radius', { read: (text, facts) => lengthPercentage.read(text, facts), write: (value) => lengthPercentage.write(value) });
 
 // The words of a value, split at the spaces outside parentheses (rgb(1, 2, 3) is one word).
 export function valueWords(text: string): string[] {
@@ -576,7 +576,7 @@ function composeSide(width: string, style: string, colour: string): string | nul
   const text = [width, style, colour].filter((part) => part !== '').join(' ');
   return text === '' ? null : text;
 }
-export const borderSide = registerCodec('border-side', {
+const borderSide = registerCodec('border-side', {
   read(text, facts) {
     const parts = sideParts(text, facts, facts.axes ?? []);
     return parts === null ? null : { kind: 'longhands', values: parts, text: valueWords(text).join(' ') };
@@ -586,7 +586,7 @@ export const borderSide = registerCodec('border-side', {
 });
 // Every side's border at once: the same width, style and colour for the four sides (longhands: the four widths, the
 // four styles, the four colours).
-export const border = registerCodec('border', {
+const border = registerCodec('border', {
   read(text, facts) {
     const axes = facts.axes ?? [];
     const parts = sideParts(text, facts, [axes[0] ?? [], axes[4] ?? [], axes[8] ?? []]);
@@ -604,7 +604,7 @@ export const border = registerCodec('border', {
 });
 
 // A whole number (z-index, order) or a keyword the property offers (auto).
-export const integer = registerCodec('integer', {
+const integer = registerCodec('integer', {
   read(text, facts) {
     const typed = text.trim().toLowerCase();
     if (facts.keywords.includes(typed)) return { kind: 'keyword', keyword: typed };
@@ -613,7 +613,7 @@ export const integer = registerCodec('integer', {
   write: (value) => (value.kind === 'keyword' ? value.keyword : value.kind === 'expression' ? value.text : ''),
 });
 // A number that is not negative (flex-grow, flex-shrink).
-export const number = registerCodec('number', {
+const number = registerCodec('number', {
   read(text, facts) {
     const typed = text.trim().toLowerCase();
     if (facts.keywords.includes(typed)) return { kind: 'keyword', keyword: typed };
@@ -624,7 +624,7 @@ export const number = registerCodec('number', {
 // An opacity: a number from 0 to 1, or a percentage from 0 to 100 written as its number (50% is 0.5). A bare number
 // above 1 is a percentage too: the field shows an opacity as a percentage ("100 %"), so what a person types there is
 // one (the audit's S-020: "40" was refused).
-export const alpha = registerCodec('alpha', {
+const alpha = registerCodec('alpha', {
   read(text) {
     const typed = text.trim();
     const percent = /^(\d+(?:\.\d*)?|\.\d+)%$/.exec(typed);
@@ -649,7 +649,7 @@ function cssText(text: string, facts: ValueFacts): Value | null {
 const writeCssText = (value: Value): string => (value.kind === 'keyword' ? value.keyword : value.kind === 'expression' ? value.text : '');
 // A grid item's lines on one axis (grid-column, grid-row): its start and its end, split at the slash; one line alone
 // leaves the end auto, as CSS reads it, unless it names a line, whose end is then the same name.
-export const gridLinePair = registerCodec('grid-line-pair', {
+const gridLinePair = registerCodec('grid-line-pair', {
   read(text, facts) {
     const parts = text.split('/').map((p) => cssText(p, facts));
     const [start, end] = parts;
@@ -664,7 +664,7 @@ export const gridLinePair = registerCodec('grid-line-pair', {
 // grid-area (spec props-grid-container, the audit item A1.3): one area name or line name (a CSS identifier, which
 // the property offers no list of), written into all four of its longhands (grid-row-start, grid-column-start,
 // grid-row-end, grid-column-end); what the field shows is the value it holds.
-export const gridArea = registerCodec('grid-area', {
+const gridArea = registerCodec('grid-area', {
   read(text, facts) {
     const typed = text.trim();
     const lower = typed.toLowerCase();
@@ -673,16 +673,16 @@ export const gridArea = registerCodec('grid-area', {
   },
   write: (value) => (value.kind === 'longhands' ? value.text : ''),
 });
-export const trackList = registerCodec('track-list', { read: cssText, write: writeCssText });
-export const gridAreas = registerCodec('grid-areas', { read: cssText, write: writeCssText });
-export const cursor = registerCodec('cursor', { read: cssText, write: writeCssText });
-export const animateableFeatureList = registerCodec('animateable-feature-list', { read: cssText, write: writeCssText });
+const trackList = registerCodec('track-list', { read: cssText, write: writeCssText });
+const gridAreas = registerCodec('grid-areas', { read: cssText, write: writeCssText });
+const cursor = registerCodec('cursor', { read: cssText, write: writeCssText });
+const animateableFeatureList = registerCodec('animateable-feature-list', { read: cssText, write: writeCssText });
 // Transitions (the composite of the transition longhands): transitions separated by commas, each a property, a
 // duration, a timing function, a delay and a behaviour in any order, each at most once (the first time is the
 // duration, the second the delay); what one leaves out is the initial value (all, 0s, ease, 0s, normal). Each
 // longhand holds the transitions' values in order, separated by commas.
 const TRANSITION_INITIAL = ['all', '0s', 'ease', '0s', 'normal'];
-export const transitionList = registerCodec('transition-list', {
+const transitionList = registerCodec('transition-list', {
   read(text, facts) {
     const [, , timings = [], , behaviours = []] = facts.axes ?? [];
     const items = splitOutside(text, ',');
@@ -711,7 +711,7 @@ export const transitionList = registerCodec('transition-list', {
 // offers, separated by commas. An animation's setting holds one; the codec reads a list because the properties of
 // properties.json that name it (transition-duration, transition-delay) hold one per transition.
 const TIME_ITEM = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(s|ms)$/;
-export const timeList = registerCodec('time-list', {
+const timeList = registerCodec('time-list', {
   read(text, facts) {
     const items = splitOutside(text, ',');
     if (items.length === 0) return null;
@@ -739,7 +739,7 @@ export const timeList = registerCodec('time-list', {
 // offers, or the text of cubic-bezier(), steps() or linear(), separated by commas. The CSS support port judges the
 // text as well (style.set asks it before it writes).
 const EASING_FUNCTION = /^(?:cubic-bezier|steps|linear)\(/;
-export const easingList = registerCodec('easing-list', {
+const easingList = registerCodec('easing-list', {
   read(text, facts) {
     const items = splitOutside(text, ',');
     if (items.length === 0) return null;
@@ -778,11 +778,11 @@ function splitOutside(text: string, separator: string): string[] {
   pieces.push(piece.trim());
   return pieces.some((p) => p === '') ? [] : pieces;
 }
-export const filterList = registerCodec('filter-list', { read: cssText, write: writeCssText });
-export const clipPath = registerCodec('clip-path', { read: cssText, write: writeCssText });
+const filterList = registerCodec('filter-list', { read: cssText, write: writeCssText });
+const clipPath = registerCodec('clip-path', { read: cssText, write: writeCssText });
 // Text columns (the composite of column-width and column-count): a width, a count, or both in either order, each or
 // both auto; what is left out is auto, as CSS reads it.
-export const columns = registerCodec('columns', {
+const columns = registerCodec('columns', {
   read(text, facts) {
     const words = valueWords(text).map((w) => w.toLowerCase());
     if (words.length === 0 || words.length > 2) return null;
@@ -801,12 +801,12 @@ export const columns = registerCodec('columns', {
   },
   write: (value) => (value.kind === 'longhands' ? value.text : ''),
 });
-export const counterList = registerCodec('counter-list', { read: cssText, write: writeCssText });
-export const fontStretch = registerCodec('font-stretch', { read: cssText, write: writeCssText });
+const counterList = registerCodec('counter-list', { read: cssText, write: writeCssText });
+const fontStretch = registerCodec('font-stretch', { read: cssText, write: writeCssText });
 // A font variant (the composite of the font-variant longhands): each keyword goes to the longhand whose list names it
 // (small-caps: font-variant-caps; tabular-nums: font-variant-numeric), several to one longhand together; the longhands
 // no word names are left as they are; normal alone makes every longhand normal.
-export const fontVariant = registerCodec('font-variant', {
+const fontVariant = registerCodec('font-variant', {
   read(text, facts) {
     const axes = facts.axes ?? [];
     const words = valueWords(text).map((w) => w.toLowerCase());
@@ -824,25 +824,25 @@ export const fontVariant = registerCodec('font-variant', {
   write: (value) => (value.kind === 'longhands' ? value.text : ''),
 });
 // A line clamp (the recipe line-clamp): how many lines a text shows, a whole number from 1.
-export const lineClamp = registerCodec('line-clamp', {
+const lineClamp = registerCodec('line-clamp', {
   read(text) {
     const typed = text.trim();
     return /^\d+$/.test(typed) && Number(typed) >= 1 ? { kind: 'expression', text: String(Number(typed)) } : null;
   },
   write: (value) => (value.kind === 'expression' ? value.text : ''),
 });
-export const translate = registerCodec('translate', { read: cssText, write: writeCssText });
-export const rotate = registerCodec('rotate', { read: cssText, write: writeCssText });
-export const scale = registerCodec('scale', { read: cssText, write: writeCssText });
-export const transformList = registerCodec('transform-list', { read: cssText, write: writeCssText });
-export const featureTagList = registerCodec('feature-tag-list', { read: cssText, write: writeCssText });
+const translate = registerCodec('translate', { read: cssText, write: writeCssText });
+const rotate = registerCodec('rotate', { read: cssText, write: writeCssText });
+const scale = registerCodec('scale', { read: cssText, write: writeCssText });
+const transformList = registerCodec('transform-list', { read: cssText, write: writeCssText });
+const featureTagList = registerCodec('feature-tag-list', { read: cssText, write: writeCssText });
 // A pair of lengths (border-spacing, spec props-element-specific): one length for both axes, or two, the first
 // horizontal and the second vertical, each in a unit the property offers (no percentage: it offers none); a bare number
 // takes the field's unit.
-export const lengthPair = registerCodec('length-pair', { read: (text, facts) => axisPair.read(text, facts), write: (value) => axisPair.write(value) });
+const lengthPair = registerCodec('length-pair', { read: (text, facts) => axisPair.read(text, facts), write: (value) => axisPair.write(value) });
 // A counter style (list-style-type): a keyword the property offers (none), the name of a counter style (disc, decimal,
 // lower-roman or any other: a CSS identifier), or a quoted string, the marker itself.
-export const counterStyle = registerCodec('counter-style', {
+const counterStyle = registerCodec('counter-style', {
   read(text, facts) {
     const typed = text.trim();
     const lower = typed.toLowerCase();
@@ -854,7 +854,7 @@ export const counterStyle = registerCodec('counter-style', {
 });
 // One image (list-style-image): a keyword the property offers (none), a gradient, or an address, read as a background
 // image's layer is (image-layers: written url("…"), never a script's source).
-export const image = registerCodec('image', { read: (text, facts) => imageLayers.read(text, facts), write: (value) => imageLayers.write(value) });
+const image = registerCodec('image', { read: (text, facts) => imageLayers.read(text, facts), write: (value) => imageLayers.write(value) });
 
 // Every codec registered, by the id properties.json names.
 const CODECS: ReadonlyMap<string, Codec> = new Map(

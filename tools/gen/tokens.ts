@@ -8,7 +8,7 @@ import path from 'node:path';
 import StyleDictionary from 'style-dictionary';
 import type { Dictionary, TransformedToken } from 'style-dictionary/types';
 
-export const TOKENS_SOURCE = 'design/final/tokens.json';
+const TOKENS_SOURCE = 'design/final/tokens.json';
 export const TOKENS_CSS = 'src/ui/tokens.css';
 
 const THEMED = ['color', 'elevation'];
@@ -104,13 +104,13 @@ function luminance(hex: string): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-export function contrast(a: string, b: string): number {
+function contrast(a: string, b: string): number {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
   return (hi + 0.05) / (lo + 0.05);
 }
 
 // The pairs of one theme that read below 4.5:1, as "on-x on x: 3.1:1".
-export function illegiblePairs(colors: ReadonlyMap<string, Color>): string[] {
+function illegiblePairs(colors: ReadonlyMap<string, Color>): string[] {
   const solid = (name: string) => {
     const c = colors.get(name);
     return c !== undefined && (c.alpha === undefined || c.alpha === 1) ? c.hex : null;

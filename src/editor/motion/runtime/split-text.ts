@@ -8,7 +8,7 @@
 //  - Restoring puts the original text nodes back, the very same nodes, so nothing else of the page is disturbed.
 //
 // Self-contained: embedded as text in the page's motion script (self-contained.test.ts).
-export interface SplitText {
+interface SplitText {
   // the pieces, in reading order, each with the line it sits on (0 for the first)
   readonly pieces: readonly { readonly element: HTMLElement; readonly line: number }[];
   restore(): void;

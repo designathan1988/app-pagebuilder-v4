@@ -83,7 +83,7 @@ export function TargetChips() {
 }
 
 // + Class: the list of the classes to apply and the field of a new name
-export function ApplyClass() {
+function ApplyClass() {
   const t = useT();
   const trigger = useRef<HTMLButtonElement>(null);
   const { open, setOpen } = usePopover(trigger);
@@ -139,7 +139,7 @@ export function ApplyClass() {
 }
 
 // Save the styles as a class: the name field
-export function SaveAsClass() {
+function SaveAsClass() {
   const t = useT();
   const trigger = useRef<HTMLButtonElement>(null);
   const { open, setOpen } = usePopover(trigger);

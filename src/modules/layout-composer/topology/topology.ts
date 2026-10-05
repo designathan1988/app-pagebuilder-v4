@@ -22,7 +22,7 @@ export interface Boundary {
   readonly parent: string | null;
 }
 
-export interface Vertex extends Point {
+interface Vertex extends Point {
   readonly id: string;
   readonly boundaries: readonly string[];
 }

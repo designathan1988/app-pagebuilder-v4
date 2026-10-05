@@ -2,7 +2,7 @@
 // "Pattern Recognition" → Repeat, "Ambiguity Engine", "Structural Suggestions", "Topological Editing", "Seleção"): each
 // returns one operation, so the store records it as one undo step.
 import type { Axis, Constraint, LayoutIntent, Point, Region } from '../intent/model.ts';
-import { findRegion, preferenceKey } from '../intent/model.ts';
+import { findRegion } from '../intent/model.ts';
 import { nextConstraintId } from '../intent/ids.ts';
 import { refuse } from '../intent/problems.ts';
 import type { Operation } from './operations.ts';
@@ -181,6 +181,3 @@ export function editBoundary(graph: LayoutIntent, id: string, edit: BoundaryEdit
   });
   return { kind: 'compose', operations };
 }
-
-// The key of the group a set of regions belongs to (their parent's).
-export const groupOf = (graph: LayoutIntent, ids: readonly string[]): string => preferenceKey(findRegion(graph, ids[0] ?? '')?.parent ?? null);

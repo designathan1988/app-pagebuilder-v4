@@ -19,7 +19,7 @@ for (const module of INSTALLED) registerAuthoringValidator(module.authoring.name
 // every module's line below uses it, and the application holds it while none is installed)
 type Named = { readonly command: CommandId };
 type ByCommand<H extends readonly Named[]> = { readonly [E in H[number] as E['command']]: E };
-export const byCommand = <H extends readonly Named[]>(handlers: H): ByCommand<H> => Object.fromEntries(handlers.map((h) => [h.command, h])) as ByCommand<H>;
+const byCommand = <H extends readonly Named[]>(handlers: H): ByCommand<H> => Object.fromEntries(handlers.map((h) => [h.command, h])) as ByCommand<H>;
 
 export const MODULE_COMMANDS = { ...byCommand(LAYOUT_COMPOSER.handlers) } as const;
 export const MODULE_PREDICATES = { ...LAYOUT_COMPOSER.predicates } as const;

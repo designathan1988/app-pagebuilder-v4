@@ -14,7 +14,7 @@ export interface CodeTabsState {
 }
 
 export const codeTabs = (ui: EditorUi): CodeTabsState | null => ui.code ?? null;
-export const isFileOpen = (ui: EditorUi, path: string): boolean => codeTabs(ui)?.open.includes(path) === true;
+const isFileOpen = (ui: EditorUi, path: string): boolean => codeTabs(ui)?.open.includes(path) === true;
 export const activeFile = (ui: EditorUi): string | null => codeTabs(ui)?.active ?? null;
 // The file a person sees: the active one while the centre shows the code (the Code view, or Split beside the canvas).
 // Its tab is the current one, and the page's while the canvas alone shows (FT1: every open file's tab, and the active
@@ -30,7 +30,7 @@ export function openedFile(ui: EditorUi, path: string): EditorUi {
 
 // A file closed; the pane falls back to the file opened before it (the last remaining), and the pane closes with the
 // last tab. Closing the file the pane shows is allowed: the pane moves to the tab beside it.
-export function closedFile(ui: EditorUi, path: string): EditorUi {
+function closedFile(ui: EditorUi, path: string): EditorUi {
   const tabs = codeTabs(ui);
   if (tabs === null) return ui;
   const at = tabs.open.indexOf(path);

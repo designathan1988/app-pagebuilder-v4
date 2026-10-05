@@ -298,7 +298,7 @@ export function channelText(colour: Rgba, channel: ColorChannel, exact: Srgb | n
 // that sets the alpha (its slider, its channel) is kept as written.
 export const pickedAlpha = (shown: number, carried: number): number => (carried === shown && shown === 0 ? 1 : carried);
 
-export function withChannel(colour: Rgba, channel: ColorChannel, text: string): Rgba | null {
+function withChannel(colour: Rgba, channel: ColorChannel, text: string): Rgba | null {
   const hsb = rgbToHsb(colour);
   switch (channel) {
     // a channel of OKLCH or OKLab writes the colour in its space (editedColour), never through RGB

@@ -32,7 +32,7 @@ const FOLDERS: readonly { readonly folder: string; readonly types: readonly stri
   { folder: 'img/', types: ['image/'] },
   { folder: 'fonts/', types: ['font/', 'application/font', 'application/vnd.ms-fontobject', 'application/x-font'] },
 ];
-export const FILE_FOLDER = 'files/';
+const FILE_FOLDER = 'files/';
 
 export function fileAt(document: DocumentJson, path: string): ProjectFile | null {
   return filesOf(document).find((f) => f.path === path) ?? null;
@@ -47,13 +47,13 @@ export function imageFiles(document: DocumentJson): readonly ProjectFile[] {
   return filesOf(document).filter((f) => f.type.toLowerCase().startsWith('image/'));
 }
 // whether the project takes a file of this type at all
-export function supportedType(type: string): boolean {
+function supportedType(type: string): boolean {
   const lowered = type.toLowerCase();
   return lowered.startsWith('image/') || FOLDERS.slice(1).some((f) => f.types.some((t) => lowered.startsWith(t)));
 }
 
 // The folder a file's type belongs to when the door names none.
-export function folderFor(type: string): string {
+function folderFor(type: string): string {
   const found = FOLDERS.find((f) => f.types.some((t) => type.toLowerCase().startsWith(t)));
   return found === undefined ? FILE_FOLDER : found.folder;
 }
@@ -202,7 +202,7 @@ export function typeOfFile(name: string, fallback = 'application/octet-stream'):
 // comes as application/vnd.ms-excel or with no type at all), or by its type.
 const DATA_UPLOAD = /\.(csv|tsv|json|xlsx)$/i;
 const DATA_TYPES = ['text/csv', 'text/tab-separated-values', 'application/json', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-export const isDataUpload = (file: Pick<UploadedFile, 'name' | 'type'>): boolean => DATA_UPLOAD.test(file.name) || DATA_TYPES.includes(file.type.toLowerCase());
+const isDataUpload = (file: Pick<UploadedFile, 'name' | 'type'>): boolean => DATA_UPLOAD.test(file.name) || DATA_TYPES.includes(file.type.toLowerCase());
 
 export const uploadCommand = registerHandler('files.upload', ({ state }, { files, folder }) => {
   const list = fileList(files).filter((f) => f !== null && typeof f === 'object');
@@ -224,7 +224,7 @@ export const uploadCommand = registerHandler('files.upload', ({ state }, { files
 // writes (spec explorer-file-system, Problems 2), the export's own list (core/export/paths.ts). They are fixed: nothing
 // else may take their path (an upload or an imported file takes a free name beside it), and no command renames, moves
 // or deletes them; a folder that holds one of them is as fixed as the file it holds.
-export { GENERATED_PATHS };
+;
 
 // whether a path IS one of the generated files: its path is taken, and no file may be made there
 export function pathGenerated(path: string): boolean {
@@ -233,7 +233,7 @@ export function pathGenerated(path: string): boolean {
 
 // whether a path is a folder that HOLDS (or stands over) a generated file: it cannot be renamed, moved or deleted,
 // because that would take the generated file with it (spec explorer-file-system, Problems 2)
-export function holdsGenerated(path: string): boolean {
+function holdsGenerated(path: string): boolean {
   return GENERATED_PATHS.some((one) => one.startsWith(`${path}/`));
 }
 
@@ -319,7 +319,7 @@ export const pageAtPath = (document: DocumentJson, path: string): Page | null =>
 
 // the pages that link a file (or, for a folder, a file under it) among their linked scripts: deleting it would leave
 // them pointing at nothing
-export function linkedBy(document: DocumentJson, path: string): readonly Page[] {
+function linkedBy(document: DocumentJson, path: string): readonly Page[] {
   return document.pages.filter((page) => {
     const held = (page.tree.attributes as Readonly<Record<string, unknown>>).pageScripts;
     return typeof held === 'string' && held.split(/\s+/).some((one) => one === path || one.startsWith(`${path}/`));
@@ -351,7 +351,7 @@ function movedPaths(document: DocumentJson, from: string, to: string): { readonl
 
 // A captured page's residual stylesheet at its new place: every relative url() of it resolved from where it stood, that
 // path moved as the tree's paths move, and written again relative to where it stands now.
-export function capturedSheetMoved(file: ProjectFile, to: string, rewritten: (path: string) => string): ProjectFile {
+function capturedSheetMoved(file: ProjectFile, to: string, rewritten: (path: string) => string): ProjectFile {
   const text = new TextDecoder().decode(fileBytes(file));
   const moved = followCssUrls(text, (address) => {
     // an address from the site's root ("/img/a.png") names the same place wherever the sheet stands

@@ -27,7 +27,7 @@ const globalValue = /^(inherit|initial|unset|revert|revert-layer)$/i;
 // longhands.
 const substitution = /\b(?:var|env|attr)\(/i;
 
-export function fontComposite(): Composite {
+function fontComposite(): Composite {
   return {
     ...fontParts,
     compose: (values) => {

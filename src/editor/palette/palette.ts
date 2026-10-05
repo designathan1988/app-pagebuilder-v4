@@ -10,10 +10,10 @@ import type { EditorUi } from '../state.ts';
 import { chosen } from '../preferences/said.ts';
 
 // the density while none is chosen (PRODUCT.md §5.3: two columns is the default in this sidebar width)
-export const DEFAULT_DENSITY: PaletteDensity = 'two-columns';
+const DEFAULT_DENSITY: PaletteDensity = 'two-columns';
 
 export const paletteDensity = (ui: EditorUi): PaletteDensity => ui.preferences.paletteDensity ?? DEFAULT_DENSITY;
-export const isGroupCollapsed = (ui: EditorUi, group: string): boolean => (ui.preferences.collapsedGroups ?? []).includes(group);
+const isGroupCollapsed = (ui: EditorUi, group: string): boolean => (ui.preferences.collapsedGroups ?? []).includes(group);
 
 export const toggleGroup = registerHandler<'palette.toggleGroup', EditorUi>(
   'palette.toggleGroup',

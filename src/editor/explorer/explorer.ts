@@ -51,7 +51,7 @@ const SCRIPTS = [
   [LOTTIE_SCRIPT, 'lottie'],
 ] as const;
 // the paths the export may write a script at
-export const SCRIPT_PATHS: readonly string[] = SCRIPTS.map(([path]) => path);
+const SCRIPT_PATHS: readonly string[] = SCRIPTS.map(([path]) => path);
 
 // Whether the path is one the document generates (a page's file, the stylesheet, a script the export writes and no
 // stored file holds): its text is rendered now, and its path is fixed — the export writes it there (archive/DESIGN.md,
@@ -61,7 +61,7 @@ export function isGenerated(path: string, document: DocumentJson): boolean {
 }
 // the paths of the scripts the export writes now, read without writing the site (export.ts siteScriptsWritten): what
 // the rows list at every change of the document, the text being written only when the code pane shows one
-export function generatedScriptPaths(document: DocumentJson, rules: ModelRules): readonly string[] {
+function generatedScriptPaths(document: DocumentJson, rules: ModelRules): readonly string[] {
   const written = siteScriptsWritten(document, rules);
   return SCRIPTS.flatMap(([path, part]) => (written.has(part) ? [path] : []));
 }

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createFormsEngine } from './engine.ts';
 import type { FieldConfig, FormConfig, MaskConfig } from './types.ts';
 
-export const presetIds = ['cpf', 'cnpj', 'cpf-cnpj', 'cep', 'phone-br', 'phone-international', 'rg', 'pis', 'voter', 'plate', 'card', 'expiry', 'cvv', 'email', 'url', 'date-br', 'time', 'currency', 'measurement'] as const;
+const presetIds = ['cpf', 'cnpj', 'cpf-cnpj', 'cep', 'phone-br', 'phone-international', 'rg', 'pis', 'voter', 'plate', 'card', 'expiry', 'cvv', 'email', 'url', 'date-br', 'time', 'currency', 'measurement'] as const;
 const ruleIds = ['required', 'type', 'pattern', 'tooShort', 'tooLong', 'minimum', 'maximum', 'step', 'preset', 'equalTo', 'password', 'allowed', 'dateMinimum', 'dateMaximum', 'fileType', 'fileSize', 'configuration'] as const;
 const finite = z.number().finite();
 const length = z.number().int().min(0).max(1000000);
@@ -52,7 +52,7 @@ export const maskSchema = z.strictObject({
     for (const option of value.alternatives ?? []) engine.mask('', { kind: 'fixed', pattern: option.pattern });
   } catch { issue('Invalid mask configuration'); }
 });
-export const rulesSchema = z.strictObject({
+const rulesSchema = z.strictObject({
   required: z.boolean().optional(), type: z.enum(['email', 'url', 'number']).optional(), pattern: pattern.optional(),
   minLength: length.optional(), maxLength: length.optional(), minimum: finite.optional(), maximum: finite.optional(), step: finite.positive().optional(),
   equalTo: z.string().min(1).max(256).optional(),

@@ -31,7 +31,7 @@ export const shortLabelOf = (item: string): MessageId | null => {
   const found = ROW_OF_ITEM(item);
   return found === null ? null : (found.row.shortLabels[item] ?? null);
 };
-export const CONCEPT_ROW_IDS: readonly string[] = CONCEPT_ROWS.map((r) => r.id);
+const CONCEPT_ROW_IDS: readonly string[] = CONCEPT_ROWS.map((r) => r.id);
 const ROW_OF = new Map<string, { readonly row: ConceptRow; readonly part: 'head' | 'details' }>();
 for (const row of CONCEPT_ROWS) {
   for (const item of row.head) ROW_OF.set(item, { row, part: 'head' });
@@ -68,7 +68,7 @@ export function detailsHoldMore(row: ConceptRow, held: ReadonlySet<string>): boo
 export const detailProperties = (row: ConceptRow): readonly string[] => [...new Set(row.details.flatMap(itemProperties))];
 
 const NONE: readonly string[] = [];
-export const collapsedRows = (ui: EditorUi): readonly string[] => ui.preferences.collapsedRows ?? NONE;
+const collapsedRows = (ui: EditorUi): readonly string[] => ui.preferences.collapsedRows ?? NONE;
 const openedRows = (ui: EditorUi): readonly string[] => ui.preferences.expandedRows ?? NONE;
 
 // Whether a row is drawn closed: what the user said, else closed unless its details hold more than its head shows.

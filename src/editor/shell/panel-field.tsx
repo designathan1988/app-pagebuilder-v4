@@ -15,7 +15,7 @@ import { EasingCurveButton } from './easing-curve.tsx';
 
 // The one argument a door's text goes in: the argument its command declares that neither the door fixes (its own
 // `args`) nor the drawing gives. A command whose fields do not come to exactly one is a defect of the manifest.
-export function textArgument(entry: DoorEntry, given: Readonly<Record<string, unknown>>): string | null {
+function textArgument(entry: DoorEntry, given: Readonly<Record<string, unknown>>): string | null {
   const free = Object.keys(entry.command.args).filter((name) => !(name in entry.door.args) && !(name in given));
   return free.length === 1 ? (free[0] as string) : null;
 }

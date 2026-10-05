@@ -19,15 +19,6 @@ export function childPath(parentPath: Path, index: number): Path {
   return [...parentPath, 'children', index];
 }
 
-// A node taking a place among a parent's children: the index is clamped to what the parent holds, so a caller that
-// computed it before another change cannot address beyond the end.
-export function insertChild(document: DocumentJson, parentId: NodeId, index: number, node: DocNode): Patch[] {
-  const parent = locate(document, parentId);
-  if (parent === null) throw new Error(`tree.insertChild: the document has no node ${parentId}`);
-  const at = Math.max(0, Math.min(index, parent.node.children.length));
-  return [{ op: 'add', path: childPath(parent.path, at), value: node }];
-}
-
 // A subtree leaving its place (its paths and its node, as the document holds them now).
 export function removeSubtree(at: Location): Patch[] {
   return [{ op: 'remove', path: at.path }];

@@ -10,7 +10,7 @@ import { manifest } from '../../manifest/runtime.ts';
 
 // one field of a pair row: the property or composite, and the short prefix its value carries (the height's H, the
 // gap's axis marks); null when the value reads on its own
-export interface PairField {
+interface PairField {
   readonly target: string;
   readonly prefixKey: MessageId | null;
   readonly measurement?: 'width' | 'height' | undefined;

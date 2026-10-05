@@ -21,10 +21,10 @@ export interface CssSyntaxes {
   types: Readonly<Record<string, string>>;
 }
 
-export type CssMatch = { ok: true; by: 'official' | 'implemented' } | { ok: false; reason: string };
+type CssMatch = { ok: true; by: 'official' | 'implemented' } | { ok: false; reason: string };
 
 // What a matched value is made of, read from CSSTree's match tree.
-export interface CssParts {
+interface CssParts {
   // identifiers the syntax names as keywords, lower-cased ("x mandatory" → x, mandatory)
   keywords: string[];
   // the same keywords with the function each sits in, innermost, lower-case without "()" (from in

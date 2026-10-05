@@ -10,7 +10,7 @@ import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { PANELS, type Panel } from './panel-catalogue.ts';
 
 const zoneDoor = (zone: string): DoorEntry | null => manifest.doors.find((d) => d.door.kind === 'panel-drag' && (d.door.zone ?? null) === zone && d.door.source === 'panel-header') ?? null;
-export const ZONE_DOORS: Readonly<Record<string, DoorEntry | null>> = {
+const ZONE_DOORS: Readonly<Record<string, DoorEntry | null>> = {
   canvas: zoneDoor('canvas'),
   'left-edge': zoneDoor('left-edge'),
   'right-edge': zoneDoor('right-edge'),
@@ -35,7 +35,7 @@ const WINDOW_HEIGHT = range('floating.height')[0];
 const MIN_TOP = constant('floating.minTop');
 
 // where a release would land, and the panel it lands on for the two combining places
-export type PanelZone = 'canvas' | 'left-edge' | 'right-edge' | 'panel-upper-part' | 'panel-lower-part';
+type PanelZone = 'canvas' | 'left-edge' | 'right-edge' | 'panel-upper-part' | 'panel-lower-part';
 export interface PanelHint {
   readonly zone: PanelZone;
   readonly host: Panel | null;

@@ -21,7 +21,7 @@ import { validateIntent } from '../topology/topology.ts';
 import { inferMeaning } from '../intent/meaning.ts';
 import { HEIGHT, WIDTH } from '../geometry/keys.ts';
 import { materialize } from './materialize.ts';
-import { NAMESPACE, markerOf, recordOf, withAuthoring, type ContainerRecord } from './record.ts';
+import { markerOf, recordOf, withAuthoring, type ContainerRecord } from './record.ts';
 import { composerOf, withComposer, type ComposerState } from './state.ts';
 
 // the sidebar view the tool's options are drawn in while it is the canvas tool, and the one it gives back
@@ -63,7 +63,7 @@ export const layoutComposing = registerPredicate<EditorUi>(
 // A part of a region named by its number alone ("Region 2") is a region of its own number ("Region 3"), not "Region 2
 // 2"; a part of a region the person named keeps the name with the part's number ("Header 2").
 // Whether a name is still a region's number ("Region 3"), in the person's language.
-export const numberedWith = (words: (key: MessageId, params: Readonly<Record<string, number>>) => string): ((name: string) => boolean) => {
+const numberedWith = (words: (key: MessageId, params: Readonly<Record<string, number>>) => string): ((name: string) => boolean) => {
   const [before = '', after = ''] = words('layout.label.region' as MessageId, { n: 0 }).split('0');
   return (name) => name.startsWith(before) && name.endsWith(after) && /^\d+$/.test(name.slice(before.length, name.length - after.length));
 };
@@ -106,7 +106,7 @@ function namesFromElements(container: DocNode, intent: LayoutIntent): LayoutInte
 // The project's breakpoints as the composer maps its rules to them.
 // the project's own table (breakpointsOf: a project adds breakpoints and sets their widths), never the manifest's
 // default one: a rule recorded at the width the canvas shows maps to the breakpoint that has it (the audit's BP1)
-export const projectBreakpoints = (document: DocumentJson) => breakpointsOf(document).map((b) => ({ id: b.id, maxWidth: b.width, base: b.base }));
+const projectBreakpoints = (document: DocumentJson) => breakpointsOf(document).map((b) => ({ id: b.id, maxWidth: b.width, base: b.base }));
 
 // The intent as the page lays it out: what the person chose, with the automatic reflow at narrower screens wherever
 // they chose nothing (responsive/continuum.ts withAdaptation). The compiler writes it and the widths check measures it.
@@ -888,4 +888,4 @@ export const traceLayout = registerHandler<'layout.trace', EditorUi>('layout.tra
   }),
 );
 
-export { NAMESPACE };
+;

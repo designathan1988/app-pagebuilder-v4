@@ -41,7 +41,7 @@ export function uniqueName(document: DocumentJson, base: string): string {
 // table's head and body, else its natural children). The root is named by the template's label. A wrapper that lays
 // one equal track per child (the grid) writes grid-template-columns for the children it holds, with its breakpoint
 // overrides (the same rule the wrap command writes: tracksForChildren, the user's real-use audit item A1.4).
-export function templateElement(make: NodeMaker, spec: TemplateNode, rootNameKey?: MessageId): DocNode {
+function templateElement(make: NodeMaker, spec: TemplateNode, rootNameKey?: MessageId): DocNode {
   const { rules } = make;
   const nameKey = (spec.nameKey as MessageId | undefined) ?? rootNameKey;
   const base = newElement(make, spec.element, spec.children === undefined ? startingParts(spec.element) : (m) => (spec.children ?? []).map((child) => templateElement(m, child)), nameKey);

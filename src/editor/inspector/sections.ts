@@ -52,7 +52,7 @@ export function isColourValue(id: string): boolean {
   });
 }
 
-export function isSectionId(value: unknown): value is SectionId {
+function isSectionId(value: unknown): value is SectionId {
   return typeof value === 'string' && (SECTION_IDS as readonly string[]).includes(value);
 }
 
@@ -72,7 +72,7 @@ export function sectionProperties(section: SectionId): readonly string[] {
 
 // Whether the element holds a value in the section: the properties the section holds, read on the element's own
 // styles at the base breakpoint and state (the same set the header's "N set" counts).
-export function sectionHoldsValue(section: SectionId, held: ReadonlySet<string>): boolean {
+function sectionHoldsValue(section: SectionId, held: ReadonlySet<string>): boolean {
   return sectionProperties(section).some((p) => held.has(p));
 }
 
@@ -80,7 +80,7 @@ export function sectionHoldsValue(section: SectionId, held: ReadonlySet<string>)
 // first (docs/PRODUCT.md, The interface contract), so a section that carries them stays open while the element has no
 // value in it — the essentials are what the person came for, and a panel whose every section is a closed strip shows
 // nothing at all (the user's correction, 2026-09-28).
-export function sectionEssential(section: SectionId): boolean {
+function sectionEssential(section: SectionId): boolean {
   return manifest.properties.properties.some((p) => p.section === section && p.essential === true);
 }
 

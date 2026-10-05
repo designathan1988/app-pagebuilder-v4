@@ -14,7 +14,7 @@ import { solve } from '../constraints/solve.ts';
 import { changeRepeat, relayoutGrid } from '../gestures/structural.ts';
 import { execute, type Naming, type Operation } from '../gestures/operations.ts';
 
-export type TemplateParameter =
+type TemplateParameter =
   | { readonly kind: 'variable'; readonly value: number }
   // the number of items of the repeated group whose first item is `first`
   | { readonly kind: 'count'; readonly value: number; readonly first: string; readonly axis: 'x' | 'y'; readonly gap: number }

@@ -93,7 +93,7 @@ export const TRIGGER_KINDS = Object.keys(TRIGGERS) as readonly TriggerKind[];
 export const isTriggerKind = (value: string): value is TriggerKind => Object.hasOwn(TRIGGERS, value);
 
 // What a parameter holds while the person has not set it: the trigger works as soon as it is chosen.
-export const TRIGGER_DEFAULTS: Readonly<Record<TriggerParameter, string | number>> = {
+const TRIGGER_DEFAULTS: Readonly<Record<TriggerParameter, string | number>> = {
   key: 'Enter',
   threshold: 0.5,
   milliseconds: 1000,

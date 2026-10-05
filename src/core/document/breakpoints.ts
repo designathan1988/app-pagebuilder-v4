@@ -34,7 +34,7 @@ export function breakpointAtWidth(document: Tabled, width: number): ProjectBreak
 }
 
 // A default's catalogue label (properties.json), null for a breakpoint the person made
-export const defaultLabelOf = (id: string): MessageId | null => (manifest.properties.breakpoints.find((b) => b.id === id)?.labelKey as MessageId | undefined) ?? null;
+const defaultLabelOf = (id: string): MessageId | null => (manifest.properties.breakpoints.find((b) => b.id === id)?.labelKey as MessageId | undefined) ?? null;
 
 // The words that name a breakpoint in a message: a default's catalogue label, else the person's name.
 export function breakpointWords(breakpoint: ProjectBreakpoint): { readonly key: MessageId } | string {
@@ -61,7 +61,7 @@ const refuse = (refused: TableRefusal['refused'], params: TableRefusal['params']
 
 // The widths a breakpoint may take where it stands: above the next narrower one and below the next wider one (the base
 // holds every width above the others, up to the widest screen the canvas shows).
-export function widthRangeOf(table: readonly ProjectBreakpoint[], id: string): { readonly min: number; readonly max: number } {
+function widthRangeOf(table: readonly ProjectBreakpoint[], id: string): { readonly min: number; readonly max: number } {
   const at = table.findIndex((b) => b.id === id);
   const wider = table[at - 1];
   const narrower = table[at + 1];

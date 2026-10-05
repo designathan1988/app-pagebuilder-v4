@@ -1,10 +1,10 @@
 import { summarize } from '../perf/metrics.ts';
 // Formula-compatible with jornada03/scripts/analyze.mjs. No synthetic subjective scores.
-export const REFUSAL = /refused|recusad|cannot|não pode|not a value|não é um valor|nothing matches|nenhum elemento corresponde|não é um arquivo|needs a single|select an element first|selecione um elemento/i;
+const REFUSAL = /refused|recusad|cannot|não pode|not a value|não é um valor|nothing matches|nenhum elemento corresponde|não é um arquivo|needs a single|select an element first|selecione um elemento/i;
 const validate = (g) => { if (!g || typeof g !== 'object' || Object.values(g).some(n => !Number.isInteger(n) || n < 0)) throw new Error('Gesture counters must be nonnegative integers'); return g; };
 export const pointerCount = (g = {}) => ['click', 'dblclick', 'rightclick', 'drag', 'wheel'].reduce((n, k) => n + (validate(g)[k] ?? 0), 0);
-export const committed = (r) => r.historyAtEnd ? Math.max(0, r.historyAtEnd.undoSteps - (r.historyAtStart?.undoSteps ?? 0)) : null;
-export const klm = (pointer, keys) => Math.round((1.3 * pointer + 0.28 * keys) * 10) / 10;
+const committed = (r) => r.historyAtEnd ? Math.max(0, r.historyAtEnd.undoSteps - (r.historyAtStart?.undoSteps ?? 0)) : null;
+const klm = (pointer, keys) => Math.round((1.3 * pointer + 0.28 * keys) * 10) / 10;
 export const percentiles = summarize;
 export function expertRate(records) {
   const usable = records.filter((r) => r.result !== 'invalid' && (committed(r) ?? 0) > 0);

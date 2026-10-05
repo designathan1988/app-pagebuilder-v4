@@ -13,16 +13,16 @@ import type { ModelRules } from '../document/validate.ts';
 import { INITIAL_VALUES } from '../../generated/value-lists.ts';
 import { storedStyleValue, storedValue } from './stored.ts';
 
-export const valueIn = registerCondition('valueIn', (own, _parent, values) => own !== undefined && values.includes(own));
-export const alwaysHolds = registerCondition('always', () => true);
-export const parentValueIn = registerCondition('parentValueIn', (_own, parent, values) => parent !== undefined && values.includes(parent));
+const valueIn = registerCondition('valueIn', (own, _parent, values) => own !== undefined && values.includes(own));
+const alwaysHolds = registerCondition('always', () => true);
+const parentValueIn = registerCondition('parentValueIn', (_own, parent, values) => parent !== undefined && values.includes(parent));
 
 // a value the write itself names for the property wins: the coupling only fills in one it leaves out (a width typed
 // with its style keeps that style)
-export const setValue = registerAction('setValue', (values, _trigger, effect) => {
+const setValue = registerAction('setValue', (values, _trigger, effect) => {
   if (effect.value !== null && !(effect.property in values)) values[effect.property] = effect.value;
 });
-export const swapWith = registerAction('swapWith', (values, trigger, effect) => {
+const swapWith = registerAction('swapWith', (values, trigger, effect) => {
   const meant = values[trigger];
   const other = values[effect.property];
   if (meant === undefined || other === undefined) return;
@@ -31,18 +31,18 @@ export const swapWith = registerAction('swapWith', (values, trigger, effect) => 
 });
 // the keywords of an axis's two ends, each the other's mirror
 const MIRRORED: Readonly<Record<string, string>> = { 'flex-start': 'flex-end', 'flex-end': 'flex-start', start: 'end', end: 'start', 'self-start': 'self-end', 'self-end': 'self-start' };
-export const mirror = registerAction('mirror', (values, _trigger, effect) => {
+const mirror = registerAction('mirror', (values, _trigger, effect) => {
   const value = values[effect.property];
   if (value !== undefined) values[effect.property] = MIRRORED[value] ?? value;
 });
-export const setParentValue = registerAction('setParentValue', (_values, _trigger, effect, scene) => {
+const setParentValue = registerAction('setParentValue', (_values, _trigger, effect, scene) => {
   if (effect.value !== null && !(effect.property in scene.parent)) scene.parent[effect.property] = effect.value;
 });
 // the value that keeps the element where it is drawn: a value the write names wins; a fixed element is measured from
 // the viewport, any other from its parent's padding edge (its containing block, which setParentValue made relative),
 // in whole px
 const FIXED = 'fixed';
-export const keepVisualPlace = registerAction('keepVisualPlace', (values, trigger, effect, scene) => {
+const keepVisualPlace = registerAction('keepVisualPlace', (values, trigger, effect, scene) => {
   if (effect.property in values) return;
   const at = scene.place(values[trigger] === FIXED ? 'viewport' : 'parent') as Readonly<Record<string, number>> | null;
   const value = at?.[effect.property];

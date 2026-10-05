@@ -100,12 +100,12 @@ export function tracksForChildren(count: number, rules: Pick<ModelRules, 'breakp
 // writes it (a repeat of equal tracks, else the list), then read and written as any value of the property
 // (style.set's own reader and writer). A place the grid does not hold, and a track the property does not take, are
 // refused with the value named; a locked element refuses as every style write does.
-export type TrackEdit =
+type TrackEdit =
   | { readonly add: true }
   | { readonly remove: true }
   | { readonly track: number; readonly value: string };
 
-export function editedTracks(held: string | undefined, edit: TrackEdit): string | { readonly refused: 'noTrack' } {
+function editedTracks(held: string | undefined, edit: TrackEdit): string | { readonly refused: 'noTrack' } {
   if ('add' in edit) return withTrackAdded(held);
   if ('remove' in edit) return withTrackRemoved(held);
   const tracks = tracksOf(held);

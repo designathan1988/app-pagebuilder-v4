@@ -6,7 +6,7 @@ import { lexer, parse, toPlainObject, walk, type CssNodePlain, type Declaration 
 
 export const DEFAULT_TOKENS_FILE = 'src/ui/tokens.css';
 
-export type LiteralKind = 'colour' | 'length' | 'font' | 'layer' | 'variable';
+type LiteralKind = 'colour' | 'length' | 'font' | 'layer' | 'variable';
 
 export interface StyleLiteral {
   kind: LiteralKind;

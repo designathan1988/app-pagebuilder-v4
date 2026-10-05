@@ -20,7 +20,7 @@ export interface AssistantState {
   readonly inputTokens: number;
   readonly outputTokens: number;
 }
-export const INITIAL_ASSISTANT: AssistantState = { draft: '', preferences: false, busy: false, hasKey: false, connection: 'disconnected', session: '', entries: [], reference: null, request: null, serial: 0, inputTokens: 0, outputTokens: 0 };
+const INITIAL_ASSISTANT: AssistantState = { draft: '', preferences: false, busy: false, hasKey: false, connection: 'disconnected', session: '', entries: [], reference: null, request: null, serial: 0, inputTokens: 0, outputTokens: 0 };
 export const assistantOf = (ui: EditorUi): AssistantState => ui.assistant ?? INITIAL_ASSISTANT;
 const nextUi = (ui: EditorUi, patch: Partial<AssistantState>): EditorUi => ({ ...ui, assistant: { ...assistantOf(ui), ...patch } });
 export const setAssistantPreferences = registerHandler<'assistant.setPreferences', EditorUi>('assistant.setPreferences', ({ state }, { open }) => ({ kind: 'change', ui: nextUi(state.ui, { preferences: open }) }));

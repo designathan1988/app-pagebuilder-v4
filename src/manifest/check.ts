@@ -19,7 +19,7 @@ import { scenariosRules } from './check/scenarios.ts';
 import { placementRules } from './check/placement.ts';
 
 // the public names of the checker, whose ground is check/base.ts
-export { RULES, excludedUnitsOf, generatedOffer, generatedUnits, htmlRefusal, supportedKeywords, supportedUnits } from './check/base.ts';
+export { RULES, excludedUnitsOf, generatedOffer, generatedUnits, htmlRefusal, supportedKeywords,  } from './check/base.ts';
 export type { CheckResult, ManifestInput, ManifestSummary, OfferData, Problem, ReferenceKind, RuleId } from './check/base.ts';
 
 // The rule families, in the order they report (plan I.12): each reads the context and what an earlier family found.

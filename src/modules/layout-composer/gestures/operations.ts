@@ -52,8 +52,6 @@ export type Operation =
   | { readonly kind: 'interpret'; readonly parent: string | null; readonly strategy: LayoutStrategy }
   | { readonly kind: 'compose'; readonly operations: readonly Operation[] };
 
-export type OperationKind = Operation['kind'];
-
 export type Result =
   | {
       readonly ok: true;

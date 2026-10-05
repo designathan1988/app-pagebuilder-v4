@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-export interface ChatEntry { id: string; role: 'user' | 'assistant' | 'tool'; text: string; error?: boolean | undefined; image?: string | undefined }
+interface ChatEntry { id: string; role: 'user' | 'assistant' | 'tool'; text: string; error?: boolean | undefined; image?: string | undefined }
 export interface ChatSurfaceProps { entries: readonly ChatEntry[]; draft: string; busy: boolean; configured: boolean; model: string; door: (control: string, props: Readonly<Record<string, unknown>>) => ReactNode; t: (key: string) => string }
 // Controlled by existing editor UI state. Render messages as text; document/model output is never injected HTML.
 export function ChatSurface({ entries, draft, busy, configured, model, door, t }: ChatSurfaceProps) {

@@ -34,7 +34,7 @@ export function generateIconNames(): Record<string, unknown> {
 }
 
 // Every icon name the hand-written manifest gives.
-export function namedIcons(root: string): string[] {
+function namedIcons(root: string): string[] {
   const { files } = loadManifest(root).input;
   const names = new Set<string>();
   const add = (name: unknown) => {

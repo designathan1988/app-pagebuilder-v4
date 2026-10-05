@@ -91,7 +91,7 @@ export const FEATURES: Feature[] = fs
   .sort()
   .flatMap((f) => (read(path.join('manifest/features', f)) as { features: Feature[] }).features);
 const references = (read('manifest/references.json') as { references: { kind: string; id: string; status: string }[] }).references;
-export const BUILT = new Set(references.filter((r) => r.kind === 'handler' && r.status === 'registered').map((r) => r.id));
+const BUILT = new Set(references.filter((r) => r.kind === 'handler' && r.status === 'registered').map((r) => r.id));
 const environment = read('manifest/environment.json') as { viewports: { id: string; width: number; height: number }[]; locales: { default: string } };
 const properties = read('manifest/properties.json') as { breakpoints: { id: string; base: boolean }[]; states: { id: string; pseudo: string | null }[] };
 const elements = read('manifest/elements.json') as { elements: { id: string; content: string }[] };

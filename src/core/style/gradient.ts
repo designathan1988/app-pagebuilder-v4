@@ -9,7 +9,7 @@ import { formatColor, parseColor } from './color.ts';
 import { splitLayers } from './codecs.ts';
 
 export type GradientType = 'linear' | 'radial' | 'conic';
-export interface GradientStop {
+interface GradientStop {
   readonly color: string;
   readonly position: number;
 }
@@ -20,7 +20,7 @@ export interface Gradient {
 }
 
 // the gradient Add a gradient writes (spec, "Trigger")
-export const DEFAULT_GRADIENT: Gradient = {
+const DEFAULT_GRADIENT: Gradient = {
   type: 'linear',
   angle: 135,
   stops: [
@@ -83,7 +83,7 @@ export function writeGradient({ type, angle, stops }: Gradient): string {
 
 // the colour a gradient has at a position: its stops' colours mixed between the stops around it (Problems in Pager 4:
 // a stop added there keeps the rendering); a stop's own colour when the colours are not ones this reader mixes
-export function colorAt(stops: readonly GradientStop[], position: number): string {
+function colorAt(stops: readonly GradientStop[], position: number): string {
   const sorted = [...stops].sort((a, b) => a.position - b.position);
   const after = sorted.findIndex((s) => s.position >= position);
   if (after <= 0) return (sorted[after < 0 ? sorted.length - 1 : 0] ?? sorted[0])?.color ?? '';

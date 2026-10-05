@@ -1,6 +1,6 @@
 import type { Sample } from './metrics.ts';
 
-export interface Probe {
+interface Probe {
   phase: string | null;
   samples: Sample[];
   pending: number;

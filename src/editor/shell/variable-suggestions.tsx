@@ -21,7 +21,7 @@ const nameOf = (value: string) => value.slice(PREFIX.length, -1).toLowerCase();
 
 // The variables (each written var(--name)) a field's text begins: those whose names start with the name typed, else
 // those that hold it; none when the text begins no variable.
-export function variablesTyped(text: string, variables: readonly string[]): readonly string[] {
+function variablesTyped(text: string, variables: readonly string[]): readonly string[] {
   const typed = TYPED.exec(text)?.[1]?.toLowerCase();
   if (typed === undefined) return [];
   const starting = variables.filter((value) => nameOf(value).startsWith(typed));

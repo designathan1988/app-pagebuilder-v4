@@ -10,7 +10,7 @@ import { StoreContext, type EditorStore } from '../store.ts';
 import { useT } from '../text.ts';
 
 // The regions the shell draws, each a place the fallback takes (window.css)
-export type RegionId = 'top-bar' | 'activity-bar' | 'sidebar' | 'canvas' | 'right-dock' | 'dock' | 'inspector' | 'status-bar' | 'overlays' | 'preview';
+type RegionId = 'top-bar' | 'activity-bar' | 'sidebar' | 'canvas' | 'right-dock' | 'dock' | 'inspector' | 'status-bar' | 'overlays' | 'preview';
 
 interface Props {
   readonly region: RegionId;

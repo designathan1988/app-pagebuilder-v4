@@ -209,7 +209,7 @@ export function useEffectiveText(property: string, parts: readonly string[], own
 // Whether any selected element holds a value of its own of these properties (the user's real-use audit, A3.35): Reset
 // this value is drawn then, and takes the value away from every selected element that holds one, in one step
 // (style.reset). With a class as the style target, the class is the one holder.
-export function useAnyStored(properties: readonly string[]): boolean {
+function useAnyStored(properties: readonly string[]): boolean {
   return useEditorState((s) => {
     const rules = layeredRules(s);
     const holds = (node: DocNode | null | undefined) => node != null && properties.some((p) => storedValue(node, p, rules) !== undefined);
@@ -314,7 +314,7 @@ function StepButton({ entry, property, shown, input, ready }: { readonly entry: 
 
 // The project's fonts (the manifest's custom-fonts; core/files/fonts.ts): the families the font menu offers above the
 // system stacks, each drawn in its own face (the menu previews a value by the family it names).
-export function useProjectFontFamilies(): readonly string[] {
+function useProjectFontFamilies(): readonly string[] {
   const files = useEditorState((s) => s.document.files);
   return useMemo(() => (files ?? []).filter(isFontFile).map(familyOf), [files]);
 }
@@ -480,7 +480,7 @@ export function presetsOf(entry: DoorEntry): readonly string[] {
 // The values a field's door offers in Essentials only (its offers' essentials: the Display menu's nine of the 22 the
 // browser takes), or null when it offers the same values in both modes. All properties lists them first and the rest
 // behind More values (the audit's S-027: the menu listed the 22 raw keywords).
-export function essentialsOf(entry: DoorEntry): readonly string[] | null {
+function essentialsOf(entry: DoorEntry): readonly string[] | null {
   const offers = entry.door.adapter.offers;
   if (!offers || offers.essentials === null) return null;
   return SUBSETS.get(offers.property)?.find((s) => s.id === offers.essentials)?.values ?? null;
@@ -1432,7 +1432,7 @@ export function keepAfterGesture(store: EditorStore, run: () => void): void {
 
 // Keeps a text with the door's command (text.set), from a field (keepAfterGesture). Nothing is kept for a node the
 // document no longer holds.
-export function keepTextWith(store: EditorStore, command: CommandId, target: NodeId, content: string): void {
+function keepTextWith(store: EditorStore, command: CommandId, target: NodeId, content: string): void {
   keepAfterGesture(store, () => {
     if (locate(store.getState().document, target) === null) return;
     (store.dispatch as (id: CommandId, args: CommandArgs['text.set']) => DispatchResult)(command, { target, content });

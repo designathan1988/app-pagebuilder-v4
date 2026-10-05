@@ -56,7 +56,7 @@ export function marqueeMode(entry: DoorEntry, press: Press, modifier: string | n
 }
 // Whether the box being drawn takes the leaves (spec marquee-select, Problems in Pager 3): the key the marquee
 // gestures name for it is held now.
-export const LEAVES_KEY = (manifest.interactions.gestures.find((g) => g.id === 'marquee')?.modifiers ?? []).find((m) => m.meaning === 'take-leaves')?.key ?? null;
+const LEAVES_KEY = (manifest.interactions.gestures.find((g) => g.id === 'marquee')?.modifiers ?? []).find((m) => m.meaning === 'take-leaves')?.key ?? null;
 export const leavesNow = (altHeld: () => boolean): boolean => LEAVES_KEY === 'Alt' && altHeld();
 
 // Whether the key that duplicates a drag is held, once the duplicate by dragging is built (spec drag-duplicate): the
@@ -81,14 +81,14 @@ export const ELEMENT_DRAGS = manifest.doors.filter((d) => d.door.kind === 'canva
 // predicate) moves them freely instead of proposing a place in the flow: each move runs the door's command with the
 // travel since the last one, in page px (screen px divided by the zoom, whole px), inside the press's gesture.
 export const FREE_DRAG = manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.source === 'positioned-element' && isFeatureBuilt(d.door.feature as FeatureId)) ?? null;
-export const zoneDoor = (zone: string) => ELEMENT_DRAGS.find((d) => d.door.kind === 'canvas-drag' && d.door.zone === zone) ?? null;
-export const REORDER = zoneDoor('before-after');
-export const INTO = zoneDoor('inside');
+const zoneDoor = (zone: string) => ELEMENT_DRAGS.find((d) => d.door.kind === 'canvas-drag' && d.door.zone === zone) ?? null;
+const REORDER = zoneDoor('before-after');
+const INTO = zoneDoor('inside');
 export const dropDoor = (proposal: DropProposal) => (proposal.placement === 'inside' ? INTO : REORDER);
 // The duplicate by dragging (spec drag-duplicate): the element drag door whose gesture holds a key for the whole drag
 // ("held-duplicates", interactions.json), once its feature is built; the release then runs its command (the duplicate
 // of the selection) and the move of the copies through the door of the place drawn, in the drag's one gesture.
-export const DUPLICATE_GESTURE = manifest.interactions.gestures.find((g) => g.modifiers.some((m) => m.meaning === 'held-duplicates'));
+const DUPLICATE_GESTURE = manifest.interactions.gestures.find((g) => g.modifiers.some((m) => m.meaning === 'held-duplicates'));
 export const DUPLICATE_KEY = DUPLICATE_GESTURE?.modifiers.find((m) => m.meaning === 'held-duplicates')?.key ?? null;
 export const DUPLICATE_DRAG = ELEMENT_DRAGS.find((d) => d.door.kind === 'canvas-drag' && d.door.gesture === DUPLICATE_GESTURE?.id && isFeatureBuilt(d.door.feature as FeatureId)) ?? null;
 // the keys a drag press may hold: its gestures' own (the duplicate's Alt)
@@ -97,7 +97,7 @@ export const DRAG_MODIFIERS = new Set(manifest.interactions.gestures.filter((g) 
 // toggles it) belongs to the click too, so it must reach the click's door — Shift still means wrap-vertical on a drop,
 // which the drag branch reads for itself. Without this, a drag gesture that claims Shift (the side drop's wrap) made
 // every Shift+click a plain select: the person's selection was replaced instead of added to.
-export const CLICK_KEYS = new Set((manifest.interactions.gestures.find((g) => g.id === 'canvas-click')?.modifiers ?? []).map((m) => m.key));
+const CLICK_KEYS = new Set((manifest.interactions.gestures.find((g) => g.id === 'canvas-click')?.modifiers ?? []).map((m) => m.key));
 export const DRAG_ONLY_MODIFIERS = new Set([...DRAG_MODIFIERS].filter((key) => !CLICK_KEYS.has(key)));
 
 // The creation drags of tiles (specs palette-drag-insert, reusable-components): the canvas-drag doors of the
@@ -105,7 +105,7 @@ export const DRAG_ONLY_MODIFIERS = new Set([...DRAG_MODIFIERS].filter((key) => !
 // components.insertInstance), and the tiles they start from, that command's doors drawn as items (their clicks insert
 // at the selection). A drag runs once its feature is registered as built in the feature table (src/app/features.ts);
 // until then a tile's press is the tile's own click.
-export const TILE_DRAGS = manifest.doors.filter((d) => d.door.kind === 'canvas-drag' && d.door.gesture === 'palette-drag' && d.door.zone === 'drop-proposal');
+const TILE_DRAGS = manifest.doors.filter((d) => d.door.kind === 'canvas-drag' && d.door.gesture === 'palette-drag' && d.door.zone === 'drop-proposal');
 // The dwell that unfolds a folded row, once its feature is built (the row's own click and drop doors are measured
 // with the drops, input/drop-proposals.ts).
 export const ROW_DWELL = layersDrag('collapsed-row-dwell');
@@ -140,7 +140,7 @@ export const ROTATE_SNAP = numberConstant('rotate.snapStep');
 // The guide drags (spec guides-manual): out of a ruler (data-ruler: the axis of the guides it makes) a new guide, once
 // the pointer has moved past drag.threshold; a guide (data-guide) moved over the page; either released over its own
 // ruler is no guide: a new one is not made, a moved one is deleted, through the door of that zone. One gesture each.
-export const guideDoor = (source: string, zone: string) => manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.source === source && d.door.zone === zone && isFeatureBuilt(d.door.feature as FeatureId)) ?? null;
+const guideDoor = (source: string, zone: string) => manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.source === source && d.door.zone === zone && isFeatureBuilt(d.door.feature as FeatureId)) ?? null;
 export const GUIDE_CREATES: Readonly<Record<string, DoorEntry | null>> = { horizontal: guideDoor('top-ruler', 'page'), vertical: guideDoor('left-ruler', 'page') };
 export const GUIDE_MOVE = guideDoor('guide', 'page');
 export const GUIDE_DELETE = guideDoor('guide', 'own-ruler');
@@ -183,7 +183,7 @@ export interface SpacingDrag {
   gesture: Gesture | null;
   cancels: number;
 }
-export const MODIFIER_MEANINGS = new Map((manifest.interactions.gestures.find((g) => g.id === 'spacing-band')?.modifiers ?? []).map((m) => [m.meaning, m.key] as const));
+const MODIFIER_MEANINGS = new Map((manifest.interactions.gestures.find((g) => g.id === 'spacing-band')?.modifiers ?? []).map((m) => [m.meaning, m.key] as const));
 export const ALL_SIDES_KEY = MODIFIER_MEANINGS.get('change-all-four-sides');
 export const OPPOSITE_KEY = MODIFIER_MEANINGS.get('change-opposite-side');
 // Whether a drawn handle stands on its corner or edge centre of the element's box now (screen px, within a pixel): its
@@ -204,7 +204,7 @@ export function handleInPlace(handle: Element, box: { readonly x: number; readon
 }
 // The drawn controls of the canvas chrome a press may take: the eight resize handles, the spacing and gap bands, the
 // rotation zones.
-export const CHROME_CONTROLS = '[data-canvas-overlay] [data-edit-handle], [data-canvas-overlay] [data-resize-handle], [data-canvas-overlay] [data-rotate-handle]';
+const CHROME_CONTROLS = '[data-canvas-overlay] [data-edit-handle], [data-canvas-overlay] [data-resize-handle], [data-canvas-overlay] [data-rotate-handle]';
 // The drawn control of the canvas chrome a press hits (a resize handle, a spacing band, a rotation zone): the press's
 // own target when it is one, else the control whose drawn box covers the press where it went down on the stage. The
 // chrome clips its drawing to the canvas and an element at the page's edge reaches past it: the visible sliver of its
@@ -229,7 +229,7 @@ export function chromeControl(at: Point, selector: string, target: EventTarget |
   const top = covering.at(-1) ?? null;
   return top !== null && top.matches(selector) ? top : null;
 }
-export const PAN_DRAGS = manifest.doors.filter((d) => d.door.kind === 'canvas-drag' && d.door.gesture === 'space-pan');
+const PAN_DRAGS = manifest.doors.filter((d) => d.door.kind === 'canvas-drag' && d.door.gesture === 'space-pan');
 export const WHEEL_FACTOR = numberConstant('zoom.wheelFactor');
 // a wheel's line (deltaMode 1) in screen px, as the spec measured it
 export const WHEEL_LINE = 16;
@@ -257,7 +257,7 @@ export interface PointerShared {
   sessionDispatch: ((id: CommandId, args: unknown) => DispatchResult) | null;
   pendingPickerEnd: (() => void) | null;
 }
-export const SHARED = new WeakMap<EditorStore, PointerShared>();
+const SHARED = new WeakMap<EditorStore, PointerShared>();
 export function sharedOf(store: EditorStore): PointerShared {
   let shared = SHARED.get(store);
   if (shared === undefined) {
@@ -296,54 +296,54 @@ export const tileDrag = (entry: DoorEntry): DoorEntry | null =>
   entry.door.kind === 'panel-control' && entry.door.drawnAs === 'item' ? (TILE_DRAGS.find((d) => d.command.id === entry.command.id && isFeatureBuilt(d.door.feature as FeatureId)) ?? null) : null;
 // The side drop (spec drag-layout, row 5): the canvas-drag doors of the side band, one for an element drag and one for
 // a tile's creation drag; a door whose feature is not built offers nothing.
-export const sideDoor = (source: string) => manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.zone === 'side-band' && d.door.source === source && isFeatureBuilt(d.door.feature as FeatureId)) ?? null;
+const sideDoor = (source: string) => manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.zone === 'side-band' && d.door.source === source && isFeatureBuilt(d.door.feature as FeatureId)) ?? null;
 export const SIDE_ELEMENT = sideDoor('canvas-element');
 // the key that turns a side drop's wrapper to the other axis (the gesture's own modifier meaning, interactions.json)
-export const WRAP_KEY = manifest.interactions.gestures.find((g) => g.id === 'element-drag')?.modifiers.find((m) => m.meaning === 'wrap-vertical')?.key ?? null;
+const WRAP_KEY = manifest.interactions.gestures.find((g) => g.id === 'element-drag')?.modifiers.find((m) => m.meaning === 'wrap-vertical')?.key ?? null;
 export const wrapped = (wrapper: 'row' | 'column', modifier: string | null): 'row' | 'column' => (WRAP_KEY !== null && modifier === WRAP_KEY ? (wrapper === 'row' ? 'column' : 'row') : wrapper);
-export const SIDE_TILE = sideDoor('palette-tile');
-export const isTile = (entry: DoorEntry) => tileDrag(entry) !== null;
+const SIDE_TILE = sideDoor('palette-tile');
+const isTile = (entry: DoorEntry) => tileDrag(entry) !== null;
 // The side drop of a creation drag: the side band's door, when its command takes what the tile stands for (a palette
 // entry: element.wrapBeside); a component's tile offers none.
 export const sideTileFor = (inserting: Inserting): DoorEntry | null => (SIDE_TILE !== null && Object.keys(inserting.args).every((name) => name in SIDE_TILE.command.args) ? SIDE_TILE : null);
 // The scrub of a number field (spec inspector-number-fields): the panel drag doors pressed on a field's label, and the
 // key held now when their gesture gives it a meaning (interactions.json number-scrub) and their command takes it.
-export const SCRUBS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'field-label');
+const SCRUBS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'field-label');
 // the drag of a gradient stop along its bar (spec gradient-editor): the panel drag pressed on a stop
-export const STOP_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'gradient-stop');
+const STOP_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'gradient-stop');
 // the rows of a shadow editor (A3.34): dragging one moves the layer among the others
-export const LAYER_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source.endsWith('-shadow-row'));
+const LAYER_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source.endsWith('-shadow-row'));
 // the drag of a shadow's light on its pad (spec shadow-editor): the panel drags pressed on a light pad
-export const PAD_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.gesture === 'shadow-pad-drag');
+const PAD_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.gesture === 'shadow-pad-drag');
 // the four sides of a box, in the composite's order (properties.json: top, right, bottom, left)
-export const BOX_SIDES = manifest.properties.composites.find((c) => c.control === 'box-model')?.longhands ?? [];
+const BOX_SIDES = manifest.properties.composites.find((c) => c.control === 'box-model')?.longhands ?? [];
 export const SIDES: readonly string[] = BOX_SIDES.map((property) => property.slice(property.lastIndexOf('-') + 1));
 // the margin arguments geometry.resize takes for a flow drag (the manifest's own names): the dragged edge follows
 // the pointer by its margin (item 4.2)
 export const MARGIN_ARGS: Readonly<Record<'marginLeft' | 'marginTop', string>> = { marginLeft: 'marginLeft', marginTop: 'marginTop' };
 // The quick panel's grip (spec quick-panel): the panel drag doors pressed on it.
-export const GRIP_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'quick-panel-grip');
+const GRIP_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'quick-panel-grip');
 // The splitters (spec panel-resize): the panel drag doors pressed on a divider between panels; the frame's edge is
 // one too (spec breakpoints-switch): it sizes the screen the canvas shows, from the width at the press.
 export const FRAME_EDGE = 'frame-edge';
-export const SPLITTER_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && (d.door.source === 'splitter' || d.door.source === FRAME_EDGE));
+const SPLITTER_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && (d.door.source === 'splitter' || d.door.source === FRAME_EDGE));
 // The Explorer's file tree (spec explorer-file-system): the panel drag doors pressed on a row of the tree, released on
 // a folder row — the file lands in that folder (files.move)
-export const EXPLORER_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'explorer-row');
+const EXPLORER_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'explorer-row');
 // The Data panel's columns (spec content-data, "binding"): the panel drag doors pressed on a column, released on an
 // element's part in Connect fields, which they bind to the column's field
-export const COLUMN_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'data-column');
+const COLUMN_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'data-column');
 // The timeline (specs timeline-preview, timeline-keyframes): the panel drag pressed on the ruler (the playhead) and the
 // one pressed on a keyframe's marker (its animation and offset stand in the control's arguments).
-export const PLAYHEAD_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'playhead');
-export const KEYFRAME_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'keyframe');
+const PLAYHEAD_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'playhead');
+const KEYFRAME_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && d.door.source === 'keyframe');
 // A panel's header (specs floating-panels and panel-combine-tabs): the panel drag doors pressed on it. What the panel
 // becomes where the pointer is — a window, a side dock, a tab of the panel under it — is
 // src/editor/workspace/panel-drag.ts, which the moves and the release ask.
-export const PANEL_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && (d.door.source === 'panel-header' || d.door.source === 'floating-header'));
+const PANEL_DRAGS = manifest.doors.filter((d) => d.door.kind === 'panel-drag' && (d.door.source === 'panel-header' || d.door.source === 'floating-header'));
 // the door a press on a header itself stands for (the header carries no datum of its own): the first of the panel
 // drags, whose place is only the fallback a release over no other place lands in
-export const PANEL_FALLBACK = PANEL_DRAGS.find((d) => d.door.kind === 'panel-drag' && d.door.source === 'panel-header') ?? null;
+const PANEL_FALLBACK = PANEL_DRAGS.find((d) => d.door.kind === 'panel-drag' && d.door.source === 'panel-header') ?? null;
 // the door a row's press opens the file with when it was no drag: the tree's own row door (files.open)
 export const EXPLORER_OPEN = manifest.doors.find((d) => d.door.kind === 'panel-control' && d.door.control === 'file-row') ?? null;
 export function scrubModifier(entry: DoorEntry, modifier: string | null): string | null {
@@ -378,7 +378,7 @@ export function openGesture(store: EditorStore): { readonly context: KeyContextI
 // commits it, its Cancel, Escape (drag.cancel, in the picker's own key context) or its closing otherwise cancels it.
 // A press on the picker's area (saturation across, brightness down) writes the colour it points at, and so does every
 // move while the button is held.
-export const COLOR_PICKER_CONTEXT: KeyContextId = 'color-picker';
+const COLOR_PICKER_CONTEXT: KeyContextId = 'color-picker';
 // the picker's own cancel, run when Escape ends its session: the command of its Cancel button
 export const CANCEL_PICKER = (manifest.doors.find((d) => d.door.kind === 'panel-control' && d.door.panel === 'color-picker' && d.door.control === 'cancel')?.command.id ?? '') as CommandId;
 export function dispatchInSession(store: EditorStore, id: CommandId, args: unknown): DispatchResult | null {
@@ -431,7 +431,7 @@ export function registerRepeat(element: HTMLElement, step: (modifier: string | n
 // The text toolbar over the canvas while a text is edited (text-toolbar.tsx): its controls run their own doors, so a
 // press there is no press on the page under it, and it leaves the focus in the edited text (spec
 // text-inline-formatting: Bold, Italic and Link act on what is selected there).
-export const TEXT_TOOLBAR_AREA = `[data-canvas-overlay] [data-region="${TEXT_TOOLBAR}"]`;
+const TEXT_TOOLBAR_AREA = `[data-canvas-overlay] [data-region="${TEXT_TOOLBAR}"]`;
 export const onTextToolbar = (target: EventTarget | null) => target instanceof Element && target.closest(TEXT_TOOLBAR_AREA) !== null;
 // an option of the list the focused combobox controls (a value field's variable suggestions): a press there keeps the
 // focus in the combobox, as the WAI-ARIA combobox keeps it, and the option's click runs

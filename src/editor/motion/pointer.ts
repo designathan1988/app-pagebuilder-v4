@@ -18,7 +18,7 @@ import type { EditorUi } from '../state.ts';
 import { motionUiOf, shownTimeline, viewOf } from './state.ts';
 
 // the panel-drag sources of manifest/commands/motion.json, the controls the pointer owner presses
-export const MOTION_DRAG_SOURCES = ['motion-bar', 'motion-bar-start', 'motion-bar-end', 'motion-keyframe', 'motion-marker', 'motion-playhead'] as const;
+const MOTION_DRAG_SOURCES = ['motion-bar', 'motion-bar-start', 'motion-bar-end', 'motion-keyframe', 'motion-marker', 'motion-playhead'] as const;
 export type MotionDragSource = (typeof MOTION_DRAG_SOURCES)[number];
 export const isMotionDragSource = (source: string): source is MotionDragSource => (MOTION_DRAG_SOURCES as readonly string[]).includes(source);
 

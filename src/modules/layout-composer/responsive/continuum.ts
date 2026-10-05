@@ -166,7 +166,7 @@ export function responsiveEdit(graph: LayoutIntent, maxWidth: number, edit: Resp
 // grid of three alike items or more flows in two columns there instead (the group's other regions, a header over the
 // cards, take a whole row), and stacks at the phone breakpoint (the narrowest). A group the person reflowed or kept as
 // drawn at a width (or a wider one) keeps that choice there.
-export const ADAPT_WIDEST = 1024;
+const ADAPT_WIDEST = 1024;
 
 export interface Adaptation {
   readonly tablet: number | null;

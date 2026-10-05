@@ -15,7 +15,7 @@ function distanceToSegment(p: Point, a: Point, b: Point): number {
 
 // The corners of a stroke (Ramer–Douglas–Peucker): the fewest points whose straight pieces stay within the tolerance
 // of every sample. A hand's wobble disappears; a deliberate turn stays a corner.
-export function corners(points: readonly Point[], tolerance: number): Point[] {
+function corners(points: readonly Point[], tolerance: number): Point[] {
   if (points.length <= 2) return [...points];
   const first = points[0] as Point;
   const last = points[points.length - 1] as Point;

@@ -82,7 +82,7 @@ function PanelBody({ panel }: { readonly panel: Panel }) {
 
 // The tab strip of a combined area (spec panel-combine-tabs): one tab per panel, each the workspace.setActiveTab door
 // of the sidebar group with the panel it names.
-export function PanelTabs({ host }: { readonly host: Panel }) {
+function PanelTabs({ host }: { readonly host: Panel }) {
   const t = useT();
   const tabs = useEditorState((s) => combinationAt(s.ui, host).tabs.join(','));
   if (SIDEBAR_TAB === null || !tabs.includes(',')) return null;

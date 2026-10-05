@@ -5,10 +5,10 @@ import { fileURLToPath } from 'node:url';
 import type { ManifestInput, Problem, ReferenceKind } from '../../src/manifest/check.ts';
 
 export const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
-export const CATALOGUE_DIR = 'src/i18n/locales';
-export const GLOSSARY_FILE = 'src/i18n/glossary.json';
+const CATALOGUE_DIR = 'src/i18n/locales';
+const GLOSSARY_FILE = 'src/i18n/glossary.json';
 // the behaviour document the manifest's spec references point into (spec/BEHAVIOUR.md#<id>)
-export const BEHAVIOUR_FILE = 'spec/BEHAVIOUR.md';
+const BEHAVIOUR_FILE = 'spec/BEHAVIOUR.md';
 
 export interface LoadedManifest {
   input: ManifestInput;
@@ -43,7 +43,7 @@ function sourceFiles(dir: string): string[] {
   });
 }
 
-export function registeredIds(root: string = REPO_ROOT): Record<ReferenceKind, string[]> {
+function registeredIds(root: string = REPO_ROOT): Record<ReferenceKind, string[]> {
   const out: Record<ReferenceKind, string[]> = { handler: [], predicate: [], action: [], codec: [] };
   for (const file of sourceFiles(path.join(root, 'src'))) {
     for (const { kind, id } of registrationsIn(fs.readFileSync(file, 'utf8'))) {

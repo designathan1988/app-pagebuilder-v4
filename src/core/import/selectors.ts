@@ -17,7 +17,7 @@ export interface Facts {
   readonly attributes: ReadonlyMap<string, string>;
 }
 
-export interface AttributeTest {
+interface AttributeTest {
   readonly name: string;
   readonly op: 'exists' | '=' | '~=' | '^=' | '$=' | '*=';
   readonly value: string;
@@ -177,7 +177,7 @@ const attributeHolds = (facts: Facts, test: AttributeTest): boolean => {
 };
 
 // whether one compound selector holds for these facts
-export function compoundHolds(compound: Compound, facts: Facts): boolean {
+function compoundHolds(compound: Compound, facts: Facts): boolean {
   if (compound.tag !== null && facts.tag !== compound.tag) return false;
   if (compound.id !== null && facts.id !== compound.id) return false;
   for (const className of compound.classes) if (!facts.classes.includes(className)) return false;

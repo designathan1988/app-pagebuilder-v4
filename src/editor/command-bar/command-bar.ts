@@ -21,7 +21,7 @@ const constant = (id: string): number => {
   return value;
 };
 export const MAX_RESULTS = constant('commandBar.maxResults');
-export const RECENT_COUNT = constant('commandBar.recentCount');
+const RECENT_COUNT = constant('commandBar.recentCount');
 
 export type EntryKind = 'command' | 'insert' | 'open-panel' | 'set-property' | 'edit-property' | 'go-to-page' | 'select-layer' | 'apply-class';
 const KIND_ORDER: readonly EntryKind[] = ['command', 'insert', 'open-panel', 'set-property', 'edit-property', 'go-to-page', 'select-layer', 'apply-class'];
@@ -30,7 +30,7 @@ const KIND_ORDER: readonly EntryKind[] = ['command', 'insert', 'open-panel', 'se
 const SCOPES: Readonly<Record<string, readonly EntryKind[]>> = { '>': ['command'], '+': ['insert'], '/': ['open-panel'], '#': ['set-property', 'edit-property'], '@': ['go-to-page', 'select-layer', 'apply-class'] };
 // the title of the group an entry is listed under (the canonical palette: Commands, Panels), by the scope that keeps it
 const GROUP_TITLES: Readonly<Record<string, string>> = { '>': 'commandBar.group.commands', '+': 'commandBar.group.insert', '/': 'commandBar.group.panels', '#': 'commandBar.group.properties', '@': 'commandBar.group.find' };
-export function groupTitleOf(kind: EntryKind): string {
+function groupTitleOf(kind: EntryKind): string {
   const prefix = Object.entries(SCOPES).find(([, kinds]) => kinds.includes(kind))?.[0] ?? '>';
   return GROUP_TITLES[prefix] ?? 'commandBar.group.commands';
 }

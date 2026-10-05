@@ -24,7 +24,7 @@ interface Node {
 
 // The app's own port, read-only, in the page: the same surface the browser checks use. The port's members are read
 // inside the page: a function does not survive the trip to this process.
-export const readSelection = (page: Page): Promise<readonly string[]> => page.evaluate(() => (window as unknown as { __builderTestPort: Port }).__builderTestPort.selection());
+const readSelection = (page: Page): Promise<readonly string[]> => page.evaluate(() => (window as unknown as { __builderTestPort: Port }).__builderTestPort.selection());
 export const readIncidents = (page: Page): Promise<readonly { kind: string; what: string; detail: string }[]> => page.evaluate(() => (window as unknown as { __builderTestPort: Port }).__builderTestPort.incidents());
 const readDocument = (page: Page): Promise<{ pages: readonly { tree: Node }[]; files?: readonly { path: string }[] }> => page.evaluate(() => (window as unknown as { __builderTestPort: Port }).__builderTestPort.document());
 export const readWhy = (page: Page, id: string, args: unknown): Promise<string> => page.evaluate(([one, a]) => (window as unknown as { __builderTestPort: Port }).__builderTestPort.explain.command(one as string, a), [id, args] as const);

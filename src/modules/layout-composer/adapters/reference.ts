@@ -26,7 +26,7 @@ export interface TraceOptions {
   readonly contrast: number;
 }
 
-export const TRACE_DEFAULTS: TraceOptions = { minimum: 24, depth: 5, contrast: 3 };
+const TRACE_DEFAULTS: TraceOptions = { minimum: 24, depth: 5, contrast: 3 };
 
 interface Cell {
   readonly x: number;

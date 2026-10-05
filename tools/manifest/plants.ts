@@ -1079,7 +1079,7 @@ PLANTS.push(
 
 // The zoom doors' commands made unbuilt, as before zoom-keyboard-buttons: no handler registered, each reference
 // planned, and every scenario starting at Fit, as they all did then.
-export const ZOOM_COMMANDS = ['view.zoomIn', 'view.zoomOut', 'view.zoomReset', 'view.zoomTo', 'view.zoomFit'];
+const ZOOM_COMMANDS = ['view.zoomIn', 'view.zoomOut', 'view.zoomReset', 'view.zoomTo', 'view.zoomFit'];
 export function unbuildZoom(m: MutableInput): void {
   m.registered = { ...m.registered, handler: m.registered.handler.filter((id) => !ZOOM_COMMANDS.includes(id)) };
   for (const r of (m.files['references.json'] as { references: { kind: string; id: string; status: string }[] }).references) {

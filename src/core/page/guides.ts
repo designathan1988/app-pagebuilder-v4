@@ -28,7 +28,7 @@ function guidesPatch(document: DocumentJson, page: number, next: readonly Guide[
 }
 
 // the name of a new guide on an axis: the axis and the first free number
-export function nextGuideId(document: DocumentJson, axis: Guide['axis'], page: number): string {
+function nextGuideId(document: DocumentJson, axis: Guide['axis'], page: number): string {
   const taken = new Set(guidesOf(document, page).map((g) => g.id));
   let n = 1;
   while (taken.has(`${axis}-${n}`)) n += 1;

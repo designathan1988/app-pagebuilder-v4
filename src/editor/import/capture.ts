@@ -19,16 +19,16 @@ import { manifest } from '../../manifest/runtime.ts';
 const IMPORT = manifest.commands.find((c) => 'files' in c.args && 'destination' in c.args)?.id;
 
 // where the Companion answers (tools/companion/server.ts: 127.0.0.1, COMPANION_PORT, 5410 by default)
-export const COMPANION = 'http://127.0.0.1:5410';
+const COMPANION = 'http://127.0.0.1:5410';
 
-export interface CaptureRequest {
+interface CaptureRequest {
   readonly url: string;
   readonly count: number;
   // how many pages of the site to follow from the address (1: the page alone)
   readonly pages?: number;
 }
 // the most pages one capture follows (tools/companion/capture.ts)
-export const MOST_PAGES = 30;
+const MOST_PAGES = 30;
 
 // an address a person types: a bare host is read as https, but this machine's (localhost, an IP address) as http
 export function captureAddress(typed: string): string | null {

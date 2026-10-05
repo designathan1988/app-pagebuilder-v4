@@ -15,7 +15,7 @@ import type { DropProposal, SideOffer } from '../../drag/drop.ts';
 
 // The band of the marquee being drawn, in screen pixels, for the canvas chrome; null when no marquee is drawn.
 // Pointer state, like the hovered node: the selection it makes goes through the store.
-export interface Band {
+interface Band {
   readonly x: number;
   readonly y: number;
   readonly width: number;
@@ -27,7 +27,7 @@ export interface Band {
 export type PressRegion = 'canvas' | 'layers' | 'elsewhere';
 
 // Whether the stage is being panned (spec canvas-pan): idle, armed by space over the stage, or panning.
-export type PanView = 'idle' | 'armed' | 'panning';
+type PanView = 'idle' | 'armed' | 'panning';
 
 // A creation drag from a palette tile: the tile's door, its arguments and the drop door it will run.
 export interface Inserting {
@@ -64,7 +64,7 @@ export interface SideView {
 
 // The elements a drop has just placed, for the canvas chrome, which flashes them (spec drag-layout, row 10); numbered,
 // so the same elements dropped again flash again.
-export interface Dropped {
+interface Dropped {
   readonly id: number;
   readonly nodes: readonly NodeId[];
 }
@@ -103,7 +103,7 @@ function published<T>(first: T, same: (a: T, b: T) => boolean = (a, b) => a === 
 }
 
 // The views of one editor.
-export function createPointerViews() {
+function createPointerViews() {
   const band = published<Band | null>(null);
   // The node the pointer hovers on the canvas, for the canvas chrome: set by pointer moves over the page, null
   // elsewhere.

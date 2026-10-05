@@ -33,7 +33,7 @@ export const search = registerHandler<'layers.search', EditorUi>('layers.search'
 });
 
 // whether a node's row matches a searched text (not empty)
-export function layerMatches(node: DocNode, text: string): boolean {
+function layerMatches(node: DocNode, text: string): boolean {
   const wanted = text.trim().toLowerCase();
   const id = node.attributes.id;
   return [node.name, node.tag ?? '', typeof id === 'string' ? id : '', ...node.classes].some((word) => word.toLowerCase().includes(wanted));

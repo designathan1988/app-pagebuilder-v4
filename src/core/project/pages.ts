@@ -29,7 +29,7 @@ import { registerReferenceKind } from '../store/references.ts';
 import { argumentRefused } from '../store/args.ts';
 
 // A page's name as a file name: lower case, no accent, its words joined by one dash (spec explorer-pages).
-export function pageFile(name: string): string {
+function pageFile(name: string): string {
   const words = slug(name);
   return `${words === '' ? 'page' : words}.html`;
 }

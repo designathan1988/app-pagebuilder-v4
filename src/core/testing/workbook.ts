@@ -34,7 +34,7 @@ export interface WorkbookOptions {
 const escape = (text: string): string => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // The reference of a cell: its column's letters and its row's number ("C7").
-export function cellReference(column: number, row: number): string {
+function cellReference(column: number, row: number): string {
   let letters = '';
   for (let n = column + 1; n > 0; n = Math.floor((n - 1) / 26)) letters = String.fromCharCode(65 + ((n - 1) % 26)) + letters;
   return `${letters}${row + 1}`;
@@ -67,7 +67,7 @@ function sheetXml(sheet: WorkbookSheet, shared: Map<string, number>, doctype: bo
 }
 
 // The parts of the workbook, by their path in the archive.
-export function workbookParts(sheets: readonly WorkbookSheet[], options: WorkbookOptions = {}): { readonly path: string; readonly text: string }[] {
+function workbookParts(sheets: readonly WorkbookSheet[], options: WorkbookOptions = {}): { readonly path: string; readonly text: string }[] {
   const shared = new Map<string, number>();
   const sheetParts = sheets.map((sheet, i) => ({ path: `xl/worksheets/sheet${i + 1}.xml`, text: sheetXml(sheet, shared, options.doctype === true && i === 0) }));
   const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${options.date1904 === true ? '<workbookPr date1904="1"/>' : '<workbookPr/>'}<sheets>${sheets.map((sheet, i) => `<sheet name="${escape(sheet.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`;

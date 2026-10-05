@@ -211,7 +211,7 @@ function holdsInteractive(rules: ModelRules, nodes: readonly DocNode[]): boolean
 // interactive content inside it, the receiver itself or the nearest of its ancestors that does, named by
 // status.refused.interactiveInside; or null when nothing refuses them. Commands that place elements ask it after their
 // other refusals (spec elements-structure, Problems in Pager 5: every door that inserts or drops one).
-export function interactiveInsideRefusal(document: DocumentJson, rules: ModelRules, receiver: NodeId, arriving: readonly DocNode[]): Message | null {
+function interactiveInsideRefusal(document: DocumentJson, rules: ModelRules, receiver: NodeId, arriving: readonly DocNode[]): Message | null {
   let refusing: DocNode | null = null;
   for (let at = locate(document, receiver); at !== null; at = at.parent === null ? null : locate(document, at.parent.id)) {
     if (at.node.tag !== null && rules.contentModel.excludesInteractive(at.node.tag)) {

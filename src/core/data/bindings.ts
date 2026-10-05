@@ -24,7 +24,7 @@ export interface DataContext {
 // The addresses of the pages made for items (spec content-data, "one page per item"): collection name and item id →
 // the page's file.
 export type ItemPages = ReadonlyMap<string, string>;
-export const itemPageKey = (collection: string, item: string): string => `${collection}\u0000${item}`;
+const itemPageKey = (collection: string, item: string): string => `${collection}\u0000${item}`;
 export function itemPagesOf(document: DocumentJson): ItemPages {
   const pages = new Map<string, string>();
   for (const page of document.pages) {
@@ -93,7 +93,7 @@ export function valueFor(document: DocumentJson, bound: Bound, place: Place, pag
 
 // The element showing its own bindings' values for an item (its children untouched). A text written by a binding takes
 // the rich text's marks when the field holds some, and loses any marks it had otherwise.
-export function fillNode(document: DocumentJson, node: DocNode, place: Place, pages: ItemPages, context: DataContext): DocNode {
+function fillNode(document: DocumentJson, node: DocNode, place: Place, pages: ItemPages, context: DataContext): DocNode {
   let next = node;
   for (const bound of node.bind ?? []) {
     const value = valueFor(document, bound, place, pages, context);

@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 476,
-    "lines": 83326
+    "lines": 83268
   },
   "features": [
     {
@@ -3568,7 +3568,7 @@
     },
     {
       "path": "src/core/design/tokens.ts",
-      "lines": 269,
+      "lines": 264,
       "commands": [
         "tokens.create",
         "tokens.update",
@@ -3623,7 +3623,7 @@
     },
     {
       "path": "src/core/document/tree.ts",
-      "lines": 114,
+      "lines": 105,
       "commands": [],
       "features": []
     },
@@ -3726,7 +3726,7 @@
     },
     {
       "path": "src/core/elements/references.ts",
-      "lines": 108,
+      "lines": 102,
       "commands": [],
       "features": []
     },
@@ -3778,7 +3778,7 @@
     },
     {
       "path": "src/core/events/interactions.ts",
-      "lines": 387,
+      "lines": 384,
       "commands": [
         "interactions.add",
         "interactions.update",
@@ -4150,7 +4150,7 @@
     },
     {
       "path": "src/core/motion/model.ts",
-      "lines": 209,
+      "lines": 208,
       "commands": [],
       "features": []
     },
@@ -4168,7 +4168,7 @@
     },
     {
       "path": "src/core/motion/timeline.ts",
-      "lines": 291,
+      "lines": 289,
       "commands": [],
       "features": []
     },
@@ -5797,7 +5797,7 @@
     },
     {
       "path": "src/editor/inspector/spacing.ts",
-      "lines": 47,
+      "lines": 45,
       "commands": [
         "inspector.toggleSpacingLink"
       ],
@@ -5995,7 +5995,7 @@
     },
     {
       "path": "src/editor/motion/ui/doors.ts",
-      "lines": 73,
+      "lines": 67,
       "commands": [],
       "features": []
     },
@@ -6407,7 +6407,7 @@
     },
     {
       "path": "src/editor/shell/slots.tsx",
-      "lines": 39,
+      "lines": 32,
       "commands": [],
       "features": []
     },
@@ -6939,13 +6939,13 @@
     },
     {
       "path": "src/manifest/scenario.ts",
-      "lines": 287,
+      "lines": 285,
       "commands": [],
       "features": []
     },
     {
       "path": "src/manifest/schema.ts",
-      "lines": 1380,
+      "lines": 1375,
       "commands": [],
       "features": []
     },
@@ -6987,7 +6987,7 @@
     },
     {
       "path": "src/modules/layout-composer/geometry/geometry.ts",
-      "lines": 119,
+      "lines": 116,
       "commands": [],
       "features": []
     },
@@ -7005,7 +7005,7 @@
     },
     {
       "path": "src/modules/layout-composer/gestures/operations.ts",
-      "lines": 516,
+      "lines": 514,
       "commands": [],
       "features": []
     },
@@ -7023,7 +7023,7 @@
     },
     {
       "path": "src/modules/layout-composer/gestures/structural.ts",
-      "lines": 187,
+      "lines": 184,
       "commands": [],
       "features": []
     },
@@ -7089,7 +7089,7 @@
     },
     {
       "path": "src/modules/layout-composer/intent/model.ts",
-      "lines": 205,
+      "lines": 203,
       "commands": [],
       "features": []
     },

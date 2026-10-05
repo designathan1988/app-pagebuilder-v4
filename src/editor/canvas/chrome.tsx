@@ -64,8 +64,8 @@ import { useDuplicating, usePointerValue } from '../input/pointer/use-views.ts';
 import type { PointerViews } from '../input/pointer/views.ts';
 
 // the entries this module published before the placement rules moved out stay published here: consumers need not change
-export { controlBoxes, handleHitBox, placeLabel, visibleCanvas } from './placement.ts';
-export type { Box, Placement } from './placement.ts';
+export {  handleHitBox,   } from './placement.ts';
+export type { Box,  } from './placement.ts';
 
 // the resize handles (spec resize-handles): the doors of the resize gesture, one per handle, drawn on the one selected
 // element that can be resized (not the page, not locked, shown), each pressed outside the element
@@ -161,7 +161,7 @@ type DropView = Pick<DragView, 'dragged' | 'inserting' | 'proposal' | 'refusal' 
 // move with no proposal. The hand's aim reads as a move, or its refusal. A proposal the level keys climbed says how
 // many receiver levels it climbed ("· ↑1", spec drag-level-keys-escape, Problems in Pager 3): the levels actually
 // climbed, never the keys pressed.
-export function dragWords(document: DocumentJson, view: DropView): Message | null {
+function dragWords(document: DocumentJson, view: DropView): Message | null {
   const { proposal, dragged, inserting, refusal, levels } = view;
   // a confirmed side drop names the wrapper it creates, or the refusal its wrap would meet
   if (view.side?.armed === true) return view.side.refusal ?? sideWords(document, view.side, dragged, inserting);
@@ -215,7 +215,7 @@ function sideWords(document: DocumentJson, side: SideView, dragged: readonly Nod
 const lineStyle = (b: Box): CSSProperties => (b.height === 0 ? { left: b.x, top: b.y, width: b.width } : { left: b.x, top: b.y, height: b.height });
 
 // The line of a confirmed side drop: along the target's side edge, on the side the dragged element goes.
-export function sideLine(target: Box, side: SideView['offer']): Box {
+function sideLine(target: Box, side: SideView['offer']): Box {
   if (side.wrapper === 'row') return { x: side.side === 'before' ? target.x : target.x + target.width, y: target.y, width: 0, height: target.height };
   return { x: target.x, y: side.side === 'before' ? target.y : target.y + target.height, width: target.width, height: 0 };
 }
@@ -338,7 +338,7 @@ const EMPTY: Layout = { selected: [], union: null, hovered: null, label: null, t
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
 // the smallest box around every box given; null for none
-export function unionOf(boxes: readonly Box[]): Box | null {
+function unionOf(boxes: readonly Box[]): Box | null {
   if (boxes.length === 0) return null;
   const x = Math.min(...boxes.map((b) => b.x));
   const y = Math.min(...boxes.map((b) => b.y));
@@ -353,7 +353,7 @@ export function unionOf(boxes: readonly Box[]): Box | null {
 // neighbour on the side of the drop as shown (the reference's own edge when it has none there), along the receiver's
 // flow axis; across the receiver's box, or across the line of children the reference is on (`across`, when the
 // receiver lays its children on several lines: a grid's row, a wrapped line).
-export function dropLine(axis: 'x' | 'y', receiver: Box, reference: Box, neighbour: Box | null, placement: 'before' | 'after', across: { readonly from: number; readonly to: number } | null = null): Box {
+function dropLine(axis: 'x' | 'y', receiver: Box, reference: Box, neighbour: Box | null, placement: 'before' | 'after', across: { readonly from: number; readonly to: number } | null = null): Box {
   const [start, end] = axis === 'y' ? [(b: Box) => b.y, (b: Box) => b.y + b.height] : [(b: Box) => b.x, (b: Box) => b.x + b.width];
   const at = placement === 'before' ? (neighbour ? (end(neighbour) + start(reference)) / 2 : start(reference)) : neighbour ? (end(reference) + start(neighbour)) / 2 : end(reference);
   const span = across ?? (axis === 'y' ? { from: receiver.x, to: receiver.x + receiver.width } : { from: receiver.y, to: receiver.y + receiver.height });
@@ -364,7 +364,7 @@ export function dropLine(axis: 'x' | 'y', receiver: Box, reference: Box, neighbo
 // neighbour on another line of children is none; at the end of a line (the slot's child begins the next line) the
 // line is drawn after the child before it when the pointer is on that child's line; in a parent that shows its
 // children reversed, before in the document is after as shown.
-export function shownAnchor(axis: 'x' | 'y', reversed: boolean, reference: Box, neighbour: Box | null, placement: 'before' | 'after', pointer: { readonly x: number; readonly y: number } | null): { reference: Box; neighbour: Box | null; placement: 'before' | 'after' } {
+function shownAnchor(axis: 'x' | 'y', reversed: boolean, reference: Box, neighbour: Box | null, placement: 'before' | 'after', pointer: { readonly x: number; readonly y: number } | null): { reference: Box; neighbour: Box | null; placement: 'before' | 'after' } {
   let anchor = { reference, neighbour, placement };
   if (neighbour !== null && !sameLine(reference, neighbour, axis)) {
     const cross = pointer === null ? null : axis === 'x' ? pointer.y : pointer.x;
@@ -377,7 +377,7 @@ export function shownAnchor(axis: 'x' | 'y', reversed: boolean, reference: Box, 
 // The sibling an insertion line is drawn against, and its neighbour on that side: the proposal's own reference
 // beside a sibling; inside a container, the child at the slot (before it) or the last child (after it); none for a
 // refused proposal or a container with no other child, which shows its outline alone.
-export function lineAnchor(proposal: DropProposal, siblings: readonly string[]): { reference: string; neighbour: string | null; placement: 'before' | 'after' } | null {
+function lineAnchor(proposal: DropProposal, siblings: readonly string[]): { reference: string; neighbour: string | null; placement: 'before' | 'after' } | null {
   if (proposal.refused) return null;
   if (proposal.placement !== 'inside') {
     const at = siblings.indexOf(proposal.reference);
@@ -399,7 +399,7 @@ interface DropLayout {
 
 // The hand's aim as a drop (spec hand-keyboard-move: "the same indicator a mouse drag draws"): the held element is
 // dragged, the aim is a slot inside its receiver, and the move's refusal of the aim, if any, is the drop's.
-export function handDrop(hand: HandState): DropView {
+function handDrop(hand: HandState): DropView {
   const { parent, index } = hand.aim;
   return { dragged: [hand.held], inserting: null, proposal: { parent, index, placement: 'inside', reference: parent, refused: false }, refusal: hand.refusal, redirect: null, levels: 0, side: null, at: null };
 }
@@ -547,7 +547,7 @@ function Note({ note }: { readonly note: GhostNote | null }) {
   );
 }
 // the note of the drag in progress: the side drop it offers or has confirmed, if any
-export function ghostNote(document: DocumentJson, view: DragView): GhostNote | null {
+function ghostNote(document: DocumentJson, view: DragView): GhostNote | null {
   const side = view.side;
   if (side === null) return null;
   if (!side.armed) return { kind: 'hint', words: message('canvas.drop.sideHint'), wrapper: side.offer.wrapper, refused: false };

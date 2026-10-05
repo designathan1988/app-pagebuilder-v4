@@ -10,7 +10,7 @@ export type SnapAxis = 'x' | 'y';
 export type SnapSource = 'element' | 'guide' | 'parent' | 'page' | 'grid' | 'ruler';
 
 // The priority table: an earlier tier within the snap distance wins over a later one; inside a tier, the nearest.
-export const SNAP_PRIORITY: readonly (readonly SnapSource[])[] = [
+const SNAP_PRIORITY: readonly (readonly SnapSource[])[] = [
   ['element', 'guide', 'parent', 'page'],
   ['grid', 'ruler'],
 ];

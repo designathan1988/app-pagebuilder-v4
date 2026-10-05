@@ -59,7 +59,6 @@ export interface PropertyTrack {
 // The parts of a transform a track may key on its own (plan: "partes de transformação"). The runtime composes them
 // through registered custom properties, so x and y keyed in different tracks interpolate independently.
 export const TRANSFORM_PARTS = ['translate-x', 'translate-y', 'translate-z', 'scale-x', 'scale-y', 'rotate-z', 'rotate-x', 'rotate-y', 'skew-x', 'skew-y'] as const;
-export type TransformPart = (typeof TRANSFORM_PARTS)[number];
 
 // ---------------------------------------------------------------- effects (the action catalogue)
 
@@ -95,7 +94,7 @@ export type Effect =
 
 export type EffectKind = Effect['kind'];
 export type PlaybackOperation = 'play' | 'pause' | 'restart' | 'reverse' | 'seek' | 'toggle';
-export type DisplayTransition = 'none' | 'fade' | 'slide-up' | 'slide-down' | 'scale';
+type DisplayTransition = 'none' | 'fade' | 'slide-up' | 'slide-down' | 'scale';
 
 // ---------------------------------------------------------------- the timeline
 
@@ -163,7 +162,7 @@ export interface Trigger {
 export type Control = 'play' | 'restart' | 'reverse' | 'toggle' | 'pause' | 'stop' | 'scrub';
 // What the other half of a paired trigger does (hover's leave, focus-within's leaving, while-visible's leaving, the
 // other scroll direction): nothing, play the timeline backwards to its start, pause it, or reset it at once.
-export type Leave = 'none' | 'reverse' | 'pause' | 'reset';
+type Leave = 'none' | 'reverse' | 'pause' | 'reset';
 
 export interface MotionInteraction {
   readonly id: string;

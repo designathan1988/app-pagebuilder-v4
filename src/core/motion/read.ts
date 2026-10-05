@@ -15,7 +15,7 @@ import { createEasing } from './easing.ts';
 import { RUNTIME_BEHAVIOURS, TRANSFORM_PARTS, type Behaviour, type Effect, type Marker, type MotionInteraction, type MotionKeyframe, type MotionTarget, type MotionTimeline, type PropertyTrack, type TimelineAction, type Trigger } from './model.ts';
 import { BOTTOM, DIRECTION, DISPLAY, SCALE, TOP, VISIBILITY } from './words.ts';
 
-export interface Issue {
+interface Issue {
   // where, from the value read: "actions/2/effect/tracks/0/keyframes/1/time"
   readonly path: string;
   readonly reason: string;
@@ -30,7 +30,7 @@ export const CLASS_NAME = /^-?[_a-zA-Z][_a-zA-Z0-9-]*$/;
 const ANIMATION_NAME = /^-?[_a-zA-Z][_a-zA-Z0-9-]*$/;
 // a CSS property as the official data writes it, or a custom property
 const CSS_PROPERTY = /^-?[a-z][a-z0-9-]*$/;
-export const CUSTOM_PROPERTY = /^--[A-Za-z_][A-Za-z0-9_-]*$/;
+const CUSTOM_PROPERTY = /^--[A-Za-z_][A-Za-z0-9_-]*$/;
 // a timeline's name: what a person reads in the inspector's lists, letters and digits first, at most 64 characters
 export const TIMELINE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _.-]{0,63}$/u;
 // an event name a page's own code may listen to: a letter first, then letters, digits, ":", ".", "-" and "_"
@@ -134,7 +134,7 @@ class Reader {
 
 const join = (path: string, key: string | number): string => (path === '' ? String(key) : `${path}/${key}`);
 const safeValue = (text: string): boolean => text.trim() !== '' && text.length <= MAX_TEXT && !UNSAFE_VALUE.test(text);
-export const easingText = (text: string): boolean => easing.parse(text) !== null;
+const easingText = (text: string): boolean => easing.parse(text) !== null;
 
 // ---------------------------------------------------------------- targets
 

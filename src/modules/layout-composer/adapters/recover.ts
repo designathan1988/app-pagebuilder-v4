@@ -11,7 +11,7 @@ import { nextConstraintId, nextRuleId } from '../intent/ids.ts';
 import { contains, end, intersection, precision } from '../geometry/geometry.ts';
 
 // Declarations by role (camelCase of the manifest's property ids: flexGrow, gridTemplateColumns).
-export type Roles = Readonly<Record<string, string>>;
+type Roles = Readonly<Record<string, string>>;
 
 export interface MeasuredNode {
   // the region id the node becomes (the host keeps the mapping to the node)
@@ -30,7 +30,7 @@ export interface MeasuredNode {
   readonly responsive: Readonly<Record<number, Roles>>;
 }
 
-export type AmbiguityReason = 'unknown-layout' | 'positioned' | 'sizing' | 'degenerate' | 'overflow' | 'overlap';
+type AmbiguityReason = 'unknown-layout' | 'positioned' | 'sizing' | 'degenerate' | 'overflow' | 'overlap';
 
 export interface Recovery {
   readonly graph: LayoutIntent;

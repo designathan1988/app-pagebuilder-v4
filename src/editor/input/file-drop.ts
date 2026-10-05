@@ -13,29 +13,29 @@ import { proposalAt } from './drop-proposals.ts';
 import { pointerViews, type Inserting } from './pointer/views.ts';
 
 // The door an image file dropped in from the operating system runs: the same creation-drag proposal the palette draws.
-export const osImageDoor: DoorEntry | null = manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.source === 'os-image-file') ?? null;
+const osImageDoor: DoorEntry | null = manifest.doors.find((d) => d.door.kind === 'canvas-drag' && d.door.source === 'os-image-file') ?? null;
 // the element type a drop that lands on one replaces the source of
 const IMAGE_TYPE = 'image';
 
 // An image file held over the canvas: the proposal the release would commit, so the chrome draws where it lands; over
 // an image, the image the file would replace is outlined instead (the pointer's own hover mark).
-export function showFileDrag(store: EditorStore, inserting: Inserting, at: Point): void {
+function showFileDrag(store: EditorStore, inserting: Inserting, at: Point): void {
   const proposal = proposalAt(store.getState().document, [], at);
   const { setDrag, setHovered } = pointerViews(store);
   setHovered(null);
   setDrag({ dragged: [], inserting, proposal, refusal: null, redirect: null, levels: 0, at, side: null });
 }
 // The place an image file released at this point would take, as the proposal the chrome drew: what the drop proposes.
-export function fileDropProposal(store: EditorStore | null, at: Point): { readonly parent: string; readonly index: number } | null {
+function fileDropProposal(store: EditorStore | null, at: Point): { readonly parent: string; readonly index: number } | null {
   const proposal = store === null ? null : proposalAt(store.getState().document, [], at);
   return proposal === null ? null : { parent: proposal.parent, index: proposal.index };
 }
-export function showFileTarget(store: EditorStore, node: string): void {
+function showFileTarget(store: EditorStore, node: string): void {
   const { setDrag, setHovered } = pointerViews(store);
   setDrag(null);
   setHovered(node);
 }
-export function hideFileDrag(store: EditorStore): void {
+function hideFileDrag(store: EditorStore): void {
   const { setDrag, setHovered } = pointerViews(store);
   setDrag(null);
   setHovered(null);

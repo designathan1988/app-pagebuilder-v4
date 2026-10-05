@@ -26,7 +26,7 @@ export function refuse(key: MessageId, params: Readonly<Record<string, MessagePa
   throw new DataRefusal(message(key, params));
 }
 
-export const NONE: readonly Collection[] = [];
+const NONE: readonly Collection[] = [];
 export const collectionsOf = (document: { readonly collections?: readonly Collection[] }): readonly Collection[] => document.collections ?? NONE;
 export const collectionNamed = (document: { readonly collections?: readonly Collection[] }, name: string): Collection | undefined => collectionsOf(document).find((c) => c.name === name);
 

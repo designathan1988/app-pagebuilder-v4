@@ -13,7 +13,7 @@ import type { ClipboardContent, ClipboardNode } from '../../generated/commands.t
 import { readAddress } from '../elements/address.ts';
 import type { ContentModel } from '../elements/content-model.ts';
 
-export type Mark = 'strong' | 'em';
+type Mark = 'strong' | 'em';
 export type InlineRun =
   | string
   | { readonly tag: Mark; readonly children: readonly InlineRun[] }
@@ -59,7 +59,7 @@ export const keptHref = (href: string): string => {
 };
 
 // The marked characters of a tree, in order, empty stretches left out; an inner link's address wins over an outer one.
-export function segmentsOf(runs: readonly InlineRun[], marks: Omit<Segment, 'text'> = PLAIN): Segment[] {
+function segmentsOf(runs: readonly InlineRun[], marks: Omit<Segment, 'text'> = PLAIN): Segment[] {
   const out: Segment[] = [];
   for (const run of runs) {
     if (typeof run === 'string') {

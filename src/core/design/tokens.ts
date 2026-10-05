@@ -34,11 +34,6 @@ const escaped = (name: string) => name.replace(/[-]/g, '\\-');
 // a style value's reference to a variable: var(--name), with or without a fallback
 const referenceTo = (name: string) => new RegExp(`var\\(\\s*--${escaped(name)}\\s*([,)])`, 'g');
 
-// the variable a style value names first, or null
-export function tokenReferenceOf(value: string): string | null {
-  return new RegExp(`var\\(\\s*--(${IDENTIFIER_SOURCE})`, 'u').exec(value)?.[1] ?? null;
-}
-
 type Path = readonly (string | number)[];
 
 // One place a value names a variable: the document path the rename writes to, the value itself (a structured value

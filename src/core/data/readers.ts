@@ -24,7 +24,7 @@ export interface XmlElement {
 export type XmlReader = (source: string) => XmlElement;
 
 // A value a file holds in a cell: text, a number, a yes/no (a spreadsheet's boolean or a JSON one).
-export type FileValue = string | number | boolean;
+type FileValue = string | number | boolean;
 export interface Sheet {
   readonly name: string;
   readonly columns: readonly string[];
@@ -38,11 +38,11 @@ export interface DataFile {
 }
 
 // What a file may be at most: its bytes, a spreadsheet's bytes once unpacked, its rows.
-export const DATA_LIMITS = { bytes: 32 * 1024 * 1024, unpacked: 128 * 1024 * 1024, rows: 100_000, entries: 10_000 } as const;
-export const DATA_EXTENSIONS = ['csv', 'tsv', 'json', 'xlsx'] as const;
+const DATA_LIMITS = { bytes: 32 * 1024 * 1024, unpacked: 128 * 1024 * 1024, rows: 100_000, entries: 10_000 } as const;
+const DATA_EXTENSIONS = ['csv', 'tsv', 'json', 'xlsx'] as const;
 
 const extension = (name: string): string => name.slice(name.lastIndexOf('.') + 1).toLowerCase();
-export const isDataName = (name: string): boolean => (DATA_EXTENSIONS as readonly string[]).includes(extension(name));
+const isDataName = (name: string): boolean => (DATA_EXTENSIONS as readonly string[]).includes(extension(name));
 const decoder = new TextDecoder('utf-8', { fatal: true });
 
 // The columns of a table from its header row: every one named, no name twice (accents and case aside, as a person
@@ -169,7 +169,7 @@ function dateOf(file: string, cell: string, serial: number, from1904: boolean): 
   return date.toISOString().slice(0, 10);
 }
 
-export async function readSpreadsheet(file: string, bytes: Uint8Array, xml: XmlReader): Promise<DataFile> {
+async function readSpreadsheet(file: string, bytes: Uint8Array, xml: XmlReader): Promise<DataFile> {
   let archive: Map<string, Uint8Array>;
   try {
     archive = await unzip(bytes, SHEET_LIMITS);

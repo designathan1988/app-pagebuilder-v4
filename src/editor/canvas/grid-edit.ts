@@ -34,7 +34,7 @@ export const gridEditOf = (ui: EditorUi): NodeId | null => ui.gridEdit ?? null;
 
 // whether a node is a grid container the editor can open on
 // (its own display, else its classes')
-export const isGridContainer = (node: DocNode | null, rules: ModelRules, classes: readonly StyleClass[] = []): boolean => node !== null && valuePredicateHolds(node, GRID_CONTAINER, rules, classes);
+const isGridContainer = (node: DocNode | null, rules: ModelRules, classes: readonly StyleClass[] = []): boolean => node !== null && valuePredicateHolds(node, GRID_CONTAINER, rules, classes);
 
 export const enterGridEdit = registerHandler<'grid.enterEdit', EditorUi>('grid.enterEdit', ({ state, rules }, { target }) => {
   const node = (target as NodeId | undefined) ?? state.selection[0];
@@ -53,7 +53,7 @@ export const exitGridEdit = registerHandler<'grid.exitEdit', EditorUi>('grid.exi
 });
 
 // the node of the grid being edited, or null (the document no longer holding it, or no editor on)
-export function editedGrid(state: { readonly document: Parameters<typeof locate>[0]; readonly ui: EditorUi }): DocNode | null {
+function editedGrid(state: { readonly document: Parameters<typeof locate>[0]; readonly ui: EditorUi }): DocNode | null {
   const id = gridEditOf(state.ui);
   return id === null ? null : (locate(state.document, id)?.node ?? null);
 }

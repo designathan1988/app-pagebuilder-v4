@@ -29,7 +29,7 @@ const predicateId = camelId;
 const codecId = kebabId;
 const actionId = camelId;
 
-export const localeSchema = z.enum(['pt-BR', 'en']);
+const localeSchema = z.enum(['pt-BR', 'en']);
 
 // JSON values, for document diffs and fixed door arguments.
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
@@ -56,7 +56,7 @@ export const environmentSchema = z.strictObject({
 // The content model (permitted children and parents, void and text-only elements) is not here:
 // it comes from manifest/generated/html-elements.json, keyed by tag.
 
-export const elementSchema = z.strictObject({
+const elementSchema = z.strictObject({
   id: camelId,
   // null only for an element that writes its markup verbatim (content "markup" without its own tag)
   tag: htmlTag.nullable(),
@@ -85,7 +85,7 @@ export const elementSchema = z.strictObject({
   pageBlock: z.boolean().optional(),
 });
 
-export const attributeSchema = z.strictObject({
+const attributeSchema = z.strictObject({
   id: camelId,
   // its attribute's name in the markup: HTML's, or SVG's, whose may hold digits (a line's x1, y2)
   html: z.string().regex(/^[a-z][a-z0-9-]*$/).nullable(),
@@ -106,7 +106,7 @@ export const attributeSchema = z.strictObject({
   head: z.string().regex(/^(meta|link|script):[a-zA-Z0-9:-]*$/).nullable().optional(),
 });
 
-export const settingsSectionSchema = z.strictObject({
+const settingsSectionSchema = z.strictObject({
   id: kebabId,
   labelKey: i18nKey,
   descriptionKey: i18nKey,
@@ -128,7 +128,7 @@ export interface TemplateNode {
   readonly attributes?: Readonly<Record<string, string | number | boolean>> | undefined;
   readonly children?: readonly TemplateNode[] | undefined;
 }
-export const templateNodeSchema: z.ZodType<TemplateNode> = z.lazy(() =>
+const templateNodeSchema: z.ZodType<TemplateNode> = z.lazy(() =>
   z.strictObject({
     element: camelId,
     tag: z.string().optional(),
@@ -141,7 +141,7 @@ export const templateNodeSchema: z.ZodType<TemplateNode> = z.lazy(() =>
   }),
 );
 
-export const paletteEntrySchema = z.strictObject({
+const paletteEntrySchema = z.strictObject({
   id: kebabId,
   labelKey: i18nKey,
   element: camelId,
@@ -152,7 +152,7 @@ export const paletteEntrySchema = z.strictObject({
   template: templateNodeSchema.optional(),
 });
 
-export const paletteGroupSchema = z.strictObject({
+const paletteGroupSchema = z.strictObject({
   id: kebabId,
   labelKey: i18nKey,
   entries: z.array(paletteEntrySchema).min(1),
@@ -162,7 +162,7 @@ export const paletteGroupSchema = z.strictObject({
 // element.wrapGrid; spec wrap-row-column, Problems 1 and 3; the user's real-use audit, item 8.1): one definition each,
 // the same for every door and for the layout templates. The new node is an element of `element`, named by `nameKey` in
 // the person's language, with `styles` (longhand property → value) at the base breakpoint and state, and nothing else.
-export const wrapperSchema = z.strictObject({
+const wrapperSchema = z.strictObject({
   id: z.enum(['row', 'column', 'container', 'grid']),
   element: camelId,
   nameKey: i18nKey,
@@ -222,7 +222,7 @@ export const VALUE_TYPES = [
   'string',
 ] as const;
 
-export const CONTROL_TYPES = [
+const CONTROL_TYPES = [
   'keyword-menu',
   'keyword-buttons',
   'length-field',
@@ -265,7 +265,7 @@ const presetSchema = z.strictObject({
   value: z.string().min(1),
 });
 
-export const propertySchema = z.strictObject({
+const propertySchema = z.strictObject({
   // the CSS property name: a longhand, or the coarser property browsers implement when an engine
   // lacks one of its longhands (css-compat.json)
   id: cssName,
@@ -293,7 +293,7 @@ export const propertySchema = z.strictObject({
 // A shorthand whose longhands every browser implements exists only as a composite control: its door
 // writes every longhand in one command and one undo step, and rendering and export write the stored
 // longhands as they are. A longhand an engine lacks is left out (omits, with the reason).
-export const compositeSchema = z.strictObject({
+const compositeSchema = z.strictObject({
   id: kebabId,
   // the CSS shorthand this composite stands for; null for an editor composite (the alignment matrix)
   shorthand: cssName.nullable(),
@@ -318,8 +318,8 @@ export const compositeSchema = z.strictObject({
 // code that turns them into CSS. Handles and fields edit one typed field (a door's adapter.fields).
 // These value types of VALUE_TYPES are structured; each needs its structure declared in properties.json.
 export const STRUCTURED_VALUE_TYPES: readonly (typeof VALUE_TYPES)[number][] = ['shadow-list', 'text-shadow-list'];
-export const STRUCTURE_FIELD_TYPES = ['length', 'color', 'boolean'] as const;
-export const structureSchema = z.strictObject({
+const STRUCTURE_FIELD_TYPES = ['length', 'color', 'boolean'] as const;
+const structureSchema = z.strictObject({
   // a structured value type of VALUE_TYPES
   id: z.enum(VALUE_TYPES),
   codec: codecId,
@@ -349,7 +349,7 @@ export const structureSchema = z.strictObject({
 // Recipes are the only place where vendor-prefixed properties or values appear; their fixed values
 // are matched against the syntax browsers implement (CSSTree's MDN data), because they exist for
 // legacy values the official grammar does not define.
-export const recipeSchema = z.strictObject({
+const recipeSchema = z.strictObject({
   id: kebabId,
   labelKey: i18nKey,
   section: kebabId,
@@ -390,7 +390,7 @@ export const COUPLING_ACTIONS = [
   'mirror', // the value about to be written to `property` is mirrored along its axis: flex-start ↔ flex-end, start ↔ end
 ] as const;
 
-export const couplingSchema = z.strictObject({
+const couplingSchema = z.strictObject({
   id: kebabId,
   // the write that triggers the rule: a longhand, optionally only some values, optionally only from one composite
   trigger: z.strictObject({ property: cssName, values: z.array(z.string().min(1)).min(1).nullable(), via: kebabId.nullable() }),
@@ -496,7 +496,7 @@ export const propertiesFileSchema = z.strictObject({
 // ---------------------------------------------------------------- interactions
 
 // a key held through a gesture: a modifier, Space, or a letter held as a spring-loaded tool (the Layout tool's S and M)
-export const modifierKeySchema = z.enum(['Shift', 'Alt', 'Ctrl', 'Meta', 'Space', 'S', 'M']);
+const modifierKeySchema = z.enum(['Shift', 'Alt', 'Ctrl', 'Meta', 'Space', 'S', 'M']);
 
 export const interactionsFileSchema = z.strictObject({
   keyContexts: z
@@ -534,7 +534,7 @@ export const interactionsFileSchema = z.strictObject({
 
 // ---------------------------------------------------------------- commands and doors
 
-export const selectionNormalisationSchema = z.enum([
+const selectionNormalisationSchema = z.enum([
   'none', // the command does not act on the selection
   'primary', // the primary selected element
   'single', // exactly one selected element, refused otherwise
@@ -597,7 +597,7 @@ const placementSchema = z.union([
 // switcher: its icon and text come from the item it stands for), a field (an input, or a control drawn as one, such as
 // the palette's search), a toggle, an area of a larger control (a ruler, a matrix, a backdrop), or a disclosure (a
 // caret or a section header, whose icon is the layout's expanded or collapsed glyph, by its state, and never its own).
-export const DRAWN_AS = ['icon-button', 'button', 'primary', 'segment', 'tab', 'item', 'field', 'toggle', 'area', 'disclosure'] as const;
+const DRAWN_AS = ['icon-button', 'button', 'primary', 'segment', 'tab', 'item', 'field', 'toggle', 'area', 'disclosure'] as const;
 
 // Whether an icon button or a button is a toggle button: it switches a state on and off and says whether it is on
 // (aria-pressed, from the current state of its built command). A segment and a tab always say it; other controls never.
@@ -643,7 +643,7 @@ const sliderSchema = z
 
 // Where a panel lives: a view of the sidebar (the activity bar switches them), a section of a sidebar view, the
 // inspector column, the tools of the canvas toolbar, the workbench (the dock itself) or a tab of the dock.
-export const PANEL_PLACES = ['sidebar', 'section', 'inspector', 'canvas-toolbar', 'workbench', 'dock'] as const;
+const PANEL_PLACES = ['sidebar', 'section', 'inspector', 'canvas-toolbar', 'workbench', 'dock'] as const;
 
 export const menuIdSchema = z.enum([
   'file',
@@ -660,7 +660,7 @@ export const menuIdSchema = z.enum([
   'layers-row-details',
 ]);
 
-export const doorSchema = z.discriminatedUnion('kind', [
+const doorSchema = z.discriminatedUnion('kind', [
   z.strictObject({ ...doorCommon, kind: z.literal('shortcut'), chord: z.string().min(1), context: kebabId, gesture: kebabId.nullable() }),
   z.strictObject({ ...doorCommon, kind: z.literal('menu'), menu: menuIdSchema, checked: menuCheckedSchema }),
   z.strictObject({ ...doorCommon, kind: z.literal('context-menu') }),
@@ -776,7 +776,7 @@ const argSchema = z.strictObject({
 
 // How a command meets the history. Undo always restores the selection from before the command,
 // and a command that changes nothing creates no entry.
-export const historySchema = z.discriminatedUnion('undoable', [
+const historySchema = z.discriminatedUnion('undoable', [
   z.strictObject({ undoable: z.literal(false) }),
   z.strictObject({
     undoable: z.literal(true),
@@ -793,7 +793,7 @@ export const historySchema = z.discriminatedUnion('undoable', [
   }),
 ]);
 
-export const commandSchema = z
+const commandSchema = z
   .strictObject({
     id: commandId,
     labelKey: i18nKey,
@@ -834,7 +834,7 @@ export const commandsFileSchema = z.strictObject({
 // opens over it, or "component", the parts of a control repeated wherever it is drawn (every field,
 // every Layers row, every tab strip).
 
-export const REGION_AREAS = ['top-bar', 'left', 'centre', 'right', 'dock', 'status-bar', 'overlay', 'component'] as const;
+const REGION_AREAS = ['top-bar', 'left', 'centre', 'right', 'dock', 'status-bar', 'overlay', 'component'] as const;
 // The regions a state control never occupies: a state belongs to the element's class selector, never
 // to the page, so it is chosen only in the inspector's selector bar (manifest:check rule state-placement). Every
 // region of the canvas's own chrome is here (the frame, its toolbar, the breakpoint tabs beside it and its stage).
@@ -916,7 +916,7 @@ export const layoutFileSchema = z.strictObject({
 // offers it beside the issue, and how the fix is made, by the owner of what it changes: an element inserted at the end
 // of the element the issue is about (element.insert, the palette entry), the heading's next level (element.setTag), or
 // the element's attribute field opened in Settings (inspector.reveal).
-export const checkFixSchema = z.discriminatedUnion('kind', [
+const checkFixSchema = z.discriminatedUnion('kind', [
   z.strictObject({ rule: i18nKey, door: doorRef, kind: z.literal('insert'), entry: kebabId }),
   z.strictObject({ rule: i18nKey, door: doorRef, kind: z.literal('next-level') }),
   z.strictObject({ rule: i18nKey, door: doorRef, kind: z.literal('reveal'), attribute: camelId }),
@@ -1004,7 +1004,7 @@ const editorGeometry = z.strictObject({
   reference: regionId.nullable(),
 });
 
-export const scenarioSchema = z.strictObject({
+const scenarioSchema = z.strictObject({
   id: kebabId,
   setup: z.strictObject({
     // a fixture of manifest/features/fixtures/<id>.json, loaded through File › Open; "empty" is a fresh profile's
@@ -1127,7 +1127,7 @@ export const scenarioSchema = z.strictObject({
   refusals: z.array(z.strictObject({ key: i18nKey, document: z.literal('unchanged') })),
 });
 
-export const featureSchema = z.strictObject({
+const featureSchema = z.strictObject({
   id: featureId,
   titleKey: i18nKey,
   commands: z.array(commandId),
@@ -1225,7 +1225,7 @@ const supportFields = {
 
 // The value shape a syntax form BCD tracks stands for: at least N space-separated components in a layer,
 // at least two keywords, at least two comma-separated layers, or a negative number.
-export const FORM_SHAPES_LIST = ['components-2', 'components-3', 'components-4', 'keywords-2', 'layers-2', 'negative'] as const;
+const FORM_SHAPES_LIST = ['components-2', 'components-3', 'components-4', 'keywords-2', 'layers-2', 'negative'] as const;
 export type FormShape = (typeof FORM_SHAPES_LIST)[number];
 
 const entrySupport = z.strictObject({ bcd: z.string().nullable(), ...supportFields });
@@ -1347,20 +1347,16 @@ export const FILE_SCHEMAS = {
 export type Environment = z.infer<typeof environmentSchema>;
 export type ElementType = z.infer<typeof elementSchema>;
 export type Attribute = z.infer<typeof attributeSchema>;
-export type PaletteGroup = z.infer<typeof paletteGroupSchema>;
 export type ElementsFile = z.infer<typeof elementsFileSchema>;
-export type Property = z.infer<typeof propertySchema>;
 export type Composite = z.infer<typeof compositeSchema>;
 export type Structure = z.infer<typeof structureSchema>;
 export type Recipe = z.infer<typeof recipeSchema>;
-export type SyntaxFallback = PropertiesFile['syntaxFallbacks'][number];
 export type Coupling = z.infer<typeof couplingSchema>;
 export type Subset = z.infer<typeof subsetSchema>;
 export type PropertiesFile = z.infer<typeof propertiesFileSchema>;
 export type InteractionsFile = z.infer<typeof interactionsFileSchema>;
 export type Door = z.infer<typeof doorSchema>;
 export type DoorKind = Door['kind'];
-export type History = z.infer<typeof historySchema>;
 export type Command = z.infer<typeof commandSchema>;
 export type CommandsFile = z.infer<typeof commandsFileSchema>;
 export type LayoutFile = z.infer<typeof layoutFileSchema>;
@@ -1376,4 +1372,3 @@ export type GeneratedCompat = z.infer<typeof generatedCompatSchema>;
 export type GeneratedHtml = z.infer<typeof generatedHtmlSchema>;
 export type GeneratedIcons = z.infer<typeof generatedIconsSchema>;
 export type ExclusionsFile = z.infer<typeof exclusionsFileSchema>;
-export type Locale = z.infer<typeof localeSchema>;

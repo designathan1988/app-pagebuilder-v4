@@ -35,7 +35,7 @@ const ANIMATION_NAME = /^-?[_a-zA-Z][_a-zA-Z0-9-]*$/;
 // the manifest's door of a command the animations own (used for the entries the module needs, never a hand-written id)
 type DoorRef = (typeof manifest.doors)[number];
 const orderOf = (entry: DoorRef): number => (typeof entry.door.placement === 'object' ? entry.door.placement.order : 0);
-export const SETTING_DOORS: readonly { readonly setting: string; readonly entry: DoorRef }[] = manifest.doors
+const SETTING_DOORS: readonly { readonly setting: string; readonly entry: DoorRef }[] = manifest.doors
   .filter((d) => d.door.kind === 'panel-control' && d.door.panel === 'timeline' && d.door.control.startsWith('setting-'))
   .sort((a, b) => orderOf(a) - orderOf(b))
   .flatMap((entry) => {
@@ -56,18 +56,18 @@ export function settingProperty(setting: string): string | null {
 // the CSS property a keyframe's easing is written with (the timeline's easing field offers it)
 export const keyframeEasingProperty = (): string | null => offeredProperty(EASING_CONTROL);
 
-export function offeredProperty(control: string): string | null {
+function offeredProperty(control: string): string | null {
   return manifest.doors.find((d) => d.door.kind === 'panel-control' && d.door.panel === 'timeline' && d.door.control === control)?.door.adapter?.offers?.property ?? null;
 }
 // the control the keyframe's easing field is drawn as (manifest/commands/animation.json)
 const EASING_CONTROL = 'keyframe-easing';
 
-export function findAnimation(node: DocNode, name: string): Animation | null {
+function findAnimation(node: DocNode, name: string): Animation | null {
   return animationsOf(node).find((animation) => animation.name === name) ?? null;
 }
 
 // every @keyframes name the document holds, of every page
-export function allAnimationNames(document: DocumentJson): Set<string> {
+function allAnimationNames(document: DocumentJson): Set<string> {
   const names = new Set<string>();
   for (const page of document.pages) {
     const walk = (node: DocNode): void => {
@@ -82,7 +82,7 @@ export function allAnimationNames(document: DocumentJson): Set<string> {
 
 // the keyframes of an animation the CSS is written for: the ones that hold something, in offset order (a keyframe added
 // and not filled yet writes nothing)
-export const writtenKeyframes = (animation: Animation): readonly Keyframe[] => animation.keyframes.filter((k) => Object.keys(k.declarations).length > 0);
+const writtenKeyframes = (animation: Animation): readonly Keyframe[] => animation.keyframes.filter((k) => Object.keys(k.declarations).length > 0);
 
 // The duration of an animation in whole ms, read from its stored CSS text ("1s", "800ms", "1.5s"); 0 while it holds a
 // duration that is no time (the timeline then has no length to draw).
@@ -115,7 +115,7 @@ export function keyframesCss(animation: Animation, model: OutputModel, layout: '
 
 // The animation properties of an animation as CSS declarations, one per setting, in the settings' order: what the
 // export writes on the element's own rule (an animation nothing plays by an event). The values are the stored CSS text.
-export function animationDeclarations(animation: Animation, overrides: Readonly<Record<string, string>> = {}): readonly string[] {
+function animationDeclarations(animation: Animation, overrides: Readonly<Record<string, string>> = {}): readonly string[] {
   return [
     // the @keyframes it plays, then the settings (the name is no setting of the animation: it is the animation)
     `animation-name: ${animation.name};`,

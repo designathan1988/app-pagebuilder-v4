@@ -4,7 +4,7 @@
 // what a line says: the tokens' texts joined are the line.
 import type { PaneKind } from './code-panel.ts';
 
-export type TokenKind = 'plain' | 'comment' | 'tag' | 'attr' | 'string' | 'selector' | 'property' | 'value' | 'keyword';
+type TokenKind = 'plain' | 'comment' | 'tag' | 'attr' | 'string' | 'selector' | 'property' | 'value' | 'keyword';
 export interface Token {
   readonly text: string;
   readonly kind: TokenKind;

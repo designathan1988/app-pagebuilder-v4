@@ -38,7 +38,7 @@ import { responsiveEdit } from '../responsive/continuum.ts';
 export type StrokeMode = 'auto' | 'draw' | 'cut' | 'merge' | 'subtract' | 'move' | 'nest' | 'select' | 'relate' | 'group';
 
 export type HandleKind = 'boundary' | 'vertex' | 'gap' | 'repeat' | 'edge' | 'move';
-export const HANDLE_KINDS: readonly HandleKind[] = ['boundary', 'vertex', 'gap', 'repeat', 'edge', 'move'];
+const HANDLE_KINDS: readonly HandleKind[] = ['boundary', 'vertex', 'gap', 'repeat', 'edge', 'move'];
 
 // A handle's id says what it stands for: "boundary:<boundary id>", "gap:<axis>:<a>:<b>", "repeat:<first region>",
 // "move:<region>" (the region's label).
@@ -56,7 +56,7 @@ export const handleText = (handle: HandleRef): string => `${handle.kind}:${handl
 
 // Editing at a width narrower than the drawing records responsive behaviour there (spec "Responsive editing"): the
 // rule's width, and the regions as the canvas draws them at that width.
-export interface ResponsiveContext {
+interface ResponsiveContext {
   readonly maxWidth: number;
   readonly view: LayoutIntent;
 }
@@ -72,7 +72,7 @@ export interface Stroke {
   readonly selected?: readonly string[];
 }
 
-export type Cursor = 'crosshair' | 'move' | 'col-resize' | 'row-resize' | 'cell' | 'copy' | 'alias' | 'default' | 'not-allowed';
+type Cursor = 'crosshair' | 'move' | 'col-resize' | 'row-resize' | 'cell' | 'copy' | 'alias' | 'default' | 'not-allowed';
 
 export interface StrokeReading {
   // the reading the automatic tool chose, or the one asked for
@@ -97,7 +97,7 @@ export interface StrokeReading {
 }
 
 // A line a box snapped to: x = at is a vertical line, y = at a horizontal one.
-export interface Guide {
+interface Guide {
   readonly axis: Axis;
   readonly at: number;
 }
@@ -150,7 +150,7 @@ function contact(graph: LayoutIntent, axis: Axis, box: Box, start: boolean, radi
 }
 
 // A box drawn: each edge snaps on its own.
-export function snapDrawn(graph: LayoutIntent, box: Box, radius: number): { readonly box: Box; readonly guides: Guide[] } {
+function snapDrawn(graph: LayoutIntent, box: Box, radius: number): { readonly box: Box; readonly guides: Guide[] } {
   const guides: Guide[] = [];
   const edges = (axis: Axis): [number, number] => {
     const lines = snapLines(graph, axis, new Set());
@@ -168,7 +168,7 @@ export function snapDrawn(graph: LayoutIntent, box: Box, radius: number): { read
 }
 
 // A box moved: it shifts by the smallest pull that puts one of its edges or its centre on a line.
-export function snapMoved(graph: LayoutIntent, box: Box, radius: number, excluded: ReadonlySet<string>): { readonly dx: number; readonly dy: number; readonly guides: Guide[] } {
+function snapMoved(graph: LayoutIntent, box: Box, radius: number, excluded: ReadonlySet<string>): { readonly dx: number; readonly dy: number; readonly guides: Guide[] } {
   const guides: Guide[] = [];
   const pull = (axis: Axis): number => {
     const lines = snapLines(graph, axis, excluded);

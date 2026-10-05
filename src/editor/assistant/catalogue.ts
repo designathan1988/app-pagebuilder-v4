@@ -1,4 +1,4 @@
-export interface Argument { type: string; values: readonly string[]; optional: boolean }
+interface Argument { type: string; values: readonly string[]; optional: boolean }
 export interface ManifestCommand { id: string; labelKey: string; args: Readonly<Record<string, Argument>>; history: { undoable: boolean }; confirmation?: unknown }
 export interface ToolDefinition { name: string; description: string; input_schema: { type: 'object'; properties: Record<string, unknown>; required: string[]; additionalProperties: false } }
 export const toolName = (id: string) => id.replaceAll('.', '_');

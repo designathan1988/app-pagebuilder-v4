@@ -49,7 +49,7 @@ const shortcuts = manifest.doors.filter((d) => d.door.kind === 'shortcut');
 // table and no other list, so a binding added to the manifest appears there without another edit, and a unit test
 // hands it a binding of its own. A binding whose command the editor has not built yet is marked, not hidden: the
 // panel says what the keymap holds.
-export interface BindingRow {
+interface BindingRow {
   readonly ref: DoorId;
   readonly chord: string;
   // the command's label in the catalogue: what the key does
@@ -76,7 +76,7 @@ export function bindingGroups(doors: readonly DoorEntry[] = shortcuts): readonly
 }
 
 // The binding of a chord in a context: its own shortcut first, then the contexts it inherits from.
-export function bindingIn(chain: readonly KeyContextId[], chord: string): DoorEntry | null {
+function bindingIn(chain: readonly KeyContextId[], chord: string): DoorEntry | null {
   for (const c of chain) {
     const found = shortcuts.find((d) => d.door.kind === 'shortcut' && d.door.context === c && normaliseChord(d.door.chord) === chord);
     if (found) return found;
@@ -124,7 +124,7 @@ function htmlElement(target: EventTarget | null): HTMLElement | null {
 // element-text-field, which inherits the field's); any other field keeps its keys; a region names its context with
 // data-key-context; the page body, where the focus rests after a press on the canvas (its overlay takes no focus),
 // is the canvas's, which inherits the global context; everything else is the global context.
-export function contextOf(event: EventTarget | null): KeyContextId {
+function contextOf(event: EventTarget | null): KeyContextId {
   const target = htmlElement(event);
   if (target) {
     if (target === target.ownerDocument.body) return 'canvas';
@@ -143,7 +143,7 @@ export function contextOf(event: EventTarget | null): KeyContextId {
 // (interactions.json absorbsFields; the quick panel) runs the region's context first and keeps the field's own context
 // and its ancestors after it, so Escape closes the panel from any of its fields while Enter and the arrows stay the
 // field's. Any other focus is the context's own chain.
-export function focusChain(target: EventTarget | null, context: KeyContextId): readonly KeyContextId[] {
+function focusChain(target: EventTarget | null, context: KeyContextId): readonly KeyContextId[] {
   const element = htmlElement(target);
   const field = element !== null && (element.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)) ? element : null;
   // the region above the field, never the field itself (a number field names its own context on its own input)
@@ -154,7 +154,7 @@ export function focusChain(target: EventTarget | null, context: KeyContextId): r
 
 // Whether a shortcut door runs now (shortcut-rule.ts, the rule the door census reads too): its command is built and
 // its feature introduces the command or has all its commands built.
-export function shortcutRunsNow(entry: DoorEntry): boolean {
+function shortcutRunsNow(entry: DoorEntry): boolean {
   return shortcutRuns({ command: entry.command.id, introducedBy: entry.command.introducedBy, feature: entry.door.feature }, (command) => isBuilt(wiring().commands[command as CommandId]), (feature) => isFeatureBuilt(feature as FeatureId));
 }
 
@@ -168,7 +168,7 @@ export function shortcutRunsNow(entry: DoorEntry): boolean {
 // steps it. Any other focus adds nothing.
 // the argument a canvas handle's key takes the handle in (handle.step; canvas/handles.ts)
 const HANDLE_ARG = 'handle';
-export function focusedArgs(target: EventTarget | null, entry: DoorEntry): Readonly<Record<string, unknown>> | null {
+function focusedArgs(target: EventTarget | null, entry: DoorEntry): Readonly<Record<string, unknown>> | null {
   const control = target instanceof Element ? target.closest('[data-door]') : null;
   const drawn = manifest.doorByRef.get((control?.getAttribute('data-door') ?? '') as DoorId);
   const field = target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement ? target : null;
@@ -202,7 +202,7 @@ export function focusedArgs(target: EventTarget | null, entry: DoorEntry): Reado
 // A shortcut door whose gesture says what a held key means (a number field's arrows: Shift ×10, Alt ×0.1, the gesture
 // number-field-keys of interactions.json) runs with that key held too, when no door binds the chord itself: its door,
 // and the key, which the command takes as its `modifier`.
-export function heldKeyBindingIn(chain: readonly KeyContextId[], event: KeyboardEvent): { readonly entry: DoorEntry; readonly modifier: string } | null {
+function heldKeyBindingIn(chain: readonly KeyContextId[], event: KeyboardEvent): { readonly entry: DoorEntry; readonly modifier: string } | null {
   const modifier = modifierOf(event);
   if (modifier === null || modifier === 'several') return null;
   const entry = bindingIn(chain, keyOf(event));

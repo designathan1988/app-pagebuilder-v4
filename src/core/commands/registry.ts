@@ -19,7 +19,7 @@ import type { Layout } from '../ports/layout.ts';
 import type { StoreState } from '../store/store.ts';
 
 export const NOT_AVAILABLE_YET = Object.freeze({ notAvailableYet: true as const });
-export type NotAvailableYet = typeof NOT_AVAILABLE_YET;
+type NotAvailableYet = typeof NOT_AVAILABLE_YET;
 
 // The keyframe a style write lands on while the timeline's playhead sits on one (spec timeline-keyframes): the element
 // it belongs to, the @keyframes name of its animation and the offset it sits at.
@@ -34,7 +34,7 @@ export interface KeyframeTarget {
 // a value, a text of the catalogue, a whole message (the action an undo names: history.ts), or a count in words: the
 // catalogue key whose plural forms (.one, .other) the count takes in the language shown ("1 element", "3 elements";
 // the audit's A3.23), chosen when the message is shown
-export type PluralBase = MessageId extends infer M ? (M extends `${infer Base}.one` ? Base : never) : never;
+type PluralBase = MessageId extends infer M ? (M extends `${infer Base}.one` ? Base : never) : never;
 export type MessageParam = string | number | { readonly key: MessageId; readonly params?: Readonly<Record<string, MessageParam>> } | { readonly plural: PluralBase; readonly count: number };
 
 export interface Message {

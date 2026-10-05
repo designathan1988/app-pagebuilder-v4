@@ -5,11 +5,11 @@
 import type { MessageId } from '../../generated/ids.ts';
 
 // (keyword values, written as one list: some share their name with a property, which they are not)
-export const KEYWORD_WORDS: readonly string[] = 'auto none normal hidden visible bold italic solid dashed dotted double center left right uppercase lowercase capitalize underline cover contain wrap nowrap'.split(' ');
+const KEYWORD_WORDS: readonly string[] = 'auto none normal hidden visible bold italic solid dashed dotted double center left right uppercase lowercase capitalize underline cover contain wrap nowrap'.split(' ');
 
 const WORDS = new Set(KEYWORD_WORDS);
 
-export const keywordKey = (keyword: string): MessageId => `keyword.${keyword}` as MessageId;
+const keywordKey = (keyword: string): MessageId => `keyword.${keyword}` as MessageId;
 
 // a text compared as a person means it: its case and its accents aside
 const folded = (text: string): string => text.normalize('NFD').replace(/\p{M}/gu, '').trim().toLocaleLowerCase();

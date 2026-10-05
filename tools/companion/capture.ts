@@ -23,7 +23,7 @@ import { keptSrcset } from '../../src/core/files/srcset.ts';
 
 export {  type PageRead } from './serialize.ts';
 
-export interface CapturedFile {
+interface CapturedFile {
   readonly path: string;
   readonly type: string;
   readonly base64: string;
@@ -228,7 +228,7 @@ function between(from: string, to: string): string {
 }
 
 // a file the site serves: whether it answered, its type and its bytes
-export interface Fetched {
+interface Fetched {
   readonly ok: boolean;
   readonly type: string;
   readonly body: Buffer;

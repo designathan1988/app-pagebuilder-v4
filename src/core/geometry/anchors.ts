@@ -68,7 +68,7 @@ const roundedUp = (px: number) => Math.ceil(px - NEAR);
 
 // The anchors an element holds on an axis: the centre, else the edges whose insets it sets (the start edge when none:
 // where an absolute element's static position leaves it)
-export function anchorsOf(node: DocNode, axis: Axis, rules: ModelRules): Anchors {
+function anchorsOf(node: DocNode, axis: Axis, rules: ModelRules): Anchors {
   const value = (property: string) => storedValue(node, property, rules);
   const start = value(axis.start);
   const end = value(axis.end);

@@ -355,7 +355,7 @@ export interface RowZones {
   readonly after: number;
   readonly leafSplit: number;
 }
-export const ROW_ZONES: RowZones = { before: constant('layers.dropBefore'), after: constant('layers.dropAfter'), leafSplit: constant('layers.dropLeafSplit') };
+const ROW_ZONES: RowZones = { before: constant('layers.dropBefore'), after: constant('layers.dropAfter'), leafSplit: constant('layers.dropLeafSplit') };
 
 export function rowDrop(document: DocumentJson, isContainer: (type: string) => boolean, dragged: readonly NodeId[], row: NodeId, at: number, z: RowZones = ROW_ZONES): DropProposal | null {
   const target = locate(document, row);

@@ -34,8 +34,8 @@ export function readProject(parsed: unknown, rules: ModelRules): { readonly docu
 // itself with their bytes; pretty-printed). The save time is only the entries' modification time,
 // from the clock port, so the same document saved twice gives the same project.json. Nothing in the document or the
 // history changes.
-export const PROJECT_ARCHIVE = 'project.zip';
-export const PROJECT_DOCUMENT = 'project.json';
+const PROJECT_ARCHIVE = 'project.zip';
+const PROJECT_DOCUMENT = 'project.json';
 
 export const saveProject = registerHandler('project.save', ({ state, clock }) => {
   const document = new TextEncoder().encode(`${JSON.stringify(state.document, null, 2)}\n`);

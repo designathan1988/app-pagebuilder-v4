@@ -37,7 +37,7 @@ export interface MotionUiState {
   readonly picking?: { readonly timeline: string; readonly action: string } | undefined;
 }
 
-export const initialMotionUi = (): MotionUiState => ({ time: 0, pixelsPerSecond: numberConstant('motion.pixelsPerSecond'), scroll: 0 });
+const initialMotionUi = (): MotionUiState => ({ time: 0, pixelsPerSecond: numberConstant('motion.pixelsPerSecond'), scroll: 0 });
 export const motionUiOf = (ui: EditorUi): MotionUiState => ui.motion ?? initialMotionUi();
 const withMotion = (ui: EditorUi, motion: MotionUiState): EditorUi => ({ ...ui, motion });
 

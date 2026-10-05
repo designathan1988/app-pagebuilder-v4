@@ -84,10 +84,10 @@ export function withInspectorTab(ui: EditorUi, panel: string): EditorUi {
   return { ...ui, layout: { ...ui.layout, inspectorTab: panel === FIRST_INSPECTOR_TAB ? undefined : panel } };
 }
 
-export type WorkbenchRequest = 'collapsed' | 'open' | 'max' | 'toggle' | 'toggle-max';
+type WorkbenchRequest = 'collapsed' | 'open' | 'max' | 'toggle' | 'toggle-max';
 
 // toggle shows or hides the workbench; toggle-max maximises it, or restores it to open
-export function nextDock(current: DockState, request: WorkbenchRequest): DockState {
+function nextDock(current: DockState, request: WorkbenchRequest): DockState {
   if (request === 'toggle') return current === 'collapsed' ? 'open' : 'collapsed';
   if (request === 'toggle-max') return current === 'max' ? 'open' : 'max';
   return request;
@@ -160,7 +160,7 @@ export const setWorkbenchState = registerHandler<'workspace.setWorkbenchState', 
 const withLayout = (ui: EditorUi, layout: LayoutState): EditorUi => ({ ...ui, layout });
 
 // the panel a name stands for, or a defect of the door
-export function panelOf(value: unknown): Panel {
+function panelOf(value: unknown): Panel {
   if (typeof value !== 'string' || !(value in PANELS)) throw new Error(`workspace.movePanel: layout.json declares no panel ${String(value)}`);
   return value as Panel;
 }
@@ -172,7 +172,7 @@ export const rightDocked = (ui: EditorUi, panel: Panel): boolean => (ui.layout.r
 // the combination a panel is part of, as the one that was dropped (its host), or the one it hosts
 export const combinedOf = (ui: EditorUi, panel: Panel): CombinedPanel | null => (ui.layout.combined ?? []).find((c) => c.panel === panel) ?? null;
 // the panels combined with an area, in the order they were dropped: the ones that host it, then the ones it hosts
-export const combinedWith = (ui: EditorUi, panel: Panel): readonly CombinedPanel[] => (ui.layout.combined ?? []).filter((c) => c.host === panel || c.panel === panel);
+const combinedWith = (ui: EditorUi, panel: Panel): readonly CombinedPanel[] => (ui.layout.combined ?? []).filter((c) => c.host === panel || c.panel === panel);
 
 // The area a panel hosts: the panels whose tab strip it shows (the panel itself first) and the panels stacked under
 // it, in the order they were dropped, with the tab whose body fills the area.

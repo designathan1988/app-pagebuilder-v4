@@ -23,7 +23,7 @@ export const activeLayer = (shown: Shown): { readonly breakpoint: string; readon
 
 // Whether a state stands on an element of this type (elements.json ids; null for every element): the State menu
 // hides the ones it does not, and no field edit or export writes a rule a browser would ignore (A3.36).
-export function stateAppliesTo(state: (typeof STATES)[number], type: string): boolean {
+function stateAppliesTo(state: (typeof STATES)[number], type: string): boolean {
   return state.elements === null || state.elements.includes(type);
 }
 

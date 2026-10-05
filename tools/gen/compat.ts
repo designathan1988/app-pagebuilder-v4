@@ -83,7 +83,7 @@ interface Bcd {
   css: { properties: Record<string, BcdNode>; types: Record<string, BcdNode> };
 }
 
-export interface Support {
+interface Support {
   chrome: string | false;
   firefox: string | false;
   safari: string | false;
@@ -95,10 +95,10 @@ export interface KeywordCompat extends Support {
   bcd: string | null;
 }
 // a keyword: its support, and its support inside each function it appears in
-export interface KeywordEntry extends KeywordCompat {
+interface KeywordEntry extends KeywordCompat {
   inFunctions: Record<string, KeywordCompat>;
 }
-export interface FormCompat extends KeywordCompat {
+interface FormCompat extends KeywordCompat {
   shape: FormShape;
 }
 export interface PropertyCompat extends Support {
@@ -110,7 +110,7 @@ export interface PropertyCompat extends Support {
   forms: Record<string, FormCompat>;
 }
 
-export function loadBcd(): Bcd {
+function loadBcd(): Bcd {
   return require('@mdn/browser-compat-data') as Bcd;
 }
 
@@ -129,7 +129,7 @@ function atMost(a: string, b: string): boolean {
   return true;
 }
 
-export function currentReleases(bcd: Bcd): Record<Engine, string> {
+function currentReleases(bcd: Bcd): Record<Engine, string> {
   const out = {} as Record<Engine, string>;
   for (const engine of ENGINES) {
     const current = Object.entries(bcd.browsers[engine]?.releases ?? {}).filter(([, r]) => r.status === 'current').map(([v]) => v);
@@ -264,7 +264,7 @@ function allCodes(node: BcdNode): string[] {
 
 // BCD's convention for a function's subfeature that concerns one keyword without naming it: the relative
 // color syntax (rgb(from …), color(from …)) is the subfeature relative_syntax of each color function.
-export const KEYWORD_SUBFEATURES: { key: RegExp; keyword: string }[] = [{ key: /^relative_syntax$/, keyword: 'from' }];
+const KEYWORD_SUBFEATURES: { key: RegExp; keyword: string }[] = [{ key: /^relative_syntax$/, keyword: 'from' }];
 
 type Kind = 'keyword' | 'function';
 
@@ -333,7 +333,7 @@ function typeIndex(types: Record<string, BcdNode>): (name: string) => { path: st
 }
 
 // The syntax forms BCD tracks as subfeatures of a property, and the value shape each one stands for.
-export const FORM_SHAPES: { key: RegExp; shape: FormShape }[] = [
+const FORM_SHAPES: { key: RegExp; shape: FormShape }[] = [
   { key: /^(two_value_syntax|two-values|2-value)$/, shape: 'components-2' },
   { key: /^three_value_syntax$/, shape: 'components-3' },
   { key: /^4_values_for_4_corners$/, shape: 'components-4' },

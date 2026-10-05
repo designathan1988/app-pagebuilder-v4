@@ -43,14 +43,14 @@ export interface StoreState<Ui> {
   readonly ui: Ui;
 }
 
-export interface Refusal {
+interface Refusal {
   readonly command: CommandId;
   readonly args: unknown;
   readonly message: Message;
 }
 
 // What a confirmation asks and its two answers' labels, from the command's manifest entry, and the dispatch it holds.
-export interface PendingConfirmation {
+interface PendingConfirmation {
   readonly command: CommandId;
   readonly args: unknown;
   readonly message: MessageId;
@@ -103,7 +103,7 @@ export interface CommandSequence {
   cancel(): boolean;
 }
 
-export interface CommandGroup extends Gesture {
+interface CommandGroup extends Gesture {
   active(): boolean;
 }
 

@@ -30,7 +30,7 @@ function curvePath(easing: ParsedEasing | null, size: number): string | null {
   return `M${Array.from({ length: SAMPLES + 1 }, (_, i) => point(i)).join(' L')}`;
 }
 
-export function EasingCurve({ text, size, label }: { readonly text: string; readonly size: number; readonly label?: string }) {
+function EasingCurve({ text, size, label }: { readonly text: string; readonly size: number; readonly label?: string }) {
   const path = useMemo(() => curvePath(EASING.parse(text), size), [text, size]);
   const span = 1 + 2 * MARGIN;
   const top = (MARGIN / span) * size;

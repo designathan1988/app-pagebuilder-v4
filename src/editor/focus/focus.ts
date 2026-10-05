@@ -85,7 +85,7 @@ function focusRegion(region: Element): void {
 // The canvas takes the focus back (spec keyboard-panel-navigation: Escape inside a panel): the panel's control lets it
 // go, and the editor's own document holds the focus again — which is the canvas's key context (input/keymap.ts: the
 // body is the canvas), so the keys the person presses act on the page. The selection is untouched.
-export function focusTheCanvas(store: EditorStore): void {
+function focusTheCanvas(store: EditorStore): void {
   const held = document.activeElement;
   if (held instanceof HTMLElement && held !== document.body) held.blur();
   // the keyboard chose the canvas: its single-letter keys act again (jornada03 J2, keymap.ts lettersChosen)
@@ -181,7 +181,7 @@ function comboboxMove(move: FocusMove, field: Element): boolean {
   return true;
 }
 
-export function carryOut(store: EditorStore, move: FocusMove, focused: Element | null): void {
+function carryOut(store: EditorStore, move: FocusMove, focused: Element | null): void {
   if (move.startsWith('panel:')) {
     // the panel just opened is drawn on the next frame, and its rows (the Layers tree's) on the one after
     requestAnimationFrame(() =>

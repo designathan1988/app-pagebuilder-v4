@@ -2,7 +2,6 @@
 // the region renders a slot itself (an item with its data, a menu button showing a value).
 import { createContext, useContext, type ReactNode } from 'react';
 import type { RegionId } from '../../generated/ids.ts';
-import type { DoorEntry } from '../../manifest/runtime.ts';
 import { DoorControl } from '../doors/door.tsx';
 import { MenuButton } from '../doors/menu.tsx';
 import { slotsIn, type Slot } from '../doors/placement.ts';
@@ -19,12 +18,6 @@ export function Slots({ region, render, from = 1, to = Number.POSITIVE_INFINITY 
         })}
     </>
   );
-}
-
-// the door of a region at an order (PRODUCT.md §5.3 numbers the controls of each region)
-export function doorAt(region: RegionId, order: number): DoorEntry | null {
-  const slot = slotsIn(region).find((s) => s.order === order && s.kind === 'door');
-  return slot?.kind === 'door' ? slot.entry : null;
 }
 
 // The zoom that fits the base breakpoint's width in the stage: a measure of the layout, shared by the frame, the

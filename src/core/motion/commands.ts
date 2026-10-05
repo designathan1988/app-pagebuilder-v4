@@ -53,10 +53,10 @@ type Located = { readonly node: DocNode; readonly path: readonly (string | numbe
 
 // a value as its catalogue key names it: a kebab value (double-click) with its camel case (doubleClick)
 const camel = (value: string): string => value.replace(/-([a-z])/g, (_all, letter: string) => letter.toUpperCase());
-export const triggerLabel = (kind: string): MessageId => `motion.trigger.${camel(kind)}` as MessageId;
-export const effectLabel = (kind: string): MessageId => `motion.action.${camel(kind)}` as MessageId;
-export const targetLabel = (kind: string): MessageId => `motion.target.${camel(kind)}` as MessageId;
-export const behaviourLabel = (kind: string): MessageId => `motion.behaviour.${camel(kind)}` as MessageId;
+const triggerLabel = (kind: string): MessageId => `motion.trigger.${camel(kind)}` as MessageId;
+const effectLabel = (kind: string): MessageId => `motion.action.${camel(kind)}` as MessageId;
+const targetLabel = (kind: string): MessageId => `motion.target.${camel(kind)}` as MessageId;
+const behaviourLabel = (kind: string): MessageId => `motion.behaviour.${camel(kind)}` as MessageId;
 
 // ---------------------------------------------------------------- reading what a door hands
 

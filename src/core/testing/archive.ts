@@ -12,7 +12,7 @@ export interface ArchivePart {
   readonly declaredSize?: number;
 }
 
-export async function deflate(bytes: Uint8Array): Promise<Uint8Array> {
+async function deflate(bytes: Uint8Array): Promise<Uint8Array> {
   const stream = new Blob([bytes.slice().buffer]).stream().pipeThrough(new CompressionStream('deflate-raw'));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }

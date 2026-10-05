@@ -9,8 +9,8 @@ export const STATES = ['default', 'selection', 'breakpoint', 'menu', 'context', 
 export type State = (typeof STATES)[number];
 export type Theme = 'dark' | 'light';
 export type Language = 'en' | 'pt-BR';
-export const CANON = 'http://localhost:5394/design/final/index.html';
-export const FIXTURE = 'manifest/features/fixtures/canonical.json';
+const CANON = 'http://localhost:5394/design/final/index.html';
+const FIXTURE = 'manifest/features/fixtures/canonical.json';
 
 // the design at a state, its theme and language from its address (its own control reloads the page with them)
 export async function openCanon(canon: Page, state: State, theme: Theme, language: Language): Promise<void> {

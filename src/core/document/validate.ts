@@ -497,7 +497,7 @@ function validateInstances(node: DocNode, at: string, components: ReadonlySet<st
 // Why a name cannot be a custom attribute (feature element-attributes-aria), or null: an attribute name of HTML (a
 // letter, then letters, digits, "-", "_", ".", ":"), never an event handler (on…), never one of the editor's own marks
 // (data-node, data-container, data-hidden, data-key-context, contenteditable), which the page never carries.
-export const EDITOR_ATTRIBUTES: ReadonlySet<string> = new Set(['data-node', 'data-container', 'data-hidden', 'data-empty-text', 'data-key-context', 'data-editor-style', 'data-node-style']);
+const EDITOR_ATTRIBUTES: ReadonlySet<string> = new Set(['data-node', 'data-container', 'data-hidden', 'data-empty-text', 'data-key-context', 'data-editor-style', 'data-node-style']);
 // A dedicated field owns these names even when its element type is not selected. The rule also
 // catches every HTML attribute declared in elements.json, through ModelRules.attributeValues.
 const RESERVED_OWNER: Readonly<Record<string, string>> = {

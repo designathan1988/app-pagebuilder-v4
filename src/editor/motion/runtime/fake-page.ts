@@ -6,7 +6,7 @@ import { Window } from 'happy-dom';
 import type { RuntimeConfig } from '../../../core/motion/export.ts';
 
 // An animation of the fake clock: its keyframes and timing as the runtime asked, its time, its rate, its play state.
-export class FakeAnimation {
+class FakeAnimation {
   currentTime: number | { readonly value: number; readonly unit: string } | null = 0;
   playbackRate = 1;
   playState: 'idle' | 'running' | 'paused' | 'finished' = 'running';

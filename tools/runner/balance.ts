@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-export const HEADLESS_RESULTS = path.join('.cache', 'runner', 'headless.json');
+const HEADLESS_RESULTS = path.join('.cache', 'runner', 'headless.json');
 // the annotation a browser run left out carries
 export const PROVEN_HEADLESS = 'proven-headless';
 
@@ -24,7 +24,7 @@ interface Results {
 // What the tree holds now: the commit, the changes to its tracked files and the untracked files with their contents (a
 // run on a tree with any other change is a run on another tree). The record the browser runner writes after a complete
 // run (docs/feature-results.json) is left out: it follows the runs, never changes what they prove.
-export function treeFingerprint(root: string = process.cwd()): string {
+function treeFingerprint(root: string = process.cwd()): string {
   const git = (...args: string[]) => execFileSync('git', args, { cwd: root, encoding: 'buffer', maxBuffer: 1 << 30 });
   const hash = createHash('sha256');
   hash.update(git('rev-parse', 'HEAD'));

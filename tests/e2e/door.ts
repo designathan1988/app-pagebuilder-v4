@@ -69,7 +69,7 @@ const PLACE = styleSections(PROPERTIES);
 // concept-rows.ts): its own item, or the pair row its field stands in. null for a door drawn in no row's details.
 const ROW_TOGGLE = 'inspector.toggleRow#inspector-row-disclosure';
 const PAIR_OF = new Map(PROPERTIES.rows.flatMap((r) => r.fields.map((f) => [f.target, `pair:${r.id}`] as const)));
-export const rowOfDoor = (ref: string, args: Readonly<Record<string, unknown>> = {}): string | null => {
+const rowOfDoor = (ref: string, args: Readonly<Record<string, unknown>> = {}): string | null => {
   const d = DOORS.get(ref) as (Door & { property?: string | null; composite?: string | null }) | undefined;
   // a part of a field standing for a property (a ready-made value's thumbnail) is drawn in the row of that property's
   // first field
@@ -81,7 +81,7 @@ export const rowOfDoor = (ref: string, args: Readonly<Record<string, unknown>> =
   const pair = target === null ? undefined : PAIR_OF.get(target);
   return PROPERTIES.conceptRows.find((row) => row.details.includes(ref) || (pair !== undefined && row.details.includes(pair)))?.id ?? null;
 };
-export const sectionOfDoor = (ref: string, args: Readonly<Record<string, unknown>> = {}): string | null => {
+const sectionOfDoor = (ref: string, args: Readonly<Record<string, unknown>> = {}): string | null => {
   // a row's disclosure is drawn in the section of the row it stands for
   if (ref === ROW_TOGGLE && typeof args.row === 'string') return PROPERTIES.conceptRows.find((row) => row.id === args.row)?.section ?? null;
   const d = DOORS.get(ref);
@@ -117,7 +117,7 @@ export async function openStyleControl(page: Page, ref: string, args: Readonly<R
   return opened;
 }
 // Every concept row of the Style tab drawn open: a spec that reads every field presses each closed row's disclosure.
-export async function openEveryRow(page: Page): Promise<void> {
+async function openEveryRow(page: Page): Promise<void> {
   for (let i = 0; i < 40; i += 1) {
     const closed = page.locator(`[data-door="${ROW_TOGGLE}"][aria-expanded="false"]`);
     if ((await closed.count()) === 0) return;
@@ -134,12 +134,6 @@ export const UNAVAILABLE_ANNOTATION = 'door-unavailable';
 export function runs(...refs: string[]): TestDetails {
   for (const ref of refs) if (!DOORS.has(ref)) throw new Error(`the manifest has no door ${ref}`);
   return { annotation: refs.map((ref) => ({ type: DOOR_ANNOTATION, description: ref })) };
-}
-
-// the details of a test that runs these doors and shows each cannot run yet
-export function runsUnavailable(...refs: string[]): TestDetails {
-  for (const ref of refs) if (!DOORS.has(ref)) throw new Error(`the manifest has no door ${ref}`);
-  return { annotation: refs.map((ref) => ({ type: UNAVAILABLE_ANNOTATION, description: ref })) };
 }
 
 export function door(ref: string): Door {

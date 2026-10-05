@@ -6,7 +6,7 @@ import type { Axis, LayoutIntent, Region, ResponsiveRule } from './model.ts';
 import { childrenOf, findRegion, preferenceKey } from './model.ts';
 import { end, length, precision } from '../geometry/geometry.ts';
 
-export type PatternKind = 'repeated-row' | 'repeated-column' | 'grid' | 'sidebar' | 'split' | 'masonry' | 'alternating-sections' | 'dashboard' | 'holy-grail' | 'master-detail';
+type PatternKind = 'repeated-row' | 'repeated-column' | 'grid' | 'sidebar' | 'split' | 'masonry' | 'alternating-sections' | 'dashboard' | 'holy-grail' | 'master-detail';
 
 export interface Pattern {
   readonly kind: PatternKind;
@@ -105,7 +105,7 @@ export function wholePattern(graph: LayoutIntent, parent: string | null, count: 
   return allowed ? patterns(graph).find((p) => p.parent === parent && p.regions.length === count) : undefined;
 }
 
-export type InterpretationKind = 'repeat' | 'flex' | 'grid' | 'fixed' | 'proportional' | 'masonry';
+type InterpretationKind = 'repeat' | 'flex' | 'grid' | 'fixed' | 'proportional' | 'masonry';
 
 // One way a group can be read (spec "Ambiguity Engine"): its structure, how certain the engine is, and the facts the
 // predictor shows ("3 equal columns · gap 24 · fluid").
@@ -245,7 +245,7 @@ function hiddenAt(graph: LayoutIntent, rule: ResponsiveRule | null, r: Region): 
 
 // The narrowest a region drawn wider than it may become before the page no longer reads (a column of text, a card):
 // narrower than this at some width, the structure breaks there.
-export const READABLE_WIDTH = 160;
+const READABLE_WIDTH = 160;
 
 // The columns a group flows in at a width, as the page's media queries cascade: the narrowest rule that still holds
 // the width and says it; none keeps the drawn arrangement.

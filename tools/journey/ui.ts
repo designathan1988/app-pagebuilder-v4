@@ -5,7 +5,7 @@ import type { Locator, Page } from '@playwright/test';
 import { openMenu, openStyleControl, runDoor, control } from '../../tests/e2e/door.ts';
 import { canvasPoint } from './kit.ts';
 
-export { openMenu, runDoor, control };
+export {  runDoor,  };
 
 const settle = (page: Page) => page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
 

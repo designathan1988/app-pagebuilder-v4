@@ -38,7 +38,7 @@ const HOLDS: Readonly<Record<string, (element: { readonly content: string; reado
 };
 
 // the predicates that name a kind of element: a field of one is shown only on elements of that kind
-export const KIND_PREDICATES: ReadonlySet<string> = new Set(Object.keys(KINDS));
+const KIND_PREDICATES: ReadonlySet<string> = new Set(Object.keys(KINDS));
 
 // the tag a node is written with: its own, else its type's
 const tagOf = (node: DocNode, rules: ModelRules): string | null => node.tag ?? rules.elements.get(node.type)?.tags[0] ?? null;
@@ -61,7 +61,7 @@ export function elementPredicate(predicate: string, node: DocNode, rules: ModelR
 // `context`), plus whether the element draws a CSS box. Null where the editor cannot read them (the page is not drawn,
 // no parent above the page root): a field of a context predicate shows then, so a value is never unreachable because a
 // measurement was late.
-export type ContextValues = Readonly<Record<string, string | undefined>>;
+type ContextValues = Readonly<Record<string, string | undefined>>;
 export interface ElementContext {
   readonly box: boolean;
   readonly own: ContextValues;

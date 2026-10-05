@@ -8,7 +8,7 @@
 //
 // Pure: it reads the manifest's data it is handed, so the browser tests hand it the JSON they read themselves.
 
-export interface PlacedEntry {
+interface PlacedEntry {
   readonly id: string;
   readonly section: string;
   readonly doors: readonly string[];

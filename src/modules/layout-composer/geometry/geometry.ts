@@ -14,7 +14,7 @@ export const end = (b: Box, axis: Axis): number => (axis === 'x' ? b.x + b.width
 export const length = (b: Box, axis: Axis): number => b[lengthKey(axis)];
 export const cross = (axis: Axis): Axis => (axis === 'x' ? 'y' : 'x');
 export const centre = (b: Box): Point => ({ x: b.x + b.width / 2, y: b.y + b.height / 2 });
-export const area = (b: Box): number => b.width * b.height;
+const area = (b: Box): number => b.width * b.height;
 
 export function bounds(boxes: readonly Box[]): Box {
   if (boxes.length === 0) throw new Error('Bounds need at least one box');
@@ -40,7 +40,7 @@ export function intersection(a: Box, b: Box): Box | null {
   return width > precision && height > precision ? { x, y, width, height } : null;
 }
 
-export const pointInside = (p: Point, b: Box): boolean => p.x >= b.x && p.y >= b.y && p.x <= end(b, 'x') && p.y <= end(b, 'y');
+const pointInside = (p: Point, b: Box): boolean => p.x >= b.x && p.y >= b.y && p.x <= end(b, 'x') && p.y <= end(b, 'y');
 
 // The even-odd rule: whether a point lies inside a ring.
 export function polygonContains(p: Point, points: readonly Point[]): boolean {
@@ -54,7 +54,7 @@ export function polygonContains(p: Point, points: readonly Point[]): boolean {
   return inside;
 }
 
-export function regionContainsPoint(r: Region, p: Point): boolean {
+function regionContainsPoint(r: Region, p: Point): boolean {
   if (!pointInside(p, r.box)) return false;
   if (r.polygon !== undefined && !polygonContains(p, r.polygon)) return false;
   return !(r.holes ?? []).some((hole) => polygonContains(p, hole));
@@ -113,6 +113,3 @@ export function polygonArea(points: readonly Point[]): number {
 export function canonicalBox(box: Box): Box {
   return { x: quantize(box.x), y: quantize(box.y), width: quantize(box.width), height: quantize(box.height) };
 }
-
-// Two numbers the same within the committed precision.
-export const same = (a: number, b: number, tolerance = precision): boolean => Math.abs(a - b) <= tolerance;

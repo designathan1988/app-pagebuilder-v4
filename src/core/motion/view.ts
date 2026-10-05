@@ -124,7 +124,7 @@ export type Lane =
   | { readonly kind: 'property'; readonly key: string; readonly target: MotionTarget; readonly property: string; readonly keyframes: readonly { readonly action: string; readonly track: string; readonly id: string; readonly time: number; readonly value: string; readonly easing: string | null }[] };
 
 // the identity of a target, so actions on the same target share a row
-export const targetKey = (target: MotionTarget): string => JSON.stringify(target);
+const targetKey = (target: MotionTarget): string => JSON.stringify(target);
 
 export function lanes(timeline: MotionTimeline): Lane[] {
   const byTarget = new Map<string, { target: MotionTarget; actions: TimelineAction[] }>();

@@ -13,7 +13,7 @@ export const COVERAGE = process.env.E2E_COVERAGE === '1';
 export const COVERAGE_DIR = path.join('.cache', 'coverage', 'tests');
 const BUILD = 'dist';
 
-export interface TestCoverage {
+interface TestCoverage {
   // the line Playwright's --test-list takes: the test's file and its titles
   readonly test: string;
   // each source file of src/ by its path, the lines executed as [from, to] intervals, merged and sorted

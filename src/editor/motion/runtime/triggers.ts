@@ -9,7 +9,7 @@
 import type { Trigger } from '../../../core/motion/model.ts';
 import type { MotionKit } from './kit.ts';
 
-export interface TriggerHandlers {
+interface TriggerHandlers {
   fire(): void;
   leave(): void;
   progress(fraction: number): void;

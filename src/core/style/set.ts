@@ -118,7 +118,7 @@ export function writeDeclarations(
 
 // The patches that write these values into a keyframe's declarations (a null value removes its property); empty when it
 // already holds them. The one writer of a keyframe's declarations, beside writeDeclarations for an element's layer.
-export function writeKeyframeDeclarations(
+function writeKeyframeDeclarations(
   node: DocNode,
   path: readonly (string | number)[],
   animationName: string,

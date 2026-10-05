@@ -17,7 +17,7 @@ import type { Control, Effect, PlaybackOperation, PropertyTrack, Stagger } from 
 import type { MotionKit } from './kit.ts';
 import type { ScrollKind } from './scroll.ts';
 
-export interface Run {
+interface Run {
   readonly timeline: RuntimeTimeline;
   readonly source: Element;
   // the run's length in ms (an infinite action counted once)

@@ -22,7 +22,7 @@ import { animationsOf } from '../animation/animation.ts';
 import { manifest } from '../../manifest/runtime.ts';
 import { MAX_DELAY, interactionProblems } from './interaction-rule.ts';
 
-export { interactionProblems };
+;
 
 const NONE: readonly Interaction[] = [];
 export const interactionsOf = (node: DocNode): readonly Interaction[] => node.interactions ?? NONE;
@@ -40,11 +40,8 @@ const enumValues = (entry: DoorRef | null, argument: string): readonly string[] 
   const declared = entry === null ? undefined : (entry.command.args as Record<string, { values?: readonly string[] }>)[argument];
   return declared?.values ?? NONE_VALUES;
 };
-export const TRIGGERS: readonly string[] = enumValues(addDoor(), 'trigger');
-export const ACTIONS: readonly string[] = enumValues(addDoor(), 'action');
-
-// the fields an interaction's card edits (interactions.update's `field` argument, the enum of the manifest)
-export const FIELDS: readonly string[] = enumValues(fieldDoor('trigger'), 'field');
+const TRIGGERS: readonly string[] = enumValues(addDoor(), 'trigger');
+const ACTIONS: readonly string[] = enumValues(addDoor(), 'action');
 
 // a class the toggle-class action toggles and the scope names: a CSS class name's grammar (core/design/classes.ts)
 const CLASS_NAME = /^-?[_a-zA-Z][_a-zA-Z0-9-]*$/;
@@ -127,7 +124,7 @@ const camel = (value: string): string => value.replace(/-([a-z])/g, (_all, lette
 export const triggerLabel = (trigger: string): MessageId => optionLabel(addDoor(), 'trigger', trigger) ?? (`interactions.trigger.${camel(trigger)}` as MessageId);
 export const actionLabel = (action: string): MessageId => optionLabel(addDoor(), 'action', action) ?? (`interactions.action.${camel(action)}` as MessageId);
 // the field a card's control edits, by its label (the door's own labelKey)
-export const fieldLabel = (field: string): MessageId => (optionLabel(fieldDoor(field), 'field', field) ?? (`interactions.field.${camel(field)}` as MessageId));
+const fieldLabel = (field: string): MessageId => (optionLabel(fieldDoor(field), 'field', field) ?? (`interactions.field.${camel(field)}` as MessageId));
 
 // what an options text makes of an interaction's action: the class it toggles, the animation it plays, the address it
 // opens (through the one rule of an address)
@@ -156,7 +153,7 @@ function optionsFrom(node: DocNode, action: string, text: string): { readonly ch
 const ONCE_BY_NATURE: ReadonlySet<string> = new Set(['scroll-into-view', 'page-load']);
 export const firesOnce = (interaction: Interaction): boolean => interaction.once ?? ONCE_BY_NATURE.has(interaction.trigger);
 // the longest wait an action takes (interaction-rule.ts): a longer one reads as a site that does not answer
-export { MAX_DELAY };
+;
 
 export interface InteractionOptions {
   readonly once?: boolean;

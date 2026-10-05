@@ -22,7 +22,7 @@ export interface Migration {
 }
 
 // The steps this app knows, in order.
-export const MIGRATIONS: readonly Migration[] = [
+const MIGRATIONS: readonly Migration[] = [
   { from: 1, to: 2, migrate: (document) => ({ ...document, version: 2 }) },
   { from: 2, to: 3, migrate: (document) => ({ ...document, version: 3 }) },
   { from: 3, to: 4, migrate: (document) => ({ ...document, version: 4, pages: Array.isArray(document.pages) ? document.pages.map(widestCapture) : document.pages }) },

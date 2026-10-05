@@ -21,7 +21,7 @@ import { rulesForDocument } from '../../core/document/breakpoints.ts';
 // the canvas's own mark of a rendered node (editor/canvas/render/render.ts writes data-node on every element it draws)
 export const canvasSelector = (node: NodeId): string => `[data-node="${node.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"]`;
 
-export function canvasMotionConfig(document: DocumentJson, rules: ModelRules, everyTimeline = false): RuntimeConfig | null {
+function canvasMotionConfig(document: DocumentJson, rules: ModelRules, everyTimeline = false): RuntimeConfig | null {
   return motionConfig(document, { selectorOf: canvasSelector, breakpoints: rulesForDocument(rules, document).output.breakpoints.map(({ id, width, base }) => ({ id, width, base })), playedClassName, everyTimeline });
 }
 

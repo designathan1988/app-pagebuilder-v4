@@ -19,7 +19,7 @@ import type { CommandArgs } from '../../generated/commands.ts';
 import type { EditorUi } from '../state.ts';
 import { RECENT_COLOURS } from '../preferences/preferences.ts';
 
-export type ColorFormat = CommandArgs['colorPicker.setFormat']['format'];
+type ColorFormat = CommandArgs['colorPicker.setFormat']['format'];
 
 export interface ColorPickerState {
   readonly property: string;

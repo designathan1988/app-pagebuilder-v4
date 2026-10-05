@@ -29,7 +29,7 @@ const PREVIEWED = 3;
 
 // The element a fill repeats for the selected one: the repeated item of a bound list it lies in, else the instance it
 // lies in, else the element itself; the page's root never.
-export function templateOf(document: DocumentJson, id: NodeId): { readonly root: DocNode; readonly list: DocNode | null } | null {
+function templateOf(document: DocumentJson, id: NodeId): { readonly root: DocNode; readonly list: DocNode | null } | null {
   const chain = lineage(document, id);
   for (let i = chain.length - 1; i >= 1; i -= 1) {
     const node = chain[i] as DocNode;

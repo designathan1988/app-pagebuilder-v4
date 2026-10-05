@@ -233,7 +233,7 @@ interface SizeRules {
 }
 
 // The width and height an SVG declares in px at the base breakpoint and state, or null when it declares no px size.
-export function svgSize(node: DocNode, rules: SizeRules): { readonly width: number; readonly height: number } | null {
+function svgSize(node: DocNode, rules: SizeRules): { readonly width: number; readonly height: number } | null {
   const declared = (node.styles as Record<string, Record<string, Record<string, string>> | undefined>)[rules.base.breakpoint]?.[rules.base.state] ?? {};
   const [width, height] = rules.boxSize.map((property) => PX.exec(declared[property] ?? '')?.[1]);
   return width === undefined || height === undefined ? null : { width: Number(width), height: Number(height) };

@@ -29,7 +29,7 @@ export function findTimeline(document: DocumentJson, name: string): { readonly t
 
 // Every node of the document that can hold motion: the pages' trees and the components' definitions (an instance
 // carries what its definition holds).
-export function* motionHolders(document: DocumentJson): Generator<{ readonly node: DocNode; readonly path: readonly (string | number)[] }> {
+function* motionHolders(document: DocumentJson): Generator<{ readonly node: DocNode; readonly path: readonly (string | number)[] }> {
   for (const [pageIndex, page] of document.pages.entries()) yield* withPaths(page.tree, ['pages', pageIndex, 'tree']);
   for (const [index, component] of (document.components ?? []).entries()) yield* withPaths(component.tree, ['components', index, 'tree']);
 }

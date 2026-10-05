@@ -30,7 +30,7 @@ export interface TimelineState {
   // element shows its own styles until the timeline previews something and again after Stop.
   readonly live?: true | undefined;
 }
-export const INITIAL_TIMELINE: TimelineState = { time: 0 };
+const INITIAL_TIMELINE: TimelineState = { time: 0 };
 export const timelineOf = (ui: EditorUi): TimelineState => ui.timeline ?? INITIAL_TIMELINE;
 
 export const trackWidth = (): number => numberConstant('timeline.trackWidth');
@@ -80,7 +80,7 @@ export function keyframeTarget(state: StoreState<EditorUi>): KeyframeTarget | nu
 }
 
 // the time an offset of a shown animation sits at, in whole ms
-export function timeOfPercent(animation: Animation, percent: number): number {
+function timeOfPercent(animation: Animation, percent: number): number {
   return Math.round((durationMs(animation) * Math.min(100, Math.max(0, percent))) / 100);
 }
 
@@ -92,7 +92,7 @@ export function offsetFromTrackX(x: number): number {
   return Math.min(high, Math.max(low, Math.round(raw)));
 }
 // where an offset is drawn along the track, in the track's own pixels
-export const trackXOfOffset = (offset: number): number => (offset / 100) * trackWidth();
+const trackXOfOffset = (offset: number): number => (offset / 100) * trackWidth();
 
 // Where a pointer at this x of the ruler puts the playhead, in whole ms of the shown animation (spec timeline-preview:
 // a scrub follows the pointer; a click lands on the keyframe it is nearest, within timeline.snapPercent, else on the

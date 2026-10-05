@@ -20,7 +20,7 @@ import { chosen } from './said.ts';
 // the concept rows of the Style tab (properties.json), which the rows' lists may name
 const CONCEPT_ROW_IDS: readonly string[] = manifest.properties.conceptRows.map((r) => r.id);
 
-export type Theme = CommandArgs['preferences.setTheme']['theme'];
+type Theme = CommandArgs['preferences.setTheme']['theme'];
 
 // a language item or a theme item stands for the language or the theme the editor shows
 export const setLanguage: RegisteredHandler<'preferences.setLanguage', EditorUi> = registerHandler(
@@ -254,7 +254,7 @@ export function persistPreferences(store: Store<EditorUi>, storage: PreferenceSt
 }
 
 // The panel offsets of the elements the document still holds, or undefined for none of them.
-export function prunedOffsets(document: DocumentJson, offsets: Readonly<Record<string, Offset>> | undefined): Readonly<Record<string, Offset>> | undefined {
+function prunedOffsets(document: DocumentJson, offsets: Readonly<Record<string, Offset>> | undefined): Readonly<Record<string, Offset>> | undefined {
   if (offsets === undefined) return undefined;
   const ids = new Set<string>();
   for (const page of document.pages) for (const node of walk(page.tree)) ids.add(node.id);

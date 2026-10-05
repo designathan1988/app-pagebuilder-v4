@@ -22,7 +22,7 @@ export function doorOf(region: RegionId, control: string): DoorEntry {
 
 // The one way the panel runs a door it draws as a field or a form: its command with the door's own arguments, the
 // place's and the value's.
-export function useRun(entry: DoorEntry): (args: Readonly<Record<string, unknown>>) => DispatchResult {
+function useRun(entry: DoorEntry): (args: Readonly<Record<string, unknown>>) => DispatchResult {
   const store = useStore();
   return (args) => (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(entry.command.id, { ...entry.door.args, ...args });
 }

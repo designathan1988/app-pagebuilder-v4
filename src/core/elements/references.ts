@@ -9,18 +9,12 @@ import { locate, walk } from '../document/model.ts';
 
 // the attributes that hold a reference, by their HTML name: `for` (a label's control) and `href` when its value is a
 // fragment naming an element of the page ("#<node id>")
-export const REFERENCE_HTM = ['for', 'href'];
+const REFERENCE_HTM = ['for', 'href'];
 
-export function referenceTarget(document: DocumentJson, value: string): DocNode | null {
+function referenceTarget(document: DocumentJson, value: string): DocNode | null {
   const named = value.startsWith('#') ? value.slice(1) : value;
   if (named === '') return null;
   return locate(document, named as NodeId)?.node ?? null;
-}
-
-// whether a stored value is a reference at all: a value that names a node of the document (a node id is no id
-// attribute a person would type, and an id attribute that happens to look like one is resolved to itself below)
-export function isReference(document: DocumentJson, value: string): boolean {
-  return referenceTarget(document, value) !== null;
 }
 
 // What the page writes for a stored value: the target's id attribute for a reference ("#cta" for a link whose anchor

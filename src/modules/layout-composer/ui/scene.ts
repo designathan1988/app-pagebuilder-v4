@@ -19,7 +19,7 @@ export interface Words {
   readonly params: Readonly<Record<string, string | number>>;
 }
 
-export interface SceneRegion {
+interface SceneRegion {
   readonly id: string;
   readonly box: Box;
   readonly polygon: readonly Point[] | null;
@@ -32,7 +32,7 @@ export interface SceneRegion {
   readonly label: Words;
 }
 
-export interface SceneHandle {
+interface SceneHandle {
   // the handle as the stroke command names it ("boundary:<id>", "gap:x:r1:r2")
   readonly id: string;
   readonly kind: HandleKind;
@@ -43,7 +43,7 @@ export interface SceneHandle {
   readonly value?: number;
 }
 
-export interface SceneRelation {
+interface SceneRelation {
   readonly from: Point;
   readonly to: Point;
   readonly label: Words;

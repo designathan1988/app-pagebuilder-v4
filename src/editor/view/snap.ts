@@ -12,7 +12,7 @@ import { message, registerHandler } from '../../core/commands/registry.ts';
 import { commandOf, numberConstant } from '../../manifest/runtime.ts';
 import type { EditorUi } from '../state.ts';
 
-export const SNAP_DISTANCE = numberConstant('snap.distance');
+const SNAP_DISTANCE = numberConstant('snap.distance');
 const DISTANCE_MIN = numberConstant('snap.distanceMin');
 const DISTANCE_MAX = numberConstant('snap.distanceMax');
 

@@ -11,14 +11,14 @@ import { isIdentifier } from '../../../editor/host.ts';
 // A place that holds a length: a constraint's value (a gap, a fixed size) or a region's padding.
 export type ValueRef = { readonly kind: 'constraint'; readonly id: string } | { readonly kind: 'padding'; readonly region: string };
 
-export const refText = (ref: ValueRef): string => (ref.kind === 'constraint' ? `constraint:${ref.id}` : `padding:${ref.region}`);
+const refText = (ref: ValueRef): string => (ref.kind === 'constraint' ? `constraint:${ref.id}` : `padding:${ref.region}`);
 export function refOf(text: string): ValueRef | null {
   const [kind, id] = text.split(':');
   if (id === undefined || id === '') return null;
   return kind === 'constraint' ? { kind, id } : kind === 'padding' ? { kind, region: id } : null;
 }
 
-export function valueAt(graph: LayoutIntent, ref: ValueRef): LayoutValue | undefined {
+function valueAt(graph: LayoutIntent, ref: ValueRef): LayoutValue | undefined {
   if (ref.kind === 'padding') return findRegion(graph, ref.region)?.layout?.padding;
   const c = graph.constraints.find((one) => one.id === ref.id);
   return c !== undefined && 'value' in c ? c.value : undefined;

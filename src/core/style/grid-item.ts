@@ -13,7 +13,7 @@ import { argumentRefused } from '../store/args.ts';
 // the start and the span a composite's text holds ("2 / span 3", "span 3", "auto / b"): a start that is a whole
 // number, else none; a span that is "span N" in either side, else one (a value written as longhands keeps the span in
 // the start longhand: "span 2" + "auto")
-export function startAndSpan(text: string | undefined): { readonly start: number | null; readonly span: number } {
+function startAndSpan(text: string | undefined): { readonly start: number | null; readonly span: number } {
   const held = text?.trim() ?? '';
   const [first = '', second = ''] = held.split('/').map((part) => part.trim());
   const start = /^\d+$/.test(first) ? Number.parseInt(first, 10) : null;
@@ -29,7 +29,7 @@ export function storedPlace(node: DocNode, property: string, rules: ModelRules):
 }
 
 // what the door's start and span make of the place the element holds (storedPlace: its longhands)
-export function gridItemValue(now: { readonly start: number | null; readonly span: number }, start: number | undefined, span: number | undefined): string | { readonly refused: 'start' } | { readonly refused: 'span' } {
+function gridItemValue(now: { readonly start: number | null; readonly span: number }, start: number | undefined, span: number | undefined): string | { readonly refused: 'start' } | { readonly refused: 'span' } {
   const nextStart = start ?? now.start;
   const nextSpan = span ?? now.span;
   if (nextStart !== null && nextStart < 1) return { refused: 'start' };

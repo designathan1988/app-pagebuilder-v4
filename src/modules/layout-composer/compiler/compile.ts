@@ -18,9 +18,9 @@ import { morphCss, morphSegmentId } from '../responsive/continuum.ts';
 // Declarations by role while compiling (camelCase names of the manifest's properties: minWidth for min-width); written
 // out by the manifest's own ids at the end.
 type Declarations = Record<string, string>;
-export type Css = Readonly<Record<string, string>>;
+type Css = Readonly<Record<string, string>>;
 
-export type NodeRole = 'root' | 'region' | 'row' | 'column' | 'grid' | 'masonry';
+type NodeRole = 'root' | 'region' | 'row' | 'column' | 'grid' | 'masonry';
 
 export interface CompiledNode {
   // the region id, a wrapper's key (group:<sorted region ids>), or ROOT_KEY for the composed container itself
@@ -68,7 +68,7 @@ export interface CompileOptions {
 }
 
 export const ROOT_NODE = '$root';
-export const groupKey = (ids: readonly string[]): string => `group:${[...ids].sort().join('+')}`;
+const groupKey = (ids: readonly string[]): string => `group:${[...ids].sort().join('+')}`;
 
 const number = (n: number): string => String(Math.round(n * 10000) / 10000);
 // lengths are written in whole pixels: a drawing is made with a pointer, and its fractions mean nothing on the page
@@ -77,10 +77,10 @@ const px = (n: number): string => `${Math.round(n)}px`;
 // Parallel edges closer than this are one line of the structure (spec "Snap": a drawing made by hand is a few pixels
 // off where the person meant one line). It never joins the end of one region to the start of the next: the room
 // between them is a gap, however small.
-export const ALIGN = 8;
+const ALIGN = 8;
 
 // Gaps meant alike: they differ by at most 4 px, or by a quarter of the smallest of them.
-export const alike = (gaps: readonly number[]): boolean => gaps.length > 0 && Math.max(...gaps) - Math.min(...gaps) <= Math.max(4, Math.min(...gaps) / 4);
+const alike = (gaps: readonly number[]): boolean => gaps.length > 0 && Math.max(...gaps) - Math.min(...gaps) <= Math.max(4, Math.min(...gaps) / 4);
 const mean = (values: readonly number[]): number => values.reduce((sum, v) => sum + v, 0) / values.length;
 
 // The share of each sibling that takes a share of its line: their drawn lengths over the smallest of them, so three

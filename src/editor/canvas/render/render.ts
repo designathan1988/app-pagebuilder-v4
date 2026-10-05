@@ -43,7 +43,7 @@ import type { NodeId } from '../../../generated/commands.ts';
 import { baseCss, capturedBaseCss } from '../../../core/render/base.ts';
 import { formNodes } from '../../../core/export/authoring.ts';
 import { classesCss, elementAttributes, fileUrlsIn, nodeCss, outputModelFromManifest, type OutputModel } from '../../../core/render/output.ts';
-export { elementAttributes, nodeCss, outputModelFromManifest, type OutputModel } from '../../../core/render/output.ts';
+export {  nodeCss,   } from '../../../core/render/output.ts';
 import type { ElementsFile, InteractionsFile, PropertiesFile } from '../../../manifest/schema.ts';
 import { locate, walk, type DocNode, type DocumentJson } from '../../../core/document/model.ts';
 import { applyPatches, deepEqual, type Patch } from '../../../core/history/transaction.ts';
@@ -65,41 +65,41 @@ export const NODE_ATTRIBUTE = 'data-node';
 // a node's style element in the head: its own attribute, so [data-node] finds only elements of the page
 export const NODE_STYLE_ATTRIBUTE = 'data-node-style';
 // the editor-only marks: an element of a container, a hidden node's element, and the editor's own style element
-export const CONTAINER_ATTRIBUTE = 'data-container';
+const CONTAINER_ATTRIBUTE = 'data-container';
 export const HIDDEN_ATTRIBUTE = 'data-hidden';
 // editor-only: a text element whose text is empty (the audit's A3.38)
 export const EMPTY_TEXT_ATTRIBUTE = 'data-empty-text';
-export const EDITOR_STYLE_ATTRIBUTE = 'data-editor-style';
+const EDITOR_STYLE_ATTRIBUTE = 'data-editor-style';
 // the project's base style element (core/render/base.ts): written first in the page's head, before every other rule, as
 // the exported stylesheet carries it (the user's real-use audit, item 2.4)
-export const BASE_STYLE_ATTRIBUTE = 'data-base-style';
+const BASE_STYLE_ATTRIBUTE = 'data-base-style';
 // the marks of the text edited in place: editable as plain text, in the key context the editor names
-export const EDITABLE_ATTRIBUTE = 'contenteditable';
+const EDITABLE_ATTRIBUTE = 'contenteditable';
 // editor-only: the sandboxed frame that shows an embed's markup on the canvas
 const EMBED_FRAME_ATTRIBUTE = 'data-embed-frame';
 // the style element of the project's design tokens (core/design/tokens.ts): the :root rule of its variables, after the
 // editor's, before every node's (the export writes the same rule first in its stylesheet)
-export const TOKENS_STYLE_ATTRIBUTE = 'data-tokens-style';
+const TOKENS_STYLE_ATTRIBUTE = 'data-tokens-style';
 const TOKENS_FIELD = 'tokens';
 // the style element of the project's style classes (core/design/classes.ts): their rules, after the tokens', before
 // every node's, so an element's own values override its classes (spec shared-style-classes)
-export const CLASSES_STYLE_ATTRIBUTE = 'data-classes-style';
+const CLASSES_STYLE_ATTRIBUTE = 'data-classes-style';
 // the style element of a captured page's residual stylesheet (spec capture-url): before the classes and every node's
 // rules, so what the person edits wins over it
-export const CAPTURE_STYLE_ATTRIBUTE = 'data-capture-style';
+const CAPTURE_STYLE_ATTRIBUTE = 'data-capture-style';
 // the style element of the project's fonts (core/files/fonts.ts): one @font-face per font file of the tree, serving
 // it through the file's object URL, so the family the font menu offers draws on the canvas (manifest: custom-fonts)
-export const FONTS_STYLE_ATTRIBUTE = 'data-fonts-style';
+const FONTS_STYLE_ATTRIBUTE = 'data-fonts-style';
 // the stylesheet of the state the editor previews on the selection (previewState)
-export const PREVIEW_STYLE_ATTRIBUTE = 'data-preview-style';
+const PREVIEW_STYLE_ATTRIBUTE = 'data-preview-style';
 // the outline of the selection in a side frame (spec side-by-side-view)
-export const OUTLINE_STYLE_ATTRIBUTE = 'data-outline-style';
+const OUTLINE_STYLE_ATTRIBUTE = 'data-outline-style';
 // The animations' @keyframes of the page the canvas shows (group 18): the canvas writes them so the timeline can play
 // an animation at the playhead; the animation properties themselves are drawn only while the timeline previews one
 // (previewTimeline), so the editing canvas never runs an animation on its own.
-export const KEYFRAMES_STYLE_ATTRIBUTE = 'data-keyframes-style';
+const KEYFRAMES_STYLE_ATTRIBUTE = 'data-keyframes-style';
 // the stylesheet of the animation the timeline previews at its playhead (previewTimeline)
-export const PLAY_STYLE_ATTRIBUTE = 'data-play-style';
+const PLAY_STYLE_ATTRIBUTE = 'data-play-style';
 const CLASSES_FIELD = 'classes';
 const FILES_FIELD = 'files';
 // editor-only: the group that draws an SVG's markup after its shapes (the export writes the markup itself there)
@@ -110,8 +110,8 @@ const SVG_TAG = 'svg';
 const IMAGE_PLACEHOLDER = `data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect width="640" height="360" fill="#e2e8f0"/><g fill="none" stroke="#94a3b8" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"><rect x="260" y="130" width="120" height="100" rx="10"/><circle cx="295" cy="162" r="11"/><path d="M262 214l38-34 26 22 22-18 32 30"/></g></svg>',
 )}`;
-export const EDITABLE_VALUE = 'plaintext-only';
-export const KEY_CONTEXT_ATTRIBUTE = 'data-key-context';
+const EDITABLE_VALUE = 'plaintext-only';
+const KEY_CONTEXT_ATTRIBUTE = 'data-key-context';
 
 // The canvas's model: the output's, and the editor-only minimum heights of an empty container and of an empty text,
 // in CSS px (canvas.emptyContainerMinHeight, canvas.emptyTextMinHeight)
@@ -134,7 +134,7 @@ export function renderModelFromManifest(elements: ElementsFile, properties: Prop
 // The browser's own scrollbar width, measured once in the editor's document (the same scrollbar the site shows): the
 // page keeps it free whatever the zoom, so its usable width is the site's (the user's real-use audit, item A3.22).
 let measuredScrollbar: number | null = null;
-export function scrollbarWidth(): number {
+function scrollbarWidth(): number {
   if (measuredScrollbar !== null) return measuredScrollbar;
   const probe = document.createElement('div');
   probe.style.cssText = 'position:absolute;overflow:scroll;width:100px;height:100px;visibility:hidden';

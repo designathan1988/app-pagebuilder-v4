@@ -95,7 +95,7 @@ export function outputModelFromManifest(elements: ElementsFile, properties: Prop
 // window of the breakpoint's size — wherever a value writes them, while the export keeps the units the person typed. vw
 // and its siblings need no rewriting: the frame is exactly the breakpoint wide.
 const VIEWPORT_HEIGHT = new RegExp('(^|[^a-z0-9.-])(-?(?:[0-9]+[.]?[0-9]*|[.][0-9]+))(svh|dvh|lvh|vh)(?![a-z])', 'gi');
-export function viewportUnits(text: string, screen: { readonly height: number }): string {
+function viewportUnits(text: string, screen: { readonly height: number }): string {
   return text.replace(VIEWPORT_HEIGHT, (_all, before: string, n: string) => `${before}${Math.round((Number(n) * screen.height) / 100 * 100) / 100}px`);
 }
 
