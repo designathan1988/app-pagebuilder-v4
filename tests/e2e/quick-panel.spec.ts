@@ -40,7 +40,9 @@ async function offset(page: Page, node: string): Promise<{ x: number; y: number 
 }
 
 test('the panel dragged by its grip keeps its offset from the element after a reload', runs(OPEN, ROW, GRIP), async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  // 1000 px high: a field whose value does not fit its half takes a row of its own (QA 367), and the Intro's panel grew
+  // to nearly the 900 px window's stage, leaving it no room to move up
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await openEditor(page);
   const chooser = page.waitForEvent('filechooser');
   await runDoor(page, OPEN);
@@ -221,4 +223,36 @@ test('the quick panel reads opacity in percent, as the Style tab does', runs(OPE
   await expect(quick).toContainText('100');
   await expect(quick).toContainText('%');
   await expect(quick).not.toContainText(/(^|\s)1(\s|$)/);
+});
+
+// A value is never cut where the panel has room for it (the user's review of 2026-10-05, case 12: "Display g", "Gap 2…",
+// "Tamanho 1…"): a field whose value does not fit its half takes its group's whole row, and its Reset lies over its end
+// only while the field is hovered, taking no room from the value at rest.
+test('a field whose value does not fit its half takes the row, and its Reset shows only while hovered', runs(OPEN, ROW, 'style.set#quick-panel-font-family', FONT_SIZE), async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await openEditor(page);
+  const chooser = page.waitForEvent('filechooser');
+  await runDoor(page, OPEN);
+  await (await chooser).setFiles({ name: 'aurora.json', mimeType: 'application/json', buffer: fs.readFileSync(FIXTURE) });
+  await control(page, ROW, { args: { target: 'n-intro' } }).click();
+  await openPanel(page);
+  // the font list cannot fit a half: its field spans the group, its two columns
+  const font = panel(page).locator('.field-row[data-door="style.set#quick-panel-font-family"]').first();
+  await expect(font).toHaveAttribute('data-wide', '');
+  const group = font.locator('xpath=..');
+  const [fieldBox, groupBox] = await Promise.all([font.boundingBox(), group.boundingBox()]);
+  expect(Math.round(fieldBox?.width ?? 0)).toBe(Math.round(groupBox?.width ?? -1));
+  // a short value keeps its half
+  const size = panel(page).locator(`.field-row[data-door="${FONT_SIZE}"]`).first();
+  await size.locator('input').fill('19px');
+  await size.locator('input').press('Enter');
+  // at rest: the field neither focused nor hovered (a focused field shows its Reset as a hovered one does)
+  await size.locator('input').evaluate((input) => (input as HTMLInputElement).blur());
+  await page.mouse.move(10, 10);
+  await expect(size).not.toHaveAttribute('data-wide', '');
+  // its Reset: hidden at rest, over its end while hovered
+  const reset = size.locator(':scope > .field__end');
+  await expect(reset).toBeHidden();
+  await size.hover();
+  await expect(reset).toBeVisible();
 });

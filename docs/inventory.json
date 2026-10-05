@@ -5,8 +5,8 @@
     "commands": 373,
     "doors": 1362,
     "scenarios": 1831,
-    "modules": 476,
-    "lines": 83226
+    "modules": 477,
+    "lines": 83318
   },
   "features": [
     {
@@ -5074,6 +5074,12 @@
       "features": []
     },
     {
+      "path": "src/editor/canvas/chip-fit.ts",
+      "lines": 88,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/canvas/chrome.tsx",
       "lines": 1112,
       "commands": [],
@@ -5177,7 +5183,7 @@
     },
     {
       "path": "src/editor/canvas/quick-panel.tsx",
-      "lines": 497,
+      "lines": 501,
       "commands": [],
       "features": []
     },

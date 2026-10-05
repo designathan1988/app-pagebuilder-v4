@@ -10,6 +10,7 @@
 // Opening the panel with its chip is not a command (PRODUCT.md §5.3: data-local): the chip's state is this component's.
 // Hidden while a drag runs and while a text is edited in place (the text toolbar replaces it).
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import { installChipFit } from './chip-fit.ts';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type DocNode } from '../../core/document/model.ts';
 import { functionArgument, functionOfControl, functionsOf, translateAxis, translateWith, withBareUnit } from '../../core/style/functions.ts';
@@ -361,6 +362,9 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
   const shown = node !== null && !editing && dragging === null;
   const id = node?.id ?? null;
   const offset: Offset | null = id === null ? null : (offsets[id] ?? null);
+
+  // a field whose value does not fit its half takes the group's whole row (chip-fit.ts)
+  useEffect(() => (shown && open && panel.current !== null ? installChipFit(panel.current) : undefined), [shown, open, id]);
 
   // placed at every frame (the element moves with the page's layout, a scroll, a zoom), set only when it moves
   useEffect(() => {

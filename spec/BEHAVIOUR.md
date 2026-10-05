@@ -6084,9 +6084,12 @@ The panel's controls have `tabindex="-1"` (sealed out of the Tab order, `quick-p
 11. **The panel's groups were ranges of placement orders in the code** (the audit's U-044: object-fit landed in Settings, the radius in Paint by a magic order). Required: the groups are manifest data — layout.json's `quickPanelGroups` (id and name, in the order the panel draws them) — and each quick panel field names its group (`group`; null for the panel's head: the tag, More actions, Edit on canvas); manifest:check refuses a group the layout does not list and a group that holds no field (rule `quick-panel-group`).
 12. **The Effects, Text, Transform and Layout fields had no visible name, and the values read the browser's text** (the audit's U-008: `rgba(0, 0, 0, 0)`, `1 · none · 32px · 700 · normal`). Required: every style field of the panel names itself inside, before its value (the canonical `.qp-f` key): its door's short face label (`faceLabelKey`: Weight, ↕ line height, ↔ letter spacing, Align, Items), else its label (W, H, Opacity, Size, Move X…); a field whose door has an icon (Effects) shows the icon; a colour field in a two-column group shows its swatch as its key. At rest a field shows the inspector's face (a colour's hex or `transparent`, a length's number and unit); focused, its text.
 - **The panel was wider than the canonical one and Background image named itself in two words** (jornada03 plan, stage
-  5: the canonical anatomy). Required: the panel is the canonical 196 px wide (68 % of the inspector's 288); the
-  background image field's key is **Image**; Paint lays its fields two to a line as the canonical panel does (the
-  colour's swatch is its key), Padding and Justify take a whole line, a field's Reset sits beside its value. Settings
+  5: the canonical anatomy). Required: the panel is 68 % of the inspector's width (the canonical 196 px of 288; 228 px of
+  the 336 px default since DEC-66); the background image field's key is **Image**; Paint lays its fields two to a line
+  as the canonical panel does (the colour's swatch is its key), Padding and Justify take a whole line, a field whose value
+  does not fit its half takes the whole line too (`src/editor/canvas/chip-fit.ts`; the user's review of 2026-10-05:
+  "Display g", "Tamanho 1…"), and a field's Reset lies over its value's end only while the field is hovered or holds the
+  focus, taking no room from the value. Settings
   keeps one attribute to a line, its label beside it. The bar holds more than the canonical one (the grip, Edit on
   canvas, the close button), so it is two lines: the grip, the element's name and the close button, then the context,
   the tag and the actions.

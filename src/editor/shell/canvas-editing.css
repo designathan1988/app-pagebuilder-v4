@@ -259,12 +259,31 @@
 
 .quick-panel__group-fields .field-row {
   position: relative;
-  /* the value, then its Reset beside it when it has one (it fell under the value, a line of its own) */
-  grid-template-columns: minmax(0, 1fr) auto;
+  /* the value takes the whole field: its Reset lies over the field's end only while the field is hovered or holds
+     the focus, so it takes no room from the value (the user's review of 2026-10-05: beside it, "Size 19px ↺" cut
+     "Tamanho 1…") */
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
   gap: 0;
 }
+
+.quick-panel .quick-panel__group-fields .field-row > .field__end {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+}
+
+.quick-panel .quick-panel__group-fields .field-row:hover > .field__end:not(:empty),
+.quick-panel .quick-panel__group-fields .field-row:focus-within > .field__end:not(:empty) { display: flex; }
+
+/* a field whose value does not fit its half takes the group's whole row (chip-fit.ts) */
+.quick-panel__group-fields > .field-row[data-wide] { grid-column: 1 / -1; }
 
 /* a quick field is the canonical .qp-f: no border, a soft fill, its key muted before the value, its unit after it at
    the right, in the colour of where its value comes from */
