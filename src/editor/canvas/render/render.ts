@@ -162,11 +162,12 @@ export function editorCss(model: RenderModel, screenHeight?: number): string {
   // zoom (the user's real-use audit, item A3.22). The frame sets the variable from the browser's own scrollbar.
   // An empty page's root takes the breakpoint's screen height (`screenHeight`): an empty body is 0 px tall, so its
   // selection was a line at the frame's top and its size read "1440 × 0" (the user's audit order of 2026-10-05); with
-  // nothing inside, nothing it holds is laid out otherwise than the site lays it out.
+  // nothing inside, nothing it holds is laid out otherwise than the site lays it out. Never taller than the frame
+  // shows (100vh, the frame's own height): an empty page that scrolls moved the Layout tool's first stroke off it.
   // A phone's or a tablet's browser draws its scrollbar over the page, taking no width, so a screen narrower than
   // OVERLAY_SCROLLBAR_BELOW keeps its whole width: the phone breakpoint measured 375 px for its 390 (the user's audit
   // order of 2026-10-05). The media query reads the frame's own width, the breakpoint's.
-  return `html { padding-right: ${scrollbarWidth()}px; scrollbar-width: none; }\n@media (max-width: ${OVERLAY_SCROLLBAR_BELOW - 0.02}px) { html { padding-right: 0; } }\n:where(body:empty) { min-height: ${screenHeight === undefined ? '100vh' : `${screenHeight}px`}; }\n:where([${CONTAINER_ATTRIBUTE}]:empty) { min-height: ${model.emptyContainerMinHeight}px; }\n:where([${EMPTY_TEXT_ATTRIBUTE}]) { min-height: ${model.emptyTextMinHeight}px; outline: 1px dashed currentColor; outline-offset: -1px; }\n[${HIDDEN_ATTRIBUTE}] { display: none !important; }\n[${EMBED_FRAME_ATTRIBUTE}] { display: block; width: 100%; min-height: ${model.emptyContainerMinHeight}px; border: 0; pointer-events: none; }`;
+  return `html { padding-right: ${scrollbarWidth()}px; scrollbar-width: none; }\n@media (max-width: ${OVERLAY_SCROLLBAR_BELOW - 0.02}px) { html { padding-right: 0; } }\n:where(body:empty) { min-height: ${screenHeight === undefined ? '100vh' : `min(${screenHeight}px, 100vh)`}; }\n:where([${CONTAINER_ATTRIBUTE}]:empty) { min-height: ${model.emptyContainerMinHeight}px; }\n:where([${EMPTY_TEXT_ATTRIBUTE}]) { min-height: ${model.emptyTextMinHeight}px; outline: 1px dashed currentColor; outline-offset: -1px; }\n[${HIDDEN_ATTRIBUTE}] { display: none !important; }\n[${EMBED_FRAME_ATTRIBUTE}] { display: block; width: 100%; min-height: ${model.emptyContainerMinHeight}px; border: 0; pointer-events: none; }`;
 }
 
 // The selector of a node's element: its id quoted as a CSS string.
