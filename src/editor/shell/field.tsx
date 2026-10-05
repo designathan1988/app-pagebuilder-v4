@@ -747,6 +747,8 @@ function useStyleFieldValue(property: string, parts: readonly string[], part: Fi
 
 // the range a field's slider covers (the manifest's inspector-field slider)
 type SliderRange = NonNullable<Extract<DoorEntry['door'], { kind: 'inspector-field' }>['slider']>;
+// the slider each property's Style tab door declares, by property
+const INSPECTOR_SLIDERS = new Map<string, SliderRange>(manifest.doors.flatMap((d) => (d.door.kind === 'inspector-field' && d.door.property !== null && d.door.slider !== undefined && d.door.slider !== null ? [[d.door.property, d.door.slider] as const] : [])));
 
 // The slider a style field's door declares beside it (A3.30): it follows the value and writes what the pointer releases
 // on (a drag writes once, on release), through the same command the text field uses, with the unit the shown value
@@ -946,6 +948,9 @@ export function TextStyleField({
   useRevealed(property, input);
   // the slider the door declares beside the field (A3.30; FieldSlider)
   const sliderRange = entry.door.kind === 'inspector-field' ? entry.door.slider : undefined;
+  // how the value reads: by that slider's range, else by the range the Style tab's door of the property declares, so a
+  // quick panel's Opacity reads 100 % as the Style tab's does (the user's review of 2026-10-05: it read 1)
+  const readRange = sliderRange ?? INSPECTOR_SLIDERS.get(property);
   // the list of every value the field offers, opened by its own button (A3.33): all of them, whatever the field holds
   // the layer contract of the field values menu: the same owner the menu buttons stand on (doors/menu.tsx)
   const valueScope = useRef<HTMLSpanElement>(null);
@@ -1067,7 +1072,7 @@ export function TextStyleField({
   };
   const state = `${available ? '' : ' is-unavailable'}${set ? ' is-set' : ''}${refused.text !== null ? ' is-invalid' : ''}`;
   const visible = mixed ? t('inspector.mixedValue') : shown || placeholder || '';
-  const percent = sliderRange?.min === 0 && sliderRange.max === 1 && visible.trim() !== '' && Number.isFinite(Number(visible));
+  const percent = readRange?.min === 0 && readRange.max === 1 && visible.trim() !== '' && Number.isFinite(Number(visible));
   const face = percent ? { value: String(Math.round(Number(visible) * 100)), unit: '%' } : compactFieldValue(visible, sliderRange !== undefined, colour);
   const cell = (
     <span ref={valueScope} className="input-wrap" data-face="" data-origin={appearance.kind}>

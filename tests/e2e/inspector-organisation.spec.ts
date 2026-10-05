@@ -258,6 +258,8 @@ test('a breakpoint that inherits two columns shows them, and editing one writes 
   expect((await add.boundingBox())?.y).toBe(before?.y);
   await expect(header).toContainText('2 tracks');
   await expect.poll(async () => (await stylesOf(page, 'n-card-a'))['grid-template-columns']).toBe('repeat(2, minmax(0, 1fr))');
+  // each track named by its axis and its place (the user's review of 2026-10-05: three rows all read "Track")
+  await expect(layout.locator('[data-door="style.setGridTracks#inspector-grid-template-columns-track"] > .field-row__label')).toHaveText(['Track 1', 'Track 2']);
   await runDoor(page, 'view.setBreakpoint#toolbar-breakpoint-tabs-tablet');
   // the tablet inherits the desktop's two columns: they are shown, never "0 tracks"
   await expect(header).toContainText('2 tracks');

@@ -361,7 +361,10 @@ function GridTrackField({ entry, property, index, track, available }: { readonly
   const store = useStore();
   const t = useT();
   const appearance = useFieldAppearance([property]);
-  const door = useDoor(entry ?? (manifest.doors[0] as DoorEntry), {}, t('inspector.grid.track'), entry !== undefined && available);
+  // each track named by its place under its axis's header (Columns, 3 tracks): Track 1, Track 2 (the user's review of
+  // 2026-10-05: three rows all read "Track")
+  const name = t('inspector.grid.trackNumber', { n: index + 1 });
+  const door = useDoor(entry ?? (manifest.doors[0] as DoorEntry), {}, name, entry !== undefined && available);
   const input = useRef<HTMLInputElement>(null);
   const draft = useRef(false);
   useEffect(() => {
@@ -387,13 +390,13 @@ function GridTrackField({ entry, property, index, track, available }: { readonly
         keep();
       }}
     >
-      <span className="field-row__label">{t('inspector.grid.track')}</span>
+      <span className="field-row__label">{name}</span>
       <input
         ref={input}
         className="input"
         role="spinbutton"
         inputMode="numeric"
-        aria-label={`${t('inspector.grid.track')} ${String(index + 1)}`}
+        aria-label={name}
         spellCheck={false}
         disabled={!door.available}
         onInput={() => { draft.current = true; }}

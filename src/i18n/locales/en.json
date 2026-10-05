@@ -975,6 +975,7 @@
   "inspector.grid.rowSpan": "Row span",
   "inspector.grid.rowStart": "Row start",
   "inspector.grid.track": "Track",
+  "inspector.grid.trackNumber": "Track {n}",
   "inspector.grid.trackCount.one": "1 track",
   "inspector.grid.trackCount.other": "{count} tracks",
   "inspector.grid.trackCount": "{count} tracks",

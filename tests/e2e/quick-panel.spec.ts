@@ -205,3 +205,20 @@ test('deleting an element with a moved panel removes its offset from the prefere
   await expect.poll(async () => await selectionNow()).not.toEqual(ids);
   await expect.poll(stored, 'the dead offset is gone').toEqual(null);
 });
+
+// One property reads one way in both panels: the quick panel's Opacity read "1" where the Style tab's reads "100 %" (the
+// user's review of 2026-10-05, case 14). Both read the value by the range the Style tab's door declares (0 to 1).
+test('the quick panel reads opacity in percent, as the Style tab does', runs(OPEN, ROW, 'style.set#quick-panel-opacity', 'style.set#inspector-opacity'), async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openEditor(page);
+  const chooser = page.waitForEvent('filechooser');
+  await runDoor(page, OPEN);
+  await (await chooser).setFiles({ name: 'aurora.json', mimeType: 'application/json', buffer: fs.readFileSync(FIXTURE) });
+  await control(page, ROW, { args: { target: 'n-intro' } }).click();
+  await openPanel(page);
+  const quick = panel(page).locator('[data-door="style.set#quick-panel-opacity"]').first();
+  await expect(quick).toBeVisible();
+  await expect(quick).toContainText('100');
+  await expect(quick).toContainText('%');
+  await expect(quick).not.toContainText(/(^|\s)1(\s|$)/);
+});

@@ -975,6 +975,7 @@
   "inspector.grid.rowSpan": "Linhas ocupadas",
   "inspector.grid.rowStart": "Início da linha",
   "inspector.grid.track": "Trilha",
+  "inspector.grid.trackNumber": "Trilha {n}",
   "inspector.grid.trackCount.one": "1 trilha",
   "inspector.grid.trackCount.other": "{count} trilhas",
   "inspector.grid.trackCount": "{count} trilhas",
