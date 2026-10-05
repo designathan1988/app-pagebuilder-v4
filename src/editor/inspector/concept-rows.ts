@@ -51,9 +51,16 @@ const TARGET_OF_DOOR = new Map(
     return [d.ref as string, door.property ?? door.composite ?? door.recipe ?? null] as const;
   }),
 );
+// A recipe's own parameters (properties.json recipes: the declarations it takes a value for, Line clamp's
+// -webkit-line-clamp): what a row reads it by. Its fixed declarations (display, overflow) are other rows' properties
+// too, and a grid section's More text read "grid" from them (the user's review of 2026-10-05, LR2).
+const RECIPE_PARAMETERS = new Map(manifest.properties.recipes.map((recipe) => [recipe.id, recipe.declarations.filter((d) => d.value === null).map((d) => d.property)] as const));
+
 function itemProperties(item: string): readonly string[] {
   if (item.startsWith('pair:')) return (PAIR_TARGETS.get(item.slice('pair:'.length)) ?? []).flatMap((t) => editedProperties(t));
   const target = TARGET_OF_DOOR.get(item) ?? null;
+  const parameters = target === null ? undefined : RECIPE_PARAMETERS.get(target);
+  if (parameters !== undefined) return parameters;
   return [...(target === null ? [] : editedProperties(target)), ...(editedPropertiesByDoor(item) ?? [])];
 }
 

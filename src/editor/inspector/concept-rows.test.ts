@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CONCEPT_ROWS, detailsHoldMore, rowClosed, rowOfItem } from './concept-rows.ts';
+import { CONCEPT_ROWS, detailProperties, detailsHoldMore, rowClosed, rowOfItem } from './concept-rows.ts';
 import type { EditorUi } from '../state.ts';
 
 const row = (id: string) => {
@@ -10,6 +10,18 @@ const row = (id: string) => {
 const ui = (preferences: Record<string, unknown> = {}) => ({ preferences: { locale: 'en', theme: 'dark', ...preferences } }) as unknown as EditorUi;
 
 describe('concept rows (src/editor/inspector/concept-rows.ts)', () => {
+  // the user's review of 2026-10-05 (LR2): a grid section's More text read "grid" — the Line clamp recipe's every
+  // declaration was read, display among them; a recipe stands for its own parameter, the one value it takes
+  it('reads a recipe by its own parameter, never by the declarations it shares with other rows', () => {
+    const more = CONCEPT_ROWS.find((row) => row.id === 'more-text');
+    expect(more).toBeDefined();
+    const read = detailProperties(more as (typeof CONCEPT_ROWS)[number]);
+    expect(read).toContain('-webkit-line-clamp');
+    expect(read).not.toContain('display');
+    expect(read).not.toContain('overflow-x');
+    expect(detailsHoldMore(more as (typeof CONCEPT_ROWS)[number], new Set(['display', 'overflow-x', 'overflow-y']))).toBe(false);
+  });
+
   it('knows the row and the part of every item properties.json names', () => {
     expect(rowOfItem('style.set#inspector-overflow-x')).toEqual({ row: row('overflow'), part: 'details' });
     expect(rowOfItem('style.set#inspector-overflow')).toEqual({ row: row('overflow'), part: 'head' });

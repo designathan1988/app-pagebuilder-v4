@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83473
+    "lines": 83480
   },
   "features": [
     {
@@ -5712,7 +5712,7 @@
     },
     {
       "path": "src/editor/inspector/concept-rows.ts",
-      "lines": 102,
+      "lines": 109,
       "commands": [
         "inspector.toggleRow"
       ],

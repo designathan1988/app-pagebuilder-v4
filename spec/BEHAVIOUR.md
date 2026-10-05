@@ -3136,6 +3136,8 @@ The manifest draws the two Element actions items with `checked: null`: the item 
 
 
 A concept row's name stands on its disclosure's line however tall its head's control is — the alignment matrix's three lines, the Anchors' two lines of buttons (the user's review of 2026-10-05, LR2: the Anchors' name was centred under its disclosure, which stood alone above it; `tests/e2e/concept-row-heads.spec.ts`).
+
+A row reads a recipe by its own parameter (properties.json recipes: the declarations it takes a value for, Line clamp's -webkit-line-clamp), never by the declarations it shares with other rows: a grid section's More text read "grid" from Line clamp's display (the user's review of 2026-10-05, LR2; concept-rows.test.ts).
 ## inspector-property-search
 
 The Style tab's "Find a property…" field filters the tab down to the properties it names. Pager has no such filter (its
