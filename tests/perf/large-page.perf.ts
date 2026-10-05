@@ -6,6 +6,7 @@ import { control, runDoor, setSectionOpen } from '../e2e/door.ts';
 import { walk, type DocumentJson } from '../../src/core/document/model.ts';
 import { installPerformanceProbe, type ProbedWindow } from '../../tools/perf/probe.ts';
 import type { PerformanceRun } from '../../tools/perf/metrics.ts';
+import { migrateDocument } from '../../src/core/document/migrations.ts';
 
 const budget = JSON.parse(fs.readFileSync('tests/perf/budget.json', 'utf8')) as { fixture: string; nodes: number; runs: number };
 const output = path.resolve(process.env.PERF_OUTPUT ?? '.cache/logs/perf-manual');
@@ -33,7 +34,11 @@ for (let iteration = 1; iteration <= iterations; iteration += 1) {
     const fixture = JSON.parse(fs.readFileSync(budget.fixture, 'utf8')) as DocumentJson;
     const nodes = fixture.pages.flatMap(p => [...walk(p.tree)]);
     expect(nodes.length).toBe(budget.nodes);
-    await expect.poll(async () => (await read(page)).document).toEqual(fixture);
+    // the editor holds the file as the current format writes it: the study's probe is format 1, migrated on open
+    // (document format 4, 2026-10-04), so the document is compared with the file's migration, never the raw file
+    const migrated = migrateDocument(fixture);
+    if (!migrated.ok) throw new Error(`the probe does not migrate: ${migrated.reason}`);
+    await expect.poll(async () => (await read(page)).document).toEqual(migrated.document);
     await expect(page.frameLocator('.frame__page').locator('[data-node]')).toHaveCount(budget.nodes);
     // Attach parent-realm listeners after the script-disabled canvas exists.
     await page.evaluate(installPerformanceProbe);
@@ -75,7 +80,7 @@ for (let iteration = 1; iteration <= iterations; iteration += 1) {
     await phase(page, 'undo');
     await runDoor(page, 'history.undo#toolbar-top-bar');
     await runDoor(page, 'history.undo#toolbar-top-bar');
-    await expect.poll(async () => (await read(page)).document).toEqual(fixture);
+    await expect.poll(async () => (await read(page)).document).toEqual(migrated.document);
     await phase(page, null);
     await runDoor(page, 'history.redo#toolbar-top-bar');
     await runDoor(page, 'history.redo#toolbar-top-bar');
@@ -83,7 +88,7 @@ for (let iteration = 1; iteration <= iterations; iteration += 1) {
     await phase(page, 'undoKeys');
     await page.keyboard.press('Control+z');
     await page.keyboard.press('Control+z');
-    await expect.poll(async () => (await read(page)).document).toEqual(fixture);
+    await expect.poll(async () => (await read(page)).document).toEqual(migrated.document);
     await phase(page, null);
     const probe = await page.evaluate(() => (window as unknown as ProbedWindow).__builderPerformance);
     fs.writeFileSync(path.join(output, `probe-${iteration}.json`), JSON.stringify(probe, null, 2));
