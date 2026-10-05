@@ -102,7 +102,31 @@
 }
 
 .picker__header {
+  margin: 0;
   font: var(--fw-title) var(--fs-title) / var(--lh-title) var(--font-ui);
+}
+
+/* the link picker's pages and elements: a list of rows from their start, the one the link points at now marked as a
+   chosen row is (the accent's soft fill, its words in the accent) — they stood centred, none marked (LR2) */
+.picker--link > .door {
+  justify-content: flex-start;
+  width: 100%;
+  height: var(--size-row);
+  text-align: left;
+}
+
+.picker--link > .door.is-current {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: var(--weight-semibold);
+}
+
+/* a picker's head: its title, its close button at the end (the link and asset pickers, as every dialog's head) */
+.picker__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
 .picker__swatches {

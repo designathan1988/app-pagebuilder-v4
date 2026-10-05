@@ -680,7 +680,17 @@
   background: var(--color-surface-sunken);
 }
 
-.picker__thumb-name,
+/* a file's name on up to two lines, broken anywhere (a file name has no spaces), its size on one (LR2: "hero-xica…"
+   cut on one line in a tile with room under it); the whole path is the tile's name and tooltip */
+.picker__thumb-name {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .picker__thumb-size {
   overflow: hidden;
   text-overflow: ellipsis;

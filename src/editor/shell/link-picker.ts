@@ -3,14 +3,27 @@
 // link is being chosen, or null); nothing of it is document state. The view that draws it is shell/link-picker.tsx;
 // this module owns the three commands that open it, switch the kind of link and close it.
 import { message, registerHandler, type RegisteredHandler } from '../../core/commands/registry.ts';
-import type { NodeId } from '../../core/document/model.ts';
+import { locate, type DocumentJson, type NodeId } from '../../core/document/model.ts';
 import type { EditorUi } from '../state.ts';
 
+// The kind of link a stored href is (the picker's kinds): a page of the project (its file), an element of the page (a
+// fragment, kept as "#" and the element's node id), an email address, a phone number, else a web address.
+export function linkKindOf(document: DocumentJson, href: string): string {
+  if (href.startsWith('#')) return 'anchor';
+  if (href.startsWith('mailto:')) return 'email';
+  if (href.startsWith('tel:')) return 'phone';
+  if (href !== '' && document.pages.some((page) => page.file === href)) return 'page';
+  return 'url';
+}
+
+// The picker opens on the kind its link holds (the user's review of 2026-10-05, LR2: a link to a page opened on "A web
+// address"), a link with none on the web address.
 export const openLinkPicker = registerHandler<'linkPicker.open', EditorUi>('linkPicker.open', ({ state }, { target }) => {
   const node = (target as NodeId | undefined) ?? state.selection[0];
   if (node === undefined) return { kind: 'refused', message: message('status.needsSingleSelection') };
   if (state.ui.linkPicker?.node === node) return { kind: 'change' };
-  return { kind: 'change', ui: { ...state.ui, linkPicker: { node, kind: 'url' } } };
+  const href = locate(state.document, node)?.node.attributes.href;
+  return { kind: 'change', ui: { ...state.ui, linkPicker: { node, kind: linkKindOf(state.document, href === undefined ? '' : String(href)) } } };
 });
 
 export const setLinkKind = registerHandler<'linkPicker.setKind', EditorUi>('linkPicker.setKind', ({ state }, { kind }) => {

@@ -1928,6 +1928,13 @@ A focused tile inserts with Enter or Space (palette-click-insert). The href fiel
   for one page's file), the elements of the page that carry an ID as items
   (`element.setLink#link-picker-anchor-item`). Its close button, a click on the shield and Escape (its own key context
   in the keymap) leave it.
+- **It opens on the kind the link holds and says its value once** (the user's review of 2026-10-05, LR2: a link to
+  planos.html opened on "A web address", its value written as a line and again in the field, the close at its foot):
+  a page's file opens the page kind, a fragment the element kind, mailto: the email, tel: the phone, anything else (or
+  nothing) the web address; the page or element the link points at is the marked row of its list (the accent's soft
+  fill), the address in its field, and the line naming what the link points at shows only while another kind is shown
+  (or "No link yet"); the picker's title and its close button stand at its head, as every dialog's, and the asset
+  picker's too, whose file names take up to two lines (`link-picker-and-references.spec.ts`).
 - **Choosing a page or an element ends the choice** (the journey "site", 2026-10-01: after "Sobre" was chosen the
   picker stayed open, the click on the next link of the menu only closed it, and the next choice rewrote the first
   link): once an item sets the link, the picker closes; a typed address keeps it open until Enter, the close button,

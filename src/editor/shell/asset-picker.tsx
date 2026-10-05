@@ -61,7 +61,11 @@ export function AssetPicker() {
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
-        <p className="picker__label">{t('assetPicker.title')}</p>
+        {/* its title and its close button at its head, as every dialog's (LR2: the close stood at its foot) */}
+        <div className="picker__head">
+          <p className="picker__header">{t('assetPicker.title')}</p>
+          <DoorControl entry={CLOSE} />
+        </div>
         {files.length === 0 ? <p className="picker__warning" role="note">{t('assetPicker.empty')}</p> : null}
         {/* a search over the project's images by their path, the picker's own view (not a command; M4) */}
         {files.length > 1 ? <input className="search" type="search" placeholder={t('assetPicker.search')} aria-label={t('assetPicker.search')} data-local="asset-search" value={query} onChange={(event) => setQuery(event.target.value)} /> : null}
@@ -76,9 +80,6 @@ export function AssetPicker() {
                   <span className="picker__thumb-size">{sizeLabel(file)}</span>
                 </DoorControl>
               ))}
-        </div>
-        <div className="picker__actions">
-          <DoorControl entry={CLOSE} />
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ import { DoorControl } from '../doors/door.tsx';
 import { doorSlots } from '../doors/placement.ts';
 import { useEditorState, useStore } from '../store.ts';
 import { useOutsideLayer } from './outside-layer.ts';
+import { linkKindOf } from './link-picker.ts';
 import { useT } from '../text.ts';
 
 const PARTS = doorSlots('link-picker');
@@ -75,7 +76,11 @@ export function LinkPicker() {
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
-        <p className="picker__label">{t('linkPicker.title')}</p>
+        {/* its title and its close button at its head, as every dialog's (LR2: the close stood at its foot) */}
+        <div className="picker__head">
+          <p className="picker__header">{t('linkPicker.title')}</p>
+          {CLOSE === null ? null : <DoorControl entry={CLOSE} />}
+        </div>
         {/* the kinds hug their words and wrap to a second line when the picker is narrower than them all (the audit's
             U-007: stretched to equal widths they overprinted each other) */}
         <span className="segmented segmented--hug" role="group" aria-label={t('command.linkPicker.setKind')}>
@@ -83,7 +88,9 @@ export function LinkPicker() {
             <DoorControl key={entry.ref} entry={entry} current={String(entry.door.args.kind ?? '') === kind} />
           ))}
         </span>
-        <p className="picker__value" data-link-current>{shown === '' ? t('linkPicker.none') : shown}</p>
+        {/* what the link points at now, said once: the field or the marked item of its own kind says it, so the line shows
+            only while another kind is shown, or while the link holds nothing */}
+        {stored === '' ? <p className="picker__value" data-link-current>{t('linkPicker.none')}</p> : linkKindOf(document, stored) === kind ? null : <p className="picker__value" data-link-current>{shown}</p>}
         {pickKind ? null : HREF === undefined ? null : (
           <form
             className="field-row"
@@ -105,11 +112,10 @@ export function LinkPicker() {
           : null}
         {kind === 'anchor' && ANCHOR_ITEM !== null
           ? idElements(document, page).map((element) => (
-              <DoorControl key={element.id} entry={ANCHOR_ITEM} args={{ target: node.node.id, anchor: element.id }} label={`${element.name} · ${element.value}`} current={stored === element.id} />
+              <DoorControl key={element.id} entry={ANCHOR_ITEM} args={{ target: node.node.id, anchor: element.id }} label={`${element.name} · ${element.value}`} current={stored === `#${element.id}`} />
             ))
           : null}
         {kind === 'anchor' && idElements(document, page).length === 0 ? <p className="picker__warning" role="note">{t('linkPicker.noAnchors')}</p> : null}
-        <div className="picker__actions">{CLOSE === null ? null : <DoorControl entry={CLOSE} />}</div>
       </div>
     </div>
   );

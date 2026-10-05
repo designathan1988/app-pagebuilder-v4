@@ -197,3 +197,42 @@ test('a page chosen in the picker closes it, and the next link clicked gets its 
   await runDoor(page, PAGE_ITEM, { args: { page: 'index.html' } });
   await expect.poll(async () => [named(await tree(page), 'Link 3')?.attributes.href, named(await tree(page), 'Link 4')?.attributes.href]).toEqual(['page.html', 'index.html']);
 });
+
+// The picker opens on the kind the link already holds, says its value once, and closes from its head (the user's review
+// of 2026-10-05, LR2: a link to planos.html opened on "A web address", its value written twice — once as a line, once
+// in the field — and its close button at the picker's foot where every dialog has it at its head).
+test('the picker opens on the kind the link holds, says its value once, and closes from its head', runs(INSERT, TILE, SETTINGS, OPEN_PICKER, KIND('page'), KIND('anchor'), KIND('url'), ANCHOR_ITEM, PAGE_ITEM, CLOSE), async ({ page }) => {
+  await runDoor(page, TILE, { args: { entry: 'heading' } });
+  await runDoor(page, SETTINGS);
+  await typeInto(page, ID_FIELD, 'inicio');
+  await runDoor(page, TILE, { args: { entry: 'link' } });
+  await runDoor(page, SETTINGS);
+  const link = find(await tree(page), 'link');
+  const heading = find(await tree(page), 'heading');
+  if (link === null || heading === null) throw new Error('the Link and the Heading are missing');
+  const picker = page.locator('[data-region="link-picker"]');
+  const current = (ref: string, args: Readonly<Record<string, unknown>> = {}) => control(page, ref, { args }).first();
+  // a page chosen, the picker opened again: on the page kind, the page marked, the value said once
+  await runDoor(page, OPEN_PICKER, { args: { target: link.id } });
+  await runDoor(page, KIND('page'));
+  await runDoor(page, PAGE_ITEM, { args: { page: 'index.html' } });
+  await runDoor(page, OPEN_PICKER, { args: { target: link.id } });
+  await expect(current(KIND('page'))).toHaveClass(/is-current/);
+  await expect(current(PAGE_ITEM, { page: 'index.html' })).toHaveClass(/is-current/);
+  await expect(picker.locator('[data-link-current]')).toHaveCount(0);
+  // its close button at its head, above the kinds
+  const close = await current(CLOSE).boundingBox();
+  const kinds = await current(KIND('url')).boundingBox();
+  expect((close?.y ?? 0) + (close?.height ?? 0)).toBeLessThanOrEqual(kinds?.y ?? 0);
+  // another kind shown than the link holds: then the line says what it points at now
+  await runDoor(page, KIND('url'));
+  await expect(picker.locator('[data-link-current]')).toHaveText('index.html');
+  // an element of the page chosen: the anchor kind, the element marked
+  await runDoor(page, KIND('anchor'));
+  await runDoor(page, ANCHOR_ITEM, { args: { anchor: heading.id } });
+  await runDoor(page, OPEN_PICKER, { args: { target: link.id } });
+  await expect(current(KIND('anchor'))).toHaveClass(/is-current/);
+  await expect(current(ANCHOR_ITEM, { anchor: heading.id })).toHaveClass(/is-current/);
+  await runDoor(page, CLOSE);
+  await expect(picker).toHaveCount(0);
+});

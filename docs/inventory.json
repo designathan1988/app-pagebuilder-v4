@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83437
+    "lines": 83457
   },
   "features": [
     {
@@ -6107,7 +6107,7 @@
     },
     {
       "path": "src/editor/shell/asset-picker.tsx",
-      "lines": 87,
+      "lines": 88,
       "commands": [],
       "features": []
     },
@@ -6293,7 +6293,7 @@
     },
     {
       "path": "src/editor/shell/link-picker.ts",
-      "lines": 41,
+      "lines": 54,
       "commands": [
         "linkPicker.open",
         "linkPicker.setKind",
@@ -6305,7 +6305,7 @@
     },
     {
       "path": "src/editor/shell/link-picker.tsx",
-      "lines": 122,
+      "lines": 128,
       "commands": [],
       "features": []
     },
