@@ -290,6 +290,9 @@
 .row {
   --depth: 0;
   position: relative;
+  /* a row is pressed, never its text selected: a Shift+click choosing a range of rows stretched the browser's text
+     selection over the whole interface (the audit of 2026-10-05); a name is renamed in its own field */
+  user-select: none;
   display: flex;
   align-items: center;
   gap: var(--space-3);
