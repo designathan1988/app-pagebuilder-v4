@@ -217,8 +217,9 @@
 
 /* The notice an element of an instance wears in the Style tab (the user's real-use audit, item A3.12): a style write
    there reaches the component and every copy of it, said before anything is typed. */
+/* inset as the tab's controls are, apart from the sections under it (it lay from edge to edge, touching LAYOUT) */
 .inspector-notice {
-  margin: 0;
+  margin: var(--space-3) var(--space-6);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-warning);
   border-radius: var(--radius-sm);
