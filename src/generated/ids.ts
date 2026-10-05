@@ -2789,8 +2789,6 @@ export const CONSTANT_IDS = [
   "dock.minWidth",
   "panels.minStackedHeight",
   "floating.minSize",
-  "inspector.minWidth",
-  "inspector.maxWidth",
   "workbench.maxFraction",
   "workbench.collapsedHeight",
   "floating.width",

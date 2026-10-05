@@ -1242,20 +1242,6 @@
       "note": "Smallest width and height of a floating panel."
     },
     {
-      "id": "inspector.minWidth",
-      "value": 320,
-      "unit": "screen-px",
-      "source": "spec/BEHAVIOUR.md#panel-resize",
-      "note": "Smallest inspector width; the default respects it."
-    },
-    {
-      "id": "inspector.maxWidth",
-      "value": 520,
-      "unit": "screen-px",
-      "source": "spec/BEHAVIOUR.md#panel-resize",
-      "note": "Largest inspector width, or less when the room left is smaller."
-    },
-    {
       "id": "workbench.maxFraction",
       "value": 0.6,
       "unit": "fraction",
