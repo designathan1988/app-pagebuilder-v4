@@ -71,6 +71,15 @@ describe('the widths of a page merged into one tree', () => {
     expect(capturedAt({ widths, root }, 390).children[1]).toMatchObject({ children: [{ state: { scrollLeft: 240 } }] });
   });
 
+  it('gives back every width of a page with thousands of siblings, paired in order without a table of them all', () => {
+    const items = (count: number, skip: number) => Array.from({ length: count }, (_, index) => index).filter((index) => index % skip !== 0).map((index) => element('li', { id: `i${index}` }, [text(`Item ${index}`)]));
+    const wide = page(element('ul', {}, items(3000, 7)));
+    const narrow = page(element('ul', {}, items(3000, 5)));
+    const { widths, root } = mergeWidths([{ width: 1440, root: wide }, { width: 390, root: narrow }], sequentialIds('m'));
+    expect(shape(capturedAt({ widths, root }, 1440))).toEqual(shape(wide));
+    expect(shape(capturedAt({ widths, root }, 390))).toEqual(shape(narrow));
+  });
+
   it('gives back every width of random pages exactly', () => {
     const tags = ['div', 'p', 'span', 'section', 'li'];
     const tree: fc.Arbitrary<CapturedNode> = fc.letrec<{ node: CapturedNode }>((tie) => ({

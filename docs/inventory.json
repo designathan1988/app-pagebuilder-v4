@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 476,
-    "lines": 83236
+    "lines": 83256
   },
   "features": [
     {
@@ -3360,7 +3360,7 @@
     },
     {
       "path": "src/core/capture/merge.ts",
-      "lines": 179,
+      "lines": 199,
       "commands": [],
       "features": []
     },

@@ -71,6 +71,26 @@ function common(a: readonly string[], b: readonly string[], aFrom: number, aTo: 
   const rows = aTo - aFrom;
   const columns = bTo - bFrom;
   if (rows === 0 || columns === 0) return [...head, ...tail];
+  // A list of thousands of siblings at both widths would need a table of rows × columns: past a few million cells the
+  // pairs are taken in order instead, each key matched with its next occurrence (linear, never fewer than none).
+  if (rows * columns > 4_000_000) {
+    const next = new Map<string, number[]>();
+    for (let j = bTo - 1; j >= bFrom; j -= 1) {
+      const key = b[j] as string;
+      next.set(key, [...(next.get(key) ?? []), j]);
+    }
+    const greedy: [number, number][] = [];
+    let after = bFrom;
+    for (let i = aFrom; i < aTo; i += 1) {
+      const positions = next.get(a[i] as string);
+      while (positions !== undefined && positions.length > 0 && (positions.at(-1) as number) < after) positions.pop();
+      const j = positions?.pop();
+      if (j === undefined) continue;
+      greedy.push([i, j]);
+      after = j + 1;
+    }
+    return [...head, ...greedy, ...tail];
+  }
   const lengths = new Uint32Array((rows + 1) * (columns + 1));
   const at = (i: number, j: number): number => lengths[i * (columns + 1) + j] ?? 0;
   for (let i = rows - 1; i >= 0; i -= 1) {
