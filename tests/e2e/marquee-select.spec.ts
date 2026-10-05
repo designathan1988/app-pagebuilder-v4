@@ -173,8 +173,10 @@ test('with Ctrl held at the press, the band toggles what it takes in the selecti
   const title = await screen(page, await midOf(page, 'n-title'));
   await page.mouse.click(title.x, title.y);
   expect(await selection(page)).toEqual(['n-title']);
-  // over Title and Intro: Title leaves the selection, Intro joins it
-  await pressAndMove(page, { x: 20, y: 20 }, await midOf(page, 'n-intro'), 'Control');
+  // over Title and Intro: Title leaves the selection, Intro joins it. The press is in Hero's padding clear of the
+  // selected Title's chrome: its rotation handle stands 12 screen px outside its corner, which reaches page (20, 20)
+  // at the fit zoom of the 336 px inspector (DEC-66, 0.558)
+  await pressAndMove(page, { x: 8, y: 8 }, await midOf(page, 'n-intro'), 'Control');
   await release(page, 'Control');
   expect(await selection(page)).toEqual(['n-intro']);
 });

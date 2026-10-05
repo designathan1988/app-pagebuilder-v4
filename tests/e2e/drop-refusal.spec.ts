@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import { expect, test, type Page } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
-import { control, openMenu, runDoor, runs } from './door.ts';
+import { control, openMenu, runDoor, runs, openStyleControl } from './door.ts';
 
 const FIXTURE = 'manifest/features/fixtures/aurora.json';
 const OPEN = 'project.open#menu-file';
@@ -100,6 +100,8 @@ test('a Link tile carried to the middle of a Link lands beside it, in the same p
 test('at 25 % a tile carried into the 7 px gap between two buttons creates no Row and lands between them', runs(OPEN, ROW, INSERT_PANEL, TILE, PALETTE_DRAG, ZOOM_25, DISPLAY, COLUMN_GAP), async ({ page }) => {
   // the Actions (selected) a row with a 28 px gap: 7 screen px at 25 %, as the audit measured; then its two buttons
   for (const [ref, value] of [[DISPLAY, 'flex'], [COLUMN_GAP, '28px']] as const) {
+    // the column gap is drawn in the Gap row's details since DEC-64 (QA 358): opened as a person opens it
+    await openStyleControl(page, ref);
     await control(page, ref).locator('input').click();
     await page.keyboard.press('Control+A');
     await page.keyboard.type(value);

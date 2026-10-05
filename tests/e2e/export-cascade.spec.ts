@@ -46,6 +46,9 @@ test('the exported page has the canvas\'s computed styles at every breakpoint', 
   });
 
   for (const breakpoint of BREAKPOINTS) {
+    // the frame fitted first, its tabs in view: at 100 % a frame wider than the stage stands centred on it, its tabs
+    // panned out of view (with the 336 px inspector of DEC-66 the Laptop tab fell under the sidebar at 1600 px)
+    await page.keyboard.press('Shift+1');
     await runDoor(page, tab(breakpoint));
     // the canvas at 100 %: the frame is the breakpoint wide and its page lays out in whole pixels
     await page.keyboard.press('Control+0');
