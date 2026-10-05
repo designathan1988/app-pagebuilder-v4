@@ -4,6 +4,9 @@ import { expect, test } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
 import { openExplorer, runDoor, runs } from './door.ts';
 import { unzip } from '../../tools/runner/unzip.ts';
+import { markRuntime } from '../../tools/companion/capture.ts';
+import { completeOpaquePaint } from '../../tools/companion/paint.ts';
+import { serializePage } from '../../tools/companion/serialize.ts';
 
 const IMPORT = 'project.importHtml#menu-file';
 const EXPORT = 'project.export#toolbar-top-bar-export';
@@ -75,4 +78,35 @@ test('a captured min-width rule keeps its wide and narrow heights after export',
   await mixedPage.goto('https://mixed.test/page.html');
   expect(await mixedPage.locator('body').evaluate(el => getComputedStyle(el).marginLeft)).toBe('0px');
   await mixedPage.close();
+});
+
+// A video with no frame to show takes its poster's natural size (HTML Standard, the video element). Its poster is the
+// screenshot cropped to the box, whole pixels: svelte's video came back 153 px tall where the video gave 152.14, and
+// every row below it was a pixel off. The poster now keeps the video's own proportions.
+test('a captured video\'s poster keeps the video\'s proportions, so the page keeps its height', async ({ page }) => {
+  // a video of 1000 × 425, drawn 358 px wide: 152.15 px tall, no whole number (headless Chrome records no video, so the
+  // box takes the video's proportions and the element reports the video's natural size)
+  await page.setContent('<!doctype html><html><body style="margin:0"><video style="width:358px;aspect-ratio:1000/425;display:block;background:rgb(20,90,140)"></video><p>After</p></body></html>');
+  await page.locator('video').evaluate((video) => {
+    Object.defineProperty(video, 'videoWidth', { get: () => 1000 });
+    Object.defineProperty(video, 'videoHeight', { get: () => 425 });
+  });
+  const height = await page.locator('video').evaluate((video) => video.getBoundingClientRect().height);
+  expect(height).toBeCloseTo(358 * 425 / 1000, 1);
+  await markRuntime(page);
+  const read = await completeOpaquePaint(page, await page.evaluate(serializePage, 'http://video.test'), await page.screenshot({ fullPage: true }));
+  const poster = read.images.at(-1)?.src ?? '';
+  expect(poster.startsWith('data:image/png')).toBe(true);
+  const size = await page.evaluate(async (source) => {
+    const image = new Image();
+    image.src = source;
+    await image.decode();
+    return { width: image.naturalWidth, height: image.naturalHeight };
+  }, poster);
+  // exactly the video's proportions, at least as wide as drawn
+  expect(size.width * 425).toBe(size.height * 1000);
+  expect(size.width).toBeGreaterThanOrEqual(358);
+  // the poster alone gives the video its height again
+  await page.setContent(`<!doctype html><html><body style="margin:0"><video poster="${poster}" style="width:358px;display:block"></video></body></html>`);
+  await expect.poll(() => page.locator('video').evaluate((video) => video.getBoundingClientRect().height)).toBeCloseTo(height, 2);
 });
