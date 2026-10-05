@@ -7888,6 +7888,14 @@ None in Pager.
 4. **The keyframe's bar ran out of its panel** (the user's review of 2026-10-05, LR2: the track area was fixed to the ruler's width + 40 px, half the dock, and with the playhead on a keyframe "Add keyframe" ran into its border, the easing's curve lay over the delete, "Delete the keyframe" ran past the panel cut, and "Suavização do quadro-chave" took two lines over its neighbours). Required: the track area takes the panel's width beside the side (the track keeps `timeline.trackWidth`, scrolled across in a narrower panel); the bar's controls stand at their own widths and wrap to a second line rather than squeeze; the easing reads on one line, its name, its value in the code face and its curve; an empty easing shows the animation's timing, which it takes, and its curve draws that timing; the keyframe's delete is a small trash button, as an animation's is (`tests/e2e/timeline-bar-fits.spec.ts`).
 5. **The ruler said no time** (the user's review of 2026-10-05, LR2: ten empty cells; the canonical .tl-ruler and .tl-time). Required: with an animation shown, the ruler names its quarters in seconds ("0 s 0.3 s 0.6 s 0.9 s 1.2 s" for 1.2 s, the last ending at the ruler's end), a line at each quarter and none through a label, and the transport bar says the playhead's time over the animation's length ("0.00 s / 1.20 s", the time in the code face's strong weight, the length subtle); with none shown, neither (`tests/e2e/timeline-ruler.spec.ts`).
 
+
+### Our rule: the keyframe is edited only where it is in sight (the audit of 2026-10-05)
+
+The inspector and the quick panel read and write the keyframe under the playhead only while the Timeline shows (its
+dock tab open): with the panel closed, a button whose animation's first keyframe holds opacity 0 read "Opacity 0 %"
+at rest, and a value typed went into the animation instead of the element. Closed, the fields are the element's
+(`tests/e2e/keyframe-only-with-timeline.spec.ts`).
+
 ## timeline-preview
 
 How Pager behaves, observed by running it from `.cache/pager-run` (Chrome, window 1600×900) and read from its source. Source references are `path:line` inside Pager.

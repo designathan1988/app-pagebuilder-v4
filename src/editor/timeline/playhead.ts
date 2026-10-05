@@ -16,6 +16,11 @@ import { animationsOf, durationMs } from '../../core/animation/animation.ts';
 import { manifest, numberConstant, pairConstant, type DoorEntry } from '../../manifest/runtime.ts';
 import type { StoreState } from '../../core/store/store.ts';
 import type { EditorUi } from '../state.ts';
+import { isPanelOpen } from '../workspace/panels.ts';
+import type { Panel } from '../workspace/panel-catalogue.ts';
+
+// the dock panel the Timeline is
+const TIMELINE_PANEL: Panel = 'timeline';
 
 export interface TimelineState {
   // the animation the panel shows, by name; absent while it is the selected element's first
@@ -63,7 +68,11 @@ export function playheadPercent(state: StoreState<EditorUi>): number {
 
 // The keyframe the playhead sits on: the shown animation's keyframe whose offset is the playhead's whole percent; null
 // while it sits between two keyframes (then the inspector edits the element's styles, as usual).
+// Only while the Timeline shows, where the playhead and its keyframe are in sight: with the panel closed, a selected
+// element with an animation whose first keyframe sits at 0 s read that keyframe in every field — a button read
+// Opacity 0 % — and a value typed went into the animation (the audit of 2026-10-05).
 export function keyframeAtPlayhead(state: StoreState<EditorUi>): (Shown & { readonly keyframe: Keyframe }) | null {
+  if (!isPanelOpen(state.ui, TIMELINE_PANEL)) return null;
   const shown = shownAnimation(state);
   if (shown === null) return null;
   const percent = Math.round(playheadPercent(state));
