@@ -85,14 +85,14 @@
                   "region": "canvas-toolbar",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 1112,
+                  "value": 1064,
                   "reference": null
                 },
                 {
                   "region": "canvas-frame",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 1076,
+                  "value": 1028,
                   "reference": null
                 }
               ],
@@ -170,7 +170,7 @@
                   "region": "canvas-toolbar",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 888,
+                  "value": 840,
                   "reference": null
                 },
                 {
@@ -324,7 +324,7 @@
                   "region": "canvas-toolbar",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 888,
+                  "value": 840,
                   "reference": null
                 },
                 {
@@ -569,7 +569,7 @@
                   "region": "canvas-toolbar",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 1112,
+                  "value": 1064,
                   "reference": null
                 }
               ],
@@ -996,14 +996,14 @@
                   "region": "canvas-toolbar",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 1112,
+                  "value": 1064,
                   "reference": null
                 },
                 {
                   "region": "canvas-frame",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 1076,
+                  "value": 1028,
                   "reference": null
                 }
               ],
@@ -9606,7 +9606,7 @@
                 {
                   "key": "status.zoom.fitted",
                   "params": {
-                    "zoom": 59
+                    "zoom": 56
                   }
                 }
               ]
@@ -9617,7 +9617,7 @@
                   "region": "canvas-frame",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 852,
+                  "value": 804,
                   "reference": null
                 }
               ],
@@ -11564,7 +11564,7 @@
                   "region": "canvas-toolbar",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 888,
+                  "value": 840,
                   "reference": null
                 }
               ],
@@ -11697,7 +11697,7 @@
                   "region": "dock-strip",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 888,
+                  "value": 840,
                   "reference": null
                 }
               ],

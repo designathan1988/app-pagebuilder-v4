@@ -710,7 +710,7 @@
                 {
                   "key": "status.zoom.fitted",
                   "params": {
-                    "zoom": 59
+                    "zoom": 56
                   }
                 }
               ]
@@ -981,7 +981,7 @@
                 {
                   "key": "status.zoom.fitted",
                   "params": {
-                    "zoom": 59
+                    "zoom": 56
                   }
                 }
               ]
@@ -992,7 +992,7 @@
                   "region": "canvas-frame",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 852,
+                  "value": 804,
                   "reference": null
                 }
               ],
@@ -1650,7 +1650,7 @@
                   "region": "canvas-frame",
                   "measure": "x",
                   "relation": "equals",
-                  "value": -2362,
+                  "value": -2386,
                   "reference": null
                 }
               ],
@@ -1714,7 +1714,7 @@
                   "region": "canvas-frame",
                   "measure": "x",
                   "relation": "equals",
-                  "value": -2062,
+                  "value": -2086,
                   "reference": null
                 }
               ],
@@ -1778,7 +1778,7 @@
                   "region": "canvas-frame",
                   "measure": "x",
                   "relation": "equals",
-                  "value": -2262,
+                  "value": -2286,
                   "reference": null
                 }
               ],
@@ -2912,14 +2912,14 @@
                   "region": "canvas-outlines",
                   "measure": "width",
                   "relation": "greater-than",
-                  "value": 847,
+                  "value": 799,
                   "reference": null
                 },
                 {
                   "region": "canvas-outlines",
                   "measure": "width",
                   "relation": "less-than",
-                  "value": 857,
+                  "value": 809,
                   "reference": null
                 }
               ],
@@ -3059,14 +3059,14 @@
                   "region": "canvas-outlines",
                   "measure": "width",
                   "relation": "greater-than",
-                  "value": 847,
+                  "value": 799,
                   "reference": null
                 },
                 {
                   "region": "canvas-outlines",
                   "measure": "width",
                   "relation": "less-than",
-                  "value": 857,
+                  "value": 809,
                   "reference": null
                 }
               ],
@@ -3161,14 +3161,14 @@
                   "region": "grid-columns",
                   "measure": "width",
                   "relation": "greater-than",
-                  "value": 49,
+                  "value": 46,
                   "reference": null
                 },
                 {
                   "region": "grid-columns",
                   "measure": "width",
                   "relation": "less-than",
-                  "value": 51,
+                  "value": 48,
                   "reference": null
                 }
               ],
@@ -3300,14 +3300,14 @@
                   "region": "grid-rows",
                   "measure": "height",
                   "relation": "greater-than",
-                  "value": 46,
+                  "value": 44,
                   "reference": null
                 },
                 {
                   "region": "grid-rows",
                   "measure": "height",
                   "relation": "less-than",
-                  "value": 48,
+                  "value": 46,
                   "reference": null
                 }
               ],
@@ -3379,14 +3379,14 @@
                   "region": "grid-dots",
                   "measure": "width",
                   "relation": "greater-than",
-                  "value": 847,
+                  "value": 799,
                   "reference": null
                 },
                 {
                   "region": "grid-dots",
                   "measure": "width",
                   "relation": "less-than",
-                  "value": 857,
+                  "value": 809,
                   "reference": null
                 }
               ],
@@ -3469,14 +3469,14 @@
                   "region": "grid-columns",
                   "measure": "width",
                   "relation": "greater-than",
-                  "value": 49,
+                  "value": 46,
                   "reference": null
                 },
                 {
                   "region": "grid-columns",
                   "measure": "width",
                   "relation": "less-than",
-                  "value": 51,
+                  "value": 48,
                   "reference": null
                 }
               ],
@@ -3559,14 +3559,14 @@
                   "region": "grid-rows",
                   "measure": "height",
                   "relation": "greater-than",
-                  "value": 46,
+                  "value": 44,
                   "reference": null
                 },
                 {
                   "region": "grid-rows",
                   "measure": "height",
                   "relation": "less-than",
-                  "value": 48,
+                  "value": 46,
                   "reference": null
                 }
               ],
@@ -3649,14 +3649,14 @@
                   "region": "grid-dots",
                   "measure": "width",
                   "relation": "greater-than",
-                  "value": 847,
+                  "value": 799,
                   "reference": null
                 },
                 {
                   "region": "grid-dots",
                   "measure": "width",
                   "relation": "less-than",
-                  "value": 857,
+                  "value": 809,
                   "reference": null
                 }
               ],
