@@ -134,3 +134,44 @@ test('a painted frame shows its width\'s picture once the width script has run',
     expect(srcdoc, `${width}px`).toContain(encodeURIComponent(colour));
   }
 });
+
+// The width script gave an element a width's attributes by removing every one and setting them again. Setting a frame's
+// srcdoc loads it again and setting a canvas's width clears it, even to the same value (HTML Standard, the iframe and
+// canvas elements): vue's banner frame loaded again at every width, and the corpus's next navigation broke on it.
+test('a width change loads a frame again only when its picture changes, and keeps a canvas\'s picture', async ({ page }) => {
+  const HTML = 'http://www.w3.org/1999/xhtml';
+  await page.setContent('<canvas width="40" height="20"></canvas>');
+  const red = await page.evaluate(() => {
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    context.fillStyle = 'rgb(200, 0, 0)';
+    context.fillRect(0, 0, 40, 20);
+    return canvas.toDataURL('image/png');
+  });
+  const attribute = (name: string, value: string) => ({ name, namespace: null, value });
+  const page2 = (height: number) => ({ kind: 'element' as const, id: 'r', namespace: HTML, tag: 'html', attributes: [], children: [
+    { kind: 'element' as const, id: 'h', namespace: HTML, tag: 'head', attributes: [], children: [] },
+    { kind: 'element' as const, id: 'b', namespace: HTML, tag: 'body', attributes: [attribute('style', 'margin:0')], children: [
+      { kind: 'element' as const, id: 'f', namespace: HTML, tag: 'iframe', attributes: [attribute('data-capture-paint', red), attribute('style', `display:block;width:300px;height:${height}px;border:0`)], children: [] },
+      { kind: 'text' as const, id: 't', value: `Banner ${height}` },
+      { kind: 'element' as const, id: 'c', namespace: HTML, tag: 'canvas', attributes: [attribute('width', '40'), attribute('height', '20'), attribute('data-capture-paint', red), attribute('style', `display:block;margin-top:${height}px`)], children: [] },
+    ] },
+  ] });
+  const capture = mergeWidths([{ width: 1440, root: page2(60) }, { width: 1180, root: page2(80) }], sequentialIds('p'));
+  await page.setViewportSize({ width: 1440, height: 400 });
+  await page.route('http://paint.test/', (route) => route.fulfill({ contentType: 'text/html', body: capturedExportHtml(capture) }));
+  await page.goto('http://paint.test/');
+  const pixel = () => page.locator('canvas').evaluate((canvas) => [...((canvas as HTMLCanvasElement).getContext('2d') as CanvasRenderingContext2D).getImageData(20, 10, 1, 1).data].join(','));
+  await expect.poll(pixel).toBe('200,0,0,255');
+  // the frame's own load events (a sandboxed srcdoc load is not reported as a navigation of the page)
+  await page.locator('iframe').evaluate((frame) => {
+    (window as unknown as { loads: number }).loads = 0;
+    frame.addEventListener('load', () => { (window as unknown as { loads: number }).loads += 1; });
+  });
+  await page.setViewportSize({ width: 1180, height: 400 });
+  await expect(page.locator('iframe')).toHaveCSS('height', '80px');
+  await expect(page.locator('body')).toContainText('Banner 80');
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => (window as unknown as { loads: number }).loads)).toBe(0);
+  expect(await pixel()).toBe('200,0,0,255');
+});

@@ -141,6 +141,25 @@ describe('the exported file of a captured page', () => {
       .replace('{"tag":"meta","attributes":[["charset","utf-8"]],"children":[]},', '');
     expect(parsed).toBe(JSON.stringify(shape(exportedCapturedRoot(capturedAt(capture, 1440), HEAD))));
   });
+
+  // vuejs.org's banner, a frame of another site, is kept as its same-moment picture: written as the frame's own
+  // document, it shows without any script, and a width whose picture is the same leaves the frame's attribute unchanged
+  it('writes a painted frame\'s picture as its sandboxed document, seen without scripts', () => {
+    const picture = 'img/banner "1".png';
+    const wide = pageOf(element('iframe', { 'data-capture-paint': picture, style: 'height: 72px' }));
+    const narrow = pageOf(element('iframe', { 'data-capture-paint': picture, style: 'height: 96px' }));
+    const capture = mergeWidths([{ width: 1440, root: wide }, { width: 390, root: narrow }], sequentialIds('f'));
+    const html = capturedExportHtml(capture, HEAD);
+    const frame = parse(html.replace(/<script>[\s\S]*?<\/script>/g, '')).childNodes.flatMap(function all(node: Parsed): Parsed[] {
+      return [node, ...('childNodes' in node ? node.childNodes.flatMap(all) : [])];
+    }).find((node) => node.nodeName === 'iframe') as DefaultTreeAdapterMap['element'];
+    const attribute = (name: string) => frame.attrs.find((one) => one.name === name)?.value;
+    expect(attribute('sandbox')).toBe('');
+    const inner = parse(attribute('srcdoc') ?? '');
+    expect(JSON.stringify(parsedShape(inner.childNodes.find((one) => one.nodeName === 'html') as Parsed))).toContain('["src","img/banner \\"1\\".png"]');
+    // no script paints the frame
+    expect(html).not.toContain('iframe[data-capture-paint]');
+  });
 });
 
 describe('what the HTML parser rebuilds from a written page (HTML Standard, tree construction)', () => {

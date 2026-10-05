@@ -152,6 +152,18 @@ function stateAttributes(node: CapturedElement): readonly CapturedAttribute[] {
   return node.attributes;
 }
 
+// The attributes an element is written with: its state's, and a painted frame's picture as the frame's own sandboxed
+// document (srcdoc), which shows without any script; its base URL is the page's (HTML Standard, document base URL of
+// an about:srcdoc document), so the picture's relative path resolves as the page's own images do.
+function writtenAttributes(node: CapturedElement): readonly CapturedAttribute[] {
+  const attributes = stateAttributes(node);
+  const paint = node.tag === 'iframe' && node.namespace === HTML ? node.attributes.find((one) => one.name === 'data-capture-paint')?.value : undefined;
+  if (paint === undefined || paint === '') return attributes;
+  const document = '<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%}img{display:block;width:100%;height:100%;object-fit:fill}</style></head>'
+    + `<body><img src="${escapeAttribute(paint)}" alt=""></body></html>`;
+  return [...attributes.filter((one) => one.name !== 'sandbox' && one.name !== 'srcdoc'), { name: 'sandbox', namespace: null, value: '' }, { name: 'srcdoc', namespace: null, value: document }];
+}
+
 export interface WriteOptions {
   // the elements written with their id (data-capture-node), which the width script finds them by
   readonly marked?: ReadonlySet<string>;
@@ -171,7 +183,7 @@ export function capturedHtml(root: CapturedElement, options: WriteOptions = {}):
     if (unsafeCapturedElement(node.tag, node.attributes)) return '';
     if (parent !== null && isElement(parent, 'head') && !HEAD_CONTENT.has(node.tag)) return '';
     const marked = options.marked?.has(node.id) === true ? ` data-capture-node="${escapeAttribute(node.id)}"` : '';
-    const attributes = stateAttributes(node).map((one) => ` ${one.name}="${escapeAttribute(one.value)}"`).join('');
+    const attributes = writtenAttributes(node).map((one) => ` ${one.name}="${escapeAttribute(one.value)}"`).join('');
     const open = `<${node.tag}${attributes}${marked}>`;
     if (node.namespace === HTML && VOID.has(node.tag)) return open;
     const shadow = node.shadow === undefined || node.shadow.mode !== 'open' ? '' : `<template shadowrootmode="open">${node.shadow.children.map((child) => write(child, null)).join('')}</template>`;
@@ -246,7 +258,7 @@ function widthData(root: CapturedElement, widths: readonly number[], rebuilt: Re
     projected.set(width, byId);
   }
   const childList = (node: CapturedElement): Child[] => node.children.map((child) => (child.kind === 'element' ? child.id : [child.kind === 'text' ? 't' : 'c', child.value] as const));
-  const attributeList = (node: CapturedElement) => stateAttributes(node).map((one) => [one.name, one.namespace, one.value] as const);
+  const attributeList = (node: CapturedElement) => writtenAttributes(node).map((one) => [one.name, one.namespace, one.value] as const);
   const all = new Set<string>();
   for (const byId of projected.values()) for (const id of byId.keys()) all.add(id);
   for (const id of all) {
@@ -281,20 +293,28 @@ function widthData(root: CapturedElement, widths: readonly number[], rebuilt: Re
 // The Builder-owned script of an exported captured page (its data first). At load and on resize it takes the observed
 // width nearest the window and gives every changing element that width's attributes and children (finding elements by
 // their mark, making the ones the static page lacks) and scroll offsets.
+// It changes only what differs, as a renderer patches a node (Vue's patchProps sets a prop only when next !== prev):
+// setting a frame's srcdoc loads it again and setting a canvas's width clears it, even to the value it has (HTML
+// Standard, the iframe and canvas elements), and moving a frame in the tree loads it again. vue's banner frame loaded
+// twice at every width, and the corpus's next navigation broke on it.
 function widthScript(widths: readonly number[], changing: Record<string, Changing>, made: Record<string, Made>): string {
   const data = JSON.stringify({ w: widths, g: changing, m: made }).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('&', '\\u0026');
   return `<script>(function(){var d=${data},cur=null,cache=null;`
     + 'function near(){var x=window.innerWidth,b=d.w[0];for(var i=0;i<d.w.length;i++){var v=d.w[i];if(Math.abs(v-x)<Math.abs(b-x))b=v}return String(b)}'
     + 'function el(id){if(cache===null){cache={};var all=document.querySelectorAll("[data-capture-node]");for(var i=0;i<all.length;i++)cache[all[i].getAttribute("data-capture-node")]=all[i]}return cache[id]||null}'
-    + 'function attrs(e,list,id){for(var i=e.attributes.length-1;i>=0;i--){var n=e.attributes[i];if(n.name!=="data-capture-node")e.removeAttributeNode(n)}'
-    + 'for(var j=0;j<list.length;j++){var a=list[j];if(a[1])e.setAttributeNS(a[1],a[0],a[2]);else e.setAttribute(a[0],a[2])}e.setAttribute("data-capture-node",id)}'
-    + 'function kids(e,list,w){var out=[];for(var i=0;i<list.length;i++){var k=list[i];if(typeof k==="string"){var c=el(k)||make(k,w);if(c)out.push(c)}'
-    + 'else out.push(k[0]==="t"?document.createTextNode(k[1]):document.createComment(k[1]))}e.replaceChildren.apply(e,out)}'
+    + 'function attrs(e,list,id){var want=Object.create(null);want["data-capture-node"]=true;for(var j=0;j<list.length;j++)want[list[j][0]]=true;'
+    + 'for(var i=e.attributes.length-1;i>=0;i--){var n=e.attributes[i];if(!want[n.name])e.removeAttributeNode(n)}'
+    + 'for(var k=0;k<list.length;k++){var a=list[k];if(e.getAttribute(a[0])===a[2])continue;if(a[1])e.setAttributeNS(a[1],a[0],a[2]);else e.setAttribute(a[0],a[2])}'
+    + 'if(e.getAttribute("data-capture-node")!==id)e.setAttribute("data-capture-node",id)}'
+    // a text or comment already at its place is kept; a child already at its place is not moved
+    + 'function kids(e,list,w){var out=[],old=e.childNodes;for(var i=0;i<list.length;i++){var k=list[i];if(typeof k==="string"){var c=el(k)||make(k,w);if(c)out.push(c);continue}'
+    + 'var o=old[out.length],type=k[0]==="t"?3:8;out.push(o&&o.nodeType===type&&o.data===k[1]?o:type===3?document.createTextNode(k[1]):document.createComment(k[1]))}'
+    + 'for(var p=0;p<out.length;p++){var here=e.childNodes[p];if(here!==out[p])e.insertBefore(out[p],here||null)}while(e.childNodes.length>out.length)e.removeChild(e.lastChild)}'
     + 'function make(id,w){var m=d.m[id];if(!m||!m.a[w])return null;var e=m.n==="http://www.w3.org/1999/xhtml"?document.createElement(m.t):document.createElementNS(m.n,m.t);'
     + 'el(id);cache[id]=e;attrs(e,m.a[w],id);kids(e,m.c[w],w);return e}'
     + 'function apply(){var w=near();if(w===cur)return;cur=w;for(var id in d.g){var g=d.g[id],e=el(id);if(!e||!g.a[w])continue;attrs(e,g.a[w],id);kids(e,g.c[w],w)}'
     + 'for(var id2 in d.g){var s=d.g[id2].s&&d.g[id2].s[w],e2=el(id2);if(s&&e2){e2.scrollLeft=s[0];e2.scrollTop=s[1]}}'
-    // a width's attributes replace what the paint script gave a canvas or a frame: it paints them again
+    // a canvas whose size or picture the width changed is drawn again
     + 'if(window.__builderCapturePaint)window.__builderCapturePaint()}'
     + 'if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",apply);else apply();window.addEventListener("resize",apply)})()</script>';
 }
@@ -338,12 +358,13 @@ export function capturedExportHtml(capture: CapturedPage, head?: CapturedHead): 
       html = html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${links}</body>`);
     }
   }
-  const hasPaint = (node: CapturedNode): boolean => node.kind === 'element' &&
-    (node.attributes.some((one) => one.name === 'data-capture-paint') || node.children.some(hasPaint));
-  if (hasPaint(root)) {
-    // run at once, and again by the width script after it gives a width's attributes (vue's banner frame was blank at
-    // 1180 px: its 1180 px attributes had replaced the frame's painted document)
-    const paint = `<script>(window.__builderCapturePaint=function(){for(const canvas of document.querySelectorAll('canvas[data-capture-paint]')){const image=new Image();image.onload=function(){const context=canvas.getContext('2d');if(context)context.drawImage(image,0,0,canvas.width,canvas.height)};image.src=canvas.getAttribute('data-capture-paint')}for(const frame of document.querySelectorAll('iframe[data-capture-paint]')){const src=frame.getAttribute('data-capture-paint');if(!src)continue;const safe=src.replaceAll('&','&amp;').replaceAll('"','&quot;');frame.setAttribute('sandbox','');frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%}img{display:block;width:100%;height:100%;object-fit:fill}</style></head><body><img src="'+safe+'"></body></html>'}})()</script>`;
+  // a painted canvas (its picture is the canvas's drawing, which no markup holds): drawn at once, and again by the
+  // width script once a width has changed it; cleared first, as a picture drawn twice over itself darkens the
+  // translucent
+  const paints = (node: CapturedNode): boolean => node.kind === 'element' && ((node.tag === 'canvas' &&
+    [node.attributes, ...Object.values(node.at ?? {}).map((one) => one.attributes ?? [])].some((list) => list.some((one) => one.name === 'data-capture-paint'))) || node.children.some(paints));
+  if (paints(root)) {
+    const paint = `<script>(window.__builderCapturePaint=function(){for(const canvas of document.querySelectorAll('canvas[data-capture-paint]')){const image=new Image(),src=canvas.getAttribute('data-capture-paint');image.onload=function(){if(canvas.getAttribute('data-capture-paint')!==src)return;const context=canvas.getContext('2d');if(!context)return;context.clearRect(0,0,canvas.width,canvas.height);context.drawImage(image,0,0,canvas.width,canvas.height)};image.src=src}})()</script>`;
     html = html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${paint}</body>`);
   }
   return html;
