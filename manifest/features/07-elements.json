@@ -1036,6 +1036,17 @@
               "hold": false,
               "type": null
             },
+          {
+            "door": "element.insert#elements-tile",
+            "args": {
+              "entry": "container"
+            },
+            "target": null,
+            "drop": null,
+            "action": false,
+            "hold": false,
+            "type": null
+          },
             {
               "door": "element.insert#elements-tile",
               "args": {
@@ -1073,16 +1084,27 @@
                       }
                     },
                     "text": null,
-                    "children": []
+                    "children": [
+                      {
+                        "type": "div",
+                        "name": "Container",
+                        "tag": "div",
+                        "attributes": {},
+                        "classes": [],
+                        "styles": {},
+                        "text": null,
+                        "children": []
+                      }
+                    ]
                   }
                 ]
               }
             ],
             "selection": [
-              "/Page/Link Block"
+              "/Page/Link Block/Container"
             ],
             "history": {
-              "undoSteps": 1,
+              "undoSteps": 2,
               "undoRestores": true,
               "redoRestores": true
             },

@@ -123,6 +123,11 @@ createNaturalChildCommand.labelParams = (state, rules) => {
   return { tag: tag === '' ? '' : `<${tag}>` };
 };
 
+// Whether a new element is of a selected element's own kind, so it goes beside it rather than inside: the same type,
+// other than a plain container (a container clicked in a container is a nested one, the layouts' way)
+const PLAIN_CONTAINER = 'div';
+const sameKind = (selected: DocNode, incoming: DocNode): boolean => selected.type === incoming.type && incoming.type !== PLAIN_CONTAINER;
+
 // Where the new element goes: the parent and the index among its children; null when the parent given is no node.
 // With nothing selected the element goes at the end of the root of the page the editor shows (openedPage, its one
 // owner), never of the project's first page: an insert with another page open lands on that page. A page block coming
@@ -151,6 +156,13 @@ export function placement(
     while (at !== null && !isBlock(at.node)) at = at.parent === null ? null : locate(document, at.parent.id);
     const up = at?.parent ? locate(document, at.parent.id) : null;
     if (at && up) return { parent: up, index: at.index + 1 };
+  }
+  // an element of the selected one's own kind, other than a plain container, lands right after it, as its sibling: a
+  // card clicked while a card is selected is the next card, never one inside it (the audit of 2026-10-05: Card clicked
+  // three times nested each card in the one before)
+  if (primary?.parent && incoming !== undefined && sameKind(primary.node, incoming)) {
+    const up = locate(document, primary.parent.id);
+    if (up) return { parent: up, index: primary.index + 1 };
   }
   if (primary && rules.elements.get(primary.node.type)?.content === 'children') return { parent: primary, index: primary.node.children.length };
   if (primary?.parent) {
@@ -214,8 +226,10 @@ export const insertCommand = registerHandler('element.insert', ({ state, ids, ru
   const refused = placementRefusal(state.document, rules, receiver.id, [node]);
   if (refused !== null) return { kind: 'refused', message: refused };
   const placed = withSiblingClasses(node, receiver.children);
-  // placed at a grid's end with no place asked for: it takes the grid's first empty cell (emptyCell)
-  const cell = index === undefined && at.index === receiver.children.length ? emptyCell(receiver, rules) : -1;
+  // placed at a grid's end, or beside an element of its kind in a grid, with no place asked for: it takes the grid's
+  // first empty cell (emptyCell)
+  const beside = parent === undefined && state.selection[0] !== undefined && locate(state.document, state.selection[0])?.parent?.id === receiver.id && sameKind(locate(state.document, state.selection[0])?.node ?? node, node);
+  const cell = index === undefined && (at.index === receiver.children.length || beside) ? emptyCell(receiver, rules) : -1;
   if (cell >= 0) {
     const path = [...at.parent.path, 'children', cell];
     // the cell leaves: what pointed at it lets go in the same change (the audit's RF2), as a delete releases it

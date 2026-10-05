@@ -135,7 +135,9 @@ describe('element.insert into a Link Block (spec elements-structure, Problems in
   const refused = { kind: 'refused', message: { key: 'status.refused.interactiveInside', params: { parent: 'Card' } } };
 
   it('refuses a Link Block into a Link Block, and into an element inside one, naming the Link Block', () => {
-    expect(insert(['Card'], { entry: 'link-block' })).toEqual(refused);
+    // into the Link Block itself, asked by its place: a Link Block clicked while one is selected now goes beside it
+    // (its own kind, the audit of 2026-10-05), tested below
+    expect(insert([], { entry: 'link-block', parent: 'Card', index: 0 })).toEqual(refused);
     expect(insert(['Inside'], { entry: 'link-block' })).toEqual(refused);
     expect(insert([], { entry: 'link-block', parent: 'Inside', index: 0 })).toEqual(refused);
   });
@@ -144,5 +146,11 @@ describe('element.insert into a Link Block (spec elements-structure, Problems in
     expect(insert(['Card'], { entry: 'container' }).kind).toBe('change');
     expect(insert(['Inside'], { entry: 'paragraph' }).kind).toBe('change');
     expect(insert(['Band'], { entry: 'link-block' }).kind).toBe('change');
+  });
+
+  it('puts a Link Block clicked while a Link Block is selected beside it, never inside', () => {
+    const placed = insert(['Card'], { entry: 'link-block' });
+    expect(placed.kind).toBe('change');
+    expect(placed.kind === 'change' ? placed.message?.params?.parent : null).not.toBe('Card');
   });
 });

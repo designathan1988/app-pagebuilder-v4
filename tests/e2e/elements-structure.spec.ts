@@ -170,21 +170,20 @@ test('each Structure tile inserts its element, drawn as its tag and kept visible
   expect((await drawn(page, link?.id ?? '')).href).toBeNull();
 });
 
-test('Enter and Space on the Link Block tile are refused inside a Link Block and inside an element inside one, naming the Link Block', runs(INSERT_PANEL, TILE, ENTER, SPACE), async ({ page }) => {
-  // a Link Block, selected: the tile's keys would put a Link Block into it
+test('Enter and Space on the Link Block tile put one beside a selected Link Block, and are refused inside an element inside one, naming the Link Block', runs(INSERT_PANEL, TILE, ENTER, SPACE), async ({ page }) => {
+  // a Link Block, selected: the tile's Enter puts the new one beside it, its own kind (the audit of 2026-10-05: a card
+  // clicked on a card nested in it), never into it; undone, the first is selected again
   await runDoor(page, TILE, { args: { entry: 'link-block' } });
   const outer = await named(page, 'Link Block');
   expect((await port(page)).selection).toEqual([outer.id]);
   const before = await port(page);
   await tabToTile(page, 'link-block');
   await page.keyboard.press('Enter');
-  await expect(status(page)).toHaveText(REFUSED_IN_LINK_BLOCK);
-  expect((await port(page)).document).toEqual(before.document);
-  await page.keyboard.press('Space');
-  await expect(status(page)).toHaveText(REFUSED_IN_LINK_BLOCK);
-  const refused = await port(page);
-  expect(refused.document).toEqual(before.document);
-  expect(refused.undoSteps).toBe(1);
+  await expect.poll(async () => (await named(page, 'Link Block')).children.length).toBe(0);
+  await expect(status(page)).not.toHaveText(REFUSED_IN_LINK_BLOCK);
+  await page.keyboard.press('Control+z');
+  await expect.poll(async () => (await port(page)).document).toEqual(before.document);
+  await control(page, 'selection.select#layers-row', { args: { target: outer.id } }).click();
 
   // a Container is not interactive: Enter on its tile puts it into the Link Block, and selects it
   await tabToTile(page, 'container');

@@ -4688,6 +4688,14 @@ Tab to the Elements panel, arrow keys between tiles (Home/End jump; `palette/ind
 
 How Pager behaves, observed by running it from `.cache/pager-run` (Chrome, window 1600×900, zoom 100 %) and read from its source. Source references are `path:line` inside Pager. Test document: a Section holding a Heading and a Paragraph.
 
+
+- **A tile of the selected element's own kind goes beside it** (the audit of 2026-10-05: Grid, then Card clicked three
+  times, nested each card in the one before, and the form after them in the last): a new element of the selected one's
+  type, other than a plain container (a container clicked in a container is a nested one, the layouts' way), lands
+  right after it in its parent, and in a grid with an empty cell it takes the first empty cell. A Link Block clicked
+  while a Link Block is selected so goes beside it; into one, or into an element inside one, it is still refused
+  (spec elements-structure, Problems 5) (`tests/e2e/insert-same-kind.spec.ts`).
+
 ### Trigger
 
 - Primary-button press on a palette tile (`.pi[data-new]`) arms a **creation** drag carrying the element type and its label; the pointer is captured by the canvas stage (`src/app/boot.js:459-461`).
