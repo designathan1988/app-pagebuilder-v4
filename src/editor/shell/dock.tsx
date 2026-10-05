@@ -104,7 +104,9 @@ function Checks() {
           {byNode(issues).map((held) => (
             <li key={held[0]?.node}>
               <DoorControl entry={ISSUE} args={{ target: held[0]?.node }} className="dock-checks__row">
-                <Icon name={PANELS.checks.icon} size="sm" />
+                {/* a problem's mark: the warning triangle, as the status bar's incidents wear it; the tab's check mark reads
+                    "passed" (the user's review of 2026-10-05, LR2) */}
+                <Icon name="triangle-alert" size="sm" />
                 <span className="dock-checks__issues">
                   {held.map((issue) => (
                     <span key={issue.rule} className="dock-checks__issue">

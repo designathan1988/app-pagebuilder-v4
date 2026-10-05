@@ -45,6 +45,31 @@ test('the panel lists every issue with its category and fix, and a row selects i
   await expect(page.locator('[data-door="selection.select#layers-row"]').first()).toBeVisible();
 });
 
+// A problem is marked as one: a check mark reads "passed" (VS Code's codicons: check and pass for success, warning for
+// a warning), so each row wears the warning triangle in the warning colour (the user's review of 2026-10-05, LR2: every
+// problem started with the Checks tab's own check mark).
+test('each problem is marked with the warning triangle, never the check mark', async ({ page }) => {
+  await open(page);
+  await runDoor(page, INSERT_PANEL, {});
+  await runDoor(page, TILE, { args: { entry: 'image' } });
+  await runDoor(page, CHECKS, {});
+  const marks = page.locator('.dock-checks__row > svg use');
+  await expect(marks.first()).toBeVisible();
+  const names = await marks.evaluateAll((all) => all.map((one) => one.getAttribute('href')));
+  expect(names.length).toBeGreaterThan(0);
+  expect(new Set(names)).toEqual(new Set(['#triangle-alert']));
+  const colours = await page.locator('.dock-checks__row > svg').evaluateAll((all) => all.map((one) => getComputedStyle(one).color));
+  const warning = await page.evaluate(() => {
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--color-warning)';
+    document.body.append(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  });
+  expect(new Set(colours)).toEqual(new Set([warning]));
+});
+
 test('the list follows the document and never blocks the export', async ({ page }) => {
   await open(page);
   await runDoor(page, CHECKS, {});

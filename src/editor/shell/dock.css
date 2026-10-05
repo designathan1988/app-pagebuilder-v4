@@ -202,6 +202,12 @@
 
 /* an issue's row is a door (it selects the element): a row, laid out from its start and as tall as what it says — not a
    button centred in a 28 px box (the audit's U-037) */
+/* a problem's warning triangle, in the warning colour of the strip's count */
+.dock-checks__row > .icon {
+  flex: none;
+  color: var(--color-warning);
+}
+
 .dock-checks__row.door {
   justify-content: flex-start;
   height: auto;
