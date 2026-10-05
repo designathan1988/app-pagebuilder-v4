@@ -7,7 +7,7 @@ open problems, are in `docs/PRODUCT.md`.
 
 214 features (214 built), 373 commands, 1362 doors, 1831 scenarios.
 
-Last complete browser run: commit `0f8f052` (2026-10-04), 2044 of 2044 tests passed; 214 features passed every scenario test.
+Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests passed; 214 features passed every scenario test.
 
 "Required" counts the `Required:` items of the feature's section of `spec/BEHAVIOUR.md`; "none" means the feature has no section.
 
