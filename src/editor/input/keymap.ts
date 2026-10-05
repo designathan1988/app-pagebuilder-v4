@@ -250,6 +250,14 @@ const GLOBAL_CONTEXT: KeyContextId = 'global';
 const TOOLBAR_CONTEXT: KeyContextId = 'toolbar';
 const keptField = (target: EventTarget | null): target is DraftField =>
   (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) && target.dataset.draft === DRAFT_KEPT && target.value === target.dataset.shown;
+// Chrome keeps one editing history for the page: Ctrl+Z in a field with nothing of its own to undo reaches back into
+// the last typing of another field, rewrites it and moves the focus there, and Ctrl+Shift+Z then retypes it (the audit
+// of 2026-10-05: with the focus in the Timeline's empty New animation field, Ctrl+Z jumped to Font size and the redos
+// left "48px2828" in it). A text field outside the draft contract that holds what it held when it took the focus, with
+// no undo of its own to redo, gives these keys to the editor's history.
+const TEXT_TYPES: ReadonlySet<string> = new Set(['text', 'search', 'url', 'email', 'tel', 'number', 'password']);
+const textField = (target: EventTarget | null): target is HTMLInputElement | HTMLTextAreaElement =>
+  target instanceof HTMLTextAreaElement || (target instanceof HTMLInputElement && TEXT_TYPES.has(target.type));
 const CANVAS: KeyContextId = 'canvas';
 function positionedContext(store: EditorStore, context: KeyContextId): KeyContextId {
   const nudge = NUDGE_DOORS[0];
@@ -304,6 +312,9 @@ function withDoorArgs(own: Readonly<Record<string, unknown>>, door: Readonly<Rec
 const SLIDER_KEYS: Readonly<Record<string, number>> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 };
 
 export function installKeymap(store: EditorStore, target: Window = window): () => void {
+  // what each text field held when it took the focus, and how many of its own typings the browser has undone since
+  const focusValues = new WeakMap<EventTarget, string>();
+  const ownUndos = new WeakMap<EventTarget, number>();
   const views = pointerViews(store);
   let pointerFocused: EventTarget | null = null;
   // A group whose controls rove (the alignment matrix, a segmented group: A3.24) holds one Tab stop, so the arrows
@@ -449,10 +460,13 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
     const chain = gesture !== null || hand !== null || previewing(store.getState().ui) ? keyContextChain(context) : focusChain(event.target, context);
     // Confirmed fields, including inherited number/text contexts, use document history. Native undo remains with
     // pending typing; an unrelated field without the draft contract (such as search) never forwards these keys.
-    if (gesture === null && keyContextChain(focused).includes(FIELD_CONTEXT) && keptField(event.target)) {
+    const field = textField(event.target) ? event.target : null;
+    // (a field of the draft contract carries data-draft once typed in: its keys are the branch's own, below)
+    const untouched = field !== null && field.dataset.draft === undefined && focusValues.get(field) === field.value && (ownUndos.get(field) ?? 0) === 0;
+    if (gesture === null && ((keyContextChain(focused).includes(FIELD_CONTEXT) && keptField(event.target)) || untouched)) {
       const history = bindingIn(keyContextChain(GLOBAL_CONTEXT), chordOf(event));
       if (history !== null && (history.command.id === undoCommand.command || history.command.id === redoCommand.command) && shortcutRunsNow(history)) {
-        if (history.command.id === redoCommand.command && hasDraftRedo(event.target)) return;
+        if (history.command.id === redoCommand.command && field !== null && hasDraftRedo(field)) return;
         event.preventDefault();
         (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(history.command.id, withDoorArgs({}, history.door.args));
         return;
@@ -533,6 +547,10 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
   // for Space (spaceIsTheControls); a focus that arrives otherwise (Tab, the arrows, a script after a key) clears it
   const onFocusIn = (event: FocusEvent) => {
     pointerFocused = views.pointerPressing() ? event.target : null;
+    if (textField(event.target)) {
+      focusValues.set(event.target, event.target.value);
+      ownUndos.set(event.target, 0);
+    }
     if (!CHOSEN_CONTEXTS.has(contextOf(event.target))) endBurst();
     // the keyboard reached a Layers row: its keys are chosen
     if (!views.pointerPressing() && contextOf(event.target) === LAYERS_CONTEXT) {
@@ -551,9 +569,20 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
   };
   // a click between two letters ends the burst: the person is not typing
   const onClick = endBurst;
+  // the browser's own undo and redo act on the focused field alone, never on another field's typing (see textField);
+  // a field's own undos are counted so its redo stays the browser's while one is pending
+  const onBeforeInput = (event: InputEvent) => {
+    if (event.inputType !== 'historyUndo' && event.inputType !== 'historyRedo') return;
+    if (event.target instanceof Node && event.target !== event.target.ownerDocument?.activeElement) {
+      event.preventDefault();
+      return;
+    }
+    if (textField(event.target)) ownUndos.set(event.target, Math.max(0, (ownUndos.get(event.target) ?? 0) + (event.inputType === 'historyUndo' ? 1 : -1)));
+  };
   target.addEventListener('focusin', onFocusIn, true);
   target.addEventListener('focusout', onFocusOut, true);
   target.addEventListener('click', onClick, true);
+  target.addEventListener('beforeinput', onBeforeInput, true);
   target.addEventListener('keydown', onKeyDown);
   target.addEventListener('keyup', onKeyUp);
   target.addEventListener('blur', onBlur);
@@ -561,6 +590,7 @@ export function installKeymap(store: EditorStore, target: Window = window): () =
     endBurst();
     target.removeEventListener('keydown', onKeyDown);
     target.removeEventListener('click', onClick, true);
+    target.removeEventListener('beforeinput', onBeforeInput, true);
     target.removeEventListener('keyup', onKeyUp);
     target.removeEventListener('blur', onBlur);
     target.removeEventListener('focusin', onFocusIn, true);
