@@ -749,7 +749,7 @@
     "inspector-width": {
       "axis": "x",
       "grow": "left",
-      "size": 304,
+      "size": 336,
       "min": 240,
       "max": 440,
       "labelKey": "splitter.inspectorWidth",

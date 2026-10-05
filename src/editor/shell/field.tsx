@@ -36,7 +36,7 @@ import { elementPredicate, type ElementContext } from '../../core/style/applies.
 import { ATTRIBUTES, inputValueEditorOf } from '../inspector/attributes.ts';
 import { editedProperties, inspectorMode } from '../inspector/sections.ts';
 import { useSettingsRefusal } from '../inspector/attribute-feedback.ts';
-import { GENERATED_VALUES } from '../../generated/value-lists.ts';
+import { GENERATED_VALUES, INITIAL_VALUES } from '../../generated/value-lists.ts';
 import { manifest, type DoorEntry } from '../../manifest/runtime.ts';
 import { computedValues } from '../canvas/coordinates.ts';
 import { DoorControl, Icon, useDoor, type DoorState } from '../doors/door.tsx';
@@ -197,7 +197,10 @@ export function useEffectiveText(property: string, parts: readonly string[], own
   const computed = usePageValues(own || cascaded !== undefined ? null : primary, parts);
   if (own) return '';
   if (cascaded !== undefined) return cascaded;
-  return computed === null ? '' : composedText(property, parts.map((p) => computed[p] ?? ''), MODEL_RULES);
+  const shown = computed === null ? '' : composedText(property, parts.map((p) => computed[p] ?? ''), MODEL_RULES);
+  // what the page computes nothing for (Chrome reads no line-clamp) shows the property's initial value: an empty field
+  // read as a missing value (the user's review of 2026-10-05)
+  return shown === '' && computed !== null ? (INITIAL_VALUES[property] ?? '') : shown;
 }
 
 // Whether the selected elements show different values of these properties (spec multi-select-edit, Problems in Pager

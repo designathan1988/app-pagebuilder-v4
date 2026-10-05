@@ -203,8 +203,9 @@ export const GENERATED_VALUES: Readonly<Partial<Record<StyleTargetId, GeneratedV
   "z-index": { keywords: ["auto"], units: [] },
 };
 
-// The initial value of every edited property that is not inherited (css-properties.json): what an element holds for
-// it while it holds none of its own, as a coupling's condition reads it (src/core/style/couplings.ts).
+// The initial value of every edited property that is not inherited (css-properties.json), and of a recipe that is a CSS
+// property of its own: what an element holds for it while it holds none of its own, as a coupling's condition reads it
+// (src/core/style/couplings.ts) and a field shows it when the page computes nothing for it (line-clamp in Chrome).
 export const INITIAL_VALUES: Readonly<Partial<Record<string, string>>> = {
   "display": "inline",
   "flex-direction": "row",
@@ -343,6 +344,8 @@ export const INITIAL_VALUES: Readonly<Partial<Record<string, string>>> = {
   "transition-timing-function": "ease",
   "transition-delay": "0s",
   "transition-behavior": "normal",
+  "line-clamp": "none",
+  "user-select": "auto",
 };
 
 // Every edited property that is inherited (css-properties.json): an element holding none of its own takes its parent's,

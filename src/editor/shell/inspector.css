@@ -675,11 +675,16 @@ textarea.input {
   grid-template-columns: var(--size-label-column) minmax(0, 1fr) minmax(0, 1fr);
 }
 
-/* A row of one field keeps a 24 px column at its end for Reset this value (jornada02 A.0, J6): the value
+/* Every row of the Style tab keeps a 24 px column at its end for Reset this value (jornada02 A.0, J6): the value
    cells keep their width whether the reset shows or not, so focusing a field never squeezes its number. Every field
-   of the row places its reset in that one column; only the hovered or focused field's shows. */
-[data-region='inspector-style'] .field-row:not(.field-row--pair):has(> .field__end) {
+   of the row places its reset in that one column; only the hovered or focused field's shows. A row with no reset
+   (a pair, whose resets stand at its label column's end, a choice, the anchors, a concept row's summary) keeps the
+   column too, so every value box ends at the same x (the user's review of 2026-10-05: they ran to the panel's edge). */
+[data-region='inspector-style'] .field-row:not(.field-row--pair) {
   grid-template-columns: var(--size-label-column) minmax(0, 1fr) var(--size-target-min);
+}
+[data-region='inspector-style'] .field-row--pair {
+  grid-template-columns: var(--size-label-column) minmax(0, 1fr) minmax(0, 1fr) var(--size-target-min);
 }
 [data-region='inspector-style'] .field__end {
   display: none;
@@ -1520,8 +1525,11 @@ textarea.input {
 .inspector .field-row--pair[data-stacked] {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
-[data-region='inspector-style'] .field-row:not(.field-row--pair)[data-stacked]:has(> .field__end) {
+[data-region='inspector-style'] .field-row:not(.field-row--pair)[data-stacked] {
   grid-template-columns: minmax(0, 1fr) var(--size-target-min);
+}
+[data-region='inspector-style'] .field-row--pair[data-stacked] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--size-target-min);
 }
 .inspector .field-row[data-stacked] > .field-row__label {
   grid-column: 1 / -1;

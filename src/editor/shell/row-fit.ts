@@ -21,9 +21,10 @@ const CELLS = ':scope > .field-cell';
 const CHOICE = ':scope > input[list], :scope > .panel-field__form > input[list]';
 // the texts a cell cuts with an ellipsis: a field's shown value, a keyword menu's value
 const CLIPS = '.field__rest-value, .field__keyword-value';
-// the width of each row's label column, read while the row is laid out beside its label (a row is drawn so before it is
-// first judged): the Style and Settings tabs' 100 px, a card's 72 px
-const COLUMNS = new WeakMap<HTMLElement, number>();
+// the widths of each row's columns, read while the row is laid out beside its label (a row is drawn so before it is
+// first judged): its label column (the Style and Settings tabs' 116 px, a card's 72 px), then its value column or a
+// pair's halves, then the Style tab's Reset column
+const COLUMNS = new WeakMap<HTMLElement, readonly number[]>();
 // the sub-pixel difference between the canvas's measure and the laid-out text
 const TOLERANCE = 0.5;
 
@@ -39,9 +40,10 @@ function widthOf(context: CanvasRenderingContext2D, text: string, style: CSSStyl
 // Whether the row's label and values fit beside each other.
 function fitsBeside(row: HTMLElement, context: CanvasRenderingContext2D): boolean {
   const style = getComputedStyle(row);
-  if (!('stacked' in row.dataset)) COLUMNS.set(row, parseFloat(style.gridTemplateColumns));
-  const column = COLUMNS.get(row);
-  if (column === undefined || Number.isNaN(column)) return true;
+  if (!('stacked' in row.dataset)) COLUMNS.set(row, style.gridTemplateColumns.split(' ').map((track) => parseFloat(track)));
+  const tracks = COLUMNS.get(row);
+  const column = tracks?.[0];
+  if (tracks === undefined || column === undefined || Number.isNaN(column)) return true;
   const label = row.querySelector<HTMLElement>(LABEL);
   if (label !== null) {
     const own = getComputedStyle(label);
@@ -63,11 +65,14 @@ function fitsBeside(row: HTMLElement, context: CanvasRenderingContext2D): boolea
     // datalist, which the text's own width leaves out); else the width of its words
     const overflow = choice.scrollWidth - choice.clientWidth;
     const needs = overflow > 1 ? choice.getBoundingClientRect().width + overflow : widthOf(context, choice.value, own) + frame;
-    if (needs + beside > inner - column - gap + TOLERANCE) return false;
+    // the value column as laid out (a Reset column after it takes its share), else the row less the label and the gap
+    const room = tracks.length >= 3 && tracks[1] !== undefined ? tracks[1] : inner - column - gap;
+    if (needs + beside > room + TOLERANCE) return false;
   }
   if (!row.classList.contains(PAIR)) return true;
-  // a pair's half beside its label: the row less the label column and the two gaps, halved (inspector.css)
-  const half = (inner - column - 2 * gap) / 2;
+  // a pair's half beside its label: as laid out (its Reset column after it), else the row less the label column and the
+  // two gaps, halved (inspector.css)
+  const half = tracks.length >= 3 && tracks[1] !== undefined ? tracks[1] : (inner - column - 2 * gap) / 2;
   for (const cell of row.querySelectorAll<HTMLElement>(CELLS)) {
     // what the cell has beyond its half while the row is stacked goes to its value (the value slot takes the free room)
     const extra = cell.getBoundingClientRect().width - half;

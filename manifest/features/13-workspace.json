@@ -331,7 +331,7 @@
                   "region": "inspector-header",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 303,
+                  "value": 335,
                   "reference": null
                 }
               ],
@@ -12654,7 +12654,7 @@
                   "region": "inspector-header",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 323,
+                  "value": 355,
                   "reference": null
                 }
               ],
@@ -12822,7 +12822,7 @@
                   "region": "inspector-header",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 323,
+                  "value": 355,
                   "reference": null
                 }
               ],
@@ -12878,7 +12878,7 @@
                   "region": "inspector-header",
                   "measure": "width",
                   "relation": "equals",
-                  "value": 283,
+                  "value": 315,
                   "reference": null
                 }
               ],

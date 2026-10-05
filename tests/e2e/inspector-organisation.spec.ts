@@ -64,7 +64,7 @@ test('two fields read together share one row, under the row’s label, each name
   const row = panel(page).locator(`[data-pair="${pair?.id ?? ''}"]`);
   await expect(row, 'the pair is one row').toHaveCount(1);
   // both fields are drawn, each its own door, side by side or, while the panel is too narrow for two whole cells
-  // (304 px of inspector against the ~310 px they need), one under the other in the same value column
+  // (336 px of inspector against the ~310 px they need), one under the other in the same value column
   const width = row.locator(`[data-door="${WIDTH}"]`);
   const height = row.locator(`[data-door="${HEIGHT}"]`);
   await expect(width).toHaveCount(1);

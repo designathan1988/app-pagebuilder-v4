@@ -201,7 +201,9 @@ ${featureFiles.flatMap((f) => f.features.map((x) => `  ${q(x.id)}: ${JSON.string
   const lists = offered
     .map((id) => `  ${q(id)}: { keywords: ${JSON.stringify(generatedOffer(data, id) ?? [])}, units: ${JSON.stringify(generatedUnits(data, id) ?? [])} },`)
     .join('\n');
-  const initials = properties.properties
+  // a recipe that is a CSS property of its own (line-clamp) has its initial value too: a field of it shows it while the
+  // element holds none (the user's review of 2026-10-05: Line clamp was an empty field)
+  const initials = [...properties.properties, ...properties.recipes]
     .flatMap((p) => {
       const css = data.css.properties[p.id];
       return css !== undefined && !css.inherited && typeof css.initial === 'string' ? [`  ${q(p.id)}: ${q(css.initial)},`] : [];
@@ -222,8 +224,9 @@ export const GENERATED_VALUES: Readonly<Partial<Record<StyleTargetId, GeneratedV
 ${lists}
 };
 
-// The initial value of every edited property that is not inherited (css-properties.json): what an element holds for
-// it while it holds none of its own, as a coupling's condition reads it (src/core/style/couplings.ts).
+// The initial value of every edited property that is not inherited (css-properties.json), and of a recipe that is a CSS
+// property of its own: what an element holds for it while it holds none of its own, as a coupling's condition reads it
+// (src/core/style/couplings.ts) and a field shows it when the page computes nothing for it (line-clamp in Chrome).
 export const INITIAL_VALUES: Readonly<Partial<Record<string, string>>> = {
 ${initials}
 };

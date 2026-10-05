@@ -1,7 +1,7 @@
 import { styleSections, type StyleDoor } from '../../manifest/style-places.ts';
 import { useEffect, useRef, type ReactNode } from 'react';
 import type { CommandId, FeatureId, KeyContextId, MessageId, StyleTargetId } from '../../generated/ids.ts';
-import { GENERATED_VALUES } from '../../generated/value-lists.ts';
+import { GENERATED_VALUES, INITIAL_VALUES } from '../../generated/value-lists.ts';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate } from '../../core/document/model.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
@@ -305,6 +305,7 @@ export function GridItemField({ entry, half }: { readonly entry: DoorEntry; read
         spellCheck={false}
         disabled={!door.available}
         aria-label={t(entry.door.labelKey as MessageId)}
+        placeholder={half === 'start' ? (INITIAL_VALUES[`${property}-start`] ?? undefined) : undefined}
         onInput={() => { draft.current = true; }}
         onBlur={keep}
       />
