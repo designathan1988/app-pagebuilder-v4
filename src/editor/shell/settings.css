@@ -134,3 +134,11 @@
   flex-direction: column;
   gap: var(--space-2);
 }
+
+/* the message a validation rule shows while its own is left empty, whole under its field, in the value column, in the
+   muted caption (forms/settings.tsx; the audit of 2026-10-05: as the field's placeholder it was cut) */
+.settings-default-message {
+  margin: var(--space-1) 0 var(--space-2) calc(var(--size-label-column) + var(--space-4));
+  color: var(--color-text-subtle);
+  font: var(--fw-caption) var(--fs-caption) / var(--lh-caption) var(--font-ui);
+}

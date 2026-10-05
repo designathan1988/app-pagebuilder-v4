@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 477,
-    "lines": 83544
+    "lines": 83551
   },
   "features": [
     {
@@ -5519,7 +5519,7 @@
     },
     {
       "path": "src/editor/forms/settings.tsx",
-      "lines": 161,
+      "lines": 168,
       "commands": [],
       "features": []
     },

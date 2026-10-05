@@ -129,9 +129,16 @@ export function FieldFormSettings({ config, onChange: commit, ports, maskAllowed
     {(['maxBytes', 'maxTotalBytes'] as const).map((key) => <div key={key}>{field(`rules.file.${key}`, 'number', rules.file?.[key], (value) => changeRules({ file: withoutEmpty({ ...rules.file, [key]: value === '' ? undefined : Number(value) }) }))}</div>)}
     {field('errorId', 'select', config.errorId, (value) => onChange(withoutEmpty({ ...config, errorId: value }) as FieldConfig), [{ value: '', label: ports.t('forms.error.automatic') }, ...ports.elements])}
     {field('messages.locale', 'select', locale, setLocale, ports.locales.map((value) => ({ value, label: value })))}
-    {/* each message named by when it shows, the message it shows when left empty its placeholder, in the language
-        the messages are in (the user's review of 2026-10-05, LR2: each name was "Message: " and that whole message) */}
-    {(Object.keys(validationMessageKeys) as RuleCode[]).map((code) => <div key={code}>{field(`messages.${code}`, 'text', config.messages?.[locale]?.[code], (value) => onChange({ ...config, messages: { ...config.messages, [locale]: withoutEmpty({ ...config.messages?.[locale], [code]: value }) } }), undefined, ports.defaultMessage(locale, code))}</div>)}
+    {/* each message named by when it shows (the user's review of 2026-10-05, LR2: each name was "Message: " and that
+        whole message), in the language the messages are in; while it is empty, the message it shows then is written
+        whole under it (as its placeholder it was cut in the one-line field: the audit of 2026-10-05) */}
+    {(Object.keys(validationMessageKeys) as RuleCode[]).map((code) => {
+      const written = config.messages?.[locale]?.[code];
+      return <div key={code}>
+        {field(`messages.${code}`, 'text', written, (value) => onChange({ ...config, messages: { ...config.messages, [locale]: withoutEmpty({ ...config.messages?.[locale], [code]: value }) } }))}
+        {written === undefined || written === '' ? <p className="settings-default-message">{ports.defaultMessage(locale, code)}</p> : null}
+      </div>;
+    })}
     {field('address.enabled', 'boolean', config.address !== undefined, (value) => onChange(withoutEmpty({ ...config, address: value === 'true' ? { endpoint: 'https://viacep.com.br/ws/{cep}/json/', fields: {} } : undefined }) as FieldConfig))}
     {address && <div>
       {field('address.endpoint', 'text', address.endpoint, (endpoint) => onChange({ ...config, address: { ...address, endpoint } }))}
