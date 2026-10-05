@@ -144,14 +144,15 @@ export function Field(props: FieldProps) {
 function FieldControl({ entry, bare = false, labelled = false, prefix = null, rowLabel = null }: FieldProps) {
   const t = useT();
   const target = targetOf(entry);
-  // named as fieldLabelKey says, what a screen reader reads and its step buttons are named after ("Step Width up"); a
-  // pair row's first field shows the row's own label (Size) where its label stands, and keeps its own name, so no two
-  // controls share one (the Size row's Width and the background's Size). A field is usable only once its own feature
-  // is registered as built (archive/DESIGN.md "Build order"): style.set runs Width and Height long before Display or
+  // named as fieldLabelKey says, or by the shorter name its concept row gives a detail (rowLabel: under Border, "Top
+  // width"): what a screen reader reads and its step buttons are named after ("Step Width up"). A pair row's first
+  // field (bare) shows the row's own label (Size) where its label stands and keeps its own name, so no two controls
+  // share one (the Size row's Width and the background's Size). A field is usable only once its own feature is
+  // registered as built (archive/DESIGN.md "Build order"): style.set runs Width and Height long before Display or
   // Color.
   const own = entry.door.labelKey !== entry.command.labelKey;
-  const door = useDoor(entry, {}, target && !own ? t(fieldLabelKey(entry)) : undefined, isFeatureBuilt(entry.door.feature as FeatureId));
-  const rowText = rowLabel === null ? null : t(rowLabel);
+  const door = useDoor(entry, {}, rowLabel !== null && !bare ? t(rowLabel) : target && !own ? t(fieldLabelKey(entry)) : undefined, isFeatureBuilt(entry.door.feature as FeatureId));
+  const rowText = rowLabel === null || !bare ? null : t(rowLabel);
   if (!target) return null;
   const cssName = entry.door.kind === 'inspector-field' ? (entry.door.property ?? target.id) : target.id;
   // a composite of lengths (gap: row-gap and column-gap) is a text field of its longhands, one or two lengths

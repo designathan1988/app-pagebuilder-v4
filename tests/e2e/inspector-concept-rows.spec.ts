@@ -90,3 +90,30 @@ test('every detail of every row is reachable: opened, each row draws the details
     }
   }
 });
+
+// A detail takes the shorter name its concept row gives it (properties.json shortLabels: under Border, "Top width"; under
+// Radius, "Top left"), the concept naming the rest. The user's review of 2026-10-05 made a pair's first field keep its own
+// name (Width) under the row's label (Size); that change once drew every detail under its whole name again ("Largura da
+// borda superior" in two lines), which no test saw.
+test('every detail a concept row names shorter is drawn under that name', runs(OPEN, ROW, SECTION, ALL, TOGGLE), async ({ page }) => {
+  const rows = (JSON.parse(fs.readFileSync('manifest/properties.json', 'utf8')) as { conceptRows: { id: string; shortLabels?: Record<string, string> }[] }).conceptRows;
+  const words = JSON.parse(fs.readFileSync('src/i18n/locales/en.json', 'utf8')) as Record<string, string>;
+  const named = rows.flatMap((row) => Object.entries(row.shortLabels ?? {}).map(([door, key]) => ({ row: row.id, door, word: words[key] ?? key })));
+  expect(named.length, 'properties.json gives some details a shorter name').toBeGreaterThan(0);
+  const seen = new Set<string>();
+  for (const target of ['n-card-a', 'n-title', 'n-grid']) {
+    await select(page, target);
+    for (const row of new Set(named.map((one) => one.row))) {
+      const toggle = control(page, TOGGLE, { args: { row } });
+      if ((await toggle.count()) > 0 && (await toggle.getAttribute('aria-expanded')) === 'false') await toggle.click();
+    }
+    for (const one of named) {
+      const field = page.locator(`[data-region="inspector-style"] [data-door="${one.door}"]`).first();
+      if ((await field.count()) === 0) continue;
+      const label = page.locator(`[data-region="inspector-style"] .field-row:has([data-door="${one.door}"]) > .field-row__label, [data-region="inspector-style"] .field-row[data-door="${one.door}"] > .field-row__label`).first();
+      await expect(label, `${one.door} under ${one.row}`).toHaveText(one.word);
+      seen.add(one.door);
+    }
+  }
+  expect(seen.size, 'the details named shorter were drawn').toBeGreaterThan(4);
+});
