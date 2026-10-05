@@ -16,9 +16,13 @@ export interface FormsSettingsPorts {
     readonly kind: 'text' | 'number' | 'boolean' | 'select' | 'textarea';
     readonly value: string | number | boolean;
     readonly options?: readonly { readonly value: string; readonly label: string }[];
+    // what the field shows while empty: what it takes (a format), or what applies when it is left empty (a message)
+    readonly placeholder?: string;
     readonly configurationFor?: (value: string) => FieldConfig | FormConfig | undefined;
     readonly onChange: (value: string) => void;
   }) => ReactNode;
+  // the message a rule shows in a language when none is written (the forms runtime's own catalogue)
+  readonly defaultMessage: (locale: string, code: RuleCode) => string;
   readonly button: (control: { readonly door: string; readonly labelKey: string; readonly configuration?: FieldConfig | FormConfig; readonly onClick: () => void }) => ReactNode;
 }
 type Values = Readonly<Record<string, unknown>>;
@@ -49,13 +53,13 @@ export function FieldFormSettings({ config, onChange: commit, ports, maskAllowed
   const address = config.address;
   const changeMask = (patch: Values) => onChange({ ...config, mask: withoutEmpty({ ...mask, ...patch }) as unknown as MaskConfig });
   const changeRules = (patch: Values) => onChange({ ...config, rules: withoutEmpty({ ...rules, ...patch }) as ValidationRules });
-  const field = (path: string, kind: 'text' | 'number' | 'boolean' | 'select' | 'textarea', value: string | number | boolean | undefined, changed: ((value: string) => FieldConfig | undefined) | ((value: string) => void), options?: readonly { readonly value: string; readonly label: string }[]) => {
+  const field = (path: string, kind: 'text' | 'number' | 'boolean' | 'select' | 'textarea', value: string | number | boolean | undefined, changed: ((value: string) => FieldConfig | undefined) | ((value: string) => void), options?: readonly { readonly value: string; readonly label: string }[], placeholder?: string) => {
     const local = ['preview.input', 'messages.locale', 'mask.block.name', 'address.key'].includes(path);
     return ports.field({ door: `forms.${path}`, labelKey: `forms.${path}`, kind, value: value ?? '',
       onChange: value => { const next = changed(value);
         if (next !== undefined) commit(next);
       },
-      ...(!local ? { configurationFor: (value: string) => changed(value) ?? undefined } : {}), ...(options ? { options } : {}),
+      ...(!local ? { configurationFor: (value: string) => changed(value) ?? undefined } : {}), ...(options ? { options } : {}), ...(placeholder === undefined ? {} : { placeholder }),
     });
   };
   const button = (door: string, labelKey: string, next: FieldConfig, after?: () => void) => ports.button({ door, labelKey, configuration: next, onClick: () => {
@@ -113,19 +117,21 @@ export function FieldFormSettings({ config, onChange: commit, ports, maskAllowed
     {field('rules.pattern', 'text', rules.pattern, (value) => changeRules({ pattern: value }))}
     {numberRule('minLength')}{numberRule('maxLength')}{numberRule('minimum')}{numberRule('maximum')}{numberRule('step')}
     {field('rules.equalTo', 'select', rules.equalTo, (value) => changeRules({ equalTo: value }), [{ value: '', label: ports.t('forms.none') }, ...ports.fields])}
-    {field('rules.allowed', 'textarea', rules.allowed?.join('\n'), (value) => changeRules({ allowed: value ? strings(value) : undefined }))}
+    {field('rules.allowed', 'textarea', rules.allowed?.join('\n'), (value) => changeRules({ allowed: value ? strings(value) : undefined }), undefined, ports.t('forms.rules.onePerLine'))}
     {field('rules.password.enabled', 'boolean', rules.password !== undefined, (value) => changeRules({ password: value === 'true' ? { minLength: 8 } : undefined }))}
     {rules.password && <div>
       {field('rules.password.minLength', 'number', rules.password.minLength, (value) => changeRules({ password: { ...rules.password, minLength: Number(value) } }))}
       {(['uppercase', 'lowercase', 'digit', 'symbol'] as const).map((key) => <div key={key}>{field(`rules.password.${key}`, 'boolean', rules.password?.[key] ?? false, (value) => changeRules({ password: { ...rules.password, [key]: value === 'true' } }))}</div>)}
     </div>}
-    {field('rules.dateMinimum', 'text', rules.dateMinimum, (value) => changeRules({ dateMinimum: value }))}
-    {field('rules.dateMaximum', 'text', rules.dateMaximum, (value) => changeRules({ dateMaximum: value }))}
-    {field('rules.file.accept', 'textarea', rules.file?.accept?.join('\n'), (value) => changeRules({ file: withoutEmpty({ ...rules.file, accept: value ? strings(value) : undefined }) }))}
+    {field('rules.dateMinimum', 'text', rules.dateMinimum, (value) => changeRules({ dateMinimum: value }), undefined, ports.t('forms.rules.dateFormat'))}
+    {field('rules.dateMaximum', 'text', rules.dateMaximum, (value) => changeRules({ dateMaximum: value }), undefined, ports.t('forms.rules.dateFormat'))}
+    {field('rules.file.accept', 'textarea', rules.file?.accept?.join('\n'), (value) => changeRules({ file: withoutEmpty({ ...rules.file, accept: value ? strings(value) : undefined }) }), undefined, ports.t('forms.rules.fileTypesFormat'))}
     {(['maxBytes', 'maxTotalBytes'] as const).map((key) => <div key={key}>{field(`rules.file.${key}`, 'number', rules.file?.[key], (value) => changeRules({ file: withoutEmpty({ ...rules.file, [key]: value === '' ? undefined : Number(value) }) }))}</div>)}
     {field('errorId', 'select', config.errorId, (value) => onChange(withoutEmpty({ ...config, errorId: value }) as FieldConfig), [{ value: '', label: ports.t('forms.error.automatic') }, ...ports.elements])}
     {field('messages.locale', 'select', locale, setLocale, ports.locales.map((value) => ({ value, label: value })))}
-    {(Object.keys(validationMessageKeys) as RuleCode[]).map((code) => <div key={code}>{field(`messages.${code}`, 'text', config.messages?.[locale]?.[code], (value) => onChange({ ...config, messages: { ...config.messages, [locale]: withoutEmpty({ ...config.messages?.[locale], [code]: value }) } }))}</div>)}
+    {/* each message named by when it shows, the message it shows when left empty its placeholder, in the language
+        the messages are in (the user's review of 2026-10-05, LR2: each name was "Message: " and that whole message) */}
+    {(Object.keys(validationMessageKeys) as RuleCode[]).map((code) => <div key={code}>{field(`messages.${code}`, 'text', config.messages?.[locale]?.[code], (value) => onChange({ ...config, messages: { ...config.messages, [locale]: withoutEmpty({ ...config.messages?.[locale], [code]: value }) } }), undefined, ports.defaultMessage(locale, code))}</div>)}
     {field('address.enabled', 'boolean', config.address !== undefined, (value) => onChange(withoutEmpty({ ...config, address: value === 'true' ? { endpoint: 'https://viacep.com.br/ws/{cep}/json/', fields: {} } : undefined }) as FieldConfig))}
     {address && <div>
       {field('address.endpoint', 'text', address.endpoint, (endpoint) => onChange({ ...config, address: { ...address, endpoint } }))}

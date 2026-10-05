@@ -98,3 +98,39 @@
 [data-region='inspector-settings'] .custom-attributes .field-row__label {
   font-family: var(--font-mono);
 }
+
+/* An element's parts (a select's options, a picture's sources): each part on one line — its name, then its move up,
+   move down and remove buttons at their own width — and the buttons that add a part side by side at their own widths,
+   on a second line when they do not fit (the user's review of 2026-10-05, LR2: the label column's two-cell grid broke
+   every option over two lines and cut "Add an option") */
+[data-region='inspector-settings'] .parts-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+[data-region='inspector-settings'] .parts-editor > .field-row:has(> .field-row__label) {
+  grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+  gap: var(--space-1);
+}
+
+[data-region='inspector-settings'] .parts-editor > .field-row:not(:has(> .field-row__label)) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* the Form section's fields (forms/settings.tsx) are drawn in a section of their own inside the tab's section: that
+   inner section takes no inset and no line of its own, and spaces its fields as the tab does, so its labels and values
+   stand at the tab's columns and its fields apart (LR2: 12 px in, 12 px right, touching into one dark block) */
+[data-region='inspector-settings'] .settings-section > .inspector-section {
+  gap: var(--space-2);
+  padding: 0;
+  border-bottom: 0;
+}
+
+[data-region='inspector-settings'] .settings-section > .inspector-section > div:not(.field-row) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

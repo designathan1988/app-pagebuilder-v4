@@ -5,9 +5,11 @@ import { acceptsTextMask } from '../../core/elements/inputs.ts';
 import { readFieldConfig, readFormConfig } from '../../core/forms/config.ts';
 import type { FieldConfig, FormConfig } from '../../core/forms/types.ts';
 import type { CommandId, MessageId } from '../../generated/ids.ts';
+import { translate } from '../../i18n/index.ts';
 import type { FeatureId } from '../../generated/ids.ts';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
-import { LOCALES } from '../../generated/ids.ts';
+import { LOCALES, type Locale } from '../../generated/ids.ts';
+import { validationMessageKeys } from '../../core/forms/catalog.ts';
 import type { DispatchResult } from '../../core/store/store.ts';
 import type { DoorEntry } from '../../manifest/runtime.ts';
 import { doorSlots } from '../doors/placement.ts';
@@ -66,7 +68,7 @@ function ConfigurationField({ control, entry }: { readonly control: FieldControl
   </div>;
   const common = {
     id, className: 'input', 'aria-label': label, 'data-key-context': 'command-field',
-    defaultValue: shown, spellCheck: false, onBlur: keep, disabled: !door.available, title: door.title,
+    defaultValue: shown, spellCheck: false, onBlur: keep, disabled: !door.available, title: door.title, placeholder: control.placeholder,
     onInput: (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       recordFieldInput(event.currentTarget, event.nativeEvent);
       if (control.door === 'forms.preview.input') control.onChange(event.currentTarget.value);
@@ -110,6 +112,7 @@ export function FormsInspector({ node }: { readonly node: DocNode }): ReactNode 
   if (!form && !['input', 'textarea', 'select'].includes(node.tag ?? '')) return null;
   const ports: FormsSettingsPorts = {
     t: key => t(key as MessageId), ...choices, locales: LOCALES,
+    defaultMessage: (locale, code) => translate(locale as Locale, validationMessageKeys[code] as MessageId),
     field: control => {
       const entry = entryFor(control.door);
       if (entry === undefined) throw new Error(`Missing forms control: ${control.door}`);

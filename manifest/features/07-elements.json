@@ -9269,7 +9269,7 @@
                 {
                   "key": "status.attribute.set",
                   "params": {
-                    "attribute": "Label for assistive readers",
+                    "attribute": "Accessible name",
                     "name": "Button",
                     "value": "A menu"
                   }
@@ -9376,7 +9376,7 @@
                 {
                   "key": "status.attribute.set",
                   "params": {
-                    "attribute": "Hidden from assistive readers",
+                    "attribute": "Hidden from readers",
                     "name": "Button",
                     "value": "✓"
                   }

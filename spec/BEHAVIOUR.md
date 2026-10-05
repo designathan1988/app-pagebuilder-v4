@@ -9201,6 +9201,8 @@ Required (manifest feature `element-attributes-aria`):
 - The Accessibility section's Role, Label for assistive readers (aria-label) and Hidden from assistive readers
   (aria-hidden) write their attributes; each change is one undo step.
 
+
+The Settings tab (the user's review of 2026-10-05, LR2, on a select): an element's parts stand one to a line, the part's name then its move up, move down and remove buttons, the add buttons side by side at their own widths; the Form section's fields stand at the tab's columns and apart, never a section inset inside the section; every name fits one line in both languages (DEC-69), a field's format or default message its placeholder (`tests/e2e/settings-form-field.spec.ts`).
 ## elements-form-inputs
 
 ### Our rule
