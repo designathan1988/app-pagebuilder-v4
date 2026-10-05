@@ -158,6 +158,18 @@
   overflow: auto;
 }
 
+/* a dialog's words stand at the dialog's own spacing, never the browser's 1 em margins (the capture dialog: its pages'
+   hint 40 px from its field, its notices floating apart; the user's review of 2026-10-05, LR2); a hint in the muted
+   caption under what it explains */
+.dialog__body p {
+  margin: 0;
+}
+
+.capture-url__hint {
+  color: var(--color-text-muted);
+  font: var(--fw-caption) var(--fs-caption) / var(--lh-caption) var(--font-ui);
+}
+
 /* Guides & Grids: its sections, switches, guides and grid fields */
 .guides-grids__title {
   margin: 0 0 var(--space-3);
