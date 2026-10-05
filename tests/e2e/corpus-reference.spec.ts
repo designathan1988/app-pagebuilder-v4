@@ -14,6 +14,8 @@ test('a recorded reference comes from a fresh navigation at each viewport and re
   const served: string[] = [];
   let brandResponses = 0;
   const svg = (colour: string) => `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="240"><rect width="480" height="240" fill="${colour}"/></svg>`;
+  // the page writes the time to the second: each load's clock starts at the reference moment and then runs (DEC-61), so
+  // two loads differ in milliseconds (with them, the two live photographs were 99.9 % alike, the complete run of QA 354)
   const server = createServer((request, response) => {
     const url = request.url ?? '/';
     served.push(url);
@@ -26,7 +28,7 @@ test('a recorded reference comes from a fresh navigation at each viewport and re
       response.writeHead(200, { 'content-type': 'image/svg+xml', 'cache-control': 'public, max-age=3600' }).end(svg(brandResponses <= 2 ? '#445566' : '#ee3322'));
       return;
     }
-    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end('<!doctype html><html><body style="margin:0"><img id="hero" width="480" height="240"><img id="brand" src="/brand.svg" width="100" height="100"><p id="state"></p><div id="welcome" style="height:100px;background:#f80">New visitor</div><script>document.querySelector("#hero").src = matchMedia("(max-width:1200px)").matches ? "/narrow.svg" : "/wide.svg"; document.querySelector("#state").textContent = new Date().toISOString() + "/" + Math.random().toFixed(6); if(localStorage.getItem("seen"))document.querySelector("#welcome").remove();else localStorage.setItem("seen","1")</script></body></html>');
+    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end('<!doctype html><html><body style="margin:0"><img id="hero" width="480" height="240"><img id="brand" src="/brand.svg" width="100" height="100"><p id="state"></p><div id="welcome" style="height:100px;background:#f80">New visitor</div><script>document.querySelector("#hero").src = matchMedia("(max-width:1200px)").matches ? "/narrow.svg" : "/wide.svg"; document.querySelector("#state").textContent = new Date().toISOString().slice(0, 19) + "/" + Math.random().toFixed(6); if(localStorage.getItem("seen"))document.querySelector("#welcome").remove();else localStorage.setItem("seen","1")</script></body></html>');
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   let replay: BrowserContext | null = null;
