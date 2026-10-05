@@ -40614,7 +40614,7 @@
             "state": "base",
             "locale": "en",
             "viewport": "desktop-1440",
-            "zoom": 100
+            "zoom": "fit"
           },
           "steps": [
             {
@@ -40772,7 +40772,7 @@
             "state": "base",
             "locale": "en",
             "viewport": "desktop-1440",
-            "zoom": 100
+            "zoom": "fit"
           },
           "steps": [
             {

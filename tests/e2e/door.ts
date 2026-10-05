@@ -153,7 +153,17 @@ const QUICK_PANEL_GRIP = 'quick-panel-grip';
 export const inQuickPanel = (d: Door): boolean => d.kind === 'quick-panel' || (d.kind === 'panel-drag' && d.source === QUICK_PANEL_GRIP);
 export async function openQuickPanel(page: Page): Promise<void> {
   const chip = page.locator('[data-quick-panel-chip][aria-expanded="false"]');
-  if ((await chip.count()) > 0) await chip.click();
+  // the chip stands beside the selection's label (DEC-70); where the label is out of sight (a wide element's start left
+  // of the canvas at 100 %), so is the chip, and a person opens the panel with its shortcut from the canvas (a global
+  // shortcut waits while a field holds the focus, DEC-27), the canvas moving the label into view
+  if ((await chip.count()) > 0) {
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+    if (await chip.isVisible()) await chip.click();
+    else {
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      await page.keyboard.press('Control+Shift+Q');
+    }
+  }
   // an assertion, not a bare wait: a tooth proof reads why a test failed, and a run that only times out on an action
   // proves nothing (tools/runner/tooth.ts)
   await expect(page.locator('[data-quick-panel-chip][aria-expanded="true"]'), 'the quick panel opens from its chip').toBeVisible();

@@ -55,6 +55,8 @@ const FUNCTION_CONTROLS = new Set(FUNCTION_DOORS.map((d) => (d.door.kind === 'in
 // the properties whose value is a list of functions those fields edit (filter, transform)
 const FUNCTION_PROPERTIES = new Set(FUNCTION_DOORS.map((d) => (d.door.kind === 'inspector-field' ? d.door.property : null)));
 const CHIP = { width: 24, height: 24 };
+// the canvas's pan, the wheel's command: what moves an out-of-sight label into view when the panel opens (DEC-70)
+const PAN = manifest.doors.find((d) => d.door.kind === 'canvas-wheel' && 'dx' in d.command.args);
 
 // The panel's groups, in the order it draws them, each under its name: layout.json's quickPanelGroups, which each
 // quick-panel door names (its `group`; the audit's U-044: they were ranges of placement orders here). The manifest
@@ -359,6 +361,8 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
   const [placed, setPlaced] = useState<Placed | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   const chip = useRef<HTMLButtonElement>(null);
+  // the element whose label the canvas was moved to show when the panel opened out of sight (once per opening)
+  const revealed = useRef<string | null>(null);
   const shown = node !== null && !editing && dragging === null;
   const id = node?.id ?? null;
   const offset: Offset | null = id === null ? null : (offsets[id] ?? null);
@@ -384,12 +388,24 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
         const size = open ? { width: drawn.offsetWidth, height: drawn.offsetHeight } : CHIP;
         const label = area.querySelector('[data-chrome="label"]:not(.is-measuring)');
         const inset = token(area, '--space-8');
-        const whole = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
+        // a panel the person dragged is held inside the stage, as before it was fixed in the window
+        const whole = { x: stageBox.x, y: stageBox.y, width: stageBox.width, height: stageBox.height };
         // the chip and the open panel stand on the right of the selection's label, touching it (DEC-70): both wait for
-        // the label to be placed, so neither is drawn anywhere else first; and while the label is out of the stage's
+        // the label to be placed, so neither is drawn anywhere else first; while the label is out of the stage's
         // view (the page scrolled it away, cut by the stage's edge) neither is drawn, since it follows the label
         const at = label?.getBoundingClientRect();
         const seen = at !== undefined && at.left >= stageBox.left - 0.5 && at.top >= stageBox.top - 0.5 && at.right <= stageBox.right + 0.5 && at.bottom <= stageBox.bottom + 0.5;
+        // opened while the label is out of sight (its shortcut; a wide element's start left of the canvas at 100 %):
+        // the canvas moves the label into view once, and the panel then opens beside it (DEC-70)
+        if (open && at !== undefined && !seen && revealed.current !== id) {
+          revealed.current = id;
+          const view = document.querySelector('.frame__view')?.getBoundingClientRect();
+          const top = Math.max(stageBox.top, view?.top ?? stageBox.top);
+          const dx = at.left < stageBox.left || at.right > stageBox.right ? stageBox.left + inset - at.left : 0;
+          const dy = at.top < top ? top + inset - at.top : at.bottom > stageBox.bottom ? stageBox.bottom - inset - at.bottom : 0;
+          if (dx !== 0 || dy !== 0) if (PAN !== undefined) (store.dispatch as (command: CommandId, args: unknown) => unknown)(PAN.command.id, { dx: Math.round(dx), dy: Math.round(dy) });
+        }
+        if (!open) revealed.current = null;
         const placedBox = at === undefined || !seen ? null : placeQuickPanel({ x: at.x, y: at.y, width: at.width, height: at.height }, element, size, open, whole, inset, offset);
         const next = placedBox === null ? null : { id, open, box: placedBox, element, widest: Math.max(0, window.innerWidth - 2 * inset) };
         setPlaced((before) => (JSON.stringify(before) === JSON.stringify(next) ? before : next));
@@ -398,7 +414,7 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
     };
     request = requestAnimationFrame(measure);
     return () => cancelAnimationFrame(request);
-  }, [shown, id, open, offset, stage]);
+  }, [shown, id, open, offset, stage, store]);
 
   // a placing made for the element and state drawn now: until one is made the panel is drawn hidden while it is
   // measured (`.is-measuring`), and a hidden element can take no focus, so the focus below waits for the placing

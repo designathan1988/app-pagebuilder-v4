@@ -6078,7 +6078,8 @@ The panel's controls have `tabindex="-1"` (sealed out of the Tab order, `quick-p
     with the label's — open or closed, wherever the label stands; a panel the person dragged by its grip stays where it
     was left (Problem 1). Both are fixed in the window: beside a label near the stage's edge the open panel lies over the
     inspector or the dock, whole, its close in reach; and the stage is clipped, never scrolled (`overflow: clip`), so the
-    focus put in the panel's first field cannot move the page under it. While the label is out of sight, so are they.
+    focus put in the panel's first field cannot move the page under it. While the label is out of sight, so are they;
+    the panel opened then (its shortcut, Ctrl+Shift+Q) moves the canvas once so the label is in view, and opens beside it.
 8. **Its bar showed align and distribute always disabled, and its fields a Reset "not available yet" with nothing to reset** (the user's real-use audit, item 1.4: 8 buttons and 19 Resets that looked usable and did nothing). Required: the bar draws an action only while it can act (its door built and its command able to run on the selection; a list of choices, Edit on canvas, while built); a field's Reset is drawn only while the element holds a value of its own (inspector-provenance-reset, Problems in Pager 5).
 
 ### Our rule: the fields follow the element kind, and every style door shares one context (the user's real-use audit, items 6.1 and A3.8)
