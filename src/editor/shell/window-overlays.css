@@ -307,6 +307,15 @@
   color: var(--color-text-subtle);
 }
 
+/* a breakpoint's trash as tall as its fields (the dialog's 24 px controls), so every row is one height, the base's with
+   its word as the others with their trash (the user's review of 2026-10-05, LR2: the 28 px trash made the base's row
+   4 px shorter and the rows stood unevenly apart) */
+.breakpoints-dialog__row .door--icon-button {
+  width: var(--size-control);
+  min-width: var(--size-control);
+  height: var(--size-control);
+}
+
 /* A snap line (src/editor/canvas/snap-lines.tsx, spec snap-while-moving; item 4.5): snap.lineWidth wide, in its own
    colour of the canvas snap token, from the moving element to the target it snapped to, the target outlined, with the
    distance it stands from it */

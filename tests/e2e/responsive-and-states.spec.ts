@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import { expect, test, type Page } from '../support/test.ts';
 import { openEditor } from '../support/editor.ts';
 import { unzip } from '../../tools/runner/unzip.ts';
-import { control, runDoor, runs } from './door.ts';
+import { control, openMenu, runDoor, runs } from './door.ts';
 
 const FIXTURE = 'manifest/features/fixtures/aurora.json';
 const OPEN = 'project.open#menu-file';
@@ -141,4 +141,17 @@ test('a link\'s State menu offers Visited', runs(OPEN, ROW, 'workspace.setPanelO
   await expect(page.locator('[data-door="view.setStyleState#menu-style-state-visited"]')).toBeVisible();
   await page.locator('[data-door="view.setStyleState#menu-style-state-visited"]').click();
   await expect(page.locator('.state-picker__value')).toHaveText('Visited');
+});
+
+// The Breakpoints dialog's rows are one height, the base's with its word as the others with their trash (the user's
+// review of 2026-10-05, LR2: the trash stood 28 px tall beside 24 px fields, so the base's row was 4 px shorter than
+// the others and the rows stood unevenly apart).
+test('the Breakpoints dialog draws its rows one height', runs('workspace.openDialog#menu-view-breakpoints'), async ({ page }) => {
+  await openEditor(page);
+  await openMenu(page, 'view');
+  await page.locator('[data-door="workspace.openDialog#menu-view-breakpoints"]').click();
+  const rows = page.locator('.breakpoints-dialog__row:not(.breakpoints-dialog__row--head)');
+  await expect(rows.first()).toBeVisible();
+  const heights = await rows.evaluateAll((all) => all.map((row) => Math.round(row.getBoundingClientRect().height)));
+  expect(new Set(heights).size, `heights ${heights.join(', ')}`).toBe(1);
 });
