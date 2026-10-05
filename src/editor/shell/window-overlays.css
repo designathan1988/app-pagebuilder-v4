@@ -29,21 +29,21 @@
 }
 
 /* a variable's row: its name takes what its value leaves, the value as wide as it is up to half the row, and its
-   delete over the row's end while the row is hovered or holds the focus, as a class's (LR2: in the sidebar's 224 px
-   "terracota-escuro" was cut in half the row beside a value that needed a third of its own and a trash that is
-   pressed once in a while; the canonical row names the variable first); from the section titles' start */
+   delete in a column of its own at the row's end, in the subtle ink until the row is hovered or focused (LR2: in the
+   sidebar's 224 px "terracota-escuro" was cut in half the row; the canonical row names the variable first). The delete
+   never lies over the value: laid over the row's end (QA 379), a press meant for the value deleted the variable, and
+   at rest, unseen, it still took the press (the audit of 2026-10-05); from the section titles' start */
 .variables__row {
-  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) fit-content(50%);
+  grid-template-columns: minmax(0, 1fr) fit-content(50%) auto;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-6);
+  gap: var(--space-1);
+  padding: var(--space-1) 0 var(--space-1) var(--space-6);
 }
 
 /* a colour variable's row: its swatch, then its name and value (variables.tsx) */
 .variables__row--colour {
-  grid-template-columns: auto minmax(0, 1fr) fit-content(50%);
+  grid-template-columns: auto minmax(0, 1fr) fit-content(50%) auto;
 }
 
 /* the value's field as wide as what it holds (MDN field-sizing: content), within its column */
@@ -54,17 +54,15 @@
 }
 
 .variables__row > .door {
-  position: absolute;
-  top: 50%;
-  right: var(--space-2);
-  translate: 0 -50%;
-  background: var(--color-surface);
-  opacity: 0;
+  /* the target's minimum, the room the name keeps */
+  width: var(--size-target-min);
+  min-width: var(--size-target-min);
+  color: var(--color-text-subtle);
 }
 
 .variables__row:hover > .door,
 .variables__row:focus-within > .door {
-  opacity: 1;
+  color: var(--color-text);
 }
 
 .variables__swatch {
