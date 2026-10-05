@@ -386,15 +386,15 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
         // the chip beside the selection's label; the open panel where placeQuickPanel puts it
         const at = label?.getBoundingClientRect();
         const beside = !open && at ? placeChip({ x: at.x - origin.x, y: at.y - origin.y, width: at.width, height: at.height }, size, whole, gap) : null;
-        // it never covers the selection's rotation handle (spec rotation-handle), which a narrow element's label
-        // reaches:
-        // it steps past it, to its right
-        const handle = area.querySelector('[data-rotate-handle]')?.getBoundingClientRect();
-        const turn = handle ? { x: handle.x - origin.x, y: handle.y - origin.y, width: handle.width, height: handle.height } : null;
-        const chipBox = beside !== null && turn !== null && beside.x < turn.x + turn.width && turn.x < beside.x + beside.width && beside.y < turn.y + turn.height && turn.y < beside.y + beside.height ? {
-          ...beside,
-          x: turn.x + turn.width + gap
-        } : beside;
+        // it never covers one of the selection's rotation zones (spec rotation-handle), which a narrow element's label
+        // reaches: it steps past the zone it meets, to its right
+        const zones = [...area.querySelectorAll('[data-rotate-handle]')].map((zone) => {
+          const box = zone.getBoundingClientRect();
+          return { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height };
+        });
+        const meets = (one: Box, turn: Box) => one.x < turn.x + turn.width && turn.x < one.x + one.width && one.y < turn.y + turn.height && turn.y < one.y + one.height;
+        const turn = beside === null ? undefined : zones.find((zone) => meets(beside, zone));
+        const chipBox = beside !== null && turn !== undefined ? { ...beside, x: turn.x + turn.width + gap } : beside;
         // the chip waits for the label to be placed: until then it is not drawn where it would cover the page
         const next = !open && chipBox === null ? null : { id, open, box: chipBox ?? placeQuickPanel(element, size, whole, spacing, offset), element, widest: Math.max(0, origin.width - 2 * spacing.inset) };
         setPlaced((before) => (JSON.stringify(before) === JSON.stringify(next) ? before : next));

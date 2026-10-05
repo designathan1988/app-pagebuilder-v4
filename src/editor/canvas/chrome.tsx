@@ -732,11 +732,13 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
           placed = null;
           placedToolbar = null;
         } else if (key !== placedFor) {
-          const gap = parseFloat(getComputedStyle(layer.current as HTMLDivElement).getPropertyValue('--space-2')) || 0;
-          // The label clears every control that lives on the element's top edge (A3.16: it never covers one, or the
-          // control could not be taken): the resize handles are --space-6 square with their whole box above the edge
-          // (the side's own translate), and the rotation zones stand a further --space-4 outside the corners (4.4).
+          // The label touches its element, --space-1 off its edge as the canonical label (design/final .ov-tag), and
+          // never covers a control (A3.16: the control could not be taken): the controls are among the boxes it keeps
+          // clear of, and only where every touching place is taken does it step out past them — the resize handles are
+          // --space-6 square with their whole box beyond the edge, and the rotation zones stand a further --space-4
+          // outside the corners (4.4). (The user's review of 2026-10-05, LR2: it stood that far off every element.)
           const spacing = getComputedStyle(layer.current as HTMLDivElement);
+          const gap = parseFloat(spacing.getPropertyValue('--space-1')) || 0;
           const clear = (parseFloat(spacing.getPropertyValue('--space-6')) || 0) + (parseFloat(spacing.getPropertyValue('--space-4')) || 0);
           // the selection's label sits above its element, and it clears the page's own content like every other label
           // (the label rule: never over page text — the boxes are the same contentBoxes the drop indicator's label
@@ -744,7 +746,7 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
           // While a text is edited in place, its toolbar sits above its label and the two are placed as one.
           const whole = tools === null ? size : { width: Math.max(size.width, tools.width), height: tools.height + gap + size.height };
           const content = [...contentBoxes(iframe).map((b) => local(b) as Box), ...controls];
-          const spot = placeLabel(first, whole, gap + clear, content, visibleCanvas(origin));
+          const spot = placeLabel(first, whole, gap, content, visibleCanvas(origin), null, clear);
           placed = tools === null ? spot : { placement: spot.placement, box: { x: spot.box.x, y: spot.box.y + tools.height + gap, ...size } };
           placedToolbar = tools === null ? null : { x: spot.box.x, y: spot.box.y };
         }

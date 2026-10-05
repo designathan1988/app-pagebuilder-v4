@@ -18,6 +18,8 @@ export interface Box {
 export type Placement = 'above' | 'inside' | 'below';
 
 // whether two boxes share any area
+// less than this is no overlap for a label's place (a layout's fractional pixels)
+const SLACK = 1;
 export const overlaps = (a: Box, b: Box) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 const within = (a: Box, area: Box) => a.x >= area.x && a.y >= area.y && a.x + a.width <= area.x + area.width && a.y + a.height <= area.y + area.height;
 
@@ -90,11 +92,14 @@ export function visibleCanvas(origin: { readonly left: number; readonly top: num
   return { x: left - origin.left, y: top - origin.top, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
 }
 
-// The chrome's own controls drawn over the page (the resize handles, the Edit on canvas bands and radius corners, the
-// rotation zones), in the chrome layer's pixels: what a label must never cover either, or the press a person aims at
-// the control lands on the label, which stands for the element and starts a move (the label rule; A3.16).
+// The chrome's own controls drawn over the page (the resize handles, the bands and radius corners an Edit on canvas
+// mode pins, the north-east rotation zone), in the chrome layer's pixels: what a label must never cover either, or the
+// press a person aims at the control lands on the label, which stands for the element and starts a move (the label
+// rule; A3.16). The bands no mode pins wait faint along every edge of any selection (item 4.1) and the other rotation
+// zones draw nothing; were they obstacles, no place touching the element would ever be free and every label would
+// stand a band and a zone away from it (the user's review of 2026-10-05, LR2: 22 px off every element).
 export function controlBoxes(layer: HTMLElement, origin: { readonly x: number; readonly y: number }): Box[] {
-  return [...layer.querySelectorAll('[data-edit-handle], [data-resize-handle]:not([data-chrome="edge"]), [data-rotate-handle]')].map((element) => {
+  return [...layer.querySelectorAll('[data-edit-handle]:not(.chrome__band--auto), [data-resize-handle]:not([data-chrome="edge"]), [data-rotate-zone="ne"]')].map((element) => {
     const box = element.getBoundingClientRect();
     return { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height };
   });
@@ -116,20 +121,26 @@ function heldInside(box: Box, area: Box): Box {
 // receiver, so the three places are tried at its start and then at its far end (a line between two lines of text: the
 // text sits at the left, and the far end is empty), and where even those are not free the place covering the least
 // content wins — never the largest overlap just because it is the documented order.
-export function placeLabel(box: Box, size: { readonly width: number; readonly height: number }, gap: number, content: readonly Box[], canvas: Box, ghost: Box | null = null): { box: Box; placement: Placement; covers: boolean } {
+//
+// `stepOut` is how far further out a label may step when every place touching its element is taken (by a control on the
+// element's edge, the resize handles and rotation zones the selection's label must not cover): the places touching the
+// element come first, as the canonical label touches its frame (design/final .ov-tag), and the stepped-out ones after
+// them (the user's review of 2026-10-05, LR2: every selection label stood 24 px off its element).
+export function placeLabel(box: Box, size: { readonly width: number; readonly height: number }, gap: number, content: readonly Box[], canvas: Box, ghost: Box | null = null, stepOut = 0): { box: Box; placement: Placement; covers: boolean } {
   const far = box.x + box.width - size.width;
   // 'inside' needs the label to fit within the element it names: a label taller than the element spills past its
   // bottom edge and reads as a label of whatever lies there (a paragraph one line tall), so the corner is offered only
   // where the label fits it
   const fitsInside = size.height <= box.height && size.width <= box.width;
-  const places: { box: Box; placement: Placement }[] = [
-    { placement: 'above', box: { x: box.x, y: box.y - gap - size.height, ...size } },
-    ...(fitsInside ? [{ placement: 'inside' as const, box: { x: box.x + gap, y: box.y + gap, ...size } }] : []),
-    { placement: 'below', box: { x: box.x, y: box.y + box.height + gap, ...size } },
-    { placement: 'above', box: { x: far, y: box.y - gap - size.height, ...size } },
-    { placement: 'below', box: { x: far, y: box.y + box.height + gap, ...size } },
-    ...(fitsInside ? [{ placement: 'inside' as const, box: { x: far - gap, y: box.y + gap, ...size } }] : []),
+  const around = (out: number): { box: Box; placement: Placement }[] => [
+    { placement: 'above', box: { x: box.x, y: box.y - out - size.height, ...size } },
+    ...(fitsInside ? [{ placement: 'inside' as const, box: { x: box.x + out, y: box.y + out, ...size } }] : []),
+    { placement: 'below', box: { x: box.x, y: box.y + box.height + out, ...size } },
+    { placement: 'above', box: { x: far, y: box.y - out - size.height, ...size } },
+    { placement: 'below', box: { x: far, y: box.y + box.height + out, ...size } },
+    ...(fitsInside ? [{ placement: 'inside' as const, box: { x: far - out, y: box.y + out, ...size } }] : []),
   ];
+  const places = [...around(gap), ...(stepOut > 0 ? around(gap + stepOut) : [])];
   const clear = (p: { box: Box }) => ghost === null || !overlaps(p.box, ghost);
   // how much of the label's area covers page content, in square pixels
   const covered = (b: Box) =>
@@ -139,7 +150,10 @@ export function placeLabel(box: Box, size: { readonly width: number; readonly he
       return width > 0 && height > 0 ? sum + width * height : sum;
     }, 0);
   const candidates = places.map((p) => (within(p.box, canvas) ? p : { ...p, box: heldInside(p.box, canvas) }));
-  const free = candidates.find((p) => !content.some((c) => overlaps(p.box, c)) && clear(p));
+  // a place is free of what it meets by less than a pixel: the boxes are read from a layout of fractional pixels, and a
+  // label ending at its element's edge met the corner handle beside that edge by its rounding (LR2)
+  const meets = (a: Box, b: Box) => overlaps({ x: a.x + SLACK, y: a.y + SLACK, width: a.width - 2 * SLACK, height: a.height - 2 * SLACK }, b);
+  const free = candidates.find((p) => !content.some((c) => meets(p.box, c)) && clear(p));
   const fallback = places.find((p) => p.placement === 'below') as { box: Box; placement: Placement };
   const best = candidates.reduce((held, p) => (covered(p.box) < covered(held.box) ? p : held), { ...fallback, box: heldInside(fallback.box, canvas) });
   const chosen = { ...(free ?? best), covers: free === undefined };

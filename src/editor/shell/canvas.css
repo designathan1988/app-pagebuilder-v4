@@ -1002,8 +1002,12 @@
   white-space: nowrap;
 }
 
+/* the label touches its element, so it may lie over the faint bands and the side grips along its edge (no z-index,
+   1, 2): it stands for the element, and a press on it selects and drags the element; the handles, the rotation zones
+   (6), the quick panel's chip (5) and the anchor tabs (7) stay over it (the user's review of 2026-10-05, LR2) */
 .chrome__label {
   position: absolute;
+  z-index: 3;
   display: inline-flex;
   align-items: baseline;
   gap: var(--space-2);

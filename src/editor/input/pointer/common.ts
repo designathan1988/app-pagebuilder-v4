@@ -217,6 +217,9 @@ export function chromeControl(at: Point, selector: string, target: EventTarget |
   // a press on a control of the editor's own — a drawn door, an anchor tab among them — is that control's, never one
   // of the chrome's handles drawn over the same point (a tab stands beside the edge its handle sits on)
   if (target instanceof Element && target.closest('[data-door]') !== null) return null;
+  // a press on an element's label is the label's (it selects and drags the element it names): the label touches its
+  // element and may lie over a faint band along its edge, drawn under it (canvas.css; the user's review of 2026-10-05)
+  if (target instanceof Element && target.closest('[data-canvas-overlay] [data-label-for]') !== null) return null;
   // Only a press that lands on the stage looks past its own target: a press on the page keeps its own door (a marquee
   // on a container's own area, a guide from a ruler), and a press on any editor surface over the canvas — a panel, the
   // quick panel, the text toolbar, the command bar, a dialog — keeps it too, or a handle drawn underneath would take

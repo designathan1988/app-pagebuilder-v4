@@ -23,7 +23,7 @@ Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests pas
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
 | `palette-click-insert` | Insert Section, Container, Heading and Paragraph by clicking the Insert panel | yes | 7 | 3 | [palette-click-insert](../spec/BEHAVIOUR.md#palette-click-insert) | 5 | passes 19/19 |
-| `select-click` | Select an element by clicking it on the canvas | yes | 7 | 5 | [select-click](../spec/BEHAVIOUR.md#select-click) | 6 | passes 10/10 |
+| `select-click` | Select an element by clicking it on the canvas | yes | 7 | 5 | [select-click](../spec/BEHAVIOUR.md#select-click) | 7 | passes 10/10 |
 | `layers-tree` | Layers panel shows the document tree and selects in sync with the canvas | yes | 5 | 5 | [layers-tree](../spec/BEHAVIOUR.md#layers-tree) | 5 | passes 5/5 |
 | `undo-redo` | Undo and redo every document change | yes | 5 | 5 | [undo-redo](../spec/BEHAVIOUR.md#undo-redo) | 3 | passes 9/9 |
 | `delete-element` | Delete the selected element with Delete or Backspace | yes | 6 | 3 | [delete-element](../spec/BEHAVIOUR.md#delete-element) | 2 | passes 11/11 |

@@ -6292,8 +6292,9 @@ None for resizing in Pager (the Size fields in the Inspector and quick panel are
   further, an edge drag carries the other dimension. Every other element keeps its ratio only while Shift is held, as
   before. The `resize` gesture's modifier is declared once, as `toggle-aspect-ratio` (interactions.json).
 - **The label carries the element's own size** (`canvas.measure.size`, `data-chrome="label-size"`), live while a resize
-  goes on, and **it never covers a handle** (A3.16): it stands a handle's half above the element's top edge, so the
-  north, north-west and north-east handles stay takeable.
+  goes on, and **it never covers a handle** (A3.16): it touches the element where no handle stands in the way, and steps
+  out past the handles only where every touching place meets one, so the north, north-west and north-east handles stay
+  takeable (select-click, Problem 7).
 
 The scenarios of this feature say the above: `the-west-handle-moves-the-left-edge-and-keeps-the-right-one`,
 `the-north-handle-moves-the-top-edge-and-keeps-the-bottom-one`, `a-north-east-corner-handle-moves-the-top-edge`,
@@ -6608,6 +6609,18 @@ The outline follows the element at any zoom (mapped through the iframe's CSS zoo
    over a card's price; a press on the price selected and dragged the button). Required: the label covers the least it
    can, and then takes no press — a press there reaches the page under it; the label takes presses (select, drag) only
    where it covers nothing.
+7. **Every label stood about 22 px off its element** (the user's review of 2026-10-05, LR2: "o rótulo da moldura de
+   seleção e o quick panel todos posicionados errados" — a link's label 22 px under it, a footer's 22 px over it, the
+   quick panel's chip beside it): the faint margin bands that wait along every edge of any selection (item 4.1) and the
+   rotation zones that draw nothing were counted as controls the label must clear, and every place was pushed out by a
+   handle and a zone's room, so no place touching the element was ever tried. Required: the label touches its element,
+   --space-1 off its edge as the canonical label (design/final .ov-tag): above, inside its top-left corner, or below,
+   at its start or its end, the first that covers no page text, no resize handle, no band a mode pins and not the
+   north-east rotation zone (the one drawn); only where every touching place is taken does it step out past the handles
+   (`placeLabel`'s stepOut). A place met by less than a pixel is free (a fractional layout's rounding). The label lies
+   over the faint bands and the side grips (z-index 3) and a press on it is its own, never a band's beneath; the
+   handles, the rotation zones, the chip and the anchor tabs stay over it; the chip beside it steps past whichever
+   rotation zone it meets (`tests/e2e/selection-label-touches.spec.ts`).
 
 
 The Select tool is the canvas toolbar's first tool (view.selectTool, also V): the editor's ordinary way of working, where a click selects and a drag moves or resizes what is selected. Choosing it puts any other tool away (the Layout tool, the grid edit mode); its button is pressed while no other tool is on.
