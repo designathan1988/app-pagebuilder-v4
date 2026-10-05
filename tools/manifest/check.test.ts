@@ -187,7 +187,8 @@ describe('manifest:check', () => {
     });
     expect([...twoProperties]).toEqual(['label-term']);
     const notTheTerm = mutated((m) => {
-      ((m.catalogues as Json)['pt-BR'] as Json)['property.padding'] = 'Espaçamento interno';
+      // (the glossary's term is Espaçamento interno since DEC-67; Preenchimento is the SVG fill's)
+      ((m.catalogues as Json)['pt-BR'] as Json)['property.padding'] = 'Preenchimento';
     });
     expect([...notTheTerm]).toEqual(['label-term']);
   });

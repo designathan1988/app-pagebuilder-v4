@@ -14,18 +14,18 @@
       "property": "padding",
       "terms": {
         "en": "Padding",
-        "pt-BR": "Padding"
+        "pt-BR": "Espaçamento interno"
       },
-      "note": "The space inside the border. pt-BR keeps the CSS word: \"Preenchimento\" is the SVG fill."
+      "note": "The space inside the border. pt-BR: \"Espaçamento interno\" (DEC-67, the user's review of 2026-10-05: the English word stood beside \"Margem\" in the same box), never \"Preenchimento\", which is the SVG fill; Figma's Portuguese help calls it \"Espaçamento\"."
     },
     {
       "id": "gap",
       "property": "gap",
       "terms": {
         "en": "Gap",
-        "pt-BR": "Gap"
+        "pt-BR": "Espaçamento entre"
       },
-      "note": "The space between the children of a flex or grid container. Never \"Espaçamento\", which reads as margin or padding."
+      "note": "The space between the children of a flex or grid container. pt-BR: \"Espaçamento entre\" (DEC-67; Figma's Portuguese help: \"Espaçamento entre\"), never \"Espaçamento\" alone, which reads as margin or padding; \"entre\" and \"interno\" tell it from the padding."
     },
     {
       "id": "background",

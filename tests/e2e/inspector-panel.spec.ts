@@ -628,8 +628,8 @@ test('Position is a keyword menu when its words do not fit, and choosing an item
   await expect(page.locator('[data-door="style.set#inspector-text-align"][aria-pressed]')).not.toHaveCount(0);
 });
 
-// An empty shadow editor is one row (spec shadow-editor, Problems in Pager 5; the audit's S-025): its name, "No shadow
-// yet." and the + at its end; Remove every shadow is drawn once there is a shadow to remove.
+// An empty shadow editor is one row (spec shadow-editor, Problems in Pager 5; the audit's S-025): its list's name,
+// "No shadow yet." and the + at its end; Remove every shadow is drawn once there is a shadow to remove.
 test('an empty shadow editor is one row, and Remove every shadow comes with the first shadow', runs(OPEN, ROW, SECTION, 'style.setShadows#inspector-box-shadow-shadow-add', 'style.setShadows#inspector-box-shadow-shadow-reset'), async ({ page }) => {
   await openAurora(page);
   await control(page, ROW, { args: { target: 'n-hero' } }).click();
@@ -639,7 +639,8 @@ test('an empty shadow editor is one row, and Remove every shadow comes with the 
   const add = control(page, ADD_SHADOW);
   await expect(add).toHaveAttribute('aria-label', 'Add a shadow to Box shadow');
   const head = add.locator('xpath=ancestor::div[contains(@class,"field-row")][1]');
-  await expect(head).toContainText('Box shadow');
+  // its name: the list's (Layers), the row it stands in naming the property (the user's review of 2026-10-05)
+  await expect(head).toContainText('Layers');
   await expect(head).toContainText('No shadow yet.');
   expect((await head.boundingBox())?.height ?? 0).toBeLessThan(32);
   await expect(control(page, RESET_SHADOWS)).toHaveCount(0);

@@ -86,9 +86,10 @@ function EditButton({ entry, door, args, ready, pressed = null, onDone }: {
   );
 }
 
-// The editor's head row: the property's name, "No shadow yet." while it holds none, and Add a shadow as the small +
-// at the row's end — one row for an empty editor (the audit's S-025: Add, the note in the label column and a disabled
-// Remove every shadow took three)
+// The editor's head row: its list's name (Layers: the row it stands in names the property, Text shadow or Shadow, and
+// the list read "Text shadow" inside "Text shadow": the user's review of 2026-10-05), "No shadow yet." while it holds
+// none, and Add a shadow as the small + at the row's end — one row for an empty editor (the audit's S-025: Add, the
+// note in the label column and a disabled Remove every shadow took three)
 function AddRow({ entry, door, property, empty, ready, onDone }: { readonly entry: DoorEntry; readonly door: DoorState; readonly property: string; readonly empty: boolean; readonly ready: boolean; readonly onDone: () => void }) {
   const t = useT();
   const store = useStore();
@@ -96,7 +97,7 @@ function AddRow({ entry, door, property, empty, ready, onDone }: { readonly entr
   const appearance = useFieldAppearance([property]);
   return (
     <div className={`field-row shadow__head${ready ? '' : ' is-unavailable'}`} data-origin={appearance.kind}>
-      <span className="field-row__label">{propertyWord(t, property)}</span>
+      <span className="field-row__label" title={property}>{t('inspector.shadow.layers')}</span>
       <span className="shadow__add">
         {empty ? <span className="shadow__none">{t('inspector.shadow.none')}</span> : null}
         <button
