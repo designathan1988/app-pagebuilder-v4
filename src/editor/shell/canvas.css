@@ -158,9 +158,13 @@
   background: var(--color-surface);
 }
 
+/* the Code view's pane takes its column and no more: a flex item does not shrink below its content without
+   min-width: 0 (CSS Flexbox §4.5), and the longest line widened it under the inspector (LR2: the file named "ind",
+   the lines' ends hidden, nothing scrolled); its body scrolls the lines across */
 .centre--code .code-pane {
   flex: 1;
   width: auto;
+  min-width: 0;
   border-left: none;
 }
 

@@ -9376,6 +9376,8 @@ Required (manifest feature `code-panel-view`):
   its file shows: the active file in the Code view or in Split. Over the canvas alone the page's tab is current, the
   code files' tabs stay open and unmarked (FT1: every open file's tab was drawn current beside the page's).
 
+
+The Code view's pane takes its column and no more (the user's review of 2026-10-05, LR2: its longest line widened it 153 px under the inspector, the file named "ind", the lines' ends hidden and nothing scrolled): it may shrink below its content (min-width: 0, CSS Flexbox §4.5), and its body scrolls the lines across (`code-panel.spec.ts`).
 ## code-panel-copy-download
 
 ### Our rule

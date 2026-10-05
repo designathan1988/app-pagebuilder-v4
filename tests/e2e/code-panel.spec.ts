@@ -261,3 +261,29 @@ test('a text file shows its own tab, its extension, and an editor named after it
   await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('[data-code-editor]')).toHaveAttribute('aria-label', 'The text of notes.txt');
 });
+
+// The Code view keeps its pane within its column (the user's review of 2026-10-05, LR2: with the canonical project the
+// pane was 993 px wide in an 840 px column, 153 px of it under the inspector — the file's name read "ind", the lines'
+// ends were hidden and nothing scrolled to them; a flex item does not shrink below its content without min-width: 0,
+// CSS Flexbox §4.5). Its lines scroll across inside it.
+test('the Code view keeps the pane in its column, the file named whole and the long lines scrolled across', runs(OPEN, VIEW('code')), async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openEditor(page);
+  const chooser = page.waitForEvent('filechooser');
+  await runDoor(page, OPEN);
+  await (await chooser).setFiles({ name: 'canonical.json', mimeType: 'application/json', buffer: fs.readFileSync('manifest/features/fixtures/canonical.json') });
+  await runDoor(page, VIEW('code'));
+  const found = await page.evaluate(() => {
+    const box = (s: string) => document.querySelector(s)?.getBoundingClientRect() ?? null;
+    const work = box('.centre__work');
+    const pane = box('.code-pane');
+    const name = document.querySelector<HTMLElement>('.code-pane__name');
+    const body = document.querySelector<HTMLElement>('.code-pane__body');
+    return {
+      inside: work !== null && pane !== null && pane.right <= work.right + 1,
+      named: name !== null && name.scrollWidth <= name.clientWidth + 1 && (name.getBoundingClientRect().right <= (pane?.right ?? 0) + 1),
+      scrolls: body !== null && body.scrollWidth > body.clientWidth,
+    };
+  });
+  expect(found).toEqual({ inside: true, named: true, scrolls: true });
+});
