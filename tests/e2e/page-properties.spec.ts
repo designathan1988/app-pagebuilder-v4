@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import { expect, test, type Page } from '../support/test.ts';
 import { isFeatureBuilt } from '../../src/app/features.ts';
+import { DOCUMENT_VERSION } from '../../src/core/document/model.ts';
 import type { FeatureId } from '../../src/generated/ids.ts';
 import { DOORS, control, openMenu, runDoor, runs } from './door.ts';
 import { unzip } from '../../tools/runner/unzip.ts';
@@ -174,7 +175,8 @@ test('an authored page can edit its HTML root classes and undo the change', runs
   await page.screenshot({ path: '.cache/logs/qa268/root-classes-undone.png' });
 });
 
-test('a saved version-one page opens with its authored content in version three', runs(OPEN), async ({ page }) => {
+// migrated through every step to the format this app writes (version 3 when the test was written, 4 since DEC-61)
+test('a saved version-one page opens with its authored content in the current format version', runs(OPEN), async ({ page }) => {
   const legacy = JSON.parse(fs.readFileSync(FIXTURE, 'utf8')) as Record<string, unknown>;
   legacy.version = 1;
   await openMenu(page, 'file');
@@ -184,7 +186,7 @@ test('a saved version-one page opens with its authored content in version three'
   await expect(drawn(page, 'n-intro')).toHaveCount(1);
   expect((await root(page)).name).toBe('Page');
   const version = await page.evaluate(() => (window as unknown as { __builderTestPort: { document(): { version: number } } }).__builderTestPort.document().version);
-  expect(version).toBe(3);
+  expect(version).toBe(DOCUMENT_VERSION);
 });
 
 test('a setting kept with Enter is stored on the page root, never renames it, and undo gives back the value and the selection', runs(OPEN, PAGE_PROPERTIES, TITLE, SELECT, UNDO, REDO), async ({ page }) => {
