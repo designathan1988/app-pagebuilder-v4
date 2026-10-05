@@ -9,37 +9,40 @@ degraded HAR replay. A fixed browser clock and seeded Math.random are applied be
 imported with File › Import
 HTML, exported with File › Export, and compared with the live original at every breakpoint: the share of pixels alike
 over the whole page (a channel within 24 of
-255), scaled by the shorter page over the longer. Target: 100 % at every breakpoint (STG-12.6).
+255), scaled by the shorter page over the longer. Target: 98 % at every breakpoint (STG-12.6, DEC-62). A site counts
+when its reference is current and every breakpoint reaches the target; what the site blocks or never serves, and a
+live page that changes or does not settle, are observations beside the score. A site under the target is
+inconclusive when, at every breakpoint under it, its own two live loads also differ by more (live/live under 98 %).
 
-Sites at the target: 0 of 20. Measured: 20.
+Sites at the target: 19 of 20. Below the target: 1. Inconclusive (the site varies): 0. Unmeasured: 0. Measured: 20.
 
-| Site | Kind | Files | Elements | 1440px | 1180px | 834px | 390px | Problem |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [mdn](https://developer.mozilla.org/en-US/) | documentation | 64 | 676 | 100.0 | 100.0 | 100.0 | 100.0 | 25 captured resources unavailable or blocked; see capture snapshot package |
-| [govuk](https://www.gov.uk/) | documentation | 20 | 576 | 100.0 | 100.0 | 100.0 | 100.0 | 27 captured resources unavailable or blocked; see capture snapshot package |
-| [w3c](https://www.w3.org/) | documentation | 30 | 343 | 100.0 | 100.0 | 100.0 | 100.0 | 17 captured resources unavailable or blocked; see capture snapshot package |
-| [react](https://react.dev/) | React application | 68 | 1751 | 100.0 | 100.0 | 98.5 ✗ | 99.5 ✗ | 37 captured resources unavailable or blocked; see capture snapshot package |
-| [nextjs](https://nextjs.org/) | React application | 164 | 2367 | 100.0 | 100.0 | 100.0 | 100.0 | 30 captured resources unavailable or blocked; see capture snapshot package |
-| [vue](https://vuejs.org/) | Vue application | 61 | 716 | 100.0 | 100.0 | 100.0 | 100.0 | Live page changes across loads from the same start time and seed at 1440px (97.7%), 834px (97.9%); 46 captured resources unavailable or blocked; see capture snapshot package |
-| [nuxt](https://nuxt.com/) | Vue application | 85 | 1825 | 96.4 ✗ | 96.5 ✗ | 97.5 ✗ | 97.0 ✗ | Live page changes across loads from the same start time and seed at 1440px (98.9%); Live page did not settle at 1440px, 1180px, 834px, 390px; 90 captured resources unavailable or blocked; see capture snapshot package |
-| [svelte](https://svelte.dev/) | landing | 54 | 351 | 99.8 ✗ | 99.3 ✗ | 98.3 ✗ | 99.2 ✗ | Live page did not settle at 1440px, 1180px, 834px, 390px; 105 captured resources unavailable or blocked; see capture snapshot package |
-| [astro](https://astro.build/) | landing | 38 | 1800 | 99.5 ✗ | 100.0 | 100.0 | 100.0 | 26 captured resources unavailable or blocked; see capture snapshot package |
-| [bootstrap](https://getbootstrap.com/) | landing | 27 | 1196 | 100.0 | 100.0 | 99.4 ✗ | 100.0 | 11 captured resources unavailable or blocked; see capture snapshot package |
-| [tailwind](https://tailwindcss.com/) | landing | 318 | 2292 | 99.8 ✗ | 100.0 | 100.0 | 99.9 ✗ | Live page changes across loads from the same start time and seed at 1180px (98.9%); Live page did not settle at 1180px, 834px; 36 captured resources unavailable or blocked; see capture snapshot package |
-| [overreacted](https://overreacted.io/) | blog | 26 | 305 | 100.0 | 100.0 | 100.0 | 100.0 | 13 captured resources unavailable or blocked; see capture snapshot package |
-| [frontendmastersblog](https://blog.master.dev/) | blog | 66 | 417 | 100.0 | 100.0 | 100.0 | 100.0 | 26 captured resources unavailable or blocked; see capture snapshot package |
-| [smashing](https://www.smashingmagazine.com/) | blog | 49 | 725 | 100.0 | 100.0 | 100.0 | 100.0 | 38 captured resources unavailable or blocked; see capture snapshot package |
-| [bellroy](https://bellroy.com/) | shop | 264 | 2182 | 100.0 | 98.2 ✗ | 99.5 ✗ | 98.7 ✗ | Live page changes across loads from the same start time and seed at 834px (98.5%); 493 captured resources unavailable or blocked; see capture snapshot package |
-| [allbirds](https://www.allbirds.com/) | shop | 290 | 1774 | 100.0 | 100.0 | 100.0 | 99.5 ✗ | Live page did not settle at 1440px; 87 captured resources unavailable or blocked; see capture snapshot package |
-| [typewolf](https://www.typewolf.com/) | web fonts | 63 | 690 | 100.0 | 100.0 | 100.0 | 100.0 | 60 captured resources unavailable or blocked; see capture snapshot package |
-| [gridbyexample](https://gridbyexample.com/) | grid | 20 | 94 | 99.8 ✗ | 99.8 ✗ | 99.7 ✗ | 99.6 ✗ | 23 captured resources unavailable or blocked; see capture snapshot package |
-| [everylayout](https://every-layout.dev/) | grid | 60 | 329 | 100.0 | 100.0 | 100.0 | 100.0 | 6 captured resources unavailable or blocked; see capture snapshot package |
-| [animatestyle](https://animate.style/) | animation | 22 | 1350 | 100.0 | 100.0 | 100.0 | 100.0 | 10 captured resources unavailable or blocked; see capture snapshot package |
+| Site | Kind | Files | Elements | 1440px | 1180px | 834px | 390px | Verdict | Observations |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [mdn](https://developer.mozilla.org/en-US/) | documentation | 64 | 676 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 25 captured resources unavailable or blocked; see capture snapshot package |
+| [govuk](https://www.gov.uk/) | documentation | 20 | 576 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 27 captured resources unavailable or blocked; see capture snapshot package |
+| [w3c](https://www.w3.org/) | documentation | 30 | 343 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 17 captured resources unavailable or blocked; see capture snapshot package |
+| [react](https://react.dev/) | React application | 68 | 1751 | 100.0 | 100.0 | 98.5 | 99.5 | at the target | 37 captured resources unavailable or blocked; see capture snapshot package |
+| [nextjs](https://nextjs.org/) | React application | 164 | 2367 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 30 captured resources unavailable or blocked; see capture snapshot package |
+| [vue](https://vuejs.org/) | Vue application | 61 | 716 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | Live page changes across loads from the same start time and seed at 1440px (97.7%), 834px (97.9%); 46 captured resources unavailable or blocked; see capture snapshot package |
+| [nuxt](https://nuxt.com/) | Vue application | 85 | 1825 | 96.3 ✗ | 96.5 ✗ | 97.5 ✗ | 97.0 ✗ | below the target at 1440px, 1180px, 834px, 390px | Live page changes across loads from the same start time and seed at 1440px (98.0%); Live page did not settle at 1440px, 1180px, 834px, 390px; 90 captured resources unavailable or blocked; see capture snapshot package |
+| [svelte](https://svelte.dev/) | landing | 54 | 351 | 99.8 | 99.3 | 98.3 | 99.2 | at the target | Live page did not settle at 1440px, 1180px, 834px, 390px; 105 captured resources unavailable or blocked; see capture snapshot package |
+| [astro](https://astro.build/) | landing | 38 | 1800 | 99.5 | 100.0 | 100.0 | 100.0 | at the target | 26 captured resources unavailable or blocked; see capture snapshot package |
+| [bootstrap](https://getbootstrap.com/) | landing | 27 | 1196 | 100.0 | 100.0 | 99.4 | 100.0 | at the target | 11 captured resources unavailable or blocked; see capture snapshot package |
+| [tailwind](https://tailwindcss.com/) | landing | 318 | 2292 | 99.8 | 100.0 | 100.0 | 99.9 | at the target | Live page changes across loads from the same start time and seed at 1180px (98.9%); Live page did not settle at 1180px, 834px; 36 captured resources unavailable or blocked; see capture snapshot package |
+| [overreacted](https://overreacted.io/) | blog | 26 | 305 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 13 captured resources unavailable or blocked; see capture snapshot package |
+| [frontendmastersblog](https://blog.master.dev/) | blog | 66 | 417 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 26 captured resources unavailable or blocked; see capture snapshot package |
+| [smashing](https://www.smashingmagazine.com/) | blog | 49 | 725 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 38 captured resources unavailable or blocked; see capture snapshot package |
+| [bellroy](https://bellroy.com/) | shop | 264 | 2182 | 100.0 | 98.2 | 99.5 | 98.7 | at the target | Live page changes across loads from the same start time and seed at 834px (98.5%); 493 captured resources unavailable or blocked; see capture snapshot package |
+| [allbirds](https://www.allbirds.com/) | shop | 290 | 1774 | 100.0 | 100.0 | 100.0 | 99.5 | at the target | Live page did not settle at 1440px; 87 captured resources unavailable or blocked; see capture snapshot package |
+| [typewolf](https://www.typewolf.com/) | web fonts | 63 | 690 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 60 captured resources unavailable or blocked; see capture snapshot package |
+| [gridbyexample](https://gridbyexample.com/) | grid | 20 | 94 | 99.8 | 99.8 | 99.7 | 99.6 | at the target | 23 captured resources unavailable or blocked; see capture snapshot package |
+| [everylayout](https://every-layout.dev/) | grid | 60 | 329 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 6 captured resources unavailable or blocked; see capture snapshot package |
+| [animatestyle](https://animate.style/) | animation | 22 | 1350 | 100.0 | 100.0 | 100.0 | 100.0 | at the target | 10 captured resources unavailable or blocked; see capture snapshot package |
 
 ## Live-load stability
 
 Two independent live navigations at the same width use the same fixed clock, random seed and initial cookies.
-Their unchanged pixel comparison must reach at least 99 % before the site counts as a valid fidelity result.
+Their unchanged pixel comparison is marked under 99 %; under the target it makes a site under the target inconclusive.
 
 | Site | 1440px live/live | 1180px live/live | 834px live/live | 390px live/live |
 | --- | --- | --- | --- | --- |
@@ -49,7 +52,7 @@ Their unchanged pixel comparison must reach at least 99 % before the site counts
 | react | 100.0 % | 100.0 % | 100.0 % | 100.0 % |
 | nextjs | 99.9 % | 100.0 % | 100.0 % | 100.0 % |
 | vue | 97.7 ✗ % | 100.0 % | 97.9 ✗ % | 100.0 % |
-| nuxt | 98.9 ✗ % | 100.0 % | 100.0 % | 100.0 % |
+| nuxt | 98.0 ✗ % | 100.0 % | 100.0 % | 100.0 % |
 | svelte | 100.0 % | 100.0 % | 100.0 % | 100.0 % |
 | astro | 99.5 % | 100.0 % | 100.0 % | 100.0 % |
 | bootstrap | 99.9 % | 99.9 % | 99.4 % | 99.6 % |
@@ -105,7 +108,7 @@ Replay agreement never replaces the live target or changes the 98 % export thres
 | react | 100.0 % | 100.0 % | 99.7 % | 99.9 % |
 | nextjs | 100.0 % | 100.0 % | 100.0 % | 100.0 % |
 | vue | 97.7 % | 100.0 % | 100.0 % | 98.6 % |
-| nuxt | 99.8 % | 100.0 % | 100.0 % | 100.0 % |
+| nuxt | 99.1 % | 100.0 % | 100.0 % | 100.0 % |
 | svelte | 67.0 % | 66.5 % | 75.7 % | 87.9 % |
 | astro | 99.5 % | 100.0 % | 100.0 % | 100.0 % |
 | bootstrap | 100.0 % | 99.9 % | 99.4 % | 99.6 % |

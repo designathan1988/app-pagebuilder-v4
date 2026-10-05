@@ -1,13 +1,15 @@
 // The capture corpus's report (npm run capture:corpus writes it after the runs): docs/CAPTURE-CORPUS.md, generated from
 // the records of .cache/corpus/records/ — each site's fidelity at every breakpoint (the share of pixels alike over the
-// whole page, scaled by the shorter page over the longer: the study's "adjusted" figure), against the target of 98 %.
+// whole page, scaled by the shorter page over the longer: the study's "adjusted" figure), against the target of 98 %
+// (DEC-62); which sites count is the rule of tools/capture/score.ts.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import type { SiteRecord } from './corpus.capture.ts';
+import { siteVerdict, TARGET, type SiteVerdict } from './score.ts';
+import { WIDTHS } from '../journey/fidelity.ts';
 
 const RECORDS = path.join('.cache', 'corpus', 'records');
-const TARGET = 100;
 const sites = (JSON.parse(fs.readFileSync('tools/capture/corpus.json', 'utf8')) as { sites: { id: string }[] }).sites;
 const records = sites.flatMap((site) => {
   const file = path.join(RECORDS, `${site.id}.json`);
@@ -15,9 +17,11 @@ const records = sites.flatMap((site) => {
   const one = JSON.parse(fs.readFileSync(file, 'utf8')) as SiteRecord;
   const manifest = path.join('.cache', 'corpus', 'references', site.id, 'manifest.json');
   const current = fs.existsSync(manifest) ? createHash('sha256').update(fs.readFileSync(manifest)).digest('hex') : null;
-  return [current !== null && one.referenceManifestSha256 === current ? one : { ...one, widths: [], problem: 'Stale or unbound reference; remeasure before using this score' }];
+  const fresh = current !== null && one.referenceManifestSha256 === current;
+  const record = fresh ? one : { ...one, widths: [], problem: 'Stale or unbound reference; remeasure before using this score' };
+  return [{ record, verdict: siteVerdict(record, fresh, WIDTHS) }];
 });
-const widths = [...new Set(records.flatMap((one) => one.widths.map((w) => w.width)))].sort((a, b) => b - a);
+const widths = [...new Set(records.flatMap(({ record }) => record.widths.map((w) => w.width)))].sort((a, b) => b - a);
 const cell = (record: SiteRecord, width: number) => {
   const one = record.widths.find((w) => w.width === width);
   return one === undefined ? '—' : `${one.pixelMatchAdjusted.toFixed(1)}${one.pixelMatchAdjusted >= TARGET ? '' : ' ✗'}`;
@@ -36,7 +40,15 @@ const readinessCell = (record: SiteRecord, width: number) => {
   const problems = [!one.quiescent ? 'DOM active' : '', one.pendingImages > 0 ? `${one.pendingImages} images pending` : '', one.scrollTruncated ? 'scroll incomplete' : '', !one.networkIdle ? 'network active' : '', one.unseekableVideos > 0 ? `${one.unseekableVideos} videos unseekable` : ''].filter((part) => part !== '');
   return problems.length === 0 ? 'ready' : problems.join('; ');
 };
-const reached = records.filter((one) => one.problem === null && one.widths.length > 0 && one.widths.every((w) => w.pixelMatchAdjusted >= TARGET)).length;
+const counted = (kind: SiteVerdict['kind']) => records.filter(({ verdict }) => verdict.kind === kind).length;
+const reached = counted('reached');
+const verdictCell = (verdict: SiteVerdict) => {
+  const at = verdict.widths.map((w) => `${w}px`).join(', ');
+  if (verdict.kind === 'reached') return 'at the target';
+  if (verdict.kind === 'below') return `below the target at ${at}`;
+  if (verdict.kind === 'inconclusive') return `inconclusive: the site varies (${at})`;
+  return 'unmeasured';
+};
 const lines = [
   '# Capture corpus',
   '',
@@ -49,22 +61,25 @@ const lines = [
   'imported with File › Import',
   'HTML, exported with File › Export, and compared with the live original at every breakpoint: the share of pixels alike',
   'over the whole page (a channel within 24 of',
-  `255), scaled by the shorter page over the longer. Target: ${TARGET} % at every breakpoint (STG-12.6).`,
+  `255), scaled by the shorter page over the longer. Target: ${TARGET} % at every breakpoint (STG-12.6, DEC-62). A site counts`,
+  'when its reference is current and every breakpoint reaches the target; what the site blocks or never serves, and a',
+  'live page that changes or does not settle, are observations beside the score. A site under the target is',
+  `inconclusive when, at every breakpoint under it, its own two live loads also differ by more (live/live under ${TARGET} %).`,
   '',
-  `Sites at the target: ${reached} of ${sites.length}. Measured: ${records.length}.`,
+  `Sites at the target: ${reached} of ${sites.length}. Below the target: ${counted('below')}. Inconclusive (the site varies): ${counted('inconclusive')}. Unmeasured: ${counted('unmeasured')}. Measured: ${records.length}.`,
   '',
-  `| Site | Kind | Files | Elements | ${widths.map((w) => `${w}px`).join(' | ')} | Problem |`,
-  `| --- | --- | --- | --- | ${widths.map(() => '---').join(' | ')} | --- |`,
-  ...records.map((one) => `| [${one.id}](${one.url}) | ${one.kind} | ${one.files} | ${one.elements ?? '—'} | ${widths.map((w) => cell(one, w)).join(' | ')} | ${one.problem ?? ''} |`),
+  `| Site | Kind | Files | Elements | ${widths.map((w) => `${w}px`).join(' | ')} | Verdict | Observations |`,
+  `| --- | --- | --- | --- | ${widths.map(() => '---').join(' | ')} | --- | --- |`,
+  ...records.map(({ record: one, verdict }) => `| [${one.id}](${one.url}) | ${one.kind} | ${one.files} | ${one.elements ?? '—'} | ${widths.map((w) => cell(one, w)).join(' | ')} | ${verdictCell(verdict)} | ${one.problem ?? ''} |`),
   '',
   '## Live-load stability',
   '',
   'Two independent live navigations at the same width use the same fixed clock, random seed and initial cookies.',
-  'Their unchanged pixel comparison must reach at least 99 % before the site counts as a valid fidelity result.',
+  'Their unchanged pixel comparison is marked under 99 %; under the target it makes a site under the target inconclusive.',
   '',
   `| Site | ${widths.map((w) => `${w}px live/live`).join(' | ')} |`,
   `| --- | ${widths.map(() => '---').join(' | ')} |`,
-  ...records.map((one) => `| ${one.id} | ${widths.map((w) => stabilityCell(one, w)).join(' | ')} |`),
+  ...records.map(({ record: one }) => `| ${one.id} | ${widths.map((w) => stabilityCell(one, w)).join(' | ')} |`),
   '',
   '## Live-load readiness',
   '',
@@ -72,7 +87,7 @@ const lines = [
   '',
   `| Site | ${widths.map((w) => `${w}px readiness`).join(' | ')} |`,
   `| --- | ${widths.map(() => '---').join(' | ')} |`,
-  ...records.map((one) => `| ${one.id} | ${widths.map((w) => readinessCell(one, w)).join(' | ')} |`),
+  ...records.map(({ record: one }) => `| ${one.id} | ${widths.map((w) => readinessCell(one, w)).join(' | ')} |`),
   '',
   '## Reference replay diagnostic',
   '',
@@ -82,7 +97,7 @@ const lines = [
   '',
   `| Site | ${widths.map((w) => `${w}px replay`).join(' | ')} |`,
   `| --- | ${widths.map(() => '---').join(' | ')} |`,
-  ...records.map((one) => `| ${one.id} | ${widths.map((w) => replayCell(one, w)).join(' | ')} |`),
+  ...records.map(({ record: one }) => `| ${one.id} | ${widths.map((w) => replayCell(one, w)).join(' | ')} |`),
   '',
 ];
 fs.writeFileSync(path.join('docs', 'CAPTURE-CORPUS.md'), lines.join('\n'));

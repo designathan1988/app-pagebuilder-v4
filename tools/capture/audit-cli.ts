@@ -26,7 +26,7 @@ const output = { generatedAt: new Date().toISOString(), sites: chosen.map((one) 
 fs.writeFileSync('.cache/logs/capture-import-audit.json', `${JSON.stringify(output, null, 2)}\n`);
 const markdown = [
   '# Automatic capture import audit', '',
-  'This report compares live DOM, Companion package, saved project JSON and observed exported DOM. It is read-only and never changes the pixel comparator, reference, score or 98%/100% acceptance decision.', '',
+  'This report compares live DOM, Companion package, saved project JSON and observed exported DOM. It is read-only and never changes the pixel comparator, reference, score or the 98 % acceptance target (DEC-62).', '',
   `Sites requested: ${chosen.length}; widths audited: ${rows.length}; unavailable widths: ${errors.length}.`, '',
   '| Boundary and kind | Issues |', '| --- | ---: |',
   ...summary.map(([name, count]) => `| ${name} | ${count} |`), '',
