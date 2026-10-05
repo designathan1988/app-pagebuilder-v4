@@ -21,7 +21,7 @@ const POSITION = 'position.setMode#inspector-position';
 
 const PROPERTIES = JSON.parse(fs.readFileSync('manifest/properties.json', 'utf8')) as {
   sections: { id: string; groups: { id: string }[] }[];
-  rows: { id: string; section: string; fields: { target: string; prefixKey: string | null }[] }[];
+  rows: { id: string; section: string; labelKey: string | null; fields: { target: string; prefixKey: string | null }[] }[];
   properties: { id: string; section: string; group: string }[];
   composites: { id: string; section: string; group: string }[];
 };
@@ -56,7 +56,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page.frameLocator('.frame__page').locator('[data-node="n-card-a"]')).toHaveCount(1);
 });
 
-test('two fields read together share one row, under the first one’s label, each keeping its own door', runs(OPEN, ROW, SECTION, WIDTH, HEIGHT), async ({ page }) => {
+test('two fields read together share one row, under the row’s label, each named and keeping its own door', runs(OPEN, ROW, SECTION, WIDTH, HEIGHT), async ({ page }) => {
   const pair = PROPERTIES.rows.find((r) => r.fields.some((f) => f.target === 'width'));
   expect(pair, 'properties.json declares the width|height row').toBeDefined();
   await control(page, ROW, { args: { target: 'n-card-a' } }).click();
@@ -75,11 +75,14 @@ test('two fields read together share one row, under the first one’s label, eac
   // pair, which is what it did while the fields carried steppers and a unit menu of their own at every width)
   expect(Math.round(first.y), 'both fields on one line').toBe(Math.round(second.y));
   expect(first.x, 'the height field in its own column, after the width').toBeLessThan(second.x);
-  // the row carries one label, the first property's, and the second field says which it is by its own prefix
+  // the row carries one label, the concept's (Size), and each field says which it is by its own short name, W and H as
+  // in the quick panel (the user's review of 2026-10-05: "Width" beside "H" read as two conventions)
   const labels = await row.locator('.field-row__label').evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
-  expect(labels).toEqual([EN['property.width']]);
-  const prefix = pair?.fields[1]?.prefixKey ?? null;
-  await expect(height.locator('.field__prefix'), 'the height field carries its short mark').toHaveText(prefix === null ? '' : (EN[prefix] ?? ''));
+  expect(labels).toEqual([EN[pair?.labelKey ?? 'property.width']]);
+  for (const [field, index] of [[width, 0], [height, 1]] as const) {
+    const prefix = pair?.fields[index]?.prefixKey ?? null;
+    await expect(field.locator('.field__prefix'), 'each field carries its short name').toHaveText(prefix === null ? '' : (EN[prefix] ?? ''));
+  }
   // each field writes its own property
   await width.locator('input').click();
   await page.keyboard.press('Control+A');
@@ -176,7 +179,9 @@ test('Essentials draws the Border as its composite rows, not as its per-side fie
   await setSectionOpen(page, 'border', true);
   const border = page.locator('.inspector-section[aria-label="Border"]');
   const drawn = await border.locator('.field-row[data-door], .field-pair, [data-pair]').evaluateAll((els) => els.map((el) => el.getAttribute('data-door') ?? el.getAttribute('data-pair') ?? ''));
-  expect(drawn, 'the Border row and the Radius row').toEqual(['border-and-colour', 'style.setRadius#inspector-border-radius-radius-editor']);
+  // the Border, its colour on a line of its own (a pair's half could not hold its name: the user's review of
+  // 2026-10-05), and the Radius
+  expect(drawn, 'the Border rows and the Radius row').toEqual(['style.setBorder#inspector-border-border-editor', 'style.setBorder#inspector-border-color-border-editor', 'style.setRadius#inspector-border-radius-radius-editor']);
   for (const side of ['inspector-border-top-width-border-editor', 'inspector-border-left-border-editor', 'inspector-border-top-left-radius-radius-editor']) {
     await expect(border.locator(`[data-door="style.setBorder#${side}"]`), `${side} is left out of the essentials`).toHaveCount(0);
   }

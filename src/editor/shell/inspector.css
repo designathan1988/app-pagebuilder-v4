@@ -712,71 +712,6 @@ textarea.input {
 [data-region='inspector-style'] .field-cell:hover + .field__end:not(:empty),
 [data-region='inspector-style'] .field-cell:focus-within + .field__end:not(:empty) { display: flex; }
 
-/* A shorthand that writes both cells of a pair is a small linked edit control,
-   placed on that line. Focusing it opens its full CSS value for typing. */
-[data-region='inspector-style'] .field-row-pair-wrap {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--size-target-min);
-  align-items: center;
-  gap: var(--space-1);
-}
-
-[data-region='inspector-style'] .field-row-pair-wrap > .field-row {
-  min-width: 0;
-}
-
-[data-region='inspector-style'] .field-row__shorthand {
-  position: relative;
-  z-index: 3;
-  width: 100%;
-  height: var(--size-control);
-}
-
-[data-region='inspector-style'] .field-row__shorthand .input-wrap {
-  width: 100%;
-  height: var(--size-control);
-  min-height: 0;
-  border: 0;
-  background: var(--color-surface);
-}
-
-[data-region='inspector-style'] .field-row__shorthand .input-wrap::before {
-  content: '↕↔';
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: var(--color-text-muted);
-  font-size: var(--fs-micro);
-  line-height: var(--lh-micro);
-  pointer-events: none;
-}
-
-[data-region='inspector-style'] .field-row__shorthand .input {
-  width: 100%;
-  height: var(--size-control);
-  padding: 0;
-  color: transparent;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  cursor: text;
-}
-
-[data-region='inspector-style'] .field-row__shorthand:focus-within .input-wrap {
-  width: 100%;
-  border: 1px solid var(--color-focus);
-  background: var(--color-surface-raised);
-}
-
-[data-region='inspector-style'] .field-row__shorthand:focus-within .input-wrap::before {
-  content: none;
-}
-
-[data-region='inspector-style'] .field-row__shorthand:focus-within .input {
-  padding: 0 var(--space-2);
-  color: var(--color-text);
-}
-
 /* the cell of a field standing in a pair row: the field's door, its value, and a refusal said under it (wrapped, so a
    refusal never widens the row) */
 .field-cell {
@@ -908,7 +843,7 @@ textarea.input {
   align-items: center;
 }
 .field__value-slot .input-wrap__form { display: contents; }
-.field__rest-value, .field__origin-badge, .field__suffix, .field__measurement { display: none; }
+.field__rest-value, .field__origin-badge, .field__suffix { display: none; }
 .field__actions { display: contents; }
 
 [data-region='inspector-style'] .field__rest-value {
@@ -942,8 +877,7 @@ textarea.input {
 [data-region='inspector-style'] .input-wrap[data-face]:focus-within { border-color: var(--color-focus); }
 [data-region='inspector-style'] .input-wrap:focus-within .field__value-slot .input { color: var(--color-text); }
 [data-region='inspector-style'] .field__origin-badge,
-[data-region='inspector-style'] .field__suffix,
-[data-region='inspector-style'] .field__measurement {
+[data-region='inspector-style'] .field__suffix {
   display: inline;
   flex: none;
   color: var(--color-text-subtle);
@@ -952,9 +886,6 @@ textarea.input {
   white-space: nowrap;
 }
 [data-region='inspector-style'] .field__origin-badge { margin-left: auto; }
-/* the measured hint leaves the field while it holds the focus, and leaves its place too: an input that suggests values
-   (a datalist) took no typed character while a hint stood beside it, hidden or not (Chrome; a pair's Height kept "") */
-[data-region='inspector-style'] .input-wrap:focus-within .field__measurement { display: none; }
 [data-region='inspector-style'] .input-wrap[data-origin='here'] {
   color: var(--color-origin-here);
   background: var(--color-origin-here-soft);
@@ -1047,7 +978,6 @@ textarea.input {
 }
 [data-region='inspector-style'] .input-wrap--number:hover .field__unit:has(.field__unit-value:empty),
 [data-region='inspector-style'] .input-wrap--number:focus-within .field__unit:has(.field__unit-value:empty) { visibility: visible; }
-[data-region='inspector-style'] .input-wrap:hover .field__measurement { visibility: hidden; }
 [data-region='inspector-style'] .field__unit-button,
 [data-region='inspector-style'] .field__values-button { padding: 0; }
 /* the values button takes the pointer across 24 px (WCAG 2.5.8; the audit's AUD-29: its chevron alone was 12 px), the
@@ -1119,6 +1049,17 @@ textarea.input {
 .input-wrap--number:has(.input[data-draft='typed']) .field__steps {
   display: none;
 }
+
+/* In a pair's cell the value's end is the cell's end and the number has no room to spare (a half of the panel holds its
+   short name, its value and its unit's trigger): the step buttons lie over the cell's short name instead, its W or H,
+   which the field does not need while it holds the focus. Over the value they hid "240" as "24" and took the click meant
+   for the number (the user's review of 2026-10-05; spec inspector-number-fields, Problem 5). */
+[data-region='inspector-style'] .field-row--pair .input-wrap--number:focus-within .field__value-slot { position: static; }
+[data-region='inspector-style'] .field-row--pair .input-wrap--number:focus-within .field__steps {
+  left: var(--space-1);
+  right: auto;
+}
+[data-region='inspector-style'] .field-row--pair .input-wrap--number:focus-within .field__prefix { visibility: hidden; }
 
 .field__step {
   display: inline-flex;

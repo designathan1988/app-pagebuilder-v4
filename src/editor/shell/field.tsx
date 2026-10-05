@@ -53,7 +53,6 @@ import { useMenuLayer } from '../doors/menu.tsx';
 import { useT, useValueLabel } from '../text.ts';
 import { createToken, tokenKindOf, tokensOf } from '../../core/design/tokens.ts';
 import { compactFieldValue, FieldOriginBadge, FieldValueSlot, useFieldAppearance } from './field-face.tsx';
-import { usePrimarySize } from '../view/selection-size.ts';
 import { restoreFieldDraft } from '../persistence/drafts.ts';
 import { DRAFT_KEPT, markFieldKept, recordFieldInput } from '../input/drafts.ts';
 // A cleared status is still a change for a field with typing pending; one stable value keeps the store snapshot pure.
@@ -548,14 +547,12 @@ export interface NumberFieldProps {
   readonly bare?: boolean;
   readonly labelled?: boolean;
   readonly prefix?: string | null;
-  readonly measurement?: 'width' | 'height' | undefined;
 }
 
-export function NumberField({ entry, door, property, label, bare = false, labelled = false, prefix = null, measurement }: NumberFieldProps) {
+export function NumberField({ entry, door, property, label, bare = false, labelled = false, prefix = null }: NumberFieldProps) {
   const store = useStore();
   const draft = useRef<{ typed: boolean; message: EditorState['message'] }>({ typed: false, message: store.getState().message });
   const primary = useEditorState((s) => s.selection[0] ?? null);
-  const measured = usePrimarySize(measurement === undefined ? null : primary);
   const stored = useEditorState((s) => {
     const node = styleSource(s);
     return node ? storedValue(node, property, layeredRules(s)) : undefined;
@@ -661,7 +658,6 @@ export function NumberField({ entry, door, property, label, bare = false, labell
         ))}
         {bare ? null : <FieldOriginBadge label={appearance.label} />}
         <VariableSuggestions entry={entry} property={property} label={t('field.variables.of', { property: propertyWord(t, property) })} input={input} anchor={cellRef} variables={variables} choose={chooseVariable} />
-        {measurement !== undefined && measured !== null && base === 'auto' ? <span className="field__measurement" aria-hidden="true">{measured[measurement]}</span> : null}
     </span>
   );
   // Reset this value stands at the row's end, never inside the value cell (jornada02 A.0, J6 of the jornada03 study:

@@ -74,7 +74,7 @@ Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests pas
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `inspector-panel` | Inspector shows the selection's identity and collapsible property sections | yes | 16 | 10 | [inspector-panel](../spec/BEHAVIOUR.md#inspector-panel) | 12 | passes 16/16 |
+| `inspector-panel` | Inspector shows the selection's identity and collapsible property sections | yes | 16 | 10 | [inspector-panel](../spec/BEHAVIOUR.md#inspector-panel) | 13 | passes 16/16 |
 | `inspector-number-fields` | Numeric property fields, built with the Size section's Width and Height: typing, units, steppers and scrubbing | yes | 21 | 12 | [inspector-number-fields](../spec/BEHAVIOUR.md#inspector-number-fields) | 6 | passes 21/21 |
 | `props-display` | Edit display with every keyword | yes | 11 | 1 | [props-display](../spec/BEHAVIOUR.md#props-display) | 4 | passes 11/11 |
 | `props-flex-container` | Flex container controls: direction, wrap, alignment matrix and gap | yes | 20 | 11 | [props-flex-container](../spec/BEHAVIOUR.md#props-flex-container) | 3 | passes 20/20 |

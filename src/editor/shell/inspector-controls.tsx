@@ -1,5 +1,5 @@
 import { styleSections, type StyleDoor } from '../../manifest/style-places.ts';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import type { CommandId, FeatureId, KeyContextId, MessageId, StyleTargetId } from '../../generated/ids.ts';
 import { GENERATED_VALUES } from '../../generated/value-lists.ts';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
@@ -124,7 +124,7 @@ export function fieldLabelKey(entry: DoorEntry): MessageId {
   return (named?.labelKey ?? entry.door.labelKey) as MessageId;
 }
 
-type FieldProps = { readonly entry: DoorEntry; readonly bare?: boolean; readonly labelled?: boolean; readonly prefix?: string | null; readonly rowLabel?: MessageId | null; readonly measurement?: 'width' | 'height' | undefined };
+type FieldProps = { readonly entry: DoorEntry; readonly bare?: boolean; readonly labelled?: boolean; readonly prefix?: string | null; readonly rowLabel?: MessageId | null };
 
 // A property's field, and, under the first field of a property or composite that offers ready-made values, their
 // thumbnails (value-presets.tsx)
@@ -141,7 +141,7 @@ export function Field(props: FieldProps) {
   );
 }
 
-function FieldControl({ entry, bare = false, labelled = false, prefix = null, rowLabel = null, measurement }: FieldProps) {
+function FieldControl({ entry, bare = false, labelled = false, prefix = null, rowLabel = null }: FieldProps) {
   const t = useT();
   const target = targetOf(entry);
   // labelled as fieldLabelKey says, or by the row's own label when it has one (a pair row of the gap reads "Gap"). A
@@ -178,7 +178,7 @@ function FieldControl({ entry, bare = false, labelled = false, prefix = null, ro
     );
   }
   // a length field is the field component: typing, units, steps and the scrub (spec inspector-number-fields)
-  if (target.control === 'length-field' && entry.door.kind === 'inspector-field' && entry.door.property !== null) return <NumberField entry={entry} door={door} property={entry.door.property} label={door.label} bare={bare} labelled={labelled} prefix={prefix} measurement={measurement} />;
+  if (target.control === 'length-field' && entry.door.kind === 'inspector-field' && entry.door.property !== null) return <NumberField entry={entry} door={door} property={entry.door.property} label={door.label} bare={bare} labelled={labelled} prefix={prefix} />;
   // keyword buttons: one button per value the property offers (field.tsx)
   if (target.control === 'keyword-buttons' && entry.door.kind === 'inspector-field' && entry.door.control === 'field' && entry.door.property !== null && 'property' in entry.command.args) {
     return <KeywordButtons entry={entry} door={door} property={entry.door.property} values={offered(entry)} icons={target.icons} label={door.label} />;
@@ -394,30 +394,6 @@ function GridTrackField({ entry, property, index, track, available }: { readonly
         onInput={() => { draft.current = true; }}
         onBlur={keep}
       />
-    </form>
-  );
-}
-
-// The shorthand of a paired property edits both cells at once. It is a compact
-// third control on their shared line, so the property label appears only once.
-export function PairShorthand({ entry }: { readonly entry: DoorEntry }) {
-  const store = useStore();
-  const t = useT();
-  const [value, setValue] = useState('');
-  const door = useDoor(entry, {}, t(fieldLabelKey(entry)), isFeatureBuilt(entry.door.feature as FeatureId));
-  const property = entry.door.kind === 'inspector-field' ? entry.door.composite : null;
-  if (property === null) return null;
-  const keep = () => {
-    const typed = value.trim();
-    if (!door.available || typed === '') return;
-    (store.dispatch as (id: CommandId, args: unknown) => DispatchResult)(entry.command.id, { ...entry.door.args, property, value: typed });
-    setValue('');
-  };
-  return (
-    <form className="input-wrap" data-door={entry.ref} data-args={JSON.stringify({ property })} title={door.title} onSubmit={(event) => { event.preventDefault();
-      keep();
-    }}>
-      <input className="input" aria-label={t(fieldLabelKey(entry))} disabled={!door.available} value={value} onChange={(event) => setValue(event.target.value)} onBlur={keep} spellCheck={false} />
     </form>
   );
 }

@@ -4072,10 +4072,6 @@ export const MESSAGE_IDS = [
   "inspector.origin.here",
   "inspector.origin.inherited",
   "inspector.origin.writes",
-  "inspector.pair.column",
-  "inspector.pair.max",
-  "inspector.pair.row",
-  "inspector.pair.spacing",
   "inspector.parts.add.ellipse",
   "inspector.parts.add.line",
   "inspector.parts.add.option",
@@ -4156,6 +4152,8 @@ export const MESSAGE_IDS = [
   "inspector.row.backgroundLayers.blendMode",
   "inspector.row.backgroundLayers.position",
   "inspector.row.border.topWidth",
+  "inspector.row.gap.rows",
+  "inspector.row.gap.columns",
   "inspector.row.border.rightWidth",
   "inspector.row.border.bottomWidth",
   "inspector.row.border.leftWidth",
@@ -6603,5 +6601,8 @@ export const MESSAGE_IDS = [
   "field.variables.choose",
   "textToolbar.face.bold",
   "textToolbar.face.italic",
+  "inspector.row.size",
+  "inspector.row.min",
+  "inspector.row.max",
 ] as const;
 export type MessageId = (typeof MESSAGE_IDS)[number];

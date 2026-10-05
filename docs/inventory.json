@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 476,
-    "lines": 83268
+    "lines": 83203
   },
   "features": [
     {
@@ -5760,7 +5760,7 @@
     },
     {
       "path": "src/editor/inspector/rows.ts",
-      "lines": 94,
+      "lines": 93,
       "commands": [],
       "features": []
     },
@@ -6233,7 +6233,7 @@
     },
     {
       "path": "src/editor/shell/field.tsx",
-      "lines": 1734,
+      "lines": 1730,
       "commands": [],
       "features": []
     },
@@ -6263,7 +6263,7 @@
     },
     {
       "path": "src/editor/shell/inspector-controls.tsx",
-      "lines": 635,
+      "lines": 611,
       "commands": [],
       "features": []
     },
@@ -6275,7 +6275,7 @@
     },
     {
       "path": "src/editor/shell/inspector.tsx",
-      "lines": 827,
+      "lines": 790,
       "commands": [],
       "features": []
     },
@@ -6795,7 +6795,7 @@
     },
     {
       "path": "src/generated/ids.ts",
-      "lines": 6608,
+      "lines": 6609,
       "commands": [],
       "features": []
     },

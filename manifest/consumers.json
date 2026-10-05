@@ -2289,10 +2289,6 @@
       "reader": "src/editor/inspector/rows.ts"
     },
     {
-      "field": "properties:rows[].fields[].measurement",
-      "reader": "src/editor/inspector/rows.ts"
-    },
-    {
       "field": "properties:properties[].presets",
       "reader": "src/editor/shell/value-presets.tsx"
     },

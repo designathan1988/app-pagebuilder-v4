@@ -6,8 +6,9 @@ import { control, openEverySection, runDoor, runs } from './door.ts';
 const OPEN = 'project.open#menu-file';
 const ROW = 'selection.select#layers-row';
 const SECTION = 'inspector.toggleSection#inspector-section-header';
-const FONT = 'style.set#inspector-font-size';
-const SPACING = 'style.set#inspector-letter-spacing';
+// the pair row of the Size section (properties.json rows): Size, its W and its H
+const WIDTH = 'style.set#inspector-width';
+const HEIGHT = 'style.set#inspector-height';
 const STEP = 'field.step#key-arrow-up-in-number-field';
 const RESET = 'style.reset#inspector-property-reset';
 
@@ -21,19 +22,20 @@ test.beforeEach(async ({ page }) => {
   await openEverySection(page);
 });
 
-test('paired resting values remain readable and editing keeps full units, stepping and reset', runs(OPEN, ROW, SECTION, FONT, SPACING, STEP, RESET), async ({ page }) => {
-  const font = control(page, FONT);
-  const spacing = control(page, SPACING);
-  await font.locator('input').fill('60px');
+test('paired resting values remain readable and editing keeps full units, stepping and reset', runs(OPEN, ROW, SECTION, WIDTH, HEIGHT, STEP, RESET), async ({ page }) => {
+  // (the pair was Font size and Letter spacing until the user's review of 2026-10-05 gave each its own line)
+  const font = control(page, WIDTH);
+  const spacing = control(page, HEIGHT);
+  await font.locator('input').fill('240px');
   await font.locator('input').press('Enter');
-  await spacing.locator('input').fill('-1.2px');
+  await spacing.locator('input').fill('120px');
   await spacing.locator('input').press('Enter');
   await page.locator('.selector-bar__name').click();
   await page.mouse.move(600, 40);
-  await expect(font.locator('.field__rest-value')).toHaveText('60');
-  await expect(spacing.locator('.field__rest-value')).toHaveText('-1.2');
-  await expect(font.locator('input')).toHaveValue('60px');
-  await expect(spacing.locator('input')).toHaveValue('-1.2px');
+  await expect(font.locator('.field__rest-value')).toHaveText('240');
+  await expect(spacing.locator('.field__rest-value')).toHaveText('120');
+  await expect(font.locator('input')).toHaveValue('240px');
+  await expect(spacing.locator('input')).toHaveValue('120px');
   for (const field of [font, spacing]) {
     const readable = await field.locator('.field__rest-value').evaluate((element) => element.scrollWidth <= element.clientWidth + 1);
     expect(readable, 'the complete resting number fits its cell').toBe(true);
@@ -44,8 +46,8 @@ test('paired resting values remain readable and editing keeps full units, steppi
   const after = await font.locator('.input-wrap').boundingBox();
   expect(after?.width).toBe(before?.width);
   await font.locator('input').press('ArrowUp');
-  await expect(font.locator('input')).toHaveValue('61px');
-  await expect.poll(() => page.frameLocator('.frame__page').locator('[data-node="n-title"]').evaluate(el => getComputedStyle(el).fontSize)).toBe('61px');
+  await expect(font.locator('input')).toHaveValue('241px');
+  await expect.poll(() => page.frameLocator('.frame__page').locator('[data-node="n-title"]').evaluate(el => Math.round(parseFloat(getComputedStyle(el).width)))).toBe(241);
   await font.locator('input').click();
   // a pair field's Reset stands at the end of the row's label column, beside its cell, never inside the value cell
   // (jornada02 A.0, J6: inside, it squeezed the number while the field held the focus)

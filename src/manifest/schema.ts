@@ -452,7 +452,7 @@ export const propertiesFileSchema = z.strictObject({
         // the row's own label; null: the first field's label names the row
         labelKey: i18nKey.nullable(),
         // the fields, in the order they are drawn
-        fields: z.array(z.strictObject({ target: z.union([cssName, kebabId]), prefixKey: i18nKey.nullable(), measurement: z.enum(['width', 'height']).optional() })).min(2).max(2),
+        fields: z.array(z.strictObject({ target: z.union([cssName, kebabId]), prefixKey: i18nKey.nullable() })).min(2).max(2),
       }),
     ),
   // The concept rows of the Style tab (plan item 2.D; jornada02 G-S1): one row per concept, its head drawn always, its

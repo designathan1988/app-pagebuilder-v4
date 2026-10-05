@@ -668,7 +668,7 @@
       "valueType": "length-percentage",
       "codec": "length-percentage",
       "appliesTo": "flexOrGridContainer",
-      "essential": true,
+      "essential": false,
       "doors": [
         "style.set#inspector-gap",
         "style.set#inspector-row-gap",
@@ -702,7 +702,7 @@
       "valueType": "length-percentage",
       "codec": "length-percentage",
       "appliesTo": "flexOrGridContainer",
-      "essential": true,
+      "essential": false,
       "doors": [
         "style.set#inspector-gap",
         "style.set#inspector-column-gap",
@@ -4167,7 +4167,7 @@
           "reason": "The gap field offers normal and every length; the line-width keywords (hairline, thin, medium, thick) belong to gap decorations in the CSS Gaps draft and are not offered."
         }
       ],
-      "essential": false
+      "essential": true
     },
     {
       "id": "overflow",
@@ -5218,109 +5218,47 @@
   ],
   "rows": [
     {
-      "id": "gap-axes",
-      "section": "layout",
-      "labelKey": "property.gap",
-      "fields": [
-        {
-          "target": "row-gap",
-          "prefixKey": "inspector.pair.row"
-        },
-        {
-          "target": "column-gap",
-          "prefixKey": "inspector.pair.column"
-        }
-      ]
-    },
-    {
       "id": "size-width-height",
       "section": "size",
-      "labelKey": null,
+      "labelKey": "inspector.row.size",
       "fields": [
         {
           "target": "width",
-          "prefixKey": null,
-          "measurement": "width"
+          "prefixKey": "quickPanel.width"
         },
         {
           "target": "height",
-          "prefixKey": "quickPanel.height",
-          "measurement": "height"
+          "prefixKey": "quickPanel.height"
         }
       ]
     },
     {
-      "id": "size-min-max-width",
+      "id": "size-min",
       "section": "size",
-      "labelKey": null,
+      "labelKey": "inspector.row.min",
       "fields": [
         {
           "target": "min-width",
-          "prefixKey": null
+          "prefixKey": "quickPanel.width"
         },
         {
-          "target": "max-width",
-          "prefixKey": "inspector.pair.max"
+          "target": "min-height",
+          "prefixKey": "quickPanel.height"
         }
       ]
     },
     {
-      "id": "size-min-max-height",
+      "id": "size-max",
       "section": "size",
-      "labelKey": null,
+      "labelKey": "inspector.row.max",
       "fields": [
         {
-          "target": "min-height",
-          "prefixKey": null
+          "target": "max-width",
+          "prefixKey": "quickPanel.width"
         },
         {
           "target": "max-height",
-          "prefixKey": "inspector.pair.max"
-        }
-      ]
-    },
-    {
-      "id": "text-size-weight",
-      "section": "text",
-      "labelKey": null,
-      "fields": [
-        {
-          "target": "font-size",
-          "prefixKey": null
-        },
-        {
-          "target": "font-weight",
-          "prefixKey": null
-        }
-      ]
-    },
-    {
-      "id": "text-line-height-letter-spacing",
-      "section": "text",
-      "labelKey": null,
-      "fields": [
-        {
-          "target": "line-height",
-          "prefixKey": null
-        },
-        {
-          "target": "letter-spacing",
-          "prefixKey": "inspector.pair.spacing"
-        }
-      ]
-    },
-    {
-      "id": "border-and-colour",
-      "section": "border",
-      "labelKey": null,
-      "fields": [
-        {
-          "target": "border",
-          "prefixKey": null
-        },
-        {
-          "target": "border-color",
-          "prefixKey": null
+          "prefixKey": "quickPanel.height"
         }
       ]
     }
@@ -5341,6 +5279,22 @@
         "style.set#inspector-align-content",
         "style.set#inspector-justify-items"
       ]
+    },
+    {
+      "id": "gap",
+      "section": "layout",
+      "labelKey": "property.gap",
+      "head": [
+        "style.set#inspector-gap"
+      ],
+      "details": [
+        "style.set#inspector-row-gap",
+        "style.set#inspector-column-gap"
+      ],
+      "shortLabels": {
+        "style.set#inspector-row-gap": "inspector.row.gap.rows",
+        "style.set#inspector-column-gap": "inspector.row.gap.columns"
+      }
     },
     {
       "id": "grid-columns",
@@ -5437,10 +5391,10 @@
       "section": "size",
       "labelKey": "inspector.row.limits",
       "head": [
-        "pair:size-min-max-width"
+        "pair:size-min"
       ],
       "details": [
-        "pair:size-min-max-height"
+        "pair:size-max"
       ]
     },
     {
@@ -5546,7 +5500,8 @@
       "section": "border",
       "labelKey": "inspector.row.border",
       "head": [
-        "pair:border-and-colour"
+        "style.setBorder#inspector-border-border-editor",
+        "style.setBorder#inspector-border-color-border-editor"
       ],
       "details": [
         "style.setBorder#inspector-border-width-border-editor",

@@ -13,7 +13,7 @@ describe('concept rows (src/editor/inspector/concept-rows.ts)', () => {
   it('knows the row and the part of every item properties.json names', () => {
     expect(rowOfItem('style.set#inspector-overflow-x')).toEqual({ row: row('overflow'), part: 'details' });
     expect(rowOfItem('style.set#inspector-overflow')).toEqual({ row: row('overflow'), part: 'head' });
-    expect(rowOfItem('pair:size-min-max-height')).toEqual({ row: row('limits'), part: 'details' });
+    expect(rowOfItem('pair:size-max')).toEqual({ row: row('limits'), part: 'details' });
     expect(rowOfItem('style.set#inspector-width')).toBeNull();
   });
 

@@ -267,7 +267,7 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
 .prop > label.o-here { color: var(--color-origin-here); background: none; font-weight: var(--weight-semibold); }
 .prop > label.o-bp { color: var(--color-origin-breakpoint); background: none; }
 .f { display: flex; align-items: center; gap: var(--space-2); height: var(--size-control); min-width: 0; padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-xs); background: var(--color-surface-sunken); white-space: nowrap; }
-.f .u, .f .hint2 { margin-left: auto; color: var(--color-text-subtle); font-size: var(--fs-caption); }
+.f .u { margin-left: auto; color: var(--color-text-subtle); font-size: var(--fs-caption); }
 .f .pre { color: var(--color-text-subtle); font-size: var(--fs-caption); }
 .f > .i:last-child:not(:only-child) { margin-left: auto; width: 12px; height: 12px; color: var(--color-text-subtle); }
 .o-here { color: var(--color-origin-here); background: var(--color-origin-here-soft); font-weight: var(--weight-semibold); }
@@ -829,8 +829,8 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
                   <div class="qp-f o-bp" data-door="style.set#quick-panel-font-family" data-tt="property.fontFamily" title="font-family">Georgia</div>
                   <div class="qp-f o-here" data-door="style.set#quick-panel-font-size" data-tt="quickPanel.fontSize" title="font-size">36<span class="u">px</span></div>
                   <div class="qp-f o-bp" data-door="style.set#quick-panel-font-weight" data-tt="property.fontWeight" title="font-weight">400</div>
-                  <div class="qp-f o-here" data-door="style.set#quick-panel-line-height" data-tt="property.lineHeight" title="line-height"><span class="k">↕</span>42<span class="u">px</span></div>
-                  <div class="qp-f o-bp" data-door="style.set#quick-panel-letter-spacing" data-tt="property.letterSpacing" title="letter-spacing"><span class="k">↔</span>-0.6</div>
+                  <div class="qp-f o-here" data-door="style.set#quick-panel-line-height" data-tt="property.lineHeight" title="line-height"><span class="k" data-t="quickPanel.key.lineHeight">Line</span>42<span class="u">px</span></div>
+                  <div class="qp-f o-bp" data-door="style.set#quick-panel-letter-spacing" data-tt="property.letterSpacing" title="letter-spacing"><span class="k" data-t="quickPanel.key.letterSpacing">Letters</span>-0.6</div>
                   <div class="qp-f o-bp" data-door="style.set#quick-panel-text-align" data-tt="property.textAlign" title="text-align"><svg class="i sm"><use href="#i-al-left"/></svg>left</div>
                 </div>
               </div>
@@ -995,7 +995,7 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
           <div class="align"><label class="muted" style="padding-top:var(--space-2)" data-t="property.alignmentMatrix">Alignment</label>
             <div class="matrix" data-door="style.setAlignment#inspector-alignment-matrix" title="justify-content, align-items"><span class="is-on"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           </div>
-          <div class="prop two"><label class="o-here" data-t="property.gap">Gap</label><div class="f o-here" data-door="style.set#inspector-row-gap" title="row-gap"><span class="pre">↕</span>12<span class="u">px</span></div><div class="f o-def" data-door="style.set#inspector-column-gap" title="column-gap"><span class="pre">↔</span>normal</div></div>
+          <div class="prop"><label class="o-here" data-t="property.gap">Gap</label><div class="f o-here" data-door="style.set#inspector-gap" title="row-gap, column-gap">12px normal</div></div>
         </div>
         <div class="sec">
           <div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-down"/></svg><span data-t="inspector.section.space">Space</span><span class="has"></span><span class="end"><button class="ib sm" data-door="inspector.toggleSpacingLink#inspector-spacing-link" data-tt="inspector.spacing.linkAll" title="Link all four sides"><svg class="i sm"><use href="#i-link"/></svg></button></span></div>
@@ -1011,7 +1011,7 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
         </div>
         <div class="sec">
           <div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-down"/></svg><span data-t="inspector.section.size">Size</span></div>
-          <div class="prop two"><label data-t="property.width">Width</label><div class="f o-def" data-door="style.set#inspector-width" title="width">auto<span class="hint2">400</span></div><div class="f o-def" data-door="style.set#inspector-height" title="height"><span class="pre" data-t="quickPanel.height">H</span>auto<span class="hint2">390</span></div></div>
+          <div class="prop two"><label data-t="inspector.row.size">Size</label><div class="f o-def" data-door="style.set#inspector-width" title="width"><span class="pre" data-t="quickPanel.width">W</span>auto</div><div class="f o-def" data-door="style.set#inspector-height" title="height"><span class="pre" data-t="quickPanel.height">H</span>auto</div></div>
           <div class="prop"><label data-t="property.overflow">Overflow</label><div class="f o-def" data-door="style.set#inspector-overflow" title="overflow-x, overflow-y">visible<svg class="i"><use href="#i-chev-down"/></svg></div></div>
         </div>
         <div class="sec is-closed"><div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-right"/></svg><span data-t="inspector.section.position">Position</span><span class="sec-sum">static · z auto</span></div></div>
@@ -1022,7 +1022,8 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
         </div>
         <div class="sec">
           <div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-down"/></svg><span data-t="inspector.section.border">Border</span><span class="has"></span></div>
-          <div class="prop two"><label class="o-here" data-t="property.border">Border</label><div class="f o-here" data-door="style.setBorder#inspector-border-border-editor" title="border-*-width, border-*-style">1<span class="u">px solid</span></div><div class="f o-here" data-door="style.setBorder#inspector-border-border-editor" title="border-*-color"><span class="sw" style="background:#eadfce"></span>#EADFCE</div></div>
+          <div class="prop"><label class="o-here" data-t="property.border">Border</label><div class="f o-here" data-door="style.setBorder#inspector-border-border-editor" title="border-*-width, border-*-style">1<span class="u">px solid</span></div></div>
+          <div class="prop"><label class="o-here" data-t="property.borderColor">Border colour</label><div class="f o-here" data-door="style.setBorder#inspector-border-color-border-editor" title="border-*-color"><span class="sw" style="background:#eadfce"></span>#EADFCE</div></div>
           <div class="prop"><label class="o-here" data-t="property.borderRadius">Radius</label><div class="f o-here" data-door="style.setRadius#inspector-border-radius-radius-editor" title="border-*-radius"><svg class="i sm"><use href="#i-radius"/></svg>20<span class="u">px</span></div></div>
         </div>
         <div class="sec">
@@ -1055,8 +1056,10 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
           <div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-down"/></svg><span data-t="inspector.section.text">Text</span><span class="has"></span><span class="has from-bp"></span></div>
           <div class="prop"><label data-t="property.color">Text colour</label><div class="f o-inh" data-door="style.set#inspector-color" title="color · inherited"><span class="sw" style="background:#2b1d14"></span>#2B1D14<span class="u" data-t="inspector.legend.inherited">Inherited</span></div></div>
           <div class="prop"><label class="o-bp" data-t="property.fontFamily">Font</label><div class="f o-bp" data-door="style.set#inspector-font-family" title="font-family · from Desktop">Georgia<span class="u" data-t="breakpoint.desktop">Desktop</span></div></div>
-          <div class="prop two"><label class="o-here" data-t="property.fontSize">Font size</label><div class="f o-here" data-door="style.set#inspector-font-size" title="font-size">36<span class="u">px</span></div><div class="f o-bp" data-door="style.set#inspector-font-weight" title="font-weight · from Desktop">400</div></div>
-          <div class="prop two"><label class="o-here" data-t="property.lineHeight">Line height</label><div class="f o-here" data-door="style.set#inspector-line-height" title="line-height">42<span class="u">px</span></div><div class="f o-bp" data-door="style.set#inspector-letter-spacing" title="letter-spacing · from Desktop"><span class="pre">↔</span>-0.6</div></div>
+          <div class="prop"><label class="o-here" data-t="property.fontSize">Font size</label><div class="f o-here" data-door="style.set#inspector-font-size" title="font-size">36<span class="u">px</span></div></div>
+          <div class="prop"><label class="o-bp" data-t="property.fontWeight">Font weight</label><div class="f o-bp" data-door="style.set#inspector-font-weight" title="font-weight · from Desktop">400</div></div>
+          <div class="prop"><label class="o-here" data-t="property.lineHeight">Line height</label><div class="f o-here" data-door="style.set#inspector-line-height" title="line-height">42<span class="u">px</span></div></div>
+          <div class="prop"><label class="o-bp" data-t="property.letterSpacing">Letter spacing</label><div class="f o-bp" data-door="style.set#inspector-letter-spacing" title="letter-spacing · from Desktop">-0.6</div></div>
           <div class="prop"><label data-t="property.textAlign">Text align</label><div class="icons" data-door="style.set#inspector-text-align" title="text-align"><button class="is-on"><svg class="i sm"><use href="#i-al-left"/></svg></button><button><svg class="i sm"><use href="#i-al-hcenter"/></svg></button><button><svg class="i sm"><use href="#i-al-right"/></svg></button></div></div>
         </div>
         <div class="sec is-closed"><div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-right"/></svg><span data-t="inspector.section.effects">Effects</span><span class="sec-sum">100 %</span></div></div>
@@ -1074,8 +1077,10 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
           <div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-down"/></svg><span data-t="inspector.section.text">Text</span><span class="has"></span></div>
           <div class="prop"><label data-t="property.color">Text colour</label><div class="f o-inh" data-door="style.set#inspector-color" title="color"><span class="sw" style="background:#2b1d14"></span>#2B1D14<span class="u" data-t="inspector.legend.inherited">Inherited</span></div></div>
           <div class="prop"><label class="o-here" data-t="property.fontFamily">Font</label><div class="f o-here" data-door="style.set#inspector-font-family" title="font-family">Georgia<svg class="i"><use href="#i-chev-down"/></svg></div></div>
-          <div class="prop two"><label class="o-here" data-t="property.fontSize">Font size</label><div class="f o-here" data-door="style.set#inspector-font-size" title="font-size">60<span class="u">px</span></div><div class="f o-def" data-door="style.set#inspector-font-weight" title="font-weight">400</div></div>
-          <div class="prop two"><label class="o-here" data-t="property.lineHeight">Line height</label><div class="f o-here" data-door="style.set#inspector-line-height" title="line-height">64<span class="u">px</span></div><div class="f o-here" data-door="style.set#inspector-letter-spacing" title="letter-spacing"><span class="pre">↔</span>-1.2<span class="u">px</span></div></div>
+          <div class="prop"><label class="o-here" data-t="property.fontSize">Font size</label><div class="f o-here" data-door="style.set#inspector-font-size" title="font-size">60<span class="u">px</span></div></div>
+          <div class="prop"><label data-t="property.fontWeight">Font weight</label><div class="f o-def" data-door="style.set#inspector-font-weight" title="font-weight">400</div></div>
+          <div class="prop"><label class="o-here" data-t="property.lineHeight">Line height</label><div class="f o-here" data-door="style.set#inspector-line-height" title="line-height">64<span class="u">px</span></div></div>
+          <div class="prop"><label class="o-here" data-t="property.letterSpacing">Letter spacing</label><div class="f o-here" data-door="style.set#inspector-letter-spacing" title="letter-spacing">-1.2<span class="u">px</span></div></div>
           <div class="prop"><label data-t="property.textAlign">Text align</label><div class="icons" data-door="style.set#inspector-text-align" title="text-align"><button class="is-on"><svg class="i sm"><use href="#i-al-left"/></svg></button><button><svg class="i sm"><use href="#i-al-hcenter"/></svg></button><button><svg class="i sm"><use href="#i-al-right"/></svg></button></div></div>
           <div class="prop"><label data-t="property.textTransform">Case</label><div class="f o-def" data-door="style.set#inspector-text-transform" title="text-transform">none<svg class="i"><use href="#i-chev-down"/></svg></div></div>
         </div>
@@ -1095,7 +1100,8 @@ kbd { font: var(--fw-caption) var(--fs-caption)/var(--lh-caption) var(--font-ui)
         </div>
         <div class="sec">
           <div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-down"/></svg><span data-t="inspector.section.border">Border</span><span class="has from-st"></span></div>
-          <div class="prop two"><label data-t="property.border">Border</label><div class="f o-st" data-door="style.setBorder#inspector-border-border-editor" title="border-*-width, border-*-style · from Base">1.5<span class="u">px solid</span></div><div class="f o-st" data-door="style.setBorder#inspector-border-border-editor" title="border-*-color · from Base"><span class="sw" style="background:#2b1d14"></span>--cafe</div></div>
+          <div class="prop"><label data-t="property.border">Border</label><div class="f o-st" data-door="style.setBorder#inspector-border-border-editor" title="border-*-width, border-*-style · from Base">1.5<span class="u">px solid</span></div></div>
+          <div class="prop"><label data-t="property.borderColor">Border colour</label><div class="f o-st" data-door="style.setBorder#inspector-border-color-border-editor" title="border-*-color · from Base"><span class="sw" style="background:#2b1d14"></span>--cafe</div></div>
           <div class="prop"><label data-t="property.borderRadius">Radius</label><div class="f o-st" data-door="style.setRadius#inspector-border-radius-radius-editor" title="border-*-radius · from Base">999<span class="u">px</span></div></div>
         </div>
         <div class="sec is-closed"><div class="sec-h" data-door="inspector.toggleSection#inspector-section-header"><svg class="i"><use href="#i-chev-right"/></svg><span data-t="inspector.section.text">Text</span><span class="sec-sum">600 · 17 px</span></div></div>

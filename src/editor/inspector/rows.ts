@@ -13,7 +13,6 @@ import { manifest } from '../../manifest/runtime.ts';
 interface PairField {
   readonly target: string;
   readonly prefixKey: MessageId | null;
-  readonly measurement?: 'width' | 'height' | undefined;
 }
 
 // a pair row: the two fields, in the order they are drawn, and the label the row carries — its own when the design
@@ -38,7 +37,7 @@ export const PAIR_ROWS: readonly PairRow[] = manifest.properties.rows.map((row) 
     id: row.id,
     section: row.section,
     labelKey: (row.labelKey ?? first) as MessageId,
-    fields: row.fields.map((field) => ({ target: field.target, prefixKey: (field.prefixKey ?? null) as MessageId | null, measurement: field.measurement })),
+    fields: row.fields.map((field) => ({ target: field.target, prefixKey: (field.prefixKey ?? null) as MessageId | null })),
   };
 });
 
