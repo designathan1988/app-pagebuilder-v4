@@ -6384,6 +6384,8 @@ Read from Pager's source (`reference/Pager`, run from `.cache/pager-run`); refer
 - A style write that reaches every instance is one undo step.
 - Undo restores the document and the selection.
 
+
+The component prompt (the user's review of 2026-10-05, LR2): its title "Name the component" is its field's label, the field the prompt's whole width holding the name typed whole, its close the small x at its head as every picker's, Create a component under the field (a side label took two lines beside a 95 px field that cut the name, under a title saying the same; `reusable-components.spec.ts`).
 ## repeat-element
 
 Our own feature (the dogfooding pass, 2026-09-30: "where are the repeaters?"). Pager had none: a list of cards was

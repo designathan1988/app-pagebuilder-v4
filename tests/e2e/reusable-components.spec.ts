@@ -70,3 +70,34 @@ test('Create a component is offered only where it applies, Detach only on an ins
   await expect(item(page, CREATE)).toHaveCount(1);
   await expect(item(page, DETACH)).toHaveCount(0);
 });
+
+// The prompt's field takes the prompt's width, its title is its label, and its close stands at its head (the user's
+// review of 2026-10-05, LR2: in Portuguese "Nome do componente" took two lines beside a 95 px field that cut the name
+// to "exto de apoio", under a title saying the same, the close at the foot).
+test('the component prompt holds the name in a field as wide as the prompt, named by its title, its close at its head', runs(OPEN, MENU, CREATE, 'components.closePrompt#close'), async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openEditor(page);
+  const chooser = page.waitForEvent('filechooser');
+  await runDoor(page, OPEN);
+  await (await chooser).setFiles({ name: 'aurora.json', mimeType: 'application/json', buffer: fs.readFileSync(FIXTURE) });
+  await menuOn(page, 'n-card-a');
+  await control(page, CREATE).click();
+  const prompt = page.locator('[data-region="component-prompt"]');
+  const input = control(page, PROMPT).locator('input');
+  await expect(input).toBeFocused();
+  const found = await prompt.evaluate((root) => {
+    const field = root.querySelector<HTMLInputElement>('input');
+    const style = getComputedStyle(root);
+    const inner = root.getBoundingClientRect().width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
+    const close = root.querySelector('[data-door="components.closePrompt#close"]')?.getBoundingClientRect();
+    return {
+      wide: field !== null && field.getBoundingClientRect().width >= inner - 1,
+      named: field?.labels?.[0]?.textContent?.trim() === root.getAttribute('aria-label'),
+      sideLabels: root.querySelectorAll('.field-row__label').length,
+      closeAtHead: close !== undefined && field !== null && close.bottom <= field.getBoundingClientRect().top,
+    };
+  });
+  expect(found).toEqual({ wide: true, named: true, sideLabels: 0, closeAtHead: true });
+  await control(page, 'components.closePrompt#close').click();
+  await expect(prompt).toHaveCount(0);
+});

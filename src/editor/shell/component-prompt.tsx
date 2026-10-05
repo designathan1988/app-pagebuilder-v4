@@ -39,11 +39,18 @@ export function ComponentPrompt() {
   return (
     <div className="picker-shield">
       <div ref={panel} className="picker picker--component" role="dialog" aria-label={t('components.prompt.title')} data-region="component-prompt" onClick={(event) => event.stopPropagation()}>
-        <p className="picker__label">{t('components.prompt.title')}</p>
+        {/* its title names its field, and its close stands at its head, as every picker's (LR2: a side label in two
+            lines beside a 95 px field that cut the name, under a title saying the same, the close at the foot) */}
+        <div className="picker__head">
+          <label className="picker__header" htmlFor={`${FORM_ID}-name`}>
+            {t('components.prompt.title')}
+          </label>
+          {CLOSE === null ? null : <DoorControl entry={CLOSE} />}
+        </div>
         {NAME === null ? null : (
           <form
             id={FORM_ID}
-            className="field-row"
+            className="picker__form"
             data-door={NAME.ref}
             data-args="{}"
             onSubmit={(event) => {
@@ -53,8 +60,7 @@ export function ComponentPrompt() {
               (store.dispatch as (id: string, args: unknown) => unknown)(NAME.command.id, { name: value });
             }}
           >
-            <span className="field-row__label">{t('components.prompt.name')}</span>
-            <input ref={field} className="input" aria-label={t('components.prompt.name')} defaultValue={node.node.name} spellCheck={false} data-key-context="component-prompt" />
+            <input ref={field} id={`${FORM_ID}-name`} className="input" defaultValue={node.node.name} spellCheck={false} data-key-context="component-prompt" />
           </form>
         )}
         <div className="picker__actions">
@@ -65,7 +71,6 @@ export function ComponentPrompt() {
               {t(NAME.command.labelKey as MessageId)}
             </button>
           )}
-          {CLOSE === null ? null : <DoorControl entry={CLOSE} />}
         </div>
       </div>
     </div>

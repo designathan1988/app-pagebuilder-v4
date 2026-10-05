@@ -121,6 +121,16 @@
   font-weight: var(--weight-semibold);
 }
 
+/* a picker's lone field (the component's name): the picker's whole width */
+.picker__form {
+  display: flex;
+}
+
+.picker__form .input {
+  flex: 1;
+  min-width: 0;
+}
+
 /* a picker's head: its title, its close button at the end (the link and asset pickers, as every dialog's head) */
 .picker__head {
   display: flex;

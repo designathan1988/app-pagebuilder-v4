@@ -907,7 +907,7 @@
             "fields": []
           },
           "args": {},
-          "drawnAs": "button",
+          "drawnAs": "icon-button",
           "pressed": false,
           "panel": "component-prompt",
           "control": "close",
