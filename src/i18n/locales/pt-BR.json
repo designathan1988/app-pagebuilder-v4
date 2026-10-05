@@ -3476,6 +3476,8 @@
   "commandBar.scope.find": "Páginas, camadas, classes @",
   "feature.commandBarFind": "Páginas, camadas e classes na barra de comandos",
   "canvas.badge.editingBreakpoint": "{breakpoint} · {width} px — as edições valem para esta tela e as mais estreitas",
+  "canvas.badge.breakpoint": "{breakpoint} · {width} px",
+  "canvas.badge.breakpointScope": "— as edições valem para esta tela e as mais estreitas",
   "layers.instanceOf": "Uma instância do componente {component}",
   "assetPicker.search": "Procurar uma imagem",
   "panel.dockBack": "Devolver ao lugar",

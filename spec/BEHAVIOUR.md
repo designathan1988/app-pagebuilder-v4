@@ -566,6 +566,15 @@ None.
 
 1. **The breakpoint is a global (`window.BP`)** kept apart from the store, and lost at a reload. Required: editor state, a preference restored after a reload.
 2. **The widths are written in three places** (the buttons' `data-w`, the page style, the export). Required: one table.
+3. **Out of reach, squeezed, cut** (the user's audit order of 2026-10-05; the complete suite's layout-composer and
+   project-breakpoints scenarios: "no point of its control takes a press"): the tabs row followed the frame's left
+   edge, so a frame zoomed or panned past the stage took its tabs under the sidebar; at a narrow frame the tabs shrank
+   and their words broke over two lines; the band of a breakpoint other than the base cut its sentence with an ellipsis
+   at a phone's width and broke it over two lines at a narrower one. Required: the tabs stand on the part of the frame
+   the stage shows; a tab never shrinks; where every name does not fit that width each tab shows its icon alone (its
+   name its tooltip and its accessible name) and the current one its icon and its name; the band says the breakpoint
+   and its width always, and what the edits reach only where the whole of it fits its one line, the whole sentence its
+   tooltip.
 
 ### Undo and redo
 

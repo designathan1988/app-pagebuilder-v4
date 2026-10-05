@@ -20,7 +20,7 @@ import { editorView } from '../view/editor-view.ts';
 import { CodePane } from './code-pane.tsx';
 import { SideBySide } from './side-by-side.tsx';
 import { breakpointTabSlot } from './breakpoint-tabs.tsx';
-import { breakpointName } from '../../core/document/breakpoints.ts';
+import { breakpointName, breakpointsOf } from '../../core/document/breakpoints.ts';
 import { isPanelOpen } from '../workspace/panels.ts';
 import { useT } from '../text.ts';
 import { ReportFitZoom, Slots, useFitZoom } from './slots.tsx';
@@ -164,16 +164,39 @@ function FrameEdge({ width }: { readonly width: number }) {
   return <div className="frame__edge" role="separator" aria-orientation="vertical" aria-label={t('command.resizeViewport')} title={t('command.resizeViewport')} aria-valuenow={width} data-door={FRAME_EDGE.ref} />;
 }
 
-function BreakpointTabs() {
+// The breakpoint tabs stand on the part of the frame the stage shows (`seen`, in the frame's pixels: from its left
+// edge to its right, both clipped to the stage), so a frame panned or zoomed past the stage's edge never takes its tabs
+// out of reach; and where their names do not fit that width, every tab shows its icon alone, its name kept for
+// readers and as its tooltip, and the current one its icon and its name (the user's request of 2026-10-05: the tabs
+// broke over two lines). The width the names take is read while they are drawn whole, for the tabs and words drawn now.
+function BreakpointTabs({ seen }: { readonly seen: { readonly from: number; readonly to: number } }) {
   const t = useT();
+  const row = useRef<HTMLDivElement>(null);
+  const [compact, setCompact] = useState(false);
+  const whole = useRef<{ readonly words: string; readonly width: number } | null>(null);
+  const room = Math.max(0, seen.to - seen.from);
+  // what the tabs say: the project's breakpoints, the one in view and the words of the interface's language
+  const said = useEditorState((s) => JSON.stringify([breakpointsOf(s.document), activeBreakpoint(s).id]));
+  useLayoutEffect(() => {
+    const element = row.current;
+    if (element === null) return;
+    const words = [...element.querySelectorAll('.frame-tab')].map((tab) => `${tab.textContent ?? ''}${tab.classList.contains('is-current') ? '*' : ''}`).join('|');
+    if (!compact) {
+      whole.current = { words, width: element.scrollWidth };
+      if (element.scrollWidth > room + 0.5) setCompact(true);
+    } else if (whole.current === null || whole.current.words !== words || whole.current.width <= room + 0.5) {
+      // other names, or room enough again: drawn whole once more, and measured
+      setCompact(false);
+    }
+  }, [compact, room, said, t]);
   return (
-    <div className="frame-tabs" data-region="canvas-breakpoints" role="tablist">
+    <div ref={row} className={`frame-tabs${compact ? ' is-compact' : ''}`} data-region="canvas-breakpoints" role="tablist" style={{ marginLeft: seen.from, width: compact ? undefined : room }}>
       <Slots
         region="canvas-breakpoints"
         render={(slot) => {
           if (slot.kind !== 'door') return undefined;
           return breakpointTabSlot('canvas-breakpoints', slot, (entry, breakpoint, args) => (
-            <DoorControl key={`${entry.ref}:${breakpoint.id}`} entry={entry} args={args} className="frame-tab">
+            <DoorControl key={`${entry.ref}:${breakpoint.id}`} entry={entry} args={args} className="frame-tab" title={breakpointName(breakpoint, t)}>
               <span className="door__label">{breakpointName(breakpoint, t)}</span>
               <span className="frame-tab__width">{breakpoint.width}</span>
               {breakpoint.base ? (
@@ -208,9 +231,12 @@ function BreakpointBadge() {
   const breakpoint = useEditorState((s) => activeBreakpoint(s));
   if (breakpoint.base) return null;
   return (
-    <div className="canvas-breakpoint-badge" data-canvas-badge="breakpoint">
+    // the breakpoint and its width always, what the edits reach where the band has room for it (canvas.css: a phone's
+    // frame cut it with an ellipsis, a narrower one broke it over two lines); the whole sentence is its tooltip
+    <div className="canvas-breakpoint-badge" data-canvas-badge="breakpoint" title={t('canvas.badge.editingBreakpoint', { breakpoint: breakpointName(breakpoint, t), width: breakpoint.width })}>
       <Icon name={GLYPHS.warning} size="sm" />
-      <span>{t('canvas.badge.editingBreakpoint', { breakpoint: breakpointName(breakpoint, t), width: breakpoint.width })}</span>
+      <span className="canvas-breakpoint-badge__name">{t('canvas.badge.breakpoint', { breakpoint: breakpointName(breakpoint, t), width: breakpoint.width })}</span>
+      <span className="canvas-breakpoint-badge__scope">{t('canvas.badge.breakpointScope')}</span>
     </div>
   );
 }
@@ -273,7 +299,7 @@ export function CanvasColumn() {
                     {/* the breakpoints, a row of tabs attached to the frame they switch (the owner's decision D-1; the
                         canonical frame): their row takes its own width, so at a small zoom the tabs run past the
                         frame's edge instead of being cut or overlapping (the audit's A3.18) */}
-                    <BreakpointTabs />
+                    <BreakpointTabs seen={{ from: Math.max(0, -(FIT_MARGIN + pan)), to: Math.min(pageWidth * zoom, size.width - (FIT_MARGIN + pan)) }} />
                     <StateBadge />
                     <BreakpointBadge />
                     {/* the edge first: the page's overlay (its handles at the page's edge) is drawn over it */}

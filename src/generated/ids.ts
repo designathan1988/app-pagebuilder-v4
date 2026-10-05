@@ -6512,6 +6512,8 @@ export const MESSAGE_IDS = [
   "commandBar.scope.find",
   "feature.commandBarFind",
   "canvas.badge.editingBreakpoint",
+  "canvas.badge.breakpoint",
+  "canvas.badge.breakpointScope",
   "layers.instanceOf",
   "assetPicker.search",
   "panel.dockBack",

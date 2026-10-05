@@ -206,7 +206,7 @@ Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests pas
 
 | Feature | Title | Built | Scenarios | Doors | Behaviour section | Required | Last complete run |
 |---|---|---|---|---|---|---|---|
-| `breakpoints-switch` | Switch between Desktop, Laptop, Tablet and Phone breakpoints | yes | 12 | 9 | [breakpoints-switch](../spec/BEHAVIOUR.md#breakpoints-switch) | 2 | passes 12/12 |
+| `breakpoints-switch` | Switch between Desktop, Laptop, Tablet and Phone breakpoints | yes | 12 | 9 | [breakpoints-switch](../spec/BEHAVIOUR.md#breakpoints-switch) | 3 | passes 12/12 |
 | `breakpoint-overrides` | Style overrides per breakpoint, desktop first | yes | 5 | 5 | [breakpoint-overrides](../spec/BEHAVIOUR.md#breakpoint-overrides) | 2 | passes 5/5 |
 | `state-styles` | Style states: hover, focus, active, disabled, invalid and placeholder shown | yes | 17 | 17 | [state-styles](../spec/BEHAVIOUR.md#state-styles) | 2 | passes 17/17 |
 

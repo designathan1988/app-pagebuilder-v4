@@ -481,9 +481,16 @@
 }
 
 .canvas-breakpoint-badge > span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: none;
+  line-height: var(--size-target-min);
+}
+
+/* what the edits reach, after the breakpoint's name, on the band's one line where it fits whole; where it does not, the
+   line wraps it under the band's height (overflow hidden), out of sight, and the band's tooltip says it */
+.canvas-breakpoint-badge {
+  flex-wrap: wrap;
+  align-content: flex-start;
+  row-gap: var(--space-4);
 }
 
 /* while a breakpoint other than the base is edited, the frame wears its colour: the page's outline and the tab of

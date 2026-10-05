@@ -3476,6 +3476,8 @@
   "commandBar.scope.find": "Pages, layers, classes @",
   "feature.commandBarFind": "Pages, layers and classes in the command bar",
   "canvas.badge.editingBreakpoint": "{breakpoint} · {width} px — edits apply to this screen and narrower ones",
+  "canvas.badge.breakpoint": "{breakpoint} · {width} px",
+  "canvas.badge.breakpointScope": "— edits apply to this screen and narrower ones",
   "layers.instanceOf": "An instance of the component {component}",
   "assetPicker.search": "Find an image",
   "panel.dockBack": "Put back in its place",
