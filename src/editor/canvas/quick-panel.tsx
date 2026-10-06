@@ -369,15 +369,18 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
   const [placed, setPlaced] = useState<Placed | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   const chip = useRef<HTMLButtonElement>(null);
-  // the element and the zoom for which the canvas was moved to show the label: once per opening, and once more for each
-  // zoom the person sets while it is open (DEC-75: at 200 % the label of the element it stands for left the view, and
-  // the panel with it); a scroll is the person's own move away, never undone
-  const revealed = useRef<string | null>(null);
+  // The label's view the open panel owes: its element and the zoom, owed when the panel opens, another element is
+  // selected under it or the person sets another zoom, and paid once the label is in view (DEC-70, DEC-75). Until then
+  // the canvas is moved to it whenever the last move has landed — a zoom's own settling moves the page a frame or two
+  // after it (the camera's horizontal place), so a single move made on its first frame missed (AU6-P1). A scroll is the
+  // person's own move away and owes nothing.
+  const owed = useRef<string | null>(null);
+  const lastView = useRef<string | null>(null);
   // whether the panel was open at the last placing; the frames left in which the opening fits it whole below its
   // label, and the label's top when the canvas was last moved for it
   const wasPlacedOpen = useRef(false);
   const fitFrames = useRef(0);
-  const fitFrom = useRef<number | null>(null);
+  const fitFrom = useRef<{ readonly left: number; readonly top: number } | null>(null);
   const shown = node !== null && !editing && dragging === null;
   const id = node?.id ?? null;
   const offset: Offset | null = id === null ? null : (offsets[id] ?? null);
@@ -419,15 +422,18 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
         // opened while the label is out of sight (its shortcut; a wide element's start left of the canvas at 100 %),
         // or so near the window's bottom that the panel beside it would be cut short (one field in sight, the pairing
         // of 2026-10-05): the canvas moves, the label into view and the whole panel below it (DEC-70)
-        const shownFor = `${id} ${frame?.currentCSSZoom ?? 1}`;
-        const reveal = !seen && revealed.current !== shownFor;
+        const view = `${id} ${frame?.currentCSSZoom ?? 1}`;
+        if (!open) owed.current = null;
+        else if (view !== lastView.current) owed.current = view;
+        lastView.current = open ? view : null;
+        if (seen) owed.current = null;
         // after a move, nothing more is asked until the label has moved (a canvas at the page's end never does)
-        if (at !== undefined && fitFrom.current !== null && Math.abs(at.top - fitFrom.current) >= 0.5) fitFrom.current = null;
+        if (at !== undefined && fitFrom.current !== null && (Math.abs(at.top - fitFrom.current.top) >= 0.5 || Math.abs(at.left - fitFrom.current.left) >= 0.5)) fitFrom.current = null;
+        const reveal = !seen && owed.current !== null && fitFrom.current === null;
         const fitting = seen && fitFrames.current > 0 && fitFrom.current === null;
         if (open && at !== undefined && (reveal || fitting)) {
-          if (reveal) revealed.current = shownFor;
-          const view = document.querySelector('.frame__view')?.getBoundingClientRect();
-          const top = Math.max(stageBox.top, view?.top ?? stageBox.top);
+          const pageView = document.querySelector('.frame__view')?.getBoundingClientRect();
+          const top = Math.max(stageBox.top, pageView?.top ?? stageBox.top);
           const dx = at.left < stageBox.left || at.right > stageBox.right ? stageBox.left + inset - at.left : 0;
           let dy = at.top < top ? top + inset - at.top : at.bottom > stageBox.bottom ? stageBox.bottom - inset - at.bottom : 0;
           // what the panel holds, scrolled or not, with its borders (its height counts them), at most its share of the
@@ -437,11 +443,10 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
           // moved up no further than leaves the label at the top of the view
           if (fitFrames.current > 0 && over > 0) dy = Math.max(dy - over, top + inset - at.top);
           if (Math.round(dx) !== 0 || Math.round(dy) !== 0) {
-            fitFrom.current = at.top;
+            fitFrom.current = { left: at.left, top: at.top };
             if (PAN !== undefined) (store.dispatch as (command: CommandId, args: unknown) => unknown)(PAN.command.id, { dx: Math.round(dx), dy: Math.round(dy) });
           }
         }
-        if (!open) revealed.current = null;
         const placedBox = at === undefined || !seen ? null : placeQuickPanel({ x: at.x, y: at.y, width: at.width, height: at.height }, element, size, open, whole, inset, offset);
         const next = placedBox === null ? null : { id, open, box: placedBox, element, widest: Math.max(0, window.innerWidth - 2 * inset), tallest: Math.max(0, window.innerHeight - placedBox.y - inset) };
         setPlaced((before) => (JSON.stringify(before) === JSON.stringify(next) ? before : next));
