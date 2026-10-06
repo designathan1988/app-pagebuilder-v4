@@ -103,6 +103,15 @@
   --z-palette: 85;
   --z-confirm: 85;
   --z-guard: 90;
+  --z-canvas-edge: 1;
+  --z-canvas-direct: 2;
+  --z-canvas-label: 3;
+  --z-canvas-chip: 5;
+  --z-canvas-handle: 6;
+  --z-canvas-rotation: 6;
+  --z-canvas-anchor: 7;
+  --z-canvas-panel: 8;
+  --z-canvas-panel-menu: 6;
 }
 
 :root {

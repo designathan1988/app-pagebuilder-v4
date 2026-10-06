@@ -233,7 +233,9 @@ export function CanvasFrame({ width, screen, zoom }: { readonly width: number; r
     let left = 8;
     let request = requestAnimationFrame(function again() {
       const inside = frame.contentWindow;
-      if (inside === null || left <= 0) return;
+      // a pan's scroll ended the hold (below): the point is no longer the zoom's to keep, or the hold scrolled the
+      // page back over the pan (the open quick panel's move to its label after a zoom never took: DEC-75)
+      if (inside === null || left <= 0 || held.current === null) return;
       left -= 1;
       const wanted = pageY - at / zoom;
       if (Math.abs(inside.scrollY - wanted) <= 0.5) {

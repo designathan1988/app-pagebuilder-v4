@@ -369,7 +369,9 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
   const [placed, setPlaced] = useState<Placed | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   const chip = useRef<HTMLButtonElement>(null);
-  // the element whose label the canvas was moved to show when the panel opened out of sight (once per opening)
+  // the element and the zoom for which the canvas was moved to show the label: once per opening, and once more for each
+  // zoom the person sets while it is open (DEC-75: at 200 % the label of the element it stands for left the view, and
+  // the panel with it); a scroll is the person's own move away, never undone
   const revealed = useRef<string | null>(null);
   // whether the panel was open at the last placing; the frames left in which the opening fits it whole below its
   // label, and the label's top when the canvas was last moved for it
@@ -417,12 +419,13 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
         // opened while the label is out of sight (its shortcut; a wide element's start left of the canvas at 100 %),
         // or so near the window's bottom that the panel beside it would be cut short (one field in sight, the pairing
         // of 2026-10-05): the canvas moves, the label into view and the whole panel below it (DEC-70)
-        const reveal = !seen && revealed.current !== id;
+        const shownFor = `${id} ${frame?.currentCSSZoom ?? 1}`;
+        const reveal = !seen && revealed.current !== shownFor;
         // after a move, nothing more is asked until the label has moved (a canvas at the page's end never does)
         if (at !== undefined && fitFrom.current !== null && Math.abs(at.top - fitFrom.current) >= 0.5) fitFrom.current = null;
         const fitting = seen && fitFrames.current > 0 && fitFrom.current === null;
         if (open && at !== undefined && (reveal || fitting)) {
-          if (reveal) revealed.current = id;
+          if (reveal) revealed.current = shownFor;
           const view = document.querySelector('.frame__view')?.getBoundingClientRect();
           const top = Math.max(stageBox.top, view?.top ?? stageBox.top);
           const dx = at.left < stageBox.left || at.right > stageBox.right ? stageBox.left + inset - at.left : 0;

@@ -4,7 +4,7 @@
 .quick-panel-chip,
 .quick-panel {
   position: fixed;
-  z-index: 5;
+  z-index: var(--z-canvas-chip);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-raised);
@@ -17,7 +17,7 @@
    tab marks an edge the anchor pins, and the handle there would take its press. */
 .anchor-tab-place {
   position: absolute;
-  z-index: 7;
+  z-index: var(--z-canvas-anchor);
   display: block;
 }
 
@@ -80,7 +80,7 @@
 .quick-panel {
   /* the open panel stands over the selection's handles and anchor tabs (6, 7): a handle drawn through it read as a
      stray square on its bar; the chip stays under them (item 4.2) */
-  z-index: 8;
+  z-index: var(--z-canvas-panel);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -527,6 +527,17 @@
   opacity: 1;
 }
 
+/* an optional control that would take no press under what is drawn over it gives way (src/editor/canvas/arrangement.ts,
+   DEC-75): a band no mode pins wholly under the edge grip of an element with no padding, a resize handle under the tab
+   of the anchor that pins its edge. It stays in the layout, so it comes back as soon as it has room, but is neither
+   seen nor pressed */
+.chrome__band--auto.is-yielded,
+.chrome__edge.is-yielded,
+.chrome__handle.is-yielded {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .chrome__handle-value {
   padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
@@ -565,7 +576,7 @@
 
 .quick-panel__options {
   position: absolute;
-  z-index: 6;
+  z-index: var(--z-canvas-panel-menu);
   top: 100%;
   left: 0;
   display: flex;
@@ -604,7 +615,7 @@
 .chrome__direct {
   position: absolute;
   /* over the sides' resize grips (.chrome__edge) a corner's radius dot may sit on */
-  z-index: 2;
+  z-index: var(--z-canvas-direct);
   border-radius: var(--radius-pill);
   background: var(--color-canvas-handle);
   outline: 1.5px solid var(--color-canvas-selection);

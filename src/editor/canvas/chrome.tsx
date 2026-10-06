@@ -58,6 +58,7 @@ import { ViewOverlays } from './view-overlays.tsx';
 import { GridOverlay } from './grid-overlay.tsx';
 // where a label and a resize handle may be drawn (canvas/placement.ts): the rules moved out of this file, which draws
 import { controlBoxes, handleHitBox, overlaps as overlapsBox, placeLabel, selectionLabelBox, turnedFrame, visibleCanvas, type Box, type Placement } from './placement.ts';
+import { ARRANGED, ARRANGED_SELECTOR, ROTATION_SIDES, placeRotationZones, yielding, type Arranged } from './arrangement.ts';
 import { distancesOf, type Distance } from './distances.ts';
 import { altDistances, hoverSizeOf, type HoverSize } from './hover-measure.ts';
 import { breakpointName } from '../../core/document/breakpoints.ts';
@@ -233,8 +234,12 @@ interface Layout {
   readonly toolbar: { readonly x: number; readonly y: number } | null;
   // the marquee's band while one is drawn (pointer.ts)
   readonly band: Box | null;
-  // where the four rotation zones of the one selected node go (rotateSpot), in ROTATE_ZONES order
-  readonly rotate: readonly { readonly x: number; readonly y: number }[] | null;
+  // where the four rotation zones of the one selected node go, in ROTATION_SIDES order: each its first place free of
+  // the controls it leaves pressable, null where none is (arrangement.ts, DEC-75)
+  readonly rotate: readonly (Point | null)[] | null;
+  // the optional controls that give way, taking no press under what is drawn over them (arrangement.ts): their
+  // data-arrange-key, which the components that draw them read
+  readonly yielded: readonly string[];
   // whether the one selected element's own declarations move its start edge on each axis (4.2): where they do not
   // (the parent lays it out, an inline-level element), the north and west handles are drawn disabled with the reason
   readonly starts: { readonly x: boolean; readonly y: boolean } | null;
@@ -287,31 +292,6 @@ function resizeDistances(iframe: HTMLIFrameElement, drawn: DocumentJson, id: str
 }
 
 
-// The rotation zone's place (spec rotation-handle; item 4.4: one zone outside each of the four corners): a fixed
-// screen distance outside the corner, held inside the canvas (the chrome is clipped to it): inside the corner on a
-// side where outside would leave it, and at the canvas's edge when even the corner lies beyond it (a turned element's
-// box can be larger than the page)
-function rotateSpot(box: Box, area: { readonly width: number; readonly height: number }, size: number, gap: number, side: string): { readonly x: number; readonly y: number } {
-  const west = side.includes('w');
-  const north = side.includes('n');
-  const outside = { x: west ? box.x - gap - size : box.x + box.width + gap, y: north ? box.y - gap - size : box.y + box.height + gap };
-  const x = west ? (outside.x >= 0 ? outside.x : box.x + gap) : outside.x + size <= area.width ? outside.x : box.x + box.width - gap - size;
-  const y = north ? (outside.y >= 0 ? outside.y : box.y + gap) : outside.y + size <= area.height ? outside.y : box.y + box.height - gap - size;
-  return { x: Math.min(Math.max(x, 0), area.width - size), y: Math.min(Math.max(y, 0), area.height - size) };
-}
-// A zone's place once the element itself is turned (item 4.4): its place about the element's centre, held inside the
-// canvas as rotateSpot's is. The zone is round, so turning it is moving it — and a wide turned element's corner can
-// leave the canvas, where a CSS turn could not hold it in.
-function turnedSpot(spot: { readonly x: number; readonly y: number }, box: Box, rotation: number, size: number, area: { readonly width: number; readonly height: number }): { readonly x: number; readonly y: number } {
-  if (rotation === 0) return spot;
-  const radians = (rotation * Math.PI) / 180;
-  const centre = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  const at = { x: spot.x + size / 2 - centre.x, y: spot.y + size / 2 - centre.y };
-  const turned = { x: centre.x + at.x * Math.cos(radians) - at.y * Math.sin(radians), y: centre.y + at.x * Math.sin(radians) + at.y * Math.cos(radians) };
-  return { x: Math.min(Math.max(turned.x - size / 2, 0), area.width - size), y: Math.min(Math.max(turned.y - size / 2, 0), area.height - size) };
-}
-// the four zones, in the manifest's own handle order (the corners of the box)
-const ROTATE_ZONES: readonly string[] = ['nw', 'ne', 'se', 'sw'];
 // Whether the one selected element's own declarations move its start edge on each axis (item 4.2): a positioned
 // element by left/top, a block-level element in a block container by its margins. Where the parent lays it out (a
 // flex or a grid) or the element is inline-level, that edge is the parent's, and the north or west handle is drawn
@@ -337,7 +317,7 @@ const startHeld = (handle: string, starts: Layout['starts']): boolean => {
   return (side.includes('n') && !starts.y) || (side.includes('w') && !starts.x);
 };
 
-const EMPTY: Layout = { selected: [], union: null, hovered: null, label: null, toolbar: null, band: null, rotate: null, starts: null, size: null, rotation: 0, hoverSize: null, distances: [], neighbours: [], handleSize: 24, measuredFor: '' };
+const EMPTY: Layout = { selected: [], union: null, hovered: null, label: null, toolbar: null, band: null, rotate: null, yielded: [], starts: null, size: null, rotation: 0, hoverSize: null, distances: [], neighbours: [], handleSize: 24, measuredFor: '' };
 
 // whether two pieces of what the chrome draws read the same (the layout is compared as its text, so an unchanged
 // measure is not drawn again)
@@ -769,7 +749,23 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
         const zone = parseFloat(style.getPropertyValue('--space-6')) || 0;
         const gapTo = parseFloat(style.getPropertyValue('--space-4')) || 0;
         const spin = selection.length === 1 && selection[0] !== undefined ? elementRotation(iframe, selection[0]) : 0;
-        const rotate = single === undefined ? null : ROTATE_ZONES.map((side) => turnedSpot(rotateSpot(single, origin, zone, gapTo, side), single, spin, zone, origin));
+        // the arrangement (arrangement.ts, DEC-75): every control about the selection where it is drawn, in drawing
+        // order — the chip, the open panel, the anchor tabs stand in the stage beside this layer; the label and the
+        // text toolbar are fixed in the window — so a zone or an optional control yields to what really lies there
+        const stageRoot = layer.current?.closest('[data-canvas-stage]') ?? document;
+        const arranged: Arranged[] = [...stageRoot.querySelectorAll(ARRANGED_SELECTOR)].flatMap((el) => {
+          const rule = ARRANGED.find((one) => el.matches(one.selector));
+          const box = local(el.getBoundingClientRect());
+          return rule === undefined || box === null || box.width <= 0 || box.height <= 0 ? [] : [{ key: el.getAttribute('data-arrange-key') ?? '', layer: rule.layer, box, optional: rule.optional }];
+        });
+        // a zone leaves the chip, the panel, the text toolbar, the handles shown and the anchor tabs their presses, and
+        // keeps clear of the label while it can
+        const shownBefore = new Set(last?.yielded ?? []);
+        const keep = arranged.filter((one) => (one.layer === 'chip' || one.layer === 'panel' || one.layer === 'handle' || one.layer === 'anchor') && !shownBefore.has(one.key)).map((one) => one.box);
+        const labels = arranged.filter((one) => one.layer === 'label').map((one) => one.box);
+        const rotate = single === undefined ? null : placeRotationZones(single, origin, zone, gapTo, spin, keep, labels);
+        // the optional controls that would take no press under what is drawn over them give way
+        const yielded = [...yielding(arranged)].sort();
         // the hovered element's size in CSS px, and, with Alt held, its distances to the one selected element
         const zoom = iframe.currentCSSZoom > 0 ? iframe.currentCSSZoom : 1;
         // the hovered element's size chip stands under its bottom-left corner, or under its bottom-right one where the
@@ -809,6 +805,7 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
           toolbar: placedToolbar,
           band: local(drawnBand),
           rotate,
+          yielded,
           starts: startsOf(iframe, selection.length === 1 ? selection[0] ?? null : null),
           size: ownSize,
           rotation: selection.length === 1 && selection[0] !== undefined ? elementRotation(iframe, selection[0]) : 0,
@@ -873,9 +870,10 @@ function ResizeHandles({ box, shown }: { readonly box: Box; readonly shown: Layo
     return (
       <div
         key={entry.ref}
-        className={`chrome__handle${held ? ' is-unavailable' : ''}`}
+        className={`chrome__handle${held ? ' is-unavailable' : ''}${shown.yielded.includes(`handle:${handle}`) ? ' is-yielded' : ''}`}
         data-door={entry.ref}
         data-resize-handle={handle}
+        data-arrange-key={`handle:${handle}`}
         data-chrome="handle"
         aria-disabled={held ? true : undefined}
         title={held ? t('common.disabledTitle', { label: t(entry.door.labelKey as MessageId), reason: { key: 'canvas.resize.parentPlaces' } }) : undefined}
@@ -891,28 +889,32 @@ function EdgeGrips({ box, shown }: { readonly box: Box; readonly shown: Layout }
   const t = useT();
   return EDGE_GRIPS.filter(isDoorBuilt).filter((entry) => roomFor(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', box)).filter((entry) => !startHeld(entry.door.kind === 'canvas-handle' ? entry.door.handle : '', shown.starts)).map((entry) => {
     const handle = entry.door.kind === 'canvas-handle' ? entry.door.handle : '';
-    return <div key={entry.ref} className="chrome__edge" data-door={entry.ref} data-resize-handle={handle} data-chrome="edge" title={t(entry.door.labelKey as MessageId)} style={edgeGripBox(handleSide(handle), box)} />;
+    return <div key={entry.ref} className={`chrome__edge${shown.yielded.includes(`edge:${handle}`) ? ' is-yielded' : ''}`} data-door={entry.ref} data-resize-handle={handle} data-arrange-key={`edge:${handle}`} data-chrome="edge" title={t(entry.door.labelKey as MessageId)} style={edgeGripBox(handleSide(handle), box)} />;
   });
 }
 
 // The rotation zones, one outside each corner (item 4.4): the same door, drawn four times, each turned with the
 // element when it holds a rotation.
-function RotateZones({ door, spots }: { readonly door: DoorEntry; readonly spots: readonly Point[] }) {
+function RotateZones({ door, spots }: { readonly door: DoorEntry; readonly spots: readonly (Point | null)[] }) {
   const t = useT();
-  return spots.map((spot, i) => (
-    <div
-      key={ROTATE_ZONES[i] ?? i}
-      className="chrome__rotate"
-      data-door={door.ref}
-      data-rotate-handle=""
-      data-rotate-zone={ROTATE_ZONES[i] ?? ''}
-      data-chrome="handle"
-      title={t(door.door.labelKey as MessageId)}
-      style={{ left: spot.x, top: spot.y }}
-    >
-      {ROTATE_ZONES[i] === 'ne' ? <Icon name={manifest.layout.glyphs.rotate} size="sm" /> : null}
-    </div>
-  ));
+  // the rotate glyph on the north-east zone, or on the next one drawn when it has no free place
+  const glyph = ['ne', 'se', 'sw', 'nw'].find((side) => spots[ROTATION_SIDES.indexOf(side)] != null);
+  return spots.map((spot, i) =>
+    spot === null ? null : (
+      <div
+        key={ROTATION_SIDES[i] ?? i}
+        className="chrome__rotate"
+        data-door={door.ref}
+        data-rotate-handle=""
+        data-rotate-zone={ROTATION_SIDES[i] ?? ''}
+        data-chrome="handle"
+        title={t(door.door.labelKey as MessageId)}
+        style={{ left: spot.x, top: spot.y }}
+      >
+        {ROTATION_SIDES[i] === glyph ? <Icon name={manifest.layout.glyphs.rotate} size="sm" /> : null}
+      </div>
+    ),
+  );
 }
 
 // Where a chrome layer stands in the window, read at every frame while `active` (the page pans, zooms and the panels
@@ -1131,7 +1133,7 @@ export function CanvasChrome() {
       {/* the handles of the Edit on canvas mode on the one selected element (edit-handles.tsx), and the spacing and gap
           bands any selection draws: the bands sit under the handles — the mode's own and the resize ones after them —
           so a press that lands on a handle takes that handle, never a band passing under it */}
-      {resizable && shown.selected[0] && node !== null && !dropping && !editing ? <EditHandles node={node.id} box={shown.selected[0]} /> : null}
+      {resizable && shown.selected[0] && node !== null && !dropping && !editing ? <EditHandles node={node.id} box={shown.selected[0]} yielded={shown.yielded} /> : null}
       {/* the canvas grid editor's line numbers and grips (grid-editor.tsx; the user's real-use audit, item 8.2) */}
       <GridEditor />
       {/* the resize handles, but while an Edit on canvas mode draws its own (edit-handles.tsx). A handle carrying a

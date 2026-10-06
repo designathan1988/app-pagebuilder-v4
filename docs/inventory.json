@@ -5,8 +5,8 @@
     "commands": 373,
     "doors": 1362,
     "scenarios": 1831,
-    "modules": 480,
-    "lines": 83920
+    "modules": 481,
+    "lines": 84071
   },
   "features": [
     {
@@ -5062,6 +5062,12 @@
       "features": []
     },
     {
+      "path": "src/editor/canvas/arrangement.ts",
+      "lines": 142,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/canvas/band-typing.ts",
       "lines": 31,
       "commands": [],
@@ -5081,7 +5087,7 @@
     },
     {
       "path": "src/editor/canvas/chrome.tsx",
-      "lines": 1152,
+      "lines": 1154,
       "commands": [],
       "features": []
     },
@@ -5099,7 +5105,7 @@
     },
     {
       "path": "src/editor/canvas/edit-handles.tsx",
-      "lines": 406,
+      "lines": 408,
       "commands": [],
       "features": []
     },
@@ -5115,7 +5121,7 @@
     },
     {
       "path": "src/editor/canvas/frame.tsx",
-      "lines": 275,
+      "lines": 277,
       "commands": [],
       "features": []
     },
@@ -5183,7 +5189,7 @@
     },
     {
       "path": "src/editor/canvas/quick-panel.tsx",
-      "lines": 545,
+      "lines": 548,
       "commands": [],
       "features": []
     },

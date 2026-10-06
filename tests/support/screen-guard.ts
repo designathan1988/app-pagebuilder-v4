@@ -56,7 +56,9 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
   const H = window.innerHeight;
   const english = input.english === null ? null : new Set(input.english);
   const allowed = (kind: string, el: Element) => input.allowed.some((rule) => rule.kind === kind && el.closest(rule.selector) !== null);
-  const LAYERS = '[role=menu],[role=dialog],[role=alertdialog],[role=listbox],[role=tooltip],.popover,.menu,.command-bar,[data-region=toast],[data-region=command-palette],.floating,.panel-window,[data-drag-ghost],.chrome-ghost-stack,.backdrop,[class*="backdrop"]';
+  // the layers a person opens over the editor, which cover what lies under them on purpose until they close: the open
+  // quick panel stands over the selection's handles (canvas-editing.css, DEC-75)
+  const LAYERS = '.quick-panel,[role=menu],[role=dialog],[role=alertdialog],[role=listbox],[role=tooltip],.popover,.menu,.command-bar,[data-region=toast],[data-region=command-palette],.floating,.panel-window,[data-drag-ghost],.chrome-ghost-stack,.backdrop,[class*="backdrop"]';
   const style = (el: Element) => getComputedStyle(el);
   const shown = (el: Element): DOMRect | null => {
     const r = el.getBoundingClientRect();

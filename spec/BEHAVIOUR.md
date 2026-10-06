@@ -6118,6 +6118,14 @@ The panel's controls have `tabindex="-1"` (sealed out of the Tab order, `quick-p
   last session. Undo starts again from here."), so nobody looks for an undo that is not there. Restoring a version from
   the recovery dialog starts the history again the same way.
 
+### Our rule: the panel follows its label across a zoom (DEC-75)
+
+- The open panel moves the canvas to show its label when it opens out of sight (DEC-70), and once more for each zoom
+  the person sets while it is open: at 200 % the label of the element it stands for leaves the view, and the panel
+  with it. A scroll is the person's own move away and is never undone. The move is the canvas's pan, which ends a
+  zoom's hold of the page point under its pivot (`frame.tsx`: the hold kept scrolling the page back over the pan for
+  eight frames, so the move after a zoom never took).
+
 ### Our rule: the panel's keyboard (the user's real-use audit, item 6.3)
 
 - The panel's open state is the editor's, one command: `quickPanel.setOpen` (`ui.quickPanelOpen`; the chip's own door
@@ -6534,6 +6542,14 @@ None in Pager.
   old single handle was — held *by its turned place*: the zone is round, so
   the element's own rotation moves it along its circle rather than turning it in place, and the clamp applies after
   that move (a wide turned element's corner can lie beyond the canvas, where a CSS turn could not hold it in).
+- **A zone gives way to the controls beside it** (DEC-75, the arrangement of the canvas controls,
+  `src/editor/canvas/arrangement.ts`): its place outside the corner is the first of four it tries — then beside the
+  corner's vertical side, then beside its horizontal side, then inside the corner — and it takes the first where it and
+  the quick panel's chip, the open panel, the resize handles, the anchor tabs and the zones placed before it each still
+  take a press at three or more of five points along them, keeping clear of the label while one such place does. With
+  none it is not drawn; the other corners still turn the element, and the rotate glyph shows on the first zone drawn of
+  north-east, south-east, south-west, north-west. (AU6-20: beside an element about as wide as its label, the north-east
+  zone lay over the chip, which then took no press.)
 - **The label carries the angle while the element holds a rotation** (`canvas.rotate.angle` = `{angle}°`,
   `data-chrome="label-angle"`): live while a rotate drag goes on, since every move writes the document, and kept
   afterwards. The label itself does not turn (its text stays readable and its chips stay upright).
@@ -7422,6 +7438,12 @@ Focus a band (it is focusable) and press Enter to type a value; the Inspector's 
   panel; the `spacing-band` gesture's modifiers (Shift, Alt, Ctrl) act on a band the same way whether its mode is on
   or not. Choosing a mode pins its bands (opacity as drawn); Escape on the canvas leaves the mode and its bands stay,
   faint again. A mode is the shortcut the panel offers, never the door that has to be opened first.
+- **A band no mode pins gives way where it could take no press** (DEC-75, `src/editor/canvas/arrangement.ts`): under
+  the edge grips, the resize handles, the label or a band drawn after it, a band that would take a press at fewer than
+  three of five points along it is kept in the layout but neither seen nor pressed (`is-yielded`), and comes back as
+  soon as it has room — an element with no padding has its padding band wholly under its edge grip, where no pointer
+  could reach it. A resize handle or an edge grip under an anchor tab gives way the same (the tab takes that press on
+  purpose); a pinned band never gives way.
 - **A gap band is drawn only where there is a gap to edit.** The gap bands (row, column and Gap) are drawn only while
   the element's computed display is flex or grid; on a block container no gap band is drawn and the Edit on canvas menu
   leaves Gap disabled with its own reason, "Gap does not apply to the element" (`canvas.editMode.notApplicable`); a

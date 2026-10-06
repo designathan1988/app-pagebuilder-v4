@@ -179,7 +179,8 @@ interface Drawn {
   readonly args?: Readonly<Record<string, unknown>>;
 }
 
-function Handle({ drawn, mode }: { readonly drawn: Drawn; readonly mode: EditMode }) {
+// `bandKey`: the band's own key, which the arrangement names when the band gives way (`yielded`; arrangement.ts)
+function Handle({ drawn, mode, bandKey, yielded }: { readonly drawn: Drawn; readonly mode: EditMode; readonly bandKey: string; readonly yielded: boolean }) {
   const { entry, box, start, normal, min, kind, opposite, shadow, band, sides, args } = drawn;
   const stands = shadow === undefined ? handleArgs(entry) : { property: shadow.property };
   const door = useDoor(entry, stands, undefined, isFeatureBuilt(entry.door.feature as FeatureId));
@@ -191,8 +192,9 @@ function Handle({ drawn, mode }: { readonly drawn: Drawn; readonly mode: EditMod
   const style: CSSProperties = { left: box.x, top: box.y, width: box.width, height: box.height };
   return (
     <div
-      className={`chrome__${kind} ${band === undefined ? `chrome__${kind}--${mode}` : `chrome__band--${band}${pinned ? '' : ' chrome__band--auto'}${Math.min(box.width, box.height) < VALUE_MIN_BAND ? ' chrome__band--thin' : ''}`}${dragged ? ' is-dragging' : ''}${door.available ? '' : ' is-unavailable'}`}
+      className={`chrome__${kind} ${band === undefined ? `chrome__${kind}--${mode}` : `chrome__band--${band}${pinned ? '' : ' chrome__band--auto'}${Math.min(box.width, box.height) < VALUE_MIN_BAND ? ' chrome__band--thin' : ''}`}${dragged ? ' is-dragging' : ''}${door.available ? '' : ' is-unavailable'}${!pinned && yielded ? ' is-yielded' : ''}`}
       data-door={entry.ref}
+      data-arrange-key={band === undefined ? undefined : bandKey}
       data-args={JSON.stringify({ ...stands, ...(args ?? {}), handle: entry.ref })}
       data-edit-handle=""
       data-start={start}
@@ -262,7 +264,7 @@ function childrenOf(text: string): readonly string[] {
   return ids;
 }
 
-export function EditHandles({ node, box }: { readonly node: NodeId; readonly box: Box }) {
+export function EditHandles({ node, box, yielded = [] }: { readonly node: NodeId; readonly box: Box; readonly yielded?: readonly string[] }) {
   const frame = canvasFrame();
   // the canvas zoom, which turns CSS px into the chrome's screen px, and the chrome's place on the screen
   const zoom = frame?.currentCSSZoom ?? 1;
@@ -397,7 +399,7 @@ export function EditHandles({ node, box }: { readonly node: NodeId; readonly box
   return (
     <>
       {drawn.map((d, i) => (
-        <Handle key={`${d.entry.ref}-${i}`} drawn={d} mode={mode} />
+        <Handle key={`${d.entry.ref}-${i}`} drawn={d} mode={mode} bandKey={`${d.entry.ref}-${i}`} yielded={yielded.includes(`${d.entry.ref}-${i}`)} />
       ))}
       {typed !== undefined && typing !== null ? <TypedBand key={typing.count} entry={typed.entry} box={typed.box} value={typed.start} /> : null}
     </>

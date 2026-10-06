@@ -663,7 +663,7 @@
   --handle-x: 50%;
   --handle-y: 50%;
   position: absolute;
-  z-index: 6;
+  z-index: var(--z-canvas-handle);
   width: var(--space-6);
   height: var(--space-6);
   pointer-events: auto;
@@ -696,7 +696,7 @@
    label, which a narrow element's label reaches */
 .chrome__rotate {
   position: absolute;
-  z-index: 6;
+  z-index: var(--z-canvas-rotation);
   display: grid;
   place-items: center;
   width: var(--space-6);
@@ -789,7 +789,7 @@
    (a handle, a grid's span grip, an anchor tab keeps its own press where it overlaps the side) */
 .chrome__edge {
   position: absolute;
-  z-index: 1;
+  z-index: var(--z-canvas-edge);
   pointer-events: auto;
 }
 
@@ -1040,7 +1040,7 @@
    (6), the quick panel's chip (5) and the anchor tabs (7) stay over it (the user's review of 2026-10-05, LR2) */
 .chrome__label {
   position: absolute;
-  z-index: 3;
+  z-index: var(--z-canvas-label);
   display: inline-flex;
   align-items: baseline;
   gap: var(--space-2);
