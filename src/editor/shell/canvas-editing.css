@@ -146,7 +146,9 @@
   field-sizing: content;
   width: auto;
   min-width: var(--space-6);
-  max-width: var(--size-tag-field);
+  /* the tag field's width and a step more: "blockquote" in the body's size is 86 px and its box 88, the field 76 (the
+     audit of 2026-10-05, AU6-07: it read "blockquo") */
+  max-width: calc(var(--size-tag-field) + var(--space-7));
   height: var(--size-target-min);
   padding: 0 var(--space-1);
   border-color: transparent;
