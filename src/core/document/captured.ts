@@ -34,7 +34,7 @@ export interface CapturedWidth {
 
 export type CapturedAt = Readonly<Record<string, CapturedWidth>>;
 
-export interface CapturedShadow {
+interface CapturedShadow {
   readonly mode: 'open' | 'closed';
   readonly children: readonly CapturedNode[];
 }
@@ -199,7 +199,7 @@ export function captureTree(markup: string, ids: IdGenerator): CapturedElement {
 // What a captured page's tree may hold, whatever made it: an element that acts on the page (unsafeCapturedElement)
 // goes with its subtree, an executable attribute or address goes from the element and from its per-width lists, and
 // every node takes a document id.
-export function safeCaptured(node: CapturedNode, ids: IdGenerator): CapturedNode | null {
+function safeCaptured(node: CapturedNode, ids: IdGenerator): CapturedNode | null {
   const at = node.at === undefined ? undefined : Object.fromEntries(Object.entries(node.at).map(([width, variant]) => [width, variant.attributes === undefined || node.kind !== 'element'
     ? variant
     : { ...variant, attributes: variant.attributes.filter((one) => one.name !== 'data-capture-runtime' && !unsafeCapturedAttribute(node.tag, one)) }]));

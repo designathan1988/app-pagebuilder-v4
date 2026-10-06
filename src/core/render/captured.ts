@@ -113,7 +113,7 @@ const escapeAttribute = (value: string): string => escapeText(value).replaceAll(
 const isElement = (node: CapturedNode, tag: string): node is CapturedElement => node.kind === 'element' && node.tag === tag && node.namespace === HTML;
 
 // The observed width a window of `width` px shows: the nearest one (an approximation between observed widths).
-export function nearestWidth(capture: Pick<CapturedPage, 'widths'>, width: number): number {
+function nearestWidth(capture: Pick<CapturedPage, 'widths'>, width: number): number {
   const nearest = [...capture.widths].sort((a, b) => Math.abs(a - width) - Math.abs(b - width) || b - a)[0];
   if (nearest === undefined) throw new Error('a captured page has no observed width');
   return nearest;
