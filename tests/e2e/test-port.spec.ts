@@ -29,7 +29,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('.workbench')).toBeVisible();
 });
 
-test('the test port has only its four readers, frozen and fixed on window', async ({ page }) => {
+test('the test port has only its readers, frozen and fixed on window', async ({ page }) => {
   const shape = await page.evaluate(() => {
     const descriptor = Object.getOwnPropertyDescriptor(window, '__builderTestPort');
     const port = descriptor?.value as Record<string, unknown> | undefined;
@@ -41,9 +41,10 @@ test('the test port has only its four readers, frozen and fixed on window', asyn
       configurable: descriptor?.configurable,
     };
   });
-  // its readers: the document, the selection, the history and the export, and the incident feed's list and its
-  // explanations (main.tsx: what the page throws goes to the feed, and the test port carries it)
-  expect(shape).toEqual({ members: ['document', 'explain', 'export', 'history', 'incidents', 'selection'], kinds: ['function', 'function', 'function', 'function', 'function', 'object'], frozen: true, writable: false, configurable: false });
+  // its readers: the document, the selection, the history and the export, the incident feed's list and its
+  // explanations (main.tsx: what the page throws goes to the feed, and the test port carries it), and the message keys
+  // shown, which the browser tests' coverage records (DEC-73)
+  expect(shape).toEqual({ members: ['document', 'explain', 'export', 'history', 'incidents', 'keys', 'selection'], kinds: ['function', 'function', 'function', 'function', 'function', 'function', 'object'], frozen: true, writable: false, configurable: false });
 });
 
 test('the test port reads what File › Open loaded, as copies, and its members change nothing', runs('project.open#menu-file'), async ({ page }) => {
