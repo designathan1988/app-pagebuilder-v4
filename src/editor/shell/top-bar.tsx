@@ -1,4 +1,4 @@
-// The top bar (archive/DESIGN.md "Regions"): the application menus, the page switcher, the command palette search, undo
+// The top bar : the application menus, the page switcher, the command palette search, undo
 // and redo, Preview and Export, in the order of region top-bar.
 import { PRODUCT_MARK, PRODUCT_NAME } from '../../config/product.ts';
 import { DoorControl, useDoor } from '../doors/door.tsx';

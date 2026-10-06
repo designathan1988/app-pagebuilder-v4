@@ -110,7 +110,7 @@
   cursor: pointer;
 }
 
-/* a dialog (archive/DESIGN.md "Regions": guides-grids-dialog): a modal centred over a scrim that takes every click
+/* a dialog (guides-grids-dialog): a modal centred over a scrim that takes every click
    outside it */
 .dialog-shield {
   position: fixed;
@@ -553,7 +553,7 @@
   background: var(--color-surface-raised);
 }
 
-/* the command bar (archive/DESIGN.md "Regions": command-palette): a search field over its entries, near the top of the
+/* the command bar (command-palette): a search field over its entries, near the top of the
    window, over a scrim whose press closes it (the backdrop door) */
 .command-bar {
   position: fixed;

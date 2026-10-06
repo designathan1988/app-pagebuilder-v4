@@ -39,7 +39,7 @@ export function drawnAsOf(entry: DoorEntry): string | null {
 }
 
 // The control drawn inside an item of a region (a tab's close button, a class chip's ×): the icon button placed right
-// after the item (archive/DESIGN.md "Regions": each tab is its name then its close button).
+// after the item (each tab is its name then its close button).
 export function partOf(region: RegionId, item: DoorEntry): DoorEntry | null {
   const doors = doorSlots(region);
   const next = doors[doors.indexOf(item) + 1];

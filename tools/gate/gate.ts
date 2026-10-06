@@ -1,4 +1,4 @@
-// npm run gate -- <message-file> <log-name> <path>...: the one way a change reaches main (AGENTS.md, Delivery). It
+// npm run gate -- <message-file> <log-name> <path>...: the one way a change reaches main (CLAUDE.md, Commits). It
 // commits the paths named and nothing else, and it checks exactly what it commits:
 //
 //   1. the branch is main and origin is the project's repository;
@@ -23,7 +23,7 @@ import { FEATURES_MD } from '../inventory/features.ts';
 import { addedRows, fillHashes, pendingMark, pendingRows } from './qa-log.ts';
 import { outsideTheIndex } from './status.ts';
 
-const ORIGIN = 'https://github.com/designathan1988/app-pagebuilder-v3.git';
+const ORIGIN = 'https://github.com/designathan1988/app-pagebuilder-v4.git';
 const QA_LOG = 'docs/QA-LOG.md';
 const posix = (file: string) => file.split(path.sep).join('/');
 const INVENTORY_FILES = [INVENTORY_JSON, INVENTORY_MD, FEATURES_MD].map(posix);
@@ -72,7 +72,7 @@ try {
 
   // 1. where the commit goes
   const branch = git(['rev-parse', '--abbrev-ref', 'HEAD']).stdout.trim();
-  if (branch !== 'main') refuse(`the branch is ${branch}; work is committed on main (AGENTS.md, One tree)`);
+  if (branch !== 'main') refuse(`the branch is ${branch}; work is committed on main (CLAUDE.md, One tree)`);
   const origin = git(['remote', 'get-url', 'origin']).stdout.trim();
   if (origin !== ORIGIN) refuse(`origin is ${origin}; the project's repository is ${ORIGIN}`);
 

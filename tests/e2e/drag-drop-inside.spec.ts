@@ -1,4 +1,4 @@
-// drag-drop-inside beyond its scenarios (spec/BEHAVIOUR.md#drag-drop-inside, archive/DESIGN.md "Canvas", drag): what
+// drag-drop-inside beyond its scenarios (spec/BEHAVIOUR.md#drag-drop-inside, drag): what
 // the canvas draws while an element is dragged into a container (src/editor/canvas/chrome.tsx): an empty container
 // outlined dashed with no line; a container with children at the slot of the pointer, with the line at that slot; the
 // page root's own background as a receiver; and, over the dragged element's own subtree, its current place (Problems in

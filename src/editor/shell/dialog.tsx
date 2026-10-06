@@ -1,4 +1,4 @@
-// A modal dialog of the editor (archive/DESIGN.md "Regions": dialog; spec workspace-settings-dialog): open while the
+// A modal dialog of the editor (dialog; spec workspace-settings-dialog): open while the
 // editor state names it (ui.dialog, workspace/dialogs.ts), drawn centred over a scrim, titled, with the close button of
 // the dialog region in its header (ui.dismiss). It takes the focus when it opens, keeps Tab inside it, names the dialog
 // key context (Escape closes it: ui.dismiss) and, when it closes, gives the focus back to what opened it: the control,

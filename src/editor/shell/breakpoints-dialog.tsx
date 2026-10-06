@@ -1,4 +1,4 @@
-// The Breakpoints dialog (archive/DESIGN.md "Regions": breakpoints-dialog; spec project-breakpoints), open while the
+// The Breakpoints dialog (breakpoints-dialog; spec project-breakpoints), open while the
 // editor state says so (ui.dialog; View ▸ Breakpoints…): one row per breakpoint of the project's table, widest first,
 // with its name and the widest screen it holds, then the width of the screen the canvas shows (viewport-width.tsx).
 // Enter or leaving a field keeps what was typed (breakpoints.rename, breakpoints.setWidth: one undo step each); the

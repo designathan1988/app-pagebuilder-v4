@@ -1,7 +1,7 @@
 // The inspector's sections (INVENTORY.md, owners; spec inspector-panel): which of them are collapsed, and
 // what a collapsed section's header summarises.
 //
-// inspector.toggleSection collapses or expands one section. Every section starts open (archive/DESIGN.md "Inspector");
+// inspector.toggleSection collapses or expands one section. Every section starts open;
 // the collapsed set is one per section, the same for every element (spec, Problems in Pager 1), so it survives
 // selection changes, and it lives in the preferences (src/editor/preferences/preferences.ts), which keep it after a
 // reload. Toggling records nothing in the history and never touches the document.

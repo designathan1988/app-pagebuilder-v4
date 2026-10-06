@@ -1,4 +1,4 @@
-// The Explorer view (archive/DESIGN.md "Regions"): the Pages section, one row per page, and the Files section, the
+// The Explorer view : the Pages section, one row per page, and the Files section, the
 // project's folders and files as a tree; Layers is its section below (sidebar/layers.tsx).
 import { isDataFile } from '../../../core/design/data.ts';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';

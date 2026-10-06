@@ -1,4 +1,4 @@
-// The status bar (archive/DESIGN.md "Dock and status bar"; spec status-bar): the last message in an aria-live region,
+// The status bar (spec status-bar): the last message in an aria-live region,
 // the breadcrumb of the selection (each ancestor a button that selects it), the size of the selection in page pixels,
 // the breakpoint and the state, the element count, the zoom controls and the language, in the order of region
 // status-bar, then the save state (autosave-restore). During a palette tile's creation drag the message is the drag's
@@ -56,7 +56,7 @@ export function StatusBar() {
   const next = dragging === null ? { words: '', message, pinned: null } : said !== held.words ? { words: said, message, pinned: null } : message !== held.message ? { words: said, message, pinned: message } : held;
   if (next !== held && (next.words !== held.words || next.message !== held.message || next.pinned !== held.pinned)) setHeld(next);
   const shown = dragging === null ? [message] : next.pinned !== null ? [next.pinned] : words.length > 0 ? words : [message];
-  // the whole message, also its tooltip: a long one is cut on the bar (archive/DESIGN.md "Dock and status bar")
+  // the whole message, also its tooltip: a long one is cut on the bar
   // while the page is previewed, the bar says only its message: the editing controls (the breadcrumb, the size, the
   // zoom…) act on a canvas that is not shown (the audit's U-039, met again in the dogfooding pass)
   const preview = useEditorState((s) => previewing(s.ui));
@@ -70,7 +70,7 @@ export function StatusBar() {
         <Slots
           region="status-bar"
           render={(slot) => {
-            // the region's item is the breadcrumb of the selection (archive/DESIGN.md "Regions": 1 the breadcrumb)
+            // the region's item is the breadcrumb of the selection (1 the breadcrumb)
             if (slot.kind === 'door' && drawnAsOf(slot.entry) === 'item') {
               // the breadcrumb of the selection, then its size, the breakpoint and the state, and the element count
               return [

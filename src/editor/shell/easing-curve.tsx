@@ -2,7 +2,7 @@
 // field that holds an easing (a keyframe's, a motion action's), a button opens a layer that draws the easing as its
 // curve, offers the ready-made easings each drawn as its own curve, and edits a cubic Bézier by its two control
 // points (four numbers, the curve redrawn as they change). Choosing a curve runs the field's own door with it, as
-// typing it would; opening the layer and typing in it change nothing (archive/DESIGN.md "What is not a command"). The
+// typing it would; opening the layer and typing in it change nothing. The
 // one reader of an easing's text is core/motion/easing.ts, so the curve drawn is the curve the page runs.
 import { useMemo, useRef, useState } from 'react';
 import { createEasing, type ParsedEasing } from '../../core/motion/easing.ts';

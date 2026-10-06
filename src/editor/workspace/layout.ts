@@ -33,7 +33,7 @@ export interface LayoutState {
   readonly dock: DockState;
   // the dock tab whose body shows
   readonly activeDockTab: Panel | null;
-  // the inspector tab chosen (archive/DESIGN.md "Inspector": Style, Settings, Interactions); absent while the first one
+  // the inspector tab chosen (Style, Settings, Interactions); absent while the first one
   // shows
   readonly inspectorTab?: string | undefined;
   // the panels floating as windows of their own, in the order they were floated (spec floating-panels)

@@ -1,4 +1,4 @@
-// The breakpoints side by side (archive/DESIGN.md "Regions": canvas-side-by-side; spec side-by-side-view): while the
+// The breakpoints side by side (canvas-side-by-side; spec side-by-side-view): while the
 // switch is on (view.toggleSideBySide, a preference), the project's other breakpoints are drawn to the right of the
 // stage, up to three, the nearest in width to the one edited first. Each is a live page at its breakpoint's width,
 // scaled to its column: its own renderer (editor/canvas/render/render.ts) mounted in its own frame follows every

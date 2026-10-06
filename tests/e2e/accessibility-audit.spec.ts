@@ -1,5 +1,4 @@
-// The interface's contrast, targets and states (the user's real-use audit, item A3.43; archive/DESIGN.md "Density and
-// tokens"):
+// The interface's contrast, targets and states (the user's real-use audit, item A3.43):
 // an automatic measurement over the whole editor — every visible text's contrast against the surface behind it, every
 // control's size, the states of a field (rest, hover, focus, error) told apart, and a disabled control told apart from
 // an inactive one. It reads what Chrome computes, so a colour that only works in one theme fails here.

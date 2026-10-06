@@ -15,7 +15,7 @@ export const PANELS = manifest.layout.panels as Readonly<Record<Panel, PanelData
 
 // A door's arguments open a panel without its content: they name a panel the shell draws no body for (drawsBody, from
 // the tables the shell draws its bodies from: src/editor/shell/bodies.ts) and do not close it. Such a door is drawn
-// disabled with "not available yet" (AGENTS.md), as a door of a command that is not built.
+// disabled with "not available yet" (CLAUDE.md), as a door of a command that is not built.
 export function opensEmptyPanel(args: Readonly<Record<string, unknown>>, drawsBody: (panel: Panel) => boolean): boolean {
   return typeof args.panel === 'string' && args.panel in PANELS && args.open !== 'close' && !drawsBody(args.panel as Panel);
 }

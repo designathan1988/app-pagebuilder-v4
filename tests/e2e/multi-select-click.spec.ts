@@ -1,4 +1,4 @@
-// multi-select-click beyond its scenarios (spec/BEHAVIOUR.md#multi-select-click, archive/DESIGN.md "Canvas", multi):
+// multi-select-click beyond its scenarios (spec/BEHAVIOUR.md#multi-select-click, multi):
 // what the canvas draws while several elements are selected (src/editor/canvas/chrome.tsx): each one's own outline, the
 // dashed outline of their union and one label counting them, over no text; and that a Shift+click on the page root
 // adds nothing (the door's target is an element). The selection is read through the read-only test port; the

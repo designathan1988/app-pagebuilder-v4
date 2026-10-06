@@ -1,4 +1,4 @@
-// The activity bar and the sidebar (archive/DESIGN.md "Regions"): Explorer (Pages, Files, Layers), Insert (the element
+// The activity bar and the sidebar : Explorer (Pages, Files, Layers), Insert (the element
 // grid of elements.json's palette) and Styles (classes and variables). Rows and tiles are the doors of their regions,
 // one per page, node or palette entry; a section's actions are the region's controls before its first item.
 // Each view is a file of its own under sidebar/ (plan I.12): explorer.tsx, layers.tsx, insert.tsx, styles.tsx, and the

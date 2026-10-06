@@ -1,8 +1,8 @@
-// The Keyboard shortcuts panel (spec shortcuts-panel; archive/DESIGN.md "Dock and status bar"): a bottom-dock tab
+// The Keyboard shortcuts panel (spec shortcuts-panel): a bottom-dock tab
 // listing every binding the keymap holds, grouped by the context it acts in, each row its keys and what they do. It is
 // drawn from the keymap itself (input/keymap.ts bindingGroups), never from a list of its own, so Help › Keyboard
 // shortcuts shows whatever the manifest declares — including a binding whose command the editor has not built yet,
-// marked as not available (archive/DESIGN.md "Build order").
+// marked as not available.
 import type { MessageId } from '../../generated/ids.ts';
 import { bindingGroups, chordCap } from '../input/keymap.ts';
 import { useT } from '../text.ts';

@@ -54,8 +54,7 @@ const SCRIPTS = [
 const SCRIPT_PATHS: readonly string[] = SCRIPTS.map(([path]) => path);
 
 // Whether the path is one the document generates (a page's file, the stylesheet, a script the export writes and no
-// stored file holds): its text is rendered now, and its path is fixed — the export writes it there (archive/DESIGN.md,
-// "Files, tabs and code").
+// stored file holds): its text is rendered now, and its path is fixed — the export writes it there.
 export function isGenerated(path: string, document: DocumentJson): boolean {
   return document.pages.some((page) => page.file === path) || path === STYLESHEET || (SCRIPT_PATHS.includes(path) && fileAt(document, path) === null);
 }

@@ -1,8 +1,8 @@
-// The Snap settings dialog (archive/DESIGN.md "Regions": snap-settings-dialog; spec snap-toggle-settings), open while
+// The Snap settings dialog (snap-settings-dialog; spec snap-toggle-settings), open while
 // the editor state says so (ui.dialog; the Snap menu's Snap settings…): a checkbox per snap target snap.setSettings
 // offers and the snap distance, showing the settings in force when it opens (src/editor/view/snap.ts). What is ticked
 // and typed is the dialog's own until Apply (the door of its region) keeps it; the close button and Escape (Cancel)
-// close it and drop it. Ticking a box or typing is not a command (archive/DESIGN.md "What is not a command").
+// close it and drop it. Ticking a box or typing is not a command.
 import type { FormEvent } from 'react';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import type { DispatchResult } from '../../core/store/store.ts';

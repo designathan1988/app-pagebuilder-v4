@@ -1,4 +1,4 @@
-// The quick panel on the canvas (spec quick-panel; archive/DESIGN.md "Canvas", Quick panel; the rules are
+// The quick panel on the canvas (spec quick-panel; the rules are
 // src/editor/quick-panel/quick-panel.ts): near the primary selected element, over the stage, a chip that opens the
 // panel. The panel holds the doors the manifest places in the quick-panel region, in their order: each field is the
 // inspector's own field component (field.tsx) on that door, so it runs the same command with the same arguments as

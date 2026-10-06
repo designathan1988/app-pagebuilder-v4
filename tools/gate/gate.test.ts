@@ -1,9 +1,7 @@
-// The gate's readings (tools/gate): the QA-LOG rows, git's status outside the index and the task list the Stop
-// check reads.
+// The gate's readings (tools/gate): the QA-LOG rows and git's status outside the index.
 import { describe, expect, it } from 'vitest';
 import { addedRows, fillHashes, pendingMark, pendingRows } from './qa-log.ts';
 import { outsideTheIndex } from './status.ts';
-import { stopReason, taskItems, unfinished } from './task-list.ts';
 
 const LOG = [
   '| # | Commit | Area | What the user met | What changed |',
@@ -45,43 +43,5 @@ describe('what git status reports outside the index', () => {
 
   it('reports nothing for a clean tree', () => {
     expect(outsideTheIndex('')).toEqual([]);
-  });
-});
-
-describe('the task list', () => {
-  const LIST = [
-    '# Task',
-    '- [ ] 1. an open criterion',
-    '      that continues here',
-    '- [ ] 2. blocked: the user must give the token — a criterion',
-    '- [x] 3. a done criterion — evidence: .cache/logs/a.txt',
-    '- [x] 4. ticked',
-    '  evidence: on the next line',
-    '- [x] 5. ticked with nothing to show',
-    'A closing note.',
-  ].join('\n');
-
-  it('reads each item, its continuation lines included, and its state', () => {
-    expect(taskItems(LIST).map((item) => item.state)).toEqual(['open', 'blocked', 'done', 'done', 'unproven']);
-    expect(taskItems(LIST)[0]?.text).toBe('1. an open criterion that continues here');
-  });
-
-  it('keeps a turn going for an open item and an item ticked without evidence, never for a blocked one', () => {
-    expect(unfinished(taskItems(LIST)).map((item) => item.text)).toEqual(['1. an open criterion that continues here', '5. ticked with nothing to show']);
-  });
-
-  it('names what is left in the message the agent reads', () => {
-    const reason = stopReason(unfinished(taskItems(LIST)));
-    expect(reason).toContain('2 unfinished criteria');
-    expect(reason).toContain('- 1. an open criterion that continues here');
-    expect(reason).toContain('- (ticked without evidence) 5. ticked with nothing to show');
-  });
-
-  it('reads a list saved with Windows line ends', () => {
-    expect(taskItems('- [ ] open\r\n- [x] done — evidence: x\r\n').map((item) => item.state)).toEqual(['open', 'done']);
-  });
-
-  it('lets a turn end when every item is done or blocked', () => {
-    expect(unfinished(taskItems('- [x] a — evidence: x\n- [ ] blocked: y — b\n'))).toEqual([]);
   });
 });

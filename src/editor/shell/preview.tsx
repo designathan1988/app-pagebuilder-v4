@@ -1,4 +1,4 @@
-// The preview (archive/DESIGN.md "Regions": preview-bar; spec preview-mode): while the editor previews
+// The preview (preview-bar; spec preview-mode): while the editor previews
 // (view/preview.ts), the preview bar replaces the top bar (its doors: the breakpoints, Exit preview, Export) and the
 // page is shown as it is exported (core/export/export.ts previewPage), at the active breakpoint's width and at 100 %,
 // in a frame of its own that runs it as a browser would (its scripts and embeds, its hover and details) and opens its

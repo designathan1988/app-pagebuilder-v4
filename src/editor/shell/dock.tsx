@@ -1,4 +1,4 @@
-// The bottom dock (archive/DESIGN.md "Dock and status bar"): its strip with a tab for each open dock panel (the
+// The bottom dock : its strip with a tab for each open dock panel (the
 // tab-strip component, the panel's icon from layout.json panels), show or hide, maximize, close the tab; its body when
 // open. Closed, the strip stays (design/final: Timeline · Checks · the first issue): its tabs open the dock on their
 // panel.

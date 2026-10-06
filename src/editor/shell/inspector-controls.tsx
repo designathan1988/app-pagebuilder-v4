@@ -148,7 +148,7 @@ function FieldControl({ entry, bare = false, labelled = false, prefix = null, ro
   // width"): what a screen reader reads and its step buttons are named after ("Step Width up"). A pair row's first
   // field (bare) shows the row's own label (Size) where its label stands and keeps its own name, so no two controls
   // share one (the Size row's Width and the background's Size). A field is usable only once its own feature is
-  // registered as built (archive/DESIGN.md "Build order"): style.set runs Width and Height long before Display or
+  // registered as built : style.set runs Width and Height long before Display or
   // Color.
   const own = entry.door.labelKey !== entry.command.labelKey;
   const door = useDoor(entry, {}, rowLabel !== null && !bare ? t(rowLabel) : target && !own ? t(fieldLabelKey(entry)) : undefined, isFeatureBuilt(entry.door.feature as FeatureId));
@@ -492,7 +492,7 @@ function SpacingField({ entry, box, sides, properties, where, label }: { readonl
   );
 }
 
-// The innermost cell of the box model (archive/DESIGN.md "Sections", the design's centre): the selection's own measured
+// The innermost cell of the box model (the design's centre): the selection's own measured
 // size, in page pixels whatever the zoom — the number a person compares the Width and Height fields against — or, with
 // several elements selected, how many there are. Nothing with nothing selected.
 function BoxCore() {
@@ -504,7 +504,7 @@ function BoxCore() {
   return <span className="box__core">{words}</span>;
 }
 
-// The box model (archive/DESIGN.md "Sections": margin outside, padding inside): the composites drawn as a box model
+// The box model (margin outside, padding inside): the composites drawn as a box model
 // (properties.json control box-model), each a box around the next in their placement order, the first outermost. Each
 // box has its label and its link (inspector.toggleSpacingLink); unlinked, a field on each side writes that side's
 // longhand; linked, one field (the box's own door) writes its four sides. No property is named here.

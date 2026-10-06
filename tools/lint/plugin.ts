@@ -1,5 +1,5 @@
 // The ESLint rules that hold the contract in code (PRODUCT.md §5, "Lint rules of the contract"). Each rule has a
-// planted violation that fails npm run verify:fast (archive/PROGRESS.md records the raw output).
+// planted violation that fails npm run verify:fast.
 //
 // Two plugins: `builder` lints JavaScript and TypeScript (use-ports, no-literal-ui-string, use-tokens for React style
 // objects, pointer-owner, gesture-owner, frame-owner) and `builder-css` lints stylesheets with the @eslint/css

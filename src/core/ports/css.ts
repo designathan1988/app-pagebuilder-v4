@@ -1,6 +1,6 @@
 // The CSS support port: whether the browser takes a value for a property. The core has no browser; a handler that
 // writes a value a person typed (style.set, the number fields) asks this port before it writes, so the browser is the
-// truth of what a value means (archive/DESIGN.md "Inspector": a value the browser does not act on is never written).
+// truth of what a value means (a value the browser does not act on is never written).
 // The editor gives the browser's own answer (src/editor/css-support.ts, CSS.supports); tests pass the answer they
 // choose.
 

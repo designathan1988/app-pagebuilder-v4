@@ -1,4 +1,4 @@
-// The editor's one icon library is Lucide (lucide-static, ISC license; archive/DESIGN.md "Icons"). npm run gen writes:
+// The editor's one icon library is Lucide (lucide-static, ISC license). npm run gen writes:
 // - manifest/generated/icons.json: the name of every icon of the installed Lucide, which manifest:check rule
 //   icon-name checks every icon the manifest names against;
 // - src/ui/icons.svg: a sprite with one <symbol id="<name>"> for each icon the manifest names (door icons, menu

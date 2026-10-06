@@ -7,7 +7,7 @@
 // what every browser test stands on (tests/support, the scenario runner, the door helpers, the Playwright
 // configuration, the manifest's commands or layout), shared door runtimes and unmapped production sources reach
 // everything: the run says why and runs the complete suite instead of treating an unknown path as unaffected.
-// The complete suite still runs once at the end of the work (AGENTS.md, The loop and verification); this is the loop
+// The complete suite still runs once at the end of the work (CLAUDE.md, The loop); this is the loop
 // between.
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';

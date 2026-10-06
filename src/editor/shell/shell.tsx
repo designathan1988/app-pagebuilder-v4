@@ -1,7 +1,7 @@
 import { registerPointerTool } from '../input/pointer-tools.ts';
 import { motionDragTool } from '../motion/drag-tool.ts';
 import { HtmlImportDialog } from './html-import.tsx';
-// The shell regions (PRODUCT.md §5): the window grid of archive/DESIGN.md "The window", with the top bar, the activity
+// The shell regions (PRODUCT.md §5): the window grid of with the top bar, the activity
 // bar and the sidebar, the centre column, the inspector, the dock and the status bar. The sidebar, the inspector and
 // the dock are shown or hidden by the workspace state; the theme and the language follow the preferences.
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';

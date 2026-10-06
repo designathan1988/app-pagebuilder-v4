@@ -1,4 +1,4 @@
-// The status bar's messages (archive/DESIGN.md "Dock and status bar"; the audit's A3.41): a refusal's message goes with
+// The status bar's messages (the audit's A3.41): a refusal's message goes with
 // the next action, even one that says nothing of its own (a Layers branch folded); every preference change says what it
 // set, the preference and the value by their labels, in the language shown (the theme, a view switch on and off, the
 // language itself). The status bar is the end artifact here: what it says is the feature.

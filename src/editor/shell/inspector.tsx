@@ -1,6 +1,6 @@
-// The inspector (archive/DESIGN.md "Inspector"; spec inspector-panel): its header (the tabs, Page properties, the
+// The inspector (spec inspector-panel): its header (the tabs, Page properties, the
 // Element actions menu) and the body of the tab it shows (workspace.setActiveTab). A tab whose body the inspector does
-// not draw yet (Interactions, until events-actions) is not available yet (archive/DESIGN.md "Build order").
+// not draw yet (Interactions, until events-actions) is not available yet.
 //  - Style: the selector bar, then the Style tab's region, as tall as what it shows (the inspector column scrolls it):
 //    with nothing selected, the hints first (and the fields stay empty); then the value-origin legend, Essentials only
 //    / All properties, the property search and the sections, always all eight and in order (properties.json), each
@@ -100,7 +100,7 @@ const SECTION_DOORS = (() => {
 })();
 const STYLE_SECTIONS = SECTIONS.filter((s) => (SECTION_DOORS.get(s.id) ?? []).length > 0);
 
-// The section header's origin dot (archive/DESIGN.md "Inspector", the value-origin legend; the mockup's .has mark):
+// The section header's origin dot (the value-origin legend; the mockup's .has mark):
 // where the values the section holds come from, read by inspector/origin.ts over every
 // field in that section. Its marks stay visible when the section is closed.
 function SectionOrigin({ section }: { readonly section: SectionId }) {
@@ -575,7 +575,7 @@ function PanelField({ entry }: { readonly entry: DoorEntry }) {
   );
 }
 
-// What the selector bar names (archive/DESIGN.md "Inspector": the element's icon, name and tag): the one selected
+// What the selector bar names (the element's icon, name and tag): the one selected
 // element, with its exported tag (the page root's is body); with several selected, how many; with none, that nothing
 // is. Read from the store's selection, so the inspector never says something the store contradicts.
 function SelectedElement() {
@@ -752,7 +752,7 @@ export function Inspector() {
   );
 }
 
-// The selector bar of the Style tab (archive/DESIGN.md "Inspector"): the selected element, its targets, the state
+// The selector bar of the Style tab : the selected element, its targets, the state
 // picker and the active breakpoint.
 function SelectorBar() {
   const t = useT();

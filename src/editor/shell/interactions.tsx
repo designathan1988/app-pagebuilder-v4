@@ -1,4 +1,4 @@
-// The Interactions tab of the inspector (archive/DESIGN.md "Inspector"; spec events-actions): the selected element,
+// The Interactions tab of the inspector (spec events-actions): the selected element,
 // Add, then one card per interaction — Applies to, Trigger, Action (and its own value: a class, an animation, an
 // address), the target it acts on and Options (once or every time, and a delay) — and Remove. Every
 // control is a door the manifest places in the inspector-interactions region: Add (interactions.add), the card's

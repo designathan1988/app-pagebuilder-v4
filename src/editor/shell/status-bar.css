@@ -15,8 +15,7 @@
   white-space: nowrap;
 }
 
-/* a message longer than its room is cut with an ellipsis; its tooltip holds it whole (archive/DESIGN.md "Dock and
-   status bar") */
+/* a message longer than its room is cut with an ellipsis; its tooltip holds it whole */
 .status-bar__message {
   flex: 0 1 auto;
   min-width: var(--size-sidebar);

@@ -1,4 +1,4 @@
-// drag-reorder-canvas beyond its scenarios (spec/BEHAVIOUR.md#drag-reorder-canvas, archive/DESIGN.md "Canvas", drag):
+// drag-reorder-canvas beyond its scenarios (spec/BEHAVIOUR.md#drag-reorder-canvas, drag):
 // what the canvas draws while an element is dragged (src/editor/canvas/chrome.tsx): the insertion line across the
 // receiver in the gap where the element will land, the receiver's outline, the drop label beside the line over no text,
 // the dragged element's outline dashed and its name label hidden (Problems in Pager 1); the hysteresis that keeps a

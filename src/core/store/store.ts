@@ -120,7 +120,7 @@ export interface Store<Ui> {
   gestureOpen(): boolean;
   // Whether the command would run now with these arguments: it is built, its availability predicate holds and its
   // handler does not refuse. Nothing changes: the handler's outcome is read and dropped (handlers are pure). The
-  // context menu shows only the commands that apply to the selection (archive/DESIGN.md "Overlays").
+  // context menu shows only the commands that apply to the selection.
   canRun<Id extends CommandId>(id: Id, args: CommandArgs[Id]): boolean;
   // Why the command would not run now with these arguments: "not available yet" while it is not built, else the
   // refusal of its availability predicate or of its handler; null when it would run. Nothing changes, as with canRun

@@ -72,7 +72,7 @@
   align-self: center;
 }
 
-/* the colour picker (archive/DESIGN.md "Component regions": color-picker): a popover beside the inspector, level
+/* the colour picker (color-picker): a popover beside the inspector, level
    with the field it opened from, in a pointer-transparent positioning layer */
 .picker-shield {
   pointer-events: none;

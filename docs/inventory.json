@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 478,
-    "lines": 83782
+    "lines": 83779
   },
   "features": [
     {
@@ -5455,7 +5455,7 @@
     },
     {
       "path": "src/editor/explorer/explorer.ts",
-      "lines": 169,
+      "lines": 168,
       "commands": [
         "files.open",
         "files.startRename"
@@ -6155,7 +6155,7 @@
     },
     {
       "path": "src/editor/shell/class-bar.tsx",
-      "lines": 232,
+      "lines": 231,
       "commands": [],
       "features": []
     },
@@ -6257,7 +6257,7 @@
     },
     {
       "path": "src/editor/shell/guides-grids.tsx",
-      "lines": 194,
+      "lines": 193,
       "commands": [],
       "features": []
     },

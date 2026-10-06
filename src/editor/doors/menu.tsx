@@ -1,6 +1,6 @@
 // Menus (PRODUCT.md §5): a menu's button opens it; its items are the doors placed in "menu:<menu>" and the buttons
 // of its submenus (menus anchored in it), in their order. An application menu shows every item: one whose command is
-// not built yet is disabled with "not available yet" (archive/DESIGN.md "Overlays"). Opening a menu is not a command,
+// not built yet is disabled with "not available yet". Opening a menu is not a command,
 // so which menu is open is this component's own state. A menu has no key or pointer listener of its own: its keys are
 // the doors of the "menu" key context, run by the keymap (the arrows, Home and End move the focus, Enter runs the
 // focused item, Escape dismisses). Outside presses close through outside-layer without intercepting the target. A
@@ -280,7 +280,7 @@ export function MenuButton({ menu, anchor, children, indicator = false, classNam
 // The context menu's items: the doors the manifest places in the context-menu region, in their order.
 const CONTEXT_ITEMS = doorSlots('context-menu');
 
-// The context menu (archive/DESIGN.md "Overlays", spec context-menu), open while the editor state says so
+// The context menu (spec context-menu), open while the editor state says so
 // (menus/context-menu.ts); each opening draws a new one.
 export function ContextMenu() {
   const opened = useEditorState((s) => openContextMenu(s.ui));

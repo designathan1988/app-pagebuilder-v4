@@ -785,8 +785,7 @@ textarea.input {
   cursor: not-allowed;
 }
 
-/* code, file names, class names, tags and CSS values are set in the code font (archive/DESIGN.md "Density and
-   tokens") */
+/* code, file names, class names, tags and CSS values are set in the code font */
 .segmented--values .door__label,
 .box__side {
   font-family: var(--font-mono);
@@ -799,7 +798,7 @@ textarea.input {
   cursor: not-allowed;
 }
 
-/* the field component (archive/DESIGN.md "Component regions": field): the input, the unit menu, the step buttons
+/* the field component (field): the input, the unit menu, the step buttons
    (shown while the field is hovered or holds the focus), the reset; its label is the scrub handle */
 /* The field is one box (the design's field): the value, its prefix, its unit menu and its value list live inside the
    same border, so a row reads as one control and a pair of them fits one line. */

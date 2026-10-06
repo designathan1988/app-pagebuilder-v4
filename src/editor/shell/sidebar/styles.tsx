@@ -32,7 +32,7 @@ export function Styles() {
   );
 }
 
-// The project's classes, read-only (archive/DESIGN.md "Regions", styles; spec shared-style-classes): each name and how
+// The project's classes, read-only (styles; spec shared-style-classes): each name and how
 // many elements have it; a class is edited through the selector bar.
 function StyleClasses() {
   const t = useT();

@@ -131,8 +131,8 @@ export function isBuilt<Id extends CommandId, Ui>(entry: CommandEntry<Id, Ui>): 
 
 // The feature table (src/app/features.ts) has the same design: an entry for every FeatureId of the manifest, the
 // feature registered with registerFeature once it is built, or NOT_AVAILABLE_YET. A door, and a control that stands
-// for an item a feature brings (a palette entry), is usable only while its feature is registered (archive/DESIGN.md
-// "Build order"); the census fails a registered feature with no scenario, or one of whose scenarios cannot run or
+// for an item a feature brings (a palette entry), is usable only while its feature is registered; the
+// census fails a registered feature with no scenario, or one of whose scenarios cannot run or
 // fails.
 export interface RegisteredFeature<Id extends FeatureId> {
   readonly feature: Id;

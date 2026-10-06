@@ -472,7 +472,7 @@ export const pageLayout: Layout = {
   },
 };
 
-// The page's content on the screen, which a canvas label must never cover (archive/DESIGN.md "Label rule"): the box of
+// The page's content on the screen, which a canvas label must never cover : the box of
 // every run of text and of every replaced element (an image, a video, an embedded frame, a form control).
 const REPLACED = 'img, picture, video, audio, canvas, svg, iframe, embed, object, input, textarea, select, button, progress, meter';
 // (read once per version of the page, canvas/page-clock.ts: the page and the frame are the same until it ticks, and

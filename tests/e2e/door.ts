@@ -170,7 +170,7 @@ export async function openQuickPanel(page: Page): Promise<void> {
 }
 
 // The command bar (src/editor/shell/command-bar.tsx) opens from the top bar's Commands field, which a click reaches
-// wherever the focus is (a field keeps Ctrl+K: archive/DESIGN.md "Keyboard model"); an entry is picked as a person
+// wherever the focus is (a field keeps Ctrl+K); an entry is picked as a person
 // picks it:
 // its label typed into the bar's field (English UI), then its row clicked. An insert entry's label names its palette
 // entry and an open-panel entry's its panel; a placeholder a command's label fills in from the state is left out.

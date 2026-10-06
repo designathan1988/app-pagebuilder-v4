@@ -1,4 +1,4 @@
-// The project's variables in the Styles view (archive/DESIGN.md "Regions", styles; spec css-variables-tokens): the
+// The project's variables in the Styles view (styles; spec css-variables-tokens): the
 // design tokens grouped by kind (Colours, Sizes, Fonts), each a row of its name field (tokens.rename), its value field
 // (tokens.update) and Delete (tokens.delete), under the section's New variable (tokens.create), which opens the list of
 // kinds: each item makes a variable of its kind with the next free name (the kind, a dash and a number) and its kind's

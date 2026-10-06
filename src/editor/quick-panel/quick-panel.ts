@@ -1,4 +1,4 @@
-// The quick panel (INVENTORY.md, owners; spec quick-panel; archive/DESIGN.md "Canvas", Quick panel): a small panel
+// The quick panel (INVENTORY.md, owners; spec quick-panel, Quick panel): a small panel
 // near the primary selected element, collapsed to a chip by default, whose fields are the doors the manifest places in
 // the quick-panel region (each runs the same command as the matching inspector field; canvas/quick-panel.tsx draws
 // them).

@@ -1,4 +1,4 @@
-// A door whose only effect is to open a panel without its content is disabled with "not available yet" (AGENTS.md;
+// A door whose only effect is to open a panel without its content is disabled with "not available yet" (CLAUDE.md;
 // the user's decision 2 as the user corrected it): Help › Keyboard shortcuts and View › Checks. The doors of the panels
 // that exist (the sidebar's Explorer with Layers, Insert and Styles, the inspector, the dock with its Timeline, the
 // canvas tools) stay enabled while their feature is registered, and wait with "not available yet" until it is (the door

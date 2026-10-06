@@ -14,7 +14,7 @@ inside an iframe scaled with CSS `zoom`; the document JSON is the source of trut
 - `npm run e2e` runs the browser tests; at the end of a block, run the tests of what the block built
   (`npm run e2e -- <spec file>`). The complete suite runs once, when the whole application is ready.
 - `npm run gate -- <message-file> <log-name> <path>…` commits the paths named and pushes them, after checking exactly
-  what is committed (`AGENTS.md`, Delivery).
+  what is committed (`CLAUDE.md`, Commits).
 - `npm run inventory` regenerates `docs/INVENTORY.md` (and its machine copy) and `docs/FEATURES.md` from the manifest,
   the source and the last complete browser run.
 - `npm run companion` starts the Builder Companion (web address capture, the assistant's bridge); `npm run perf`
@@ -29,8 +29,7 @@ inside an iframe scaled with CSS `zoom`; the document JSON is the source of trut
   architecture, how to prove things.
 - `docs/FEATURES.md`, `docs/INVENTORY.md`: generated — the state of every feature; every feature, command, door and
   module, and who owns what.
-- `docs/QA-LOG.md`: the history, one row per commit; `docs/AUDIT-<date>.md`: dated audits; `docs/archive/`: superseded
-  documents.
+- `docs/QA-LOG.md`: the history, one row per commit.
 - `src/core/`: the document core (no React); `src/editor/`: the editor; `src/app/`: the wiring; `src/manifest/`: the
   contract's reader; `src/generated/`: written by `npm run gen` alone.
 - `tests/`: the browser tests and their one fixture (`tests/support/`).

@@ -16,6 +16,6 @@ export async function openEditor(page: Page, options: { readonly reusedProfile?:
   // a second page shares its context's profile: what the first page wrote is expected there
   if (options.reusedProfile !== true) expect(stored, 'the editor opens in a fresh profile: nothing was stored before it loaded').toEqual({ local: 0, session: 0 });
   // the editor is drawn before the test reads or acts on it: under load a test that snapshots the editor at once took
-  // its "before" from an empty page (panels.spec.ts, archive/PROGRESS.md finding 12)
+  // its "before" from an empty page (panels.spec.ts)
   await expect(page.locator('.workbench')).toBeVisible();
 }

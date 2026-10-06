@@ -21,7 +21,7 @@ const constantId = z.string().regex(/^[a-z][a-zA-Z0-9]*(\.[a-zA-Z0-9]+)+$/, 'a d
 const cssName = z.string().regex(/^-?[a-z]+(-[a-z0-9]+)*$/, 'a CSS property name');
 const htmlTag = z.string().regex(/^[a-z][a-z0-9]*$/, 'an HTML tag name');
 const ownerPath = z.string().regex(/^src\/[a-z0-9/-]+\.ts$/, 'a planned module path under src/');
-// an icon of the editor's one icon library, Lucide (archive/DESIGN.md "Icons"): manifest:check rule icon-name proves it
+// an icon of the editor's one icon library, Lucide : manifest:check rule icon-name proves it
 // exists
 const iconName = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'a Lucide icon name');
 // a predicate, codec or action id: code registers it under this id (references.json)
@@ -441,7 +441,7 @@ export const propertiesFileSchema = z.strictObject({
   // The computed values the context predicates read (spec props-element-specific, "Our rule"): those of the selected
   // element, own, and those of its parent. The inspector reads them on the canvas and never names a property by hand.
   context: z.strictObject({ own: z.array(cssName).min(1), parent: z.array(cssName).min(1) }),
-  // The pair rows of the Style tab (archive/DESIGN.md "Inspector"): two properties or composites drawn side by side on
+  // The pair rows of the Style tab : two properties or composites drawn side by side on
   // one row, under the row's own label — the first field's own name, or the concept both fields serve when the design
   // names it (the gap's two axes read "Gap", not "Row gap"). A row is where the fields are read together (width and
   // height, the two gap axes); every other field keeps a row of its own. A row may carry a short prefix for the fields
@@ -594,7 +594,7 @@ const placementSchema = z.union([
   z.strictObject({ region: regionId, order: z.number().int().positive() }),
 ]);
 
-// How a toolbar or panel control is drawn (archive/DESIGN.md "Icons"): an icon button (the icon alone, the label as its
+// How a toolbar or panel control is drawn : an icon button (the icon alone, the label as its
 // tooltip), a button (its label, after its icon when it has one), the primary button (a button filled with the accent,
 // the region's main action), one of a segmented group, a tab, an item (a row, a tile, a file tab, a chip, the page
 // switcher: its icon and text come from the item it stands for), a field (an input, or a control drawn as one, such as

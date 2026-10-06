@@ -1,4 +1,4 @@
-// The Guides & Grids dialog (archive/DESIGN.md "Regions": guides-grids-dialog; spec workspace-settings-dialog), open
+// The Guides & Grids dialog (guides-grids-dialog; spec workspace-settings-dialog), open
 // while the editor state says so (ui.dialog, workspace/dialogs.ts): a modal over the editor whose controls are the
 // doors the manifest places in its region, in their order, parted into sections where the region breaks (layout.json),
 // each titled, its hint as the title's tooltip:
@@ -10,8 +10,7 @@
 //    (core/page/grid-settings.ts), showing the setting now; Enter keeps the number typed (grid.setSettings, which
 //    refuses one out of its range).
 // Escape (the dialog key context) and its close button (ui.dismiss) close it, and the focus goes back where it was:
-// the control that opened it, or the button of the menu whose item did. Opening a field or the list is not a command
-// (archive/DESIGN.md "What is not a command").
+// the control that opened it, or the button of the menu whose item did. Opening a field or the list is not a command.
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { openedPage } from '../../core/project/pages.ts';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';

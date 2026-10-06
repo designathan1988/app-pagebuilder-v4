@@ -1,4 +1,4 @@
-// The canvas opens fitted (archive/DESIGN.md "Canvas", spec canvas-page-iframe): from the first frame the browser
+// The canvas opens fitted (spec canvas-page-iframe): from the first frame the browser
 // paints, the page frame already has the width that fits the stage; it never shows an unfitted frame (at zoom 1) that
 // fits a frame later. A layout read right after the editor appears (history-doors.spec.ts, the region snapshots)
 // depends on it:

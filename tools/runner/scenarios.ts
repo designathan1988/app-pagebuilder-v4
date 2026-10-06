@@ -202,7 +202,7 @@ const WALK_UP_DOOR = shortcutIn('selection.walkParent', 'canvas');
 const BACK_TO_CANVAS_DOOR = shortcutIn('focus.canvas', 'layers-tree');
 const UNDO_DOOR = 'history.undo#toolbar-top-bar';
 const REDO_DOOR = 'history.redo#toolbar-top-bar';
-// a modal dialog's close button (archive/DESIGN.md "Regions": dialog)
+// a modal dialog's close button (dialog)
 const DIALOG_CLOSE_DOOR = 'ui.dismiss#dialog-close';
 
 // The doors a scenario's setup runs, in order: File › Open for a fixture, the language, the selection (the first node
@@ -818,7 +818,7 @@ async function marqueeEndPoint(page: Page, document: unknown, drop: Drop): Promi
 }
 
 // The Style tab draws a section collapsed while the selected element holds no value in it (the user's real-use audit,
-// item 5.1: the panel stays short; archive/DESIGN.md "Inspector"). A step that runs a door of a field in such a section
+// item 5.1: the panel stays short). A step that runs a door of a field in such a section
 // opens it first, through the section's own header door, as a person does — a door the editor does not draw cannot be
 // reached through the real mouse and keyboard. The header's door records the section's state only: nothing in the
 // document, the selection or the history changes.

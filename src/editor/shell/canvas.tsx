@@ -1,4 +1,4 @@
-// The centre column (archive/DESIGN.md "Regions" and "Canvas"): the file tabs, the canvas toolbar with the Canvas /
+// The centre column: the file tabs, the canvas toolbar with the Canvas /
 // Split / Code switch, the rulers, and the frame with its breakpoint tabs along the cascade from the base breakpoint,
 // and the page's iframe (src/editor/canvas/frame.tsx) at the camera's zoom (src/editor/view/camera.ts): the chosen one,
 // or in Fit mode the one that fits the frame to the stage; the frame is placed at the camera's pan.
@@ -35,7 +35,7 @@ const drawnAs = (entry: DoorEntry): string | null => (entry.door.kind === 'toolb
 
 // The file tabs (DEC-13: always drawn, a single page's tab too, as the canonical frame stands it over the canvas; the
 // audit's A3.18 had kept the row for two files and more). Every open page gets its tab, and the page on the canvas is
-// marked by its door's own current state (pages.switch); a click opens that page (archive/DESIGN.md, "Files, tabs and
+// marked by its door's own current state (pages.switch); a click opens that page ("Files, tabs and
 // code": the tabs list the open pages and code files, and a page tab shows the page on the canvas)
 function FileTabs() {
   const pages = useEditorState((s) => s.document.pages);
@@ -43,7 +43,7 @@ function FileTabs() {
   const code = useEditorState((s) => codeTabs(s.ui)?.open ?? NO_CODE);
   const fileTab = doorSlots('file-tabs').find((d) => d.door.kind === 'panel-control' && d.door.control === 'file-tab');
   const fileClose = doorSlots('file-tabs').find((d) => d.door.kind === 'panel-control' && d.door.control === 'close');
-  // the region's first item is a page's tab (archive/DESIGN.md "Regions": 1 page tab), its close button drawn inside it
+  // the region's first item is a page's tab (1 page tab), its close button drawn inside it
   const tab = doorSlots('file-tabs').find((d) => drawnAs(d) === 'item');
   // drawn with one page too (the canonical frame: the page's tab always stands over the canvas)
   if (!tab) return null;

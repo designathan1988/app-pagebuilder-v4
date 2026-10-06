@@ -117,7 +117,7 @@ export function identityRules(ctx: CheckContext) {
     ref(generated[prop.id] !== undefined, 'properties.json', `properties[${i}].id`, `"${prop.id}" is not a CSS property of the generated web data`);
     for (const [di, d] of prop.doors.entries()) ref(doorByRef.has(d), 'properties.json', `properties[${i}].doors[${di}]`, `unknown door "${d}"`);
   }
-  // A pair row draws two properties or composites side by side in one section (archive/DESIGN.md "Inspector"): each
+  // A pair row draws two properties or composites side by side in one section : each
   // field names an entry of that section, no entry stands in two rows, and the row says its id once.
   const rowEntries = new Map<string, { section: string }>([...p.properties.properties, ...p.properties.composites].map((e) => [e.id, e]));
   const inRow = new Map<string, string>();

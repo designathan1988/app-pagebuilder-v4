@@ -1,8 +1,8 @@
-// The batch rename dialog (archive/DESIGN.md "Regions": batch-rename-dialog; spec batch-rename), open while the editor
+// The batch rename dialog (batch-rename-dialog; spec batch-rename), open while the editor
 // state says so (ui.dialog; the context menu's Rename the selected…): the pattern the selected elements are named by
 // ({name} each one's name, {n} its number) and the first number, the names it will give shown as they are typed, and
 // Rename them (element.renameMany, the door of its region), which closes the dialog once it renamed. Typing is the
-// dialog's own until then (archive/DESIGN.md "What is not a command").
+// dialog's own until then.
 import { useState, type FormEvent } from 'react';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate } from '../../core/document/model.ts';

@@ -5,8 +5,8 @@
 // editor state: nothing in the document changes and nothing is recorded; it stays while the selection changes.
 //
 // Which modes the menu offers usable: none, and a mode whose handles are built (the canvas-handle doors whose handle
-// starts with the mode's name, their feature registered as built), so a mode never draws nothing (archive/DESIGN.md
-// "Build order"); a mode whose handles edit a structured value (a shadow's layers) applies to an element that holds one
+// starts with the mode's name, their feature registered as built), so a mode never draws nothing; a
+// mode whose handles edit a structured value (a shadow's layers) applies to an element that holds one
 // (modeApplies: spec shadow-handles, Problems in Pager 2), and is disabled with its reason on any other.
 import { toolKeyContext } from '../input/pointer-tools.ts';
 import { isFeatureBuilt, registerHandler } from '../../core/commands/registry.ts';

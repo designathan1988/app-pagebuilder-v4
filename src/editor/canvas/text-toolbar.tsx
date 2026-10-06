@@ -1,4 +1,4 @@
-// The text toolbar (PRODUCT.md §5; archive/DESIGN.md "Regions", text-toolbar, and "Canvas", text): while a text is
+// The text toolbar (PRODUCT.md §5, text-toolbar, and "Canvas", text): while a text is
 // edited in place, the doors the manifest places in the text-toolbar region, in their order (Bold, Italic, Link), float
 // with the edit's label above the element; the canvas chrome places them (chrome.tsx). Each is titled with its key in
 // the text editing key context. A press on them leaves the focus, and so the text selection, in the edited text

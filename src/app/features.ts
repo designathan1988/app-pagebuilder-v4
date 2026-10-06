@@ -1,7 +1,7 @@
 // The feature table (PRODUCT.md §5): the one map from every feature of the manifest to its registration, in the
 // order of manifest/features/. A feature is registered with registerFeature once it is built, and NOT_AVAILABLE_YET
 // until then; a missing or an extra entry is a type error. Its doors, and the controls that stand for an item it
-// brings (a palette entry), are usable only while it is registered (archive/DESIGN.md "Build order"); the census fails
+// brings (a palette entry), are usable only while it is registered; the census fails
 // a registered feature with no scenario, or one of whose scenarios cannot run or fails. Plain data: the runner and the
 // census read it in Node.
 import { installFeatureTable, registerFeature, type FeatureTable } from '../core/commands/registry.ts';

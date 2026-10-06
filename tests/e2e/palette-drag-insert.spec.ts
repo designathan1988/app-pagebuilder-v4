@@ -1,4 +1,4 @@
-// palette-drag-insert beyond its scenarios (spec/BEHAVIOUR.md#palette-drag-insert; archive/DESIGN.md "Canvas", drag). A
+// palette-drag-insert beyond its scenarios (spec/BEHAVIOUR.md#palette-drag-insert, drag). A
 // press on a palette tile is split by the pointer owner (src/editor/input/pointer.ts) at drag.threshold: released below
 // it, it is the tile's click and inserts at the selection; moved past it, it is a creation drag, which inserts only
 // where it is dropped on the page, so released outside the page, or back on the tile it started from, it inserts

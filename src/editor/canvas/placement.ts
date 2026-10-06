@@ -9,7 +9,7 @@
 // press meant for the text under it reaches the text (jornada03 J16: a label over a card's price selected the button
 // instead).
 //
-// A drop label (placeLabel, archive/DESIGN.md "Canvas") never covers page content, nor a control the chrome draws (a
+// A drop label (placeLabel) never covers page content, nor a control the chrome draws (a
 // resize handle or an edit band under it would lose the press to the label): it sits above its element when that space
 // is free, otherwise inside the element's top-left corner when that corner is free, otherwise below the element; with a
 // ghost chip at the pointer (a drag) it keeps clear of the chip too. Where no place is free it covers the least it can
@@ -148,7 +148,7 @@ function heldInside(box: Box, area: Box): Box {
 
 // A drop label also keeps clear of the drag's ghost chip (`ghost`, the user's real-use audit, item 3.1): a place it
 // would cover is not free, and with none free the label moves beside the chip, on the side with room. The rule's
-// invariant is that no label covers page content (archive/DESIGN.md "Label rule"); the line of a drop spans the
+// invariant is that no label covers page content; the line of a drop spans the
 // receiver, so the three places are tried at its start and then at its far end (a line between two lines of text: the
 // text sits at the left, and the far end is empty), and where even those are not free the place covering the least
 // content wins — never the largest overlap just because it is the documented order.

@@ -1,4 +1,4 @@
-// The selector bar's class controls (archive/DESIGN.md "Inspector", Style tab 1; spec shared-style-classes), each a
+// The selector bar's class controls (Style tab 1; spec shared-style-classes), each a
 // door of the inspector-selector-bar region:
 //  - the target chips (inspector.setStyleTarget): Element, then each class every selected element lists, the target
 //    pressed; each class chip holds its × (classes.detach), which removes the class from the selected elements;
@@ -7,8 +7,7 @@
 //  - Save the styles as a class (classes.create): it opens a name field; Enter keeps the name, leaving the field closes
 //    it;
 //  - below them, while a class is the target, how many elements the edit reaches (".card affects 3 elements").
-// The lists and fields are the doors' own popups: opening one is not a command (archive/DESIGN.md "What is not a
-// command").
+// The lists and fields are the doors' own popups: opening one is not a command.
 import { useRef, type FormEvent, type ReactNode } from 'react';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { classesOf, usesOfClass } from '../../core/design/classes.ts';

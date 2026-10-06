@@ -1,4 +1,4 @@
-// The code pane (archive/DESIGN.md "Files, tabs and code"): the generated HTML, CSS or JS of the page the canvas shows,
+// The code pane : the generated HTML, CSS or JS of the page the canvas shows,
 // in the centre column beside or instead of the canvas (view/editor-view.ts). Its tabs, its copy and download buttons
 // and its apply buttons are the code-view region's doors (manifest/commands); the lines are
 // src/editor/code-panel/code-panel.ts's, each carrying the node it was written for, so the pane marks the selected

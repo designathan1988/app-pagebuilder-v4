@@ -1,4 +1,4 @@
-// When a shortcut runs (archive/DESIGN.md "Build order"), part of the keymap owner (PRODUCT.md §5): its command is
+// When a shortcut runs, part of the keymap owner (PRODUCT.md §5): its command is
 // built, and its door's feature is the feature that introduces the command or is registered as built (the feature
 // table, src/app/features.ts). A key has no drawing to say "not available yet", so the shortcut of a feature still to
 // come does not run, while its command already runs through the doors of the feature that introduced it (the gradient

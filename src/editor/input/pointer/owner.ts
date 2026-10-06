@@ -100,7 +100,7 @@ export interface PointerSession {
   // never joins a gesture).
   pickAfter: { entry: DoorEntry; args: Record<string, unknown> } | null;
   // a plain press on an element of a selection of several: its click waits for the release, so a drag from it drags
-  // the whole selection (archive/DESIGN.md "Canvas", drag; the user's real-use audit, item 3.4), and a release without
+  // the whole selection (drag; the user's real-use audit, item 3.4), and a release without
   // a drag selects that element alone, as the click does
   deferredClick: { entry: DoorEntry; args: Record<string, unknown> } | null;
   // the modifier held at the last release (a drag's Alt duplicates, spec drag-duplicate)

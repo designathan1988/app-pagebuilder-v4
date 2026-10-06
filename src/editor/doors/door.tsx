@@ -32,7 +32,7 @@ export function Icon({ name, size = 'md' }: { readonly name: string; readonly si
 }
 
 // A door is usable only when its command is built and its feature is registered as built (the feature table,
-// src/app/features.ts; archive/DESIGN.md "Build order"): a menu item, a context-menu item or a toolbar button of a
+// src/app/features.ts): a menu item, a context-menu item or a toolbar button of a
 // feature still to come is drawn "not available yet", or left out of the context menu, even when another feature built
 // its command.
 export function isDoorBuilt(entry: DoorEntry): boolean {
@@ -50,7 +50,7 @@ export interface DoorState {
   readonly available: boolean;
   readonly current: boolean;
   readonly chord: string | null;
-  // why the control is disabled: "not available yet" while its command is not built (archive/DESIGN.md "Build order"),
+  // why the control is disabled: "not available yet" while its command is not built,
   // then the door's own reason (disabledReasonKey) while its predicate does not hold; null when it is enabled
   readonly reason: MessageId | null;
   readonly run: () => void;

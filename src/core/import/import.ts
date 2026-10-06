@@ -16,7 +16,7 @@
 //    closed list refuses is wrapped in the first tag that list accepts) or dropped, and the report says so;
 //  - an event handler attribute (on…) and an attribute the model refuses are removed, and the report says so.
 // The import report is the message the command says: what came in, and per kind the source lines. The status bar shows
-// it (archive/DESIGN.md "Dock and status bar").
+// it.
 //
 // The styles (html-import-styles, html-import-media-queries, html-import-states): the <style> blocks the page holds,
 // the stylesheets it links (found by their path among the picked files) and the style attributes are read by the one

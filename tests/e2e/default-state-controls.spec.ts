@@ -1,4 +1,4 @@
-// No control looks usable without acting (the user's real-use audit, item 1.4; archive/DESIGN.md "Build order"; specs
+// No control looks usable without acting (the user's real-use audit, item 1.4; specs
 // quick-panel, Problems in Pager 8, and inspector-provenance-reset, Problems in Pager 5): a field draws its Reset only
 // while the element holds a value of its own, in the Style tab and the quick panel; the quick panel's bar leaves out
 // align and distribute while they cannot act, keeping the actions that can (More actions, Edit on canvas); a control

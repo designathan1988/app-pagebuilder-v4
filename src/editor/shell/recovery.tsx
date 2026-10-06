@@ -1,4 +1,4 @@
-// The recovery dialog (archive/DESIGN.md "Regions": recovery-dialog; spec autosave-corruption-recovery): open at start
+// The recovery dialog (recovery-dialog; spec autosave-corruption-recovery): open at start
 // when the saved work could not be read (ui.dialog `recovery`, with the saved versions in ui.recovery), while autosave
 // still waits for a recovery. It lists the versions, the newest first, each with the time it was saved and the region's
 // door, Restore (project.restoreVersion, the version by its revision); with none, it says so. Closing it changes

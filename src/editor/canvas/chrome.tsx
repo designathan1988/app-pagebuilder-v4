@@ -154,7 +154,7 @@ const GHOST_RETURN_MS = ((): number => {
 // pointer and no ghost (and climbs no level of a drag).
 type DropView = Pick<DragView, 'dragged' | 'inserting' | 'proposal' | 'refusal' | 'redirect' | 'levels' | 'side'> & { readonly at: DragView['at'] | null };
 
-// The words of the drag in progress (archive/DESIGN.md "Canvas", drag): what its drop label reads, and, for a palette
+// The words of the drag in progress (drag): what its drop label reads, and, for a palette
 // tile's creation drag, the status bar too (spec palette-drag-insert, Problems in Pager 1 and 2). Over the dragged
 // nodes' own subtree, or where the new element's command refuses it, the refusal; a move reads "Drop in Hero · position
 // 2 of 3"; a creation drag "Insert Paragraph · position 2 of 4 in Hero", or "Insert Container · into Actions" into a
@@ -184,7 +184,7 @@ function dragWords(document: DocumentJson, view: DropView): Message | null {
 }
 
 // The names from the page root to a node, joined as the breadcrumb joins them; past three levels the outer ones are
-// left out (archive/DESIGN.md "Canvas", drag).
+// left out (drag).
 const PATH_SHOWN = 3;
 function pathTo(document: DocumentJson, id: NodeId): string {
   const names: string[] = [];
@@ -223,7 +223,7 @@ function sideLine(target: Box, side: SideView['offer']): Box {
 
 interface Layout {
   readonly selected: readonly Box[];
-  // the box around every selected node, drawn dashed while several are selected (archive/DESIGN.md "Canvas", multi)
+  // the box around every selected node, drawn dashed while several are selected (multi)
   readonly union: Box | null;
   readonly hovered: Box | null;
   // `seen`: whether its place lies in view (the element's top inside the page's view, the label inside the stage): it
@@ -412,7 +412,7 @@ function handDrop(hand: HandState): DropView {
 
 // The drop indicator of the drag in progress (spec drag-reorder-canvas, "Visual feedback", and Problems in Pager 3):
 // the insertion line where the dragged nodes will land, the receiving parent's outline, and the label naming the
-// receiver and the position ("Drop in Hero · position 1 of 3", archive/DESIGN.md "Canvas", drag), placed by the label
+// receiver and the position ("Drop in Hero · position 1 of 3", drag), placed by the label
 // rule next to the line, never at the receiver's far corner. A proposal that the command would refuse (a creation
 // drag's, the hand's aim) is drawn refused (spec palette-drag-insert, Problems in Pager 3). A drag's proposal drawn is
 // the one of the level the level keys set (drag-session.ts), redrawn as soon as a key changes it.
@@ -1063,7 +1063,7 @@ export function CanvasChrome() {
   // the resize drag in progress, whose distances to the neighbours the canvas draws (item 4.5)
   const resizing = usePointerValue('resizingNow');
   // the text edited in place (text-edit.ts): its outline and label wear the text editing mode, so the edit never looks
-  // like a plain selection (spec text-edit-inline, Problems in Pager 2; archive/DESIGN.md "Canvas", text)
+  // like a plain selection (spec text-edit-inline, Problems in Pager 2, text)
   const editing = useEditorState((s) => s.ui.textEdit.node !== null && s.selection.length === 1 && s.selection[0] === s.ui.textEdit.node);
   const t = useT();
   const store = useStore();
