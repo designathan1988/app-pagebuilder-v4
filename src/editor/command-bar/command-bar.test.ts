@@ -85,3 +85,20 @@ describe('shownEntries', () => {
     expect(scopeOf('wrap')).toEqual({ prefix: '', words: 'wrap' });
   });
 });
+
+// An insert entry answers to the words the Insert panel's search answers to (spec palette-click-insert: its English
+// name, its synonyms, its tag): in Portuguese "+header" found nothing where the Insert panel found Cabeçalho (the
+// audit of 2026-10-05, AU6-12). Its own label still comes first.
+describe('an insert entry\'s other names', () => {
+  if (insert === undefined) throw new Error('no insert door');
+  const header: BarEntry = { ...entry('Inserir Cabeçalho', insert, { entry: 'header' }), also: ['Header', 'header'] };
+  const heading: BarEntry = { ...entry('Inserir Título', insert, { entry: 'heading' }), also: ['Heading', 'h2'] };
+  const named: BarEntry = { ...entry('Inserir Header falso', insert, { entry: 'x' }), also: [] };
+  it('finds it by its English name and by its tag', () => {
+    expect(shownEntries('+header', [header, heading], []).map((e) => e.label)).toEqual(['Inserir Cabeçalho']);
+    expect(shownEntries('+h2', [header, heading], []).map((e) => e.label)).toEqual(['Inserir Título']);
+  });
+  it('ranks a match of the label before a match of another name', () => {
+    expect(shownEntries('+header', [header, named], []).map((e) => e.label)).toEqual(['Inserir Header falso', 'Inserir Cabeçalho']);
+  });
+});

@@ -72,7 +72,12 @@ export interface BarEntry {
   readonly args: Readonly<Record<string, unknown>>;
   readonly label: string;
   readonly key: string;
+  // the other words it answers to, after its label (an insert entry: the Insert panel's English name, synonyms and
+  // tag of its element, palette.ts alsoNamed), so the bar finds what the Insert panel's search finds
+  readonly also?: readonly string[];
 }
+// below every match of a label: a match of another name only
+const ALSO_RANK = 100;
 export const entryKey = (entry: DoorEntry, args: Readonly<Record<string, unknown>>): string => `${entry.ref} ${JSON.stringify(args)}`;
 
 // the words of a text as matched (core/text/fold.ts: lower case, without accents)
@@ -142,7 +147,9 @@ export function shownEntries(query: string, offered: readonly BarEntry[], recent
   }
   return pool
     .flatMap((e, index) => {
-      const score = matchScore(words, e.label);
+      const own = matchScore(words, e.label);
+      const other = own === null ? Math.max(-Infinity, ...(e.also ?? []).flatMap((name) => matchScore(words, name) ?? [])) : -Infinity;
+      const score = own ?? (other === -Infinity ? null : other - ALSO_RANK);
       return score === null ? [] : [{ e, score, index }];
     })
     .sort((a, b) => b.score - a.score || a.index - b.index)

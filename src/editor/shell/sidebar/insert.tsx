@@ -8,11 +8,10 @@ import type { FeatureId, MessageId } from '../../../generated/ids.ts';
 import { elementIcon, manifest } from '../../../manifest/runtime.ts';
 import { DoorControl, Icon } from '../../doors/door.tsx';
 import { GLYPHS } from '../../doors/placement.ts';
-import { paletteDensity, paletteMatches, paletteRank } from '../../palette/palette.ts';
+import { alsoNamed, paletteDensity, paletteMatches, paletteRank, tagOfElement } from '../../palette/palette.ts';
 import { MODEL_RULES, useEditorState, type EditorState } from '../../store.ts';
 import { ViewTitle } from '../view-title.tsx';
 import { useLocale, useT } from '../../text.ts';
-import { hasText, translate, type Locale } from '../../../i18n/index.ts';
 import { Slots } from '../slots.tsx';
 import { componentsOf } from '../../../core/design/instances.ts';
 import { requireDoor, drawnAs } from './doors.tsx';
@@ -28,7 +27,6 @@ const COMPONENT_TILE = requireDoor('insert', (d) => drawnAs(d) === 'item' && 'co
 // every palette entry, for the search's count of all the panel's entries
 const PALETTE_SIZE = manifest.elements.palette.reduce((n, g) => n + g.entries.length, 0);
 
-const tagOfElement = (element: string) => manifest.elements.elements.find((e) => e.id === element)?.tag ?? null;
 
 // Where a palette click inserts now: element.insert's own rule (src/core/structure/insert.ts, `placement` used with no
 // parent and no index: the selected container takes the element as its last child, a selected leaf is followed by it,
@@ -56,16 +54,6 @@ function InsertDestination() {
       {sibling === null ? t('insert.destination.inside', { parent }) : t('insert.destination.after', { parent, sibling })}
     </p>
   );
-}
-
-// The other words a palette entry answers to: its English name, and the synonyms the catalogues give it in the person's
-// language and in English (palette.keywords.<entry>), where they have them
-function alsoNamed(locale: Locale, entry: string, labelKey: string): readonly string[] {
-  const key = `palette.keywords.${entry}`;
-  const words = [translate('en', labelKey as MessageId)];
-  if (hasText(locale, key)) words.push(translate(locale, key as MessageId));
-  if (locale !== 'en' && hasText('en', key)) words.push(translate('en', key as MessageId));
-  return words;
 }
 
 export function Insert() {

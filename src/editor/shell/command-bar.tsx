@@ -15,7 +15,8 @@ import { GLYPHS, doorSlots, menuOf } from '../doors/placement.ts';
 import { setActiveOption } from '../focus/focus.ts';
 import { chordCap, chordHint } from '../input/keymap.ts';
 import { useEditorState, useStore } from '../store.ts';
-import { useT } from '../text.ts';
+import { useLocale, useT } from '../text.ts';
+import { alsoNamed, tagOfElement } from '../palette/palette.ts';
 import { PANELS, panelName, type Panel } from '../workspace/panel-catalogue.ts';
 import { PanelBodies } from './bodies.ts';
 import { walk } from '../../core/document/model.ts';
@@ -46,6 +47,7 @@ export function CommandBar() {
 
 function CommandBarDialog() {
   const t = useT();
+  const locale = useLocale();
   const store = useStore();
   const drawsBody = useContext(PanelBodies);
   // what the field holds: the bar's own view (a filter, not a command), as the Insert panel's search
@@ -63,7 +65,10 @@ function CommandBarDialog() {
       if (kind === 'insert') {
         return PALETTE.filter((p) => isFeatureBuilt(p.feature as FeatureId) && runs(entry, { entry: p.id })).map((p) => {
           const args = { entry: p.id };
-          return { entry, args, label: t(entry.door.labelKey as MessageId, { element: { key: p.labelKey as MessageId } }), key: entryKey(entry, args) };
+          // it answers to what the Insert panel's search answers to: the element's English name, synonyms and tag
+          const tag = tagOfElement(p.element);
+          const also = [...alsoNamed(locale, p.id, p.labelKey), ...(tag === null ? [] : [tag])];
+          return { entry, args, label: t(entry.door.labelKey as MessageId, { element: { key: p.labelKey as MessageId } }), key: entryKey(entry, args), also };
         });
       }
       if (kind === 'open-panel') {
@@ -125,7 +130,7 @@ function CommandBarDialog() {
       if (!runs(entry, {})) return [];
       return [{ entry, args: {}, label: t(entry.door.labelKey as MessageId, labelParamsOf(entry, state)), key: entryKey(entry, {}) }];
     });
-  }, [store, drawsBody, t, query]);
+  }, [store, drawsBody, t, locale, query]);
   const shown = useMemo(() => shownEntries(query, offered, recentEntries()), [query, offered]);
   // with nothing to offer, a command the query names that cannot run now says why (the dogfooding pass: "dup" with
   // nothing selected answered only that nothing matched); it is still not offered (Problems in Pager 2)

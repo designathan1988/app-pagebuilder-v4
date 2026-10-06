@@ -9028,6 +9028,10 @@ context menu does not offer **Rename the selected…** (it offers only what appl
   each class while elements are selected (`classes.apply`), each named by what it holds, found by the same matching
   as every entry.
 - The scope `@` (its pill: Pages, layers, classes) keeps only these.
+- An insert entry ("Insert …") answers also to the words the Insert panel's search answers to (palette.ts alsoNamed:
+  its element's English name, the synonyms of the person's language and of English, its tag), after every entry its
+  own label matches: in Portuguese "+header" finds "Inserir Cabeçalho" and "+h1" "Inserir Título" (the audit of
+  2026-10-05, AU6-12).
 
 ### Refusals
 

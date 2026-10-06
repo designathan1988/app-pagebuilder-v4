@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 480,
-    "lines": 83879
+    "lines": 83894
   },
   "features": [
     {
@@ -5335,7 +5335,7 @@
     },
     {
       "path": "src/editor/command-bar/command-bar.ts",
-      "lines": 247,
+      "lines": 254,
       "commands": [
         "commandBar.open"
       ],
@@ -6043,7 +6043,7 @@
     },
     {
       "path": "src/editor/palette/palette.ts",
-      "lines": 63,
+      "lines": 78,
       "commands": [
         "palette.toggleGroup",
         "palette.setDensity"
@@ -6185,7 +6185,7 @@
     },
     {
       "path": "src/editor/shell/command-bar.tsx",
-      "lines": 280,
+      "lines": 285,
       "commands": [],
       "features": []
     },
@@ -6407,7 +6407,7 @@
     },
     {
       "path": "src/editor/shell/sidebar/insert.tsx",
-      "lines": 165,
+      "lines": 153,
       "commands": [],
       "features": []
     },

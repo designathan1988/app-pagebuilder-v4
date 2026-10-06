@@ -5,7 +5,9 @@
 // (paletteMatches).
 import { registerHandler, type RegisteredHandler } from '../../core/commands/registry.ts';
 import type { PaletteDensity } from '../preferences/preferences.ts';
-import { commandOf } from '../../manifest/runtime.ts';
+import { commandOf, manifest } from '../../manifest/runtime.ts';
+import type { MessageId } from '../../generated/ids.ts';
+import { hasText, translate, type Locale } from '../../i18n/index.ts';
 import type { EditorUi } from '../state.ts';
 import { chosen } from '../preferences/said.ts';
 
@@ -60,3 +62,16 @@ export function paletteRank(query: string, label: string, tag: string | null, al
 
 // Whether a palette entry answers the search at all.
 export const paletteMatches = (query: string, label: string, tag: string | null, also: readonly string[] = []): boolean => paletteRank(query, label, tag, also) !== null;
+
+// The other words a palette entry answers to: its English name, and the synonyms the catalogues give it in the person's
+// language and in English (palette.keywords.<entry>), where they have them — the Insert panel's search and the
+// command bar's insert entries alike (the audit of 2026-10-05, AU6-12)
+export function alsoNamed(locale: Locale, entry: string, labelKey: string): readonly string[] {
+  const key = `palette.keywords.${entry}`;
+  const words = [translate('en', labelKey as MessageId)];
+  if (hasText(locale, key)) words.push(translate(locale, key as MessageId));
+  if (locale !== 'en' && hasText('en', key)) words.push(translate('en', key as MessageId));
+  return words;
+}
+// the HTML tag an element of the palette is made with, a word its entry answers to too
+export const tagOfElement = (element: string): string | null => manifest.elements.elements.find((e) => e.id === element)?.tag ?? null;
