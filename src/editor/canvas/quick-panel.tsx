@@ -56,6 +56,11 @@ const FUNCTION_CONTROLS = new Set(FUNCTION_DOORS.map((d) => (d.door.kind === 'in
 const FUNCTION_PROPERTIES = new Set(FUNCTION_DOORS.map((d) => (d.door.kind === 'inspector-field' ? d.door.property : null)));
 const CHIP = { width: 24, height: 24 };
 // the canvas's pan, the wheel's command: what moves an out-of-sight label into view when the panel opens (DEC-70)
+// for how many frames after its opening the panel's settling height still moves the canvas to fit it (chip-fit's few
+// frames, counted by the placing loop, which runs once a frame)
+const FIT_FRAMES = 36;
+// the share of the window's height the open panel takes at most (canvas-editing.css's max-height, 75vh)
+const TALLEST_SHARE = 0.75;
 const PAN = manifest.doors.find((d) => d.door.kind === 'canvas-wheel' && 'dx' in d.command.args);
 
 // The panel's groups, in the order it draws them, each under its name: layout.json's quickPanelGroups, which each
@@ -366,6 +371,11 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
   const chip = useRef<HTMLButtonElement>(null);
   // the element whose label the canvas was moved to show when the panel opened out of sight (once per opening)
   const revealed = useRef<string | null>(null);
+  // whether the panel was open at the last placing; the frames left in which the opening fits it whole below its
+  // label, and the label's top when the canvas was last moved for it
+  const wasPlacedOpen = useRef(false);
+  const fitFrames = useRef(0);
+  const fitFrom = useRef<number | null>(null);
   const shown = node !== null && !editing && dragging === null;
   const id = node?.id ?? null;
   const offset: Offset | null = id === null ? null : (offsets[id] ?? null);
@@ -398,15 +408,35 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
         // view (the page scrolled it away, cut by the stage's edge) neither is drawn, since it follows the label
         const at = label?.getBoundingClientRect();
         const seen = at !== undefined && at.left >= stageBox.left - 0.5 && at.top >= stageBox.top - 0.5 && at.right <= stageBox.right + 0.5 && at.bottom <= stageBox.bottom + 0.5;
-        // opened while the label is out of sight (its shortcut; a wide element's start left of the canvas at 100 %):
-        // the canvas moves the label into view once, and the panel then opens beside it (DEC-70)
-        if (open && at !== undefined && !seen && revealed.current !== id) {
-          revealed.current = id;
+        // just opened (not a new selection with the panel open, so a press on the canvas never sees the page move
+        // under it), and not dragged by the person: for the opening's first moments the panel must fit below its
+        // label — its height settles over a few frames (a field too wide for its half takes the row, chip-fit.ts)
+        if (open && !wasPlacedOpen.current) fitFrames.current = offset === null ? FIT_FRAMES : 0;
+        else if (fitFrames.current > 0) fitFrames.current -= 1;
+        wasPlacedOpen.current = open;
+        // opened while the label is out of sight (its shortcut; a wide element's start left of the canvas at 100 %),
+        // or so near the window's bottom that the panel beside it would be cut short (one field in sight, the pairing
+        // of 2026-10-05): the canvas moves, the label into view and the whole panel below it (DEC-70)
+        const reveal = !seen && revealed.current !== id;
+        // after a move, nothing more is asked until the label has moved (a canvas at the page's end never does)
+        if (at !== undefined && fitFrom.current !== null && Math.abs(at.top - fitFrom.current) >= 0.5) fitFrom.current = null;
+        const fitting = seen && fitFrames.current > 0 && fitFrom.current === null;
+        if (open && at !== undefined && (reveal || fitting)) {
+          if (reveal) revealed.current = id;
           const view = document.querySelector('.frame__view')?.getBoundingClientRect();
           const top = Math.max(stageBox.top, view?.top ?? stageBox.top);
           const dx = at.left < stageBox.left || at.right > stageBox.right ? stageBox.left + inset - at.left : 0;
-          const dy = at.top < top ? top + inset - at.top : at.bottom > stageBox.bottom ? stageBox.bottom - inset - at.bottom : 0;
-          if (dx !== 0 || dy !== 0) if (PAN !== undefined) (store.dispatch as (command: CommandId, args: unknown) => unknown)(PAN.command.id, { dx: Math.round(dx), dy: Math.round(dy) });
+          let dy = at.top < top ? top + inset - at.top : at.bottom > stageBox.bottom ? stageBox.bottom - inset - at.bottom : 0;
+          // what the panel holds, scrolled or not, with its borders (its height counts them), at most its share of the
+          // window
+          const tall = Math.min(drawn.scrollHeight + drawn.offsetHeight - drawn.clientHeight, window.innerHeight * TALLEST_SHARE);
+          const over = Math.ceil(at.top + dy + tall - (window.innerHeight - inset));
+          // moved up no further than leaves the label at the top of the view
+          if (fitFrames.current > 0 && over > 0) dy = Math.max(dy - over, top + inset - at.top);
+          if (Math.round(dx) !== 0 || Math.round(dy) !== 0) {
+            fitFrom.current = at.top;
+            if (PAN !== undefined) (store.dispatch as (command: CommandId, args: unknown) => unknown)(PAN.command.id, { dx: Math.round(dx), dy: Math.round(dy) });
+          }
         }
         if (!open) revealed.current = null;
         const placedBox = at === undefined || !seen ? null : placeQuickPanel({ x: at.x, y: at.y, width: at.width, height: at.height }, element, size, open, whole, inset, offset);
@@ -473,7 +503,7 @@ export function QuickPanel({ stage }: { readonly stage: RefObject<HTMLDivElement
     <div
       ref={panel}
       className={`quick-panel${measuring}`}
-      style={{ ...at, maxWidth: current?.widest, maxHeight: current === null ? undefined : `min(75vh, ${current.tallest}px)` }}
+      style={{ ...at, maxWidth: current?.widest, maxHeight: current === null ? undefined : `min(${TALLEST_SHARE * 100}vh, ${current.tallest}px)` }}
       data-region={REGION}
       data-key-context={PANEL_KEYS}
       role="dialog"

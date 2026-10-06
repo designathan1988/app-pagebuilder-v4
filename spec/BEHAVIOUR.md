@@ -6088,6 +6088,11 @@ The panel's controls have `tabindex="-1"` (sealed out of the Tab order, `quick-p
     inspector or the dock, whole, its close in reach; and the stage is clipped, never scrolled (`overflow: clip`), so the
     focus put in the panel's first field cannot move the page under it. While the label is out of sight, so are they;
     the panel opened then (its shortcut, Ctrl+Shift+Q) moves the canvas once so the label is in view, and opens beside it.
+    Opened (by its chip or its shortcut) beside a label so near the window's bottom that the panel would be cut short
+    (at Tablet the plans' title near the canvas's bottom left one field in sight, the pairing of 2026-10-05), it moves
+    the canvas up once, as the panel's height settles, so the whole panel fits below the label, never further than
+    leaves the label at the top of the view; a new selection made while the panel is open never moves the canvas, so
+    a press on the page never sees it move under the pointer (the panel then holds what does not fit scrolled, QA 408).
 8. **Its bar showed align and distribute always disabled, and its fields a Reset "not available yet" with nothing to reset** (the user's real-use audit, item 1.4: 8 buttons and 19 Resets that looked usable and did nothing). Required: the bar draws an action only while it can act (its door built and its command able to run on the selection; a list of choices, Edit on canvas, while built); a field's Reset is drawn only while the element holds a value of its own (inspector-provenance-reset, Problems in Pager 5).
 
 ### Our rule: the fields follow the element kind, and every style door shares one context (the user's real-use audit, items 6.1 and A3.8)

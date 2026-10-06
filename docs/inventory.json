@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 478,
-    "lines": 83779
+    "lines": 83809
   },
   "features": [
     {
@@ -5183,7 +5183,7 @@
     },
     {
       "path": "src/editor/canvas/quick-panel.tsx",
-      "lines": 515,
+      "lines": 545,
       "commands": [],
       "features": []
     },

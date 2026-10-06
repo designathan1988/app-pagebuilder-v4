@@ -148,3 +148,35 @@ test('the open quick panel stands on the label’s right, level with its top, wh
   await close.click();
   await holds(page, 'closed again');
 });
+
+// Opened beside a label near the window's bottom, the panel was held to the room left below it (QA 408): at Tablet the
+// plans' title near the canvas's bottom had a panel 89 px tall, one field in sight (the pairing of 2026-10-05). Opening
+// it now moves the canvas once so the whole panel fits below the label, still beside it (DEC-70).
+test('the quick panel opened beside a label near the bottom moves the canvas so it fits whole', runs(OPEN, ROW, 'quickPanel.setOpen#chip', 'view.setBreakpoint#toolbar-breakpoint-tabs-tablet'), async ({ page }) => {
+  await runDoor(page, 'view.setBreakpoint#toolbar-breakpoint-tabs-tablet');
+  await select(page, 'c-plans-title');
+  // the canvas scrolled with the wheel until the title's label stands near the window's bottom
+  const stage = page.locator('.frame__view').first();
+  const box = await stage.boundingBox();
+  if (box === null) throw new Error('no canvas');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const label = page.locator('[data-chrome="label"]:not(.is-measuring)');
+  const viewport = page.viewportSize()?.height ?? 900;
+  for (let turn = 0; turn < 40; turn += 1) {
+    const at = await label.boundingBox();
+    if (at !== null && at.y > viewport - 140 && at.y < viewport - 60) break;
+    await page.mouse.wheel(0, at === null || at.y < viewport - 140 ? -40 : 40);
+    await page.waitForTimeout(60);
+  }
+  const before = await label.boundingBox();
+  expect(before?.y ?? 0, 'the label near the bottom').toBeGreaterThan(viewport - 140);
+  await page.locator('.quick-panel-chip').click();
+  const panel = page.locator('.quick-panel:not(.is-measuring)');
+  await expect(panel).toBeVisible();
+  await holds(page, 'open beside the label');
+  // whole: nothing held scrolled inside it, and its bottom inside the window
+  await expect.poll(() => panel.evaluate((element) => element.scrollHeight - element.clientHeight), { message: 'no inner scroll' }).toBeLessThanOrEqual(1);
+  const placed = await panel.boundingBox();
+  expect((placed?.y ?? 0) + (placed?.height ?? 0), 'inside the window').toBeLessThanOrEqual(viewport);
+  expect(placed?.height ?? 0, 'taller than one field').toBeGreaterThan(200);
+});
