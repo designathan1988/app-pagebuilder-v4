@@ -1074,12 +1074,14 @@
   font: var(--fw-caption) var(--fs-caption) / var(--lh-caption) var(--font-mono);
 }
 
-/* the class the style target names and the breakpoint in view (A3.8): dimmer than the tag, beside the state */
+/* the class the style target names and the breakpoint in view (A3.8): lighter than the name, beside the state, in
+   the label's own ink, as the canonical label's small part (design/final .ov-tag small); the text's subtle grey on the
+   accent read at 1.2-1.5:1 (the audit of 2026-10-05, AU6-16) */
 .chrome__target,
 .chrome__state,
 .chrome__breakpoint {
   margin-left: var(--space-1);
-  color: var(--color-text-subtle);
+  color: inherit;
   font: var(--fw-caption) var(--fs-caption) / var(--lh-caption) var(--font-ui);
 }
 
