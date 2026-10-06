@@ -16,4 +16,10 @@ export const ALLOWED: readonly Allowed[] = [
     why: "the label of an element at the page's top stands above the page, fixed in the window, over the breakpoint tabs (nothing clips it there); the tab takes a press beside it, and the label hides once the page scrolls it out of view",
     decision: 'DEC-70',
   },
+  {
+    kind: 'english',
+    selector: '.settings-default-message',
+    why: "a form field's default validation message is the page's, in the language its messages are written in (the select above it, messages.locale), as the page's visitor will read it; never the editor's own text",
+    decision: 'src/editor/forms/settings.tsx (the messages written whole in their own language)',
+  },
 ];

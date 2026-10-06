@@ -116,6 +116,8 @@ const mount = (page: Page) =>
     async ({ url, html, frame }) => {
       const coordinates = (await import(/* @vite-ignore */ url)) as Coordinates;
       const host = document.createElement('div');
+      // the test's own frame over the editor, no part of it: the screen guard leaves it out (tests/support/screen-guard.ts)
+      host.dataset.testHarness = '';
       host.style.cssText = 'position:fixed;left:33px;top:47px;z-index:2147483647;line-height:0';
       const iframe = document.createElement('iframe');
       iframe.setAttribute('sandbox', 'allow-same-origin');

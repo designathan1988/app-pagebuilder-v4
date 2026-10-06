@@ -79,6 +79,8 @@ async function mount(page: Page): Promise<void> {
       };
       const frame = document.createElement('iframe');
       frame.id = 'render-proof';
+      // the test's own frame over the editor, no part of it: the screen guard leaves it out (tests/support/screen-guard.ts)
+      frame.dataset.testHarness = '';
       frame.setAttribute('sandbox', 'allow-same-origin');
       frame.style.cssText = 'position: fixed; left: 0; top: 0; width: 1440px; height: 900px; border: 0; z-index: 2147483647';
       const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));

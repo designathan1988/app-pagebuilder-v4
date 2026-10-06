@@ -49,25 +49,55 @@ const ENGLISH: readonly string[] = [
 ];
 
 // Runs in the editor's page (never inside the canvas's frame): the findings on screen now.
-export function screenFindings(input: { readonly english: readonly string[] | null; readonly allowed: readonly { readonly kind: string; readonly selector: string }[] }): Finding[] {
+export function screenFindings(input: { readonly english: readonly string[] | null; readonly allowed: readonly { readonly kind: string; readonly selector: string }[]; readonly project?: readonly string[] }): Finding[] {
   const out: Finding[] = [];
   const SHORT_VALUE = 24;
   const W = window.innerWidth;
   const H = window.innerHeight;
   const english = input.english === null ? null : new Set(input.english);
+  // the texts the project itself holds (its names, tags, classes, words): the person's, never the interface's
+  const project = new Set(input.project ?? []);
   const allowed = (kind: string, el: Element) => input.allowed.some((rule) => rule.kind === kind && el.closest(rule.selector) !== null);
-  // the layers a person opens over the editor, which cover what lies under them on purpose until they close: the open
-  // quick panel stands over the selection's handles (canvas-editing.css, DEC-75)
-  const LAYERS = '.quick-panel,[role=menu],[role=dialog],[role=alertdialog],[role=listbox],[role=tooltip],.popover,.menu,.command-bar,[data-region=toast],[data-region=command-palette],.floating,.panel-window,[data-drag-ghost],.chrome-ghost-stack,.backdrop,[class*="backdrop"]';
+  // the layers a person opens over the editor, which cover what lies under them on purpose until they close, by their
+  // roles (WAI-ARIA: a menu, a listbox, a dialog, a tooltip), the editor's own floating surfaces (a popover, a floating
+  // panel window, the open quick panel over the selection's handles: canvas-editing.css, DEC-75, a drag's ghost), and
+  // any surface fixed over the whole window (a dialog's shield, a menu's backdrop)
+  const LAYERS = '.quick-panel,[role=menu],[role=dialog],[role=alertdialog],[role=listbox],[role=tooltip],.popover,.menu,.command-bar,[data-region=toast],.floating,.panel-window,[data-drag-ghost],.chrome-ghost-stack';
+  // a surface fixed over the whole window that the hit belongs to and the control does not (a dialog's shield lies over
+  // the editor, never over what the dialog itself holds)
+  const shield = (hit: Element, under: Element): boolean => {
+    for (let e: Element | null = hit; e !== null && e !== document.body; e = e.parentElement) {
+      const b = e.getBoundingClientRect();
+      if (style(e).position === 'fixed' && b.width * b.height >= 0.9 * W * H) return !e.contains(under);
+    }
+    return false;
+  };
+  // a modal dialog open (aria-modal: what lies outside it is inert, WAI-ARIA): only what is inside it must take presses
+  const modal = [...document.querySelectorAll('[aria-modal="true"]')].filter((m) => m.getClientRects().length > 0).at(-1) ?? null;
   const style = (el: Element) => getComputedStyle(el);
+  // The window's layers, by the editor's own scale (design/final/tokens.json, z: toast, floating, menu, dialog…): a
+  // surface placed at one of them floats over the editor — a floating panel, the narrow window's sidebar opened over
+  // the canvas, a toast — and covers what lies under it on purpose
+  const floatsFrom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--z-toast')) || 40;
+  const windowLayer = (e: Element | null): Element | null => {
+    for (let x = e; x !== null && x !== document.body; x = x.parentElement) {
+      const cs = getComputedStyle(x);
+      if ((cs.position === 'fixed' || cs.position === 'absolute') && Number.parseInt(cs.zIndex, 10) >= floatsFrom) return x;
+    }
+    return null;
+  };
+  // a value written as CSS writes it, in the code face (DEC-65), and a key's name (kbd) are no interface text
+  const codeFace = getComputedStyle(document.documentElement).getPropertyValue('--font-mono').trim();
   const shown = (el: Element): DOMRect | null => {
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) return null;
     const s = style(el);
-    if (s.visibility === 'hidden' || s.display === 'none' || Number(s.opacity) === 0) return null;
+    // clipped to nothing (a text kept for screen readers alone: clip-path inset(50%), or a clip of zero area) is unseen
+    const clippedAway = (cs: CSSStyleDeclaration) => /inset\(50%/.test(cs.clipPath) || /rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)/.test(cs.clip);
+    if (s.visibility === 'hidden' || s.display === 'none' || Number(s.opacity) === 0 || clippedAway(s)) return null;
     for (let p = el.parentElement; p !== null; p = p.parentElement) {
       const ps = style(p);
-      if (Number(ps.opacity) === 0 || ps.visibility === 'hidden') return null;
+      if (Number(ps.opacity) === 0 || ps.visibility === 'hidden' || clippedAway(ps)) return null;
     }
     return r;
   };
@@ -124,7 +154,7 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
   };
   const CONTROL = 'button,input:not([type=hidden]),select,textarea,a[href],[data-door],[role=button],[role=menuitem],[role=menuitemcheckbox],[role=menuitemradio],[role=tab],[role=option],[role=checkbox],[role=radio],[role=switch],[role=slider]';
   const all = [...document.body.querySelectorAll('*')].filter(
-    (el) => el.tagName !== 'IFRAME' && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE' && el.closest('svg') === null && el.closest('.is-measuring,.visually-hidden,[aria-hidden="true"],[inert]') === null,
+    (el) => el.tagName !== 'IFRAME' && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE' && el.closest('svg') === null && el.closest('.is-measuring,.visually-hidden,[aria-hidden="true"],[inert],[data-test-harness]') === null,
   );
   for (const el of all) {
     const r = shown(el);
@@ -134,8 +164,10 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
     const text = ownText(el);
     const visible = seen(el, r);
     if (visible === null) continue;
-    // CUT
-    if ((text !== '' || tag === 'INPUT') && tag !== 'TEXTAREA') {
+    // CUT — of a text a person sees: one drawn in a transparent colour is not (a field at rest draws its value in its
+    // face, field-face.tsx, over its input's own text made transparent: the face is what is read)
+    const unseen = /^rgba\(.*,\s*0\)$|^transparent$/.test(s.color);
+    if ((text !== '' || tag === 'INPUT') && tag !== 'TEXTAREA' && !unseen) {
       const clips = s.overflowX === 'hidden' || s.overflowX === 'clip' || s.textOverflow === 'ellipsis';
       if (clips && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 4) {
         const input = tag === 'INPUT' ? (el as HTMLInputElement) : null;
@@ -161,15 +193,26 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
         tag === 'DT' ||
         ['menuitem', 'menuitemcheckbox', 'menuitemradio', 'tab', 'option', 'button'].includes(role) ||
         /(^|[-_])(label|name|title|head|caption|chip|tab)s?($|[-_])/.test(el.className.toString());
-      if (name && el.closest('p,[role=alert],[role=status],.toast,.notice,.hint,.empty,[data-region=assistant]') === null) {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const tops = new Set([...range.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top)));
-        const line = parseFloat(s.lineHeight) || parseFloat(s.fontSize) * 1.3;
-        if (tops.size > 1 && r.height > line * 1.6 && !allowed('wrapped', el)) out.push({ kind: 'wrapped', text: text.slice(0, 80), where: where(el), box: box(visible) });
+      // a name drawn to take more than one line on purpose (a line clamp: a palette tile's two lines) is not wrapped
+      const clamped = s.getPropertyValue('-webkit-line-clamp') !== '' && s.getPropertyValue('-webkit-line-clamp') !== 'none';
+      if (name && !clamped && el.closest('p,[role=alert],[role=status],.toast,.notice,.hint,.empty,[data-region=assistant]') === null) {
+        // the lines of its own text only: a label holding its field (a grid of the name over the input) has the field's
+        // box below the name, which is no second line of the name
+        const tops = new Set(
+          [...el.childNodes]
+            .filter((n) => n.nodeType === 3 && (n.textContent ?? '').trim() !== '')
+            .flatMap((n) => {
+              const range = document.createRange();
+              range.selectNodeContents(n);
+              return [...range.getClientRects()];
+            })
+            .filter((q) => q.width > 0)
+            .map((q) => Math.round(q.top)),
+        );
+        if (tops.size > 1 && !allowed('wrapped', el)) out.push({ kind: 'wrapped', text: text.slice(0, 80), where: where(el), box: box(visible) });
       }
     }
-    if (el.matches(CONTROL)) {
+    if (el.matches(CONTROL) && (modal === null || modal.contains(el))) {
       // OFF-WINDOW
       if ((visible[0] < -1 || visible[1] < -1 || visible[2] > W + 1 || visible[3] > H + 1) && !allowed('off-window', el)) {
         out.push({ kind: 'off-window', text: (text || el.getAttribute('aria-label') || el.getAttribute('title') || el.getAttribute('data-door') || tag).slice(0, 80), where: where(el), box: box(visible) });
@@ -177,16 +220,20 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
       // COVERED: what is seen of it takes no press of its own at most of five points along its length (its centre and
       // four more, so a long grip with a handle at its middle still takes presses, and a strip lying wholly under
       // another control does not)
+      // only a control at least half in sight: one a scroller holds mostly out of view is the scroller's to bring back
       const [l, t, ri, b] = visible;
-      if (ri - l >= 4 && b - t >= 4 && s.pointerEvents !== 'none' && l >= 0 && t >= 0 && ri <= W && b <= H) {
+      const inSight = ri - l >= r.width / 2 && b - t >= r.height / 2;
+      if (inSight && ri - l >= 4 && b - t >= 4 && s.pointerEvents !== 'none' && l >= 0 && t >= 0 && ri <= W && b <= H) {
         const wide = ri - l >= b - t;
         const points = [0.2, 0.35, 0.5, 0.65, 0.8].map((f) => (wide ? [l + (ri - l) * f, (t + b) / 2] : [(l + ri) / 2, t + (b - t) * f]) as [number, number]);
         const covering = points.flatMap(([x, y]) => {
           const hit = document.elementFromPoint(x, y);
           const own = hit !== null && (el.contains(hit) || hit.contains(el) || (hit as HTMLLabelElement).control === el);
           // a layer opened above (a menu, a dialog, a popover) covers what is under it on purpose, until it closes
-          const above = hit !== null && !own && hit.closest(LAYERS) !== null && el.closest(LAYERS) !== hit.closest(LAYERS);
-          return hit !== null && !own && !above ? [hit] : [];
+          const above = hit !== null && !own && ((hit.closest(LAYERS) !== null && el.closest(LAYERS) !== hit.closest(LAYERS)) || (windowLayer(hit) !== null && windowLayer(hit) !== windowLayer(el)) || shield(hit, el));
+          // what a test mounts over the editor for its own proof (data-test-harness) is no part of the screen
+          const harness = hit !== null && hit.closest('[data-test-harness]') !== null;
+          return hit !== null && !own && !above && !harness ? [hit] : [];
         });
         if (covering.length >= 3 && !allowed('covered', el)) {
           out.push({ kind: 'covered', text: `${(text || el.getAttribute('aria-label') || el.getAttribute('data-door') || tag).slice(0, 50)} under ${where(covering[0] as Element)}`, where: where(el), box: box(visible) });
@@ -194,7 +241,8 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
       }
     }
     // ENGLISH
-    if (english !== null && text.length > 3 && english.has(text) && !allowed('english', el)) out.push({ kind: 'english', text, where: where(el), box: box(rect(r)) });
+    const code = tag === 'KBD' || el.closest('kbd') !== null || (codeFace !== '' && s.fontFamily === codeFace);
+    if (english !== null && text.length > 3 && english.has(text) && !project.has(text) && !code && !allowed('english', el)) out.push({ kind: 'english', text, where: where(el), box: box(rect(r)) });
   }
   return out;
 }
@@ -202,16 +250,58 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
 const NOT_FINISHED = new Set(['timedOut', 'interrupted']);
 
 // At the end of a test: the findings of the page it leaves, reported or failing the test.
-export async function guardScreen(page: Page, info: TestInfo): Promise<readonly Finding[]> {
+// `step` names a screen a test checks on its way (screen-sweep.spec.ts: each surface it opens), its findings kept apart
+export async function guardScreen(page: Page, info: TestInfo, step = ''): Promise<readonly Finding[]> {
   if (page.isClosed() || NOT_FINISHED.has(info.status ?? '')) return [];
   const editor = await page.evaluate(() => '__builderTestPort' in window && document.querySelector('.workbench') !== null).catch(() => false);
   if (!editor) return [];
-  // what the test did last is drawn: two frames
-  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))).catch(() => undefined);
+  // the screen once it is still, as Playwright's screenshot assertion waits for two equal pictures: what the test did last
+  // is drawn and the editor's own placing (the chrome's arrangement, a panel's place) has settled — three frames with
+  // nothing changed in the page, at most twenty (a screen that animates on its own is read as it stands then)
+  await page
+    .evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          let changed = false;
+          let quiet = 0;
+          let frames = 0;
+          const seen = new MutationObserver(() => {
+            changed = true;
+          });
+          seen.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true });
+          const tick = () => {
+            frames += 1;
+            quiet = changed ? 0 : quiet + 1;
+            changed = false;
+            if (quiet >= 3 || frames >= 20) {
+              seen.disconnect();
+              resolve();
+            } else requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }),
+    )
+    .catch(() => undefined);
   const portuguese = await page.evaluate(() => document.documentElement.lang === 'pt-BR').catch(() => false);
-  const found = await page.evaluate(screenFindings, { english: portuguese ? ENGLISH : null, allowed: ALLOWED.map(({ kind, selector }) => ({ kind, selector })) }).catch(() => [] as Finding[]);
+  // every text the project holds, read from the document through the test port (names, tags, classes, the words of its
+  // texts): shown in a Portuguese editor, they are the person's own words, whatever their language
+  const project = portuguese
+    ? await page
+        .evaluate(() => {
+          const held = new Set<string>();
+          const walk = (value: unknown): void => {
+            if (typeof value === 'string') held.add(value.replace(/\s+/g, ' ').trim());
+            else if (Array.isArray(value)) value.forEach(walk);
+            else if (value !== null && typeof value === 'object') Object.values(value).forEach(walk);
+          };
+          walk((window as unknown as { __builderTestPort?: { document: () => unknown } }).__builderTestPort?.document());
+          return [...held];
+        })
+        .catch(() => [] as string[])
+    : [];
+  const found = await page.evaluate(screenFindings, { english: portuguese ? ENGLISH : null, allowed: ALLOWED.map(({ kind, selector }) => ({ kind, selector })), project }).catch(() => [] as Finding[]);
   if (MODE === 'report' && found.length > 0) {
-    const test = [path.relative(process.cwd(), info.file).replaceAll('\\', '/'), ...info.titlePath.slice(1)].join(' › ');
+    const test = [path.relative(process.cwd(), info.file).replaceAll('\\', '/'), ...info.titlePath.slice(1), ...(step === '' ? [] : [step])].join(' › ');
     const viewport = page.viewportSize();
     fs.mkdirSync(SCREEN_GUARD_DIR, { recursive: true });
     fs.writeFileSync(path.join(SCREEN_GUARD_DIR, `${crypto.createHash('sha1').update(test).digest('hex')}.json`), JSON.stringify({ test, viewport, portuguese, found }));

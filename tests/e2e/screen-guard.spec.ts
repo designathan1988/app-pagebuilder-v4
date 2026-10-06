@@ -60,3 +60,40 @@ test('the screen guard reads an English text in a Portuguese interface', async (
   const kept = await page.evaluate(screenFindings, { english: ['Open file'], allowed: [{ kind: 'english', selector: 'span' }] });
   expect(kept).toEqual([]);
 });
+
+test('the screen guard reads a modal dialog and a shield over the window as covering on purpose', async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 600 });
+  // a dialog marked modal (WAI-ARIA: what lies outside it is inert), its shield fixed over the whole window, a button
+  // under the shield and one inside the dialog under a box that is no layer
+  await page.setContent(`
+    <button style="position: absolute; left: 10px; top: 10px">Behind</button>
+    <div style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.3)">
+      <div role="dialog" aria-modal="true" style="position: absolute; left: 200px; top: 200px; width: 300px; height: 200px; background: #fff">
+        <button style="position: absolute; left: 20px; top: 20px" id="inside">Inside</button>
+        <div style="position: absolute; left: 10px; top: 10px; width: 120px; height: 40px; background: #eee"></div>
+      </div>
+    </div>`);
+  const found = await page.evaluate(screenFindings, { english: null, allowed: [] });
+  expect(found.filter((f) => f.kind === 'covered').map((f) => f.text.split(' under ')[0])).toEqual(['Inside']);
+  // a shield over the window without a modal dialog covers on purpose too
+  await page.setContent(`<button style="position: absolute; left: 10px; top: 10px">Behind</button><div style="position: fixed; inset: 0"></div>`);
+  expect(await page.evaluate(screenFindings, { english: null, allowed: [] })).toEqual([]);
+});
+
+test("the screen guard leaves the project's own words to the person", async ({ page }) => {
+  await page.setContent('<span>Home</span><span>Open file</span>');
+  const found = await page.evaluate(screenFindings, { english: ['Home', 'Open file'], allowed: [], project: ['Home'] });
+  expect(found.map((f) => [f.kind, f.text])).toEqual([['english', 'Open file']]);
+});
+
+test('the screen guard reads only what a person sees: no transparent text, no text kept for screen readers', async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 600 });
+  // a field's own text made transparent under the face that shows its value, and a name clipped to nothing for
+  // screen readers (the compact breakpoint tab's "base")
+  await page.setContent(`
+    <span style="position: absolute; left: 10px; top: 10px; width: 30px">
+      <input style="width: 28px; color: transparent; font: 13px monospace" value="1200px">
+    </span>
+    <span style="position: absolute; left: 10px; top: 60px; width: 20px; padding: 0 6px; border: 1px solid; overflow: hidden; white-space: nowrap; clip-path: inset(50%)">base layer</span>`);
+  expect(await page.evaluate(screenFindings, { english: null, allowed: [] })).toEqual([]);
+});
