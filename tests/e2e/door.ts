@@ -96,9 +96,18 @@ const sectionOfDoor = (ref: string, args: Readonly<Record<string, unknown>> = {}
 // disclosure — when either is drawn closed. True when it pressed one.
 export async function openStyleControl(page: Page, ref: string, args: Readonly<Record<string, unknown>> = {}): Promise<boolean> {
   let opened = false;
+  // The inspector draws a section or a row a change of the element brings (a flex display's Gap row, a grid's columns)
+  // one render after the change: what is drawn is waited for — the section's header or the row's disclosure, or the
+  // control itself — before it is read, as Playwright's web-first assertions wait (AU6-17: read at once, a row not yet
+  // drawn counted as none, and the control was then not found under the complete suite's load).
+  const own = control(page, ref, { args }).first();
+  const drawn = async (other: ReturnType<typeof control>) => {
+    await expect.poll(async () => (await other.count()) + (await own.count()), { message: `${ref}: the inspector draws it` }).toBeGreaterThan(0);
+  };
   const section = sectionOfDoor(ref, args);
   if (section !== null) {
     const header = control(page, 'inspector.toggleSection#inspector-section-header', { args: { section } }).first();
+    await drawn(header);
     if ((await header.count()) > 0 && (await header.getAttribute('aria-expanded')) === 'false') {
       await header.click();
       await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
@@ -108,6 +117,7 @@ export async function openStyleControl(page: Page, ref: string, args: Readonly<R
   const row = rowOfDoor(ref, args);
   if (row !== null) {
     const toggle = control(page, ROW_TOGGLE, { args: { row } }).first();
+    await drawn(toggle);
     if ((await toggle.count()) > 0 && (await toggle.getAttribute('aria-expanded')) === 'false') {
       await toggle.click();
       await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
