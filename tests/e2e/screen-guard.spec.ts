@@ -17,7 +17,7 @@ const PAGE = `
 <div class="box clip" style="left: 10px; top: 40px" id="fits">Short</div>
 <div class="box ellipsis" style="left: 10px; top: 70px" id="cut-ellipsis">Another name too long</div>
 <div class="box ellipsis" style="left: 10px; top: 100px" title="A named text too long" id="named">A named text too long</div>
-<input class="box" style="left: 10px; top: 130px; width: 40px" value="blockquote" id="cut-value">
+<input class="box" role="spinbutton" style="left: 10px; top: 130px; width: 40px" value="12000px" id="cut-value">
 <input class="box" style="left: 10px; top: 160px; width: 40px" value="https://example.com/a/rather/long/address.html" id="address">
 <label class="box narrow" style="left: 200px; top: 10px" id="wrapped">Two words name</label>
 <label class="box" style="left: 200px; top: 60px" id="one-line">One line</label>
@@ -41,8 +41,9 @@ test('the screen guard finds each defect it names and nothing drawn right', asyn
   await page.setViewportSize({ width: 800, height: 600 });
   await page.setContent(PAGE);
   const found = await page.evaluate(screenFindings, { english: null, allowed: [] });
-  // a text cut with no ellipsis, one cut with an ellipsis and its whole text nowhere, a short value cut in its field
-  expect(found.filter((f) => f.kind === 'cut').map((f) => f.text)).toEqual(['A name far too long', 'Another name too long', 'blockquote']);
+  // a text cut with no ellipsis, one cut with an ellipsis and its whole text nowhere, a number cut in its field (an
+  // address in a text field scrolls as typed text does)
+  expect(found.filter((f) => f.kind === 'cut').map((f) => f.text)).toEqual(['A name far too long', 'Another name too long', '12000px']);
   // a name drawn on two lines
   expect(found.filter((f) => f.kind === 'wrapped').map((f) => f.text)).toEqual(['Two words name']);
   // a button under a box that is not a layer, and a strip wholly under another control; a long grip with one control

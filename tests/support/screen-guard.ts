@@ -34,17 +34,23 @@ export interface Finding {
 export const SCREEN_GUARD_DIR = path.join('.cache', 'screen-guard');
 export const MODE: 'report' | 'enforce' = process.env.SCREEN_GUARD === 'report' ? 'report' : 'enforce';
 // the kinds that fail a test; the others are reported until their triage is done
-export const ENFORCED: ReadonlySet<FindingKind> = new Set<FindingKind>([]);
+// (the complete run of 950f604 left no finding of these two kinds; cut, covered and wrapped have seven open defects of the
+// product, PRODUCT.md RC-02, and fail tests once those are fixed)
+export const ENFORCED: ReadonlySet<FindingKind> = new Set<FindingKind>(['off-window', 'english']);
 
 // the English texts of the interface whose Portuguese differs (a CSS value is written as CSS in both: DEC-65)
 const catalogue = (locale: string) => JSON.parse(fs.readFileSync(path.join('src', 'i18n', 'locales', `${locale}.json`), 'utf8')) as Record<string, string>;
 const en = catalogue('en');
 const ptBR = catalogue('pt-BR');
+// a word that is the Portuguese text of some key is Portuguese too ("Canvas" names the canvas element in both, and is the
+// English of the canvas view, "Tela")
+const PORTUGUESE = new Set(Object.values(ptBR).map((value) => value.trim()));
 const ENGLISH: readonly string[] = [
   ...new Set(
     Object.entries(en)
       .filter(([key, value]) => ptBR[key] !== undefined && ptBR[key] !== value && !value.includes('{') && /[a-z]{3}/.test(value))
-      .map(([, value]) => value.trim()),
+      .map(([, value]) => value.trim())
+      .filter((value) => !PORTUGUESE.has(value)),
   ),
 ];
 
@@ -172,10 +178,11 @@ export function screenFindings(input: { readonly english: readonly string[] | nu
       if (clips && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 4) {
         const input = tag === 'INPUT' ? (el as HTMLInputElement) : null;
         const value = input === null ? text : input.value || input.placeholder;
-        // a short value (a keyword, a number with its unit, a colour, a tag, a font's name) fits its field whole; a
-        // longer one (an address, a sentence) scrolls in its field as typed text does, and a field being typed in
-        // scrolls with the caret
-        const skip = input !== null && (['range', 'checkbox', 'radio', 'color', 'file'].includes(input.type) || document.activeElement === input || value.length > SHORT_VALUE);
+        // a number fits its field whole (a value field shows its face over a transparent input: field-face.tsx); a
+        // field of free text (a cell of a data table, a CSS declaration, an address) scrolls its text as any text
+        // field does, and a field being typed in scrolls with the caret
+        const numeric = input !== null && (input.type === 'number' || input.getAttribute('role') === 'spinbutton');
+        const skip = input !== null && (!numeric || document.activeElement === input || value.length > SHORT_VALUE);
         const ellipsisNamed = s.textOverflow === 'ellipsis' && named(el, value);
         if (value !== '' && !skip && !ellipsisNamed && !allowed('cut', el)) out.push({ kind: 'cut', text: value.slice(0, 80), where: where(el), box: box(visible) });
       }
