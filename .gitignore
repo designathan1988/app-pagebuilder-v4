@@ -15,5 +15,20 @@ blob-report/
 .claude/worktrees/
 jornada01/
 jornada02/
-jornada03/
+# the Journey 03 study stays out (its photos, downloads and reports), except the files the tests and tools read
+# (tools/inventory/test-inputs.test.ts): a folder is opened level by level, so each file can be let back in
+jornada03/*
+!jornada03/00-frame/
+jornada03/00-frame/*
+!jornada03/00-frame/targets/
+jornada03/00-frame/targets/*
+!jornada03/00-frame/targets/probe-large.json
+!jornada03/00-frame/targets/marina/
+jornada03/00-frame/targets/marina/*
+!jornada03/00-frame/targets/marina/assets/
+!jornada03/data/
+jornada03/data/*
+!jornada03/data/downloads/
+jornada03/data/downloads/*
+!jornada03/data/downloads/marina-project.zip
 companion/extension/dist/
