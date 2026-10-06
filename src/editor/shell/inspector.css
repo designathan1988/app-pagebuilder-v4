@@ -1077,6 +1077,12 @@ textarea.input {
   right: auto;
 }
 [data-region='inspector-style'] .field-row--pair .input-wrap--number:focus-within .field__prefix { visibility: hidden; }
+/* A value that holds no unit (a keyword, a value refused) draws its unit menu's trigger over the cell's end (above), the
+   place the step buttons take: the trigger then took their presses (the screen guard, the complete run of 2026-10-06:
+   Font size "medium", a refused Border spacing). They stand before the trigger instead. */
+[data-region='inspector-style'] .field-row:not(.field-row--pair) .input-wrap--number:has(.field__unit-value:empty):focus-within .field__steps {
+  right: calc(var(--size-target-min) - 2 * var(--space-3));
+}
 
 .field__step {
   display: inline-flex;
