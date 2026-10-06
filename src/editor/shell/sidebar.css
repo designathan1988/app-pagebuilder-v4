@@ -585,6 +585,21 @@
   background: var(--row-colour);
 }
 
+/* A tree row keeps the room its actions strip takes at its end (the strip lies over the row: .row__actions), so the name
+   ends before it — a long name ran under the strip's buttons, transparent until hovered, and a press on its end took
+   one of them (the screen guard, the conditions sweep of 2026-10-06). The row's details (its tag, .row__meta) still
+   stand in that room, under the strip, as before. */
+.row--tree {
+  /* the actions the row draws in its strip: set by the row itself (layers.tsx), none by default */
+  --row-actions: 0;
+  --row-actions-room: calc(var(--row-actions) * var(--size-target-min));
+  padding-right: calc(var(--space-3) + var(--row-actions-room));
+}
+
+.row--tree .row__meta {
+  margin-right: calc(-1 * var(--row-actions-room));
+}
+
 /* the row wears the colour it holds: a line on its left, never a filled background, so the name stays readable */
 .row--tree.is-coloured {
   /* the line is a border, not a shadow: it follows the row's colour without a length literal */

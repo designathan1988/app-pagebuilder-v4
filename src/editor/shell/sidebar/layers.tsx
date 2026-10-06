@@ -283,7 +283,9 @@ const LayersRow = memo(function LayersRow({ node, depth, view }: { readonly node
         tabIndex={tabStop ? 0 : -1}
         className={`row row--tree${selected ? ' is-selected' : ''}${node.hidden === true ? ' row--hidden' : ''}${node.locked === true ? ' row--locked' : ''}${receiving ? ' is-receiving' : ''}${match ? ' is-match' : ''}${colour === undefined ? '' : ' is-coloured'}`}
         data-drop-position={dropAt}
-        style={{ ...(({ '--depth': depth }) as CSSProperties), ...(colour === undefined ? {} : ({ '--row-colour': layerColourCss(colour) } as CSSProperties)) }}
+        // the room the actions strip takes at the row's end (sidebar.css .row--tree): a button per action drawn
+        // there, the colour dot among them unless it leads the row
+        style={{ ...(({ '--depth': depth, '--row-actions': LAYERS_BUTTONS.filter((b) => b.ref !== LAYERS_COLOUR?.ref || colour === undefined).length }) as CSSProperties), ...(colour === undefined ? {} : ({ '--row-colour': layerColourCss(colour) } as CSSProperties)) }}
         title={door.title}
         data-door={LAYERS_SELECT.ref}
         data-args={JSON.stringify({ target: node.id })}
