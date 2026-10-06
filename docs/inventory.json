@@ -6,7 +6,7 @@
     "doors": 1362,
     "scenarios": 1831,
     "modules": 480,
-    "lines": 83894
+    "lines": 83901
   },
   "features": [
     {
@@ -6359,7 +6359,7 @@
     },
     {
       "path": "src/editor/shell/row-fit.ts",
-      "lines": 129,
+      "lines": 136,
       "commands": [],
       "features": []
     },

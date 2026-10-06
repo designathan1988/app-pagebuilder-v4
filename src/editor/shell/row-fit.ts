@@ -27,6 +27,11 @@ const CLIPS = '.field__rest-value, .field__keyword-value';
 const COLUMNS = new WeakMap<HTMLElement, readonly number[]>();
 // the sub-pixel difference between the canvas's measure and the laid-out text
 const TOLERANCE = 0.5;
+// what a field of offered values takes beside its text, measured while it overflowed beside its label (its padding,
+// border and the list's drop-down indicator Chrome draws inside an input with a datalist): judged again while stacked,
+// it is wide enough to hold its text and has nothing to measure, and its frame alone laid it back beside its label, cut
+// (the audit of 2026-10-05, AU6-10: "Respect it (no movemen" once the Motion dock opened)
+const BESIDE_TEXT = new WeakMap<HTMLInputElement, number>();
 
 const oneWord = (text: string): boolean => text !== '' && !/[\s,]/u.test(text);
 const px = (value: string): number => parseFloat(value) || 0;
@@ -64,7 +69,9 @@ function fitsBeside(row: HTMLElement, context: CanvasRenderingContext2D): boolea
     // counts what the text cannot see beside it: the list's drop-down indicator Chrome draws inside an input with a
     // datalist, which the text's own width leaves out); else the width of its words
     const overflow = choice.scrollWidth - choice.clientWidth;
-    const needs = overflow > 1 ? choice.getBoundingClientRect().width + overflow : widthOf(context, choice.value, own) + frame;
+    const text = widthOf(context, choice.value, own);
+    if (overflow > 1) BESIDE_TEXT.set(choice, choice.getBoundingClientRect().width + overflow - text);
+    const needs = overflow > 1 ? choice.getBoundingClientRect().width + overflow : text + Math.max(frame, BESIDE_TEXT.get(choice) ?? 0);
     // the value column as laid out (a Reset column after it takes its share), else the row less the label and the gap
     const room = tracks.length >= 3 && tracks[1] !== undefined ? tracks[1] : inner - column - gap;
     if (needs + beside > room + TOLERANCE) return false;
