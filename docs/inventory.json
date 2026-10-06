@@ -5,8 +5,8 @@
     "commands": 373,
     "doors": 1362,
     "scenarios": 1831,
-    "modules": 478,
-    "lines": 83809
+    "modules": 480,
+    "lines": 83877
   },
   "features": [
     {
@@ -5206,6 +5206,18 @@
       "features": []
     },
     {
+      "path": "src/editor/canvas/reveal-selection.tsx",
+      "lines": 55,
+      "commands": [],
+      "features": []
+    },
+    {
+      "path": "src/editor/canvas/reveal.ts",
+      "lines": 10,
+      "commands": [],
+      "features": []
+    },
+    {
       "path": "src/editor/canvas/rulers.ts",
       "lines": 73,
       "commands": [],
@@ -6137,7 +6149,7 @@
     },
     {
       "path": "src/editor/shell/canvas.tsx",
-      "lines": 326,
+      "lines": 329,
       "commands": [],
       "features": []
     },

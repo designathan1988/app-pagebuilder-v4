@@ -25,6 +25,7 @@ import { isPanelOpen } from '../workspace/panels.ts';
 import { useT } from '../text.ts';
 import { ReportFitZoom, Slots, useFitZoom } from './slots.tsx';
 import { QuickPanel } from '../canvas/quick-panel.tsx';
+import { RevealSelection } from '../canvas/reveal-selection.tsx';
 import { AnchorTabs } from '../canvas/anchor-tabs.tsx';
 import { usePointerValue } from '../input/pointer/use-views.ts';
 
@@ -310,6 +311,8 @@ export function CanvasColumn() {
                   <QuickPanel stage={stage} />
                   {/* the anchor tabs of a positioned selection (canvas/anchor-tabs.tsx) */}
                   <AnchorTabs stage={stage} />
+                  {/* a selection made away from the canvas brings it into view (canvas/reveal-selection.tsx) */}
+                  <RevealSelection stage={stage} />
                 </div>
               </div>
             </div>
