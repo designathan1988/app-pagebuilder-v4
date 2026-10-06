@@ -58,7 +58,7 @@ import { ViewOverlays } from './view-overlays.tsx';
 import { GridOverlay } from './grid-overlay.tsx';
 // where a label and a resize handle may be drawn (canvas/placement.ts): the rules moved out of this file, which draws
 import { controlBoxes, handleHitBox, overlaps as overlapsBox, placeLabel, selectionLabelBox, turnedFrame, visibleCanvas, type Box, type Placement } from './placement.ts';
-import { ARRANGED, ARRANGED_SELECTOR, ROTATION_SIDES, placeRotationZones, yielding, type Arranged } from './arrangement.ts';
+import { ARRANGED, ARRANGED_SELECTOR, ROTATION_SIDES, placeRotationZones, yieldingAt, type Arranged } from './arrangement.ts';
 import { distancesOf, type Distance } from './distances.ts';
 import { altDistances, hoverSizeOf, type HoverSize } from './hover-measure.ts';
 import { breakpointName } from '../../core/document/breakpoints.ts';
@@ -697,6 +697,8 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
     }
     let placedFor = '';
     let placed: Layout['label'] = null;
+    // the page's text boxes, read with the label's place (the slow part): a rotation zone never lies over them
+    let pageText: Box[] = [];
     let placedToolbar: Layout['toolbar'] = null;
     // the layout last measured: a measure that changes it is followed by another, since the overlay's own controls
     // (drawn from it) are what the label keeps clear of; the overlay settles in a frame or two
@@ -731,6 +733,7 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
           // edited in place, its toolbar sits above the label, at the same start.
           const gap = parseFloat(getComputedStyle(layer.current as HTMLDivElement).getPropertyValue('--space-1')) || 0;
           const content = contentBoxes(iframe).map((b) => local(b) as Box);
+          pageText = content;
           const spot = selectionLabelBox(turn === 0 || first === undefined ? first : turnedFrame(first, turn, edge), size, edge, content);
           // in view while the element's top is inside the page's view and the label inside the stage: the label is
           // fixed in the window, above the page's edge too (an element at the page's top), so no layer clips it, and
@@ -763,9 +766,9 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
         const shownBefore = new Set(last?.yielded ?? []);
         const keep = arranged.filter((one) => (one.layer === 'chip' || one.layer === 'panel' || one.layer === 'handle' || one.layer === 'anchor') && !shownBefore.has(one.key)).map((one) => one.box);
         const labels = arranged.filter((one) => one.layer === 'label').map((one) => one.box);
-        const rotate = single === undefined ? null : placeRotationZones(single, origin, zone, gapTo, spin, keep, labels);
-        // the optional controls that would take no press under what is drawn over them give way
-        const yielded = [...yielding(arranged)].sort();
+        const rotate = single === undefined ? null : placeRotationZones(single, origin, zone, gapTo, spin, keep, labels, pageText);
+        // the optional controls a press would not reach under what is drawn over them give way
+        const yielded = [...yieldingAt([...stageRoot.querySelectorAll('[data-arrange-key]')], (x, y) => document.elementFromPoint(x, y), ARRANGED_SELECTOR)].sort();
         // the hovered element's size in CSS px, and, with Alt held, its distances to the one selected element
         const zoom = iframe.currentCSSZoom > 0 ? iframe.currentCSSZoom : 1;
         // the hovered element's size chip stands under its bottom-left corner, or under its bottom-right one where the
@@ -843,9 +846,16 @@ function useChromeLayout({ layer, label, bar, selection, targets, hovered, node,
     };
     request = requestAnimationFrame(tick);
     const stop = onPageChange(tick);
+    // the arrangement is judged again whenever a control of the stage is drawn, removed or moved by its own component
+    // (the anchor tabs, the chip, the panel, the bands draw after this layer: a judgement made before them left a
+    // resize handle under an anchor's tab, the complete run of 2026-10-06; arrangement.ts, DEC-75)
+    const stage = layer.current?.closest('[data-canvas-stage]');
+    const drawn = new MutationObserver(tick);
+    if (stage) drawn.observe(stage, { subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class'] });
     return () => {
       cancelAnimationFrame(request);
       stop();
+      drawn.disconnect();
     };
   }, [selection, targets, hovered, node, drawnBand, editing, altHeld, resizing, documentNow, mode, layer, label, bar]);
   return layout;

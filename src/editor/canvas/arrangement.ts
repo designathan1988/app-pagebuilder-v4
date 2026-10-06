@@ -14,7 +14,8 @@
 //   the element's geometry (the resize handles, the edge grips, the anchor tabs).
 // - A rotation zone is movable: it takes the first of its places (rotationPlaces) where it and every control it must
 //   leave pressable (the chip, the panel, the text toolbar, the resize handles, the anchor tabs, the zones placed
-//   before it) all still take a press, keeping clear of the label while one place does; with none, it is not drawn —
+//   before it) all still take a press and it lies over no text of the page (a double click there edits the text),
+//   keeping clear of the label while one place does; with none, it is not drawn —
 //   the other corners still turn the element.
 // - An optional control — a spacing band no mode pins, an edge grip, a resize handle — is drawn only where it takes a
 //   press under the controls above it (a higher layer, or the same layer drawn after it): the band of an element with
@@ -84,19 +85,21 @@ export function rotationPlaces(element: Box, area: { readonly width: number; rea
 }
 
 // The place a movable control of `size` takes among its `places`: the first where it and every one of `keep` still
-// take a press, and clear of all of `rather` while one such place is; null when none leaves `keep` pressable.
-export function placeMovable(places: readonly Point[], size: number, keep: readonly Box[], rather: readonly Box[]): Point | null {
+// take a press and it lies over none of `avoid` (the page's text: a double click there edits the text, never turns the
+// element), and clear of all of `rather` while one such place is; null when none is.
+export function placeMovable(places: readonly Point[], size: number, keep: readonly Box[], rather: readonly Box[], avoid: readonly Box[] = []): Point | null {
   const boxOf = (p: Point): Box => ({ x: p.x, y: p.y, width: size, height: size });
-  const free = places.filter((p) => keep.every((b) => bothPressable(boxOf(p), b)));
+  const free = places.filter((p) => keep.every((b) => bothPressable(boxOf(p), b)) && !avoid.some((b) => meets(boxOf(p), b)));
   return free.find((p) => !rather.some((b) => meets(boxOf(p), b))) ?? free[0] ?? null;
 }
 
 // The four zones of the one selected element, in ROTATION_SIDES order: each placed in turn, the zones placed before it
 // among the controls it leaves pressable.
-export function placeRotationZones(element: Box, area: { readonly width: number; readonly height: number }, size: number, gap: number, rotation: number, keep: readonly Box[], rather: readonly Box[]): readonly (Point | null)[] {
+type Area = { readonly width: number; readonly height: number };
+export function placeRotationZones(element: Box, area: Area, size: number, gap: number, rotation: number, keep: readonly Box[], rather: readonly Box[], avoid: readonly Box[] = []): readonly (Point | null)[] {
   const placed: Box[] = [];
   return ROTATION_SIDES.map((side) => {
-    const spot = placeMovable(rotationPlaces(element, area, size, gap, side, rotation), size, [...keep, ...placed], rather);
+    const spot = placeMovable(rotationPlaces(element, area, size, gap, side, rotation), size, [...keep, ...placed], rather, avoid);
     if (spot !== null) placed.push({ x: spot.x, y: spot.y, width: size, height: size });
     return spot;
   });
@@ -113,7 +116,8 @@ export const ARRANGED: readonly { readonly selector: string; readonly layer: Can
   { selector: '.quick-panel-chip:not(.is-measuring)', layer: 'chip', optional: false },
   { selector: '[data-resize-handle][data-arrange-key]', layer: 'handle', optional: true },
   { selector: '[data-rotate-zone]', layer: 'rotation', optional: false },
-  { selector: '.anchor-tab-place', layer: 'anchor', optional: false },
+  // the tab's button, not its place: a door takes at least the target size (primitives.css), wider than the place
+  { selector: '.anchor-tab', layer: 'anchor', optional: false },
   { selector: '.quick-panel:not(.is-measuring)', layer: 'panel', optional: false },
 ];
 export const ARRANGED_SELECTOR = ARRANGED.map((rule) => rule.selector).join(', ');
@@ -125,17 +129,43 @@ export interface Arranged {
   readonly optional: boolean;
 }
 
-// The optional controls that give way, given every control in drawing order (within one layer, a control drawn later
-// lies above one drawn before): from the top down, an optional control that takes no press under the controls kept
-// above it gives way, and one that gave way covers nothing below it.
-export function yielding(controls: readonly Arranged[]): ReadonlySet<string> {
-  const rank = (layer: CanvasLayer) => CANVAS_LAYERS.indexOf(layer);
-  const order = controls.map((control, at) => ({ control, at })).sort((a, b) => rank(b.control.layer) - rank(a.control.layer) || b.at - a.at);
-  const kept: Box[] = [];
+// Whether a control takes a press, from what a press at each of its sample points reaches (true: the control itself):
+// the one rule the arrangement and the screen guard share (tests/support/screen-guard.ts).
+export const takesPressAt = (own: readonly boolean[]): boolean => own.filter(Boolean).length >= TAKES_PRESS;
+
+// The optional controls that give way: those a press at their sample points reaches through another control of the
+// canvas at most of them — read from where the browser really sends a press (document.elementFromPoint), so the
+// arrangement and the check of the screen judge the same thing; a control that gave way is hidden and reached by
+// nothing, so it comes back as soon as the control over it moves away.
+// the part of a control a person sees: its box clipped by every ancestor that clips, up to a fixed layer (the screen
+// guard's own reading, tests/support/screen-guard.ts)
+function seenBox(el: Element): { left: number; top: number; right: number; bottom: number } {
+  const r = el.getBoundingClientRect();
+  let [left, top, right, bottom] = [r.left, r.top, r.right, r.bottom];
+  for (let p = el.parentElement; p !== null && p !== p.ownerDocument.documentElement; p = p.parentElement) {
+    const style = getComputedStyle(p);
+    if (style.overflowX !== 'visible' || style.overflowY !== 'visible' || style.contain.includes('paint')) {
+      const box = p.getBoundingClientRect();
+      if (style.overflowX !== 'visible') [left, right] = [Math.max(left, box.left), Math.min(right, box.right)];
+      if (style.overflowY !== 'visible') [top, bottom] = [Math.max(top, box.top), Math.min(bottom, box.bottom)];
+    }
+    if (style.position === 'fixed') break;
+  }
+  return { left, top, right, bottom };
+}
+
+export function yieldingAt(controls: readonly Element[], reaches: (x: number, y: number) => Element | null, control: string): ReadonlySet<string> {
   const out = new Set<string>();
-  for (const { control } of order) {
-    if (control.optional && !takesPress(control.box, kept)) out.add(control.key);
-    else kept.push(control.box);
+  for (const el of controls) {
+    const key = el.getAttribute('data-arrange-key');
+    const { left, top, right, bottom } = seenBox(el);
+    if (key === null || right - left <= 0 || bottom - top <= 0) continue;
+    const own = samplePoints({ x: left, y: top, width: right - left, height: bottom - top }).map((p) => {
+      const hit = reaches(p.x, p.y);
+      // another control of the canvas lies there; anything else (the page, an outline) leaves the press to it
+      return hit === null || el.contains(hit) || hit.closest(control) === null;
+    });
+    if (!takesPressAt(own)) out.add(key);
   }
   return out;
 }

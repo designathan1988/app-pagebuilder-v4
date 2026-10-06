@@ -3,7 +3,9 @@
 // (position.setAnchors, toggle): a click toggles the anchor on that edge; an anchored edge's tab is drawn filled. They
 // are drawn over the stage, beside the page's overlay (a press there is the canvas's), placed at every frame as the
 // element moves with a scroll or a zoom, and never covered by other canvas chrome (Problems in Pager 3): the top tab
-// moves right, past the selection's label, the quick panel's chip and the rotation handle, when it would meet them.
+// moves right, past the selection's label and the quick panel's chip, which never move (DEC-70), when it would meet
+// them. The rotation zones give way to the tabs (the arrangement of the canvas controls, arrangement.ts, DEC-75): a tab
+// that also moved for a zone moved the zone, which moved the tab, and both never stood still.
 import { useEffect, useState, type RefObject } from 'react';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type NodeId } from '../../core/document/model.ts';
@@ -66,7 +68,7 @@ export function AnchorTabs({ stage }: { readonly stage: RefObject<HTMLDivElement
       if (area && box) {
         const origin = area.getBoundingClientRect();
         const inStage = (r: DOMRect): Box => ({ x: r.x - origin.x, y: r.y - origin.y, width: r.width, height: r.height });
-        const chrome = [...area.querySelectorAll('[data-chrome="label"], .quick-panel-chip, [data-rotate-handle]')].map((el) => inStage(el.getBoundingClientRect()));
+        const chrome = [...area.querySelectorAll('[data-chrome="label"], .quick-panel-chip')].map((el) => inStage(el.getBoundingClientRect()));
         const gap = parseFloat(getComputedStyle(area).getPropertyValue('--space-4')) || 0;
         const next = placeTabs({ x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height }, gap, chrome);
         setPlaced((before) => (JSON.stringify(before) === JSON.stringify(next) ? before : next));

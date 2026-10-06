@@ -4,7 +4,7 @@
 // press, and none takes a place a person cannot press.
 import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { CANVAS_LAYERS, placeMovable, placeRotationZones, rotationPlaces, takesPress, yielding, type Point } from './arrangement.ts';
+import { CANVAS_LAYERS, placeMovable, placeRotationZones, rotationPlaces, takesPress, yieldingAt, type Point } from './arrangement.ts';
 import type { Box } from './placement.ts';
 
 const tokens = JSON.parse(fs.readFileSync('design/final/tokens.json', 'utf8')) as { z: Record<string, { $value: number }> };
@@ -60,6 +60,17 @@ describe('the rotation zones', () => {
     expect(takesPress(box, [chip])).toBe(true);
   });
 
+  it("never lie over the page's text: a double click there edits it (a form group at the page's top-left)", () => {
+    // a full-width element at the canvas's top-left: outside every corner leaves the canvas, so the first places are
+    // inside the corners, where its first label's text lies
+    const element = { x: 4, y: 0, width: 1000, height: 99 };
+    const text = { x: 14, y: 12, width: 34, height: 16 };
+    const zones = placeRotationZones(element, area, 24, 16, 0, [], [], [text]);
+    for (const zone of zones) if (zone !== null) expect(zone.x < text.x + text.width && text.x < zone.x + 24 && zone.y < text.y + text.height && text.y < zone.y + 24).toBe(false);
+    // the north-west zone, whose every place meets the text, is not drawn; the others still turn the element
+    expect(zones.filter((zone) => zone !== null).length).toBeGreaterThan(0);
+  });
+
   it('never leave a control without a press, and take a place whenever one leaves every control its press', () => {
     const next = random(20261006);
     const size = 24;
@@ -107,28 +118,42 @@ describe('the rotation zones', () => {
 });
 
 describe('the optional controls', () => {
-  it('give way where the controls above leave them no press, and only there', () => {
+  // a control as the browser draws it: its box, and whether a press at a point reaches it or one drawn over it
+  interface Fake { readonly key: string | null; readonly box: Box; readonly control: boolean; readonly classList: { contains: () => boolean } }
+  const fake = (key: string | null, box: Box, control = true): Fake => ({ key, box, control, classList: { contains: () => false } });
+  const asElement = (one: Fake): Element =>
+    ({
+      getAttribute: () => one.key,
+      getBoundingClientRect: () => ({ x: one.box.x, y: one.box.y, width: one.box.width, height: one.box.height, left: one.box.x, top: one.box.y, right: one.box.x + one.box.width, bottom: one.box.y + one.box.height }),
+      contains: (other: unknown) => other === asElement.cache.get(one),
+      closest: () => (one.control ? asElement.cache.get(one) : null),
+      classList: one.classList,
+      parentElement: null,
+    }) as unknown as Element;
+  asElement.cache = new Map<Fake, Element>();
+  const element = (one: Fake) => {
+    const made = asElement(one);
+    asElement.cache.set(one, made);
+    return made;
+  };
+  // the topmost of the drawn controls at a point, the last drawn first
+  const reachesIn = (drawn: readonly Fake[]) => (x: number, y: number) => {
+    const top = [...drawn].reverse().find((one) => x >= one.box.x && x <= one.box.x + one.box.width && y >= one.box.y && y <= one.box.y + one.box.height);
+    return top === undefined ? null : (asElement.cache.get(top) ?? null);
+  };
+
+  it('give way where a press would reach another control of the canvas at most of their points, and only there', () => {
     // an element with no padding: its left band wholly under its edge grip; its top band long, a handle at its middle
-    const leftBand = { key: 'left', layer: 'band' as const, box: { x: 100, y: 100, width: 6, height: 80 }, optional: true };
-    const topBand = { key: 'top', layer: 'band' as const, box: { x: 100, y: 100, width: 300, height: 6 }, optional: true };
-    const grip = { key: 'edge:w', layer: 'edge' as const, box: { x: 97, y: 100, width: 12, height: 80 }, optional: true };
-    const handle = { key: 'handle:n', layer: 'handle' as const, box: { x: 238, y: 88, width: 24, height: 24 }, optional: true };
-    expect([...yielding([leftBand, topBand, grip, handle])]).toEqual(['left']);
-    // a resize handle under the tab of the anchor that pins its edge gives way to it
-    const anchor = { key: '', layer: 'anchor' as const, box: { x: 236, y: 86, width: 28, height: 28 }, optional: false };
-    expect([...yielding([handle, anchor])]).toEqual(['handle:n']);
-    // in one layer, the control drawn later lies above; a fixed control never gives way, and the order of the layers is
-    // their priority (an optional control drawn above a fixed one keeps its press: the handles over the label, LR2)
-    const under = { key: 'under', layer: 'band' as const, box: { x: 0, y: 0, width: 40, height: 6 }, optional: true };
-    const over = { key: 'over', layer: 'band' as const, box: { x: 0, y: 0, width: 40, height: 6 }, optional: true };
-    expect([...yielding([under, over])]).toEqual(['under']);
-    expect([...yielding([over, { ...under, optional: false }])]).toEqual(['over']);
-    expect([...yielding([{ ...under, optional: false }, over])]).toEqual([]);
-    // one that gave way covers nothing below it: the grip under a yielded handle keeps its press
-    // (a thin tab across the handle's middle, a grip under the handle's lower half that the tab leaves alone)
-    const thin = { key: '', layer: 'anchor' as const, box: { x: 240, y: 98, width: 20, height: 4 }, optional: false };
-    const covered = { key: 'edge:n', layer: 'edge' as const, box: { x: 238, y: 104, width: 24, height: 4 }, optional: true };
-    expect([...yielding([covered, handle, thin])]).toEqual(['handle:n']);
-    expect([...yielding([covered, { ...handle, optional: false }])]).toEqual(['edge:n']);
+    const leftBand = fake('left', { x: 100, y: 100, width: 6, height: 80 });
+    const topBand = fake('top', { x: 100, y: 100, width: 300, height: 6 });
+    const grip = fake('edge:w', { x: 97, y: 100, width: 12, height: 80 });
+    const handle = fake('handle:n', { x: 238, y: 88, width: 24, height: 24 });
+    const drawn = [leftBand, topBand, grip, handle];
+    const els = drawn.map(element);
+    expect([...yieldingAt(els, reachesIn(drawn), 'control')]).toEqual(['left']);
+    // what lies over a band and is no control (the page, an outline) leaves it its press
+    const outline = fake(null, { x: 90, y: 90, width: 400, height: 200 }, false);
+    const under = [leftBand, outline];
+    expect([...yieldingAt(under.map(element), reachesIn(under), 'control')]).toEqual([]);
   });
 });

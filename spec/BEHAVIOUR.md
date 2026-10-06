@@ -6120,11 +6120,12 @@ The panel's controls have `tabindex="-1"` (sealed out of the Tab order, `quick-p
 
 ### Our rule: the panel follows its label across a zoom (DEC-75)
 
-- The open panel moves the canvas to show its label when it opens out of sight (DEC-70), and once more for each zoom
-  the person sets while it is open: at 200 % the label of the element it stands for leaves the view, and the panel
-  with it. A scroll is the person's own move away and is never undone. The move is the canvas's pan, which ends a
-  zoom's hold of the page point under its pivot (`frame.tsx`: the hold kept scrolling the page back over the pan for
-  eight frames, so the move after a zoom never took).
+- The open panel owes its label a view: when it opens, when another element is selected under it, and at each zoom
+  the person sets while it is open (at 200 % the label of the element it stands for leaves the view, and the panel
+  with it). It moves the canvas to the label whenever its last move has landed, until the label is in view — a zoom
+  settles its horizontal place a frame or two after it, so one move made on its first frame missed — and stops when a
+  move moves nothing. A scroll is the person's own move away and owes nothing. The move is the canvas's pan, which ends
+  a zoom's hold of the page point under its pivot (`frame.tsx`: the hold kept scrolling the page back over the pan).
 
 ### Our rule: the panel's keyboard (the user's real-use audit, item 6.3)
 
@@ -6546,8 +6547,9 @@ None in Pager.
   `src/editor/canvas/arrangement.ts`): its place outside the corner is the first of four it tries — then beside the
   corner's vertical side, then beside its horizontal side, then inside the corner — and it takes the first where it and
   the quick panel's chip, the open panel, the resize handles, the anchor tabs and the zones placed before it each still
-  take a press at three or more of five points along them, keeping clear of the label while one such place does. With
-  none it is not drawn; the other corners still turn the element, and the rotate glyph shows on the first zone drawn of
+  take a press at three or more of five points along them, and it lies over no text of the page (a double click there
+  edits the text: a form group at the page's top-left had its north-west zone inside the corner, over its first
+  label's "Name"), keeping clear of the label while one such place does. With none it is not drawn; the other corners still turn the element, and the rotate glyph shows on the first zone drawn of
   north-east, south-east, south-west, north-west. (AU6-20: beside an element about as wide as its label, the north-east
   zone lay over the chip, which then took no press.)
 - **The label carries the angle while the element holds a rotation** (`canvas.rotate.angle` = `{angle}°`,
