@@ -83,6 +83,8 @@
 }
 
 .dock-body {
+  /* a container its panels' rows wrap within (motion.css: the Motion dock's toolbar and action row) */
+  container: dock-body / inline-size;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;

@@ -125,6 +125,15 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+/* the toolbar and the action row wrap within the part of the dock in sight — the dock's width less the timelines' list
+   (dock.css's dock-body container) — while the track below keeps its own width and scrolls sideways under them: as wide
+   as the track, Add at the playhead and the marker stood past the dock's edge at 1280 and 1440 (the audit of
+   2026-10-05, AU6-19) */
+.motion-timeline__toolbar,
+.motion-timeline__add {
+  max-width: calc(100cqw - var(--size-sidebar));
+}
+
 .motion-timeline__readout {
   margin-left: auto;
   font-family: var(--font-mono);
