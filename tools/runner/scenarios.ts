@@ -143,6 +143,8 @@ const SPLITTERS = (read('manifest/layout.json') as { splitters: Record<string, {
 // the panel-drag zones a gesture travels vertically in (the shadow editor's layer rows: the pointer climbs the rows)
 const VERTICAL_ZONES: ReadonlySet<string> = new Set(['shadow-rows', 'file-tree']);
 const DRAG_THRESHOLD = interactions.constants.find((c) => c.id === 'drag.threshold')?.value;
+// the upper share of a panel's area a dropped panel combines with as one more tab (src/editor/workspace/panel-drag.ts)
+const COMBINE_TABS = Number(interactions.constants.find((c) => c.id === 'panels.combineTabsFraction')?.value);
 // Ctrl+wheel multiplies the zoom by exp(−deltaY × this) per event (spec zoom-wheel-pan)
 const WHEEL_FACTOR = Number(interactions.constants.find((c) => c.id === 'zoom.wheelFactor')?.value);
 // how far inside a child's edge the runner points to reach its escape band: half the band's floor, in screen pixels
@@ -935,7 +937,9 @@ async function fillForm(page: Page, button: Locator, args: Record<string, unknow
   }
   return true;
 }
-const withoutGestureArgs = (args: Record<string, unknown>) => Object.fromEntries(Object.entries(args).filter(([name]) => name !== MODIFIER_ARG && name !== TRAVEL_ARG));
+// a panel drag's `host` is the panel it is released on (the place, not the control pressed)
+const HOST_ARG = 'host';
+const withoutGestureArgs = (args: Record<string, unknown>) => Object.fromEntries(Object.entries(args).filter(([name]) => name !== MODIFIER_ARG && name !== TRAVEL_ARG && name !== HOST_ARG));
 // the control of the colour picker's eyedropper (manifest style.set#color-picker-eyedropper)
 const EYEDROPPER_CONTROL = 'eyedropper';
 // the gestures of the Edit on canvas handles (interactions.json), which the runner drags by the value they make
@@ -1792,10 +1796,40 @@ async function runStep(page: Page, step: Step, ref: string, held: { current: Hel
       held.current = null;
     } else {
       if (held.current !== null) throw new Error(`step ${ref}: a drag is held; only its release may follow`);
-      const travel = step.args[TRAVEL_ARG];
-      if (typeof travel !== 'number') throw new Error(`step ${ref}: a panel drag names its ${TRAVEL_ARG}`);
       const middle = await controlPoint(page, ref, withoutGestureArgs(own));
       const from = { x: Math.round(middle.x), y: Math.round(middle.y) };
+      // A drop on a place another panel stands for (its upper part combines as tabs, its lower part stacks: spec
+      // panel-combine-tabs) names that panel, its `host`, and the pointer is released in that part of the host's area
+      // as the workspace measures it (panel-drag.ts, panels.combineTabsFraction) — never a travel in pixels, which a
+      // header's new layout sent to the window's edge instead (AU6-P3; DEC-75's rule: tests hold relations).
+      if (typeof step.args.host === 'string' && (d.zone === 'panel-upper-part' || d.zone === 'panel-lower-part')) {
+        // the point is one of that part a person sees of the host: the dragged panel's own window, which stays where it
+        // was until the release, may lie over the rest of it
+        const upper = d.zone === 'panel-upper-part';
+        const to = await page.evaluate(
+          ({ host, upper, share }) => {
+            const area = window.document.querySelector(`[data-panel-area="${host}"]`)?.getBoundingClientRect();
+            if (area === undefined) return null;
+            const [from, to] = upper ? [area.top, area.top + area.height * share] : [area.top + area.height * share, area.bottom];
+            for (const fy of [0.5, 0.25, 0.75, 0.1, 0.9])
+              for (const fx of [0.5, 0.25, 0.75, 0.1, 0.9]) {
+                const point = { x: Math.round(area.left + area.width * fx), y: Math.round(from + (to - from) * fy) };
+                if (window.document.elementFromPoint(point.x, point.y)?.closest('[data-panel-area]')?.getAttribute('data-panel-area') === host) return point;
+              }
+            return null;
+          },
+          { host: step.args.host, upper, share: COMBINE_TABS },
+        );
+        if (to === null) throw new Error(`step ${ref}: no part of the panel ${String(step.args.host)}'s ${upper ? 'upper' : 'lower'} part is in sight`);
+        await page.mouse.move(from.x, from.y);
+        await page.mouse.down();
+        await page.mouse.move(to.x, to.y, { steps: 10 });
+        if (step.hold === true) held.current = { door: ref };
+        else await page.mouse.up();
+        return;
+      }
+      const travel = step.args[TRAVEL_ARG];
+      if (typeof travel !== 'number') throw new Error(`step ${ref}: a panel drag names its ${TRAVEL_ARG}`);
       // a splitter is dragged along the axis layout.json declares for it (a vertical one up or down); a shadow
       // editor's layer rows too (a layer climbs over the row above, A3.34); every other panel drag travels horizontally
       // (a number field's label scrubbed)

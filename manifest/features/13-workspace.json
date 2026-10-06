@@ -13454,7 +13454,7 @@
               "door": "workspace.movePanel#panel-drag-panel-header-panel-upper-part",
               "args": {
                 "panel": "explorer",
-                "distance": -230
+                "host": "elements"
               },
               "target": null,
               "drop": null,
@@ -13542,7 +13542,7 @@
               "door": "workspace.movePanel#panel-drag-panel-header-panel-lower-part",
               "args": {
                 "panel": "layers",
-                "distance": -160
+                "host": "explorer"
               },
               "target": null,
               "drop": null,
@@ -13619,7 +13619,7 @@
               "door": "workspace.movePanel#panel-drag-panel-header-panel-upper-part",
               "args": {
                 "panel": "explorer",
-                "distance": -230
+                "host": "elements"
               },
               "target": null,
               "drop": null,
