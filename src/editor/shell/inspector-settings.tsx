@@ -2,7 +2,7 @@
 // fields of the attributes that apply to the selected element's type (elements.json), in their order — the text first,
 // then each attribute's own control (a kept text field, a boolean toggle, a label's target, an attribute whose feature
 // arrives later), the parts of a table or a select, the person's own attributes, and the page's own settings.
-import { useEffect, useId, useMemo, useRef, type FormEvent } from 'react';
+import { useEffect, useId, useMemo, useRef, type FormEvent, type ReactNode } from 'react';
 import type { AttributeId, CommandId, FeatureId, MessageId } from '../../generated/ids.ts';
 import { isFeatureBuilt } from '../../core/commands/registry.ts';
 import { locate, type DocNode } from '../../core/document/model.ts';
@@ -350,7 +350,7 @@ function ComponentSettings({ node }: { readonly node: DocNode }) {
   );
 }
 
-export function SettingsTab() {
+export function SettingsTab({ head = null }: { readonly head?: ReactNode } = {}) {
   const t = useT();
   const count = useEditorState((s) => s.selection.length);
   const node = useSingleNode();
@@ -359,58 +359,63 @@ export function SettingsTab() {
     const attribute = entry.door.kind === 'inspector-field' && entry.door.attribute !== null ? ATTRIBUTES.get(entry.door.attribute) : undefined;
     return attribute !== undefined && (attribute.elements === 'all' || attribute.elements.includes(node.type)) && attributeApplies(node, attribute.id);
   });
+  // the tab's region holds its head (the selected element, inspector.tsx) and its fields, as the Interactions tab's
+  // holds its head: the fields start right under the inspector's header, the head their first line
   return (
-    <div className="inspector-scroll">
-      <div className="inspector-body" data-region="inspector-settings">
-        {count === 0 ? (
-          <>
-            <p className="inspector-empty">{t('inspector.nothingSelected')}</p>
-            <Hints />
-          </>
-        ) : node === null ? (
-          <p className="inspector-empty">{t('canvas.selectedCount', { count })}</p>
-        ) : SETTINGS_SECTIONS.map((section) => {
-          if (section.elements !== 'all' && !section.elements.includes(node.type)) return null;
-          // a field of an attribute the tag does not take is not drawn (A3.7: the fields follow the tag)
-          const owned = fields.filter((entry) => entry.door.kind === 'inspector-field' && entry.door.attribute !== null && settingsSectionFor(entry.door.attribute, node.type) === section.id && tagTakes(entry.door.attribute, node, MODEL_RULES.contentModel, MODEL_RULES));
-          if (owned.length === 0 && section.id !== 'attributes') return null;
-          return (
-            <section key={section.id} className="settings-section" data-settings-section={section.id} aria-label={t(section.labelKey as MessageId)}>
-              {/* the section's title, and what it is for in its tooltip and its description (jornada02 GENERALISATION 1.3:
-                  the permanent line under every title cost a row per section) */}
-              <div className="settings-section__header">
-                <h3 title={t(section.descriptionKey as MessageId)} aria-describedby={`settings-${section.id}-about`}>
-                  {t(section.labelKey as MessageId)}
-                </h3>
-                <p id={`settings-${section.id}-about`} className="visually-hidden">
-                  {t(section.descriptionKey as MessageId)}
-                </p>
-              </div>
-              {owned.map((entry) => {
-                const attribute = entry.door.kind === 'inspector-field' && entry.door.attribute !== null ? ATTRIBUTES.get(entry.door.attribute) : undefined;
-                if (attribute === undefined) return null;
-                const label = t(attribute.labelKey as MessageId);
-                if (attribute.valueType === ID_REF) return <LabelTargetField key={`${entry.ref}@${node.id}`} entry={entry} node={node} label={label} />;
-                if ('content' in entry.command.args) return <TextField key={`${entry.ref}@${node.id}`} entry={entry} node={node} label={label} />;
-                const kept = keptTextOf(entry, attribute.id as AttributeId, attribute.valueType, node);
-                if (kept !== null) return <KeptTextField key={`${entry.ref}@${node.id}`} entry={entry} node={node} kept={kept} label={label} attribute={attribute.id} />;
-                if (attribute.valueType === 'boolean' && toggleArgOf(entry, attribute.id as AttributeId) !== null)
-                  return <ToggleField key={`${entry.ref}@${node.id}`} entry={entry} node={node} attribute={attribute.id as AttributeId} label={label} />;
-                return <AttributeField key={entry.ref} entry={entry} label={label} toggle={attribute.valueType === 'boolean'} />;
-              })}
-              {section.id === 'attributes' ? <PartsEditor node={node} /> : null}
-              {section.id === 'attributes' && CUSTOM_ADD !== undefined && CUSTOM_VALUE !== undefined && CUSTOM_REMOVE !== undefined ? <CustomAttributes node={node} add={CUSTOM_ADD} /> : null}
-              {section.id === 'attributes' && inTable ? (
-                <div className="field-row field-row--toggles">
-                  {TABLE_PART_DOORS.map((entry) => <DoorControl key={entry.ref} entry={entry} />)}
+    <div className="inspector-tab inspector-tab--settings" data-region="inspector-settings">
+      {head}
+      <div className="inspector-scroll">
+        <div className="inspector-body">
+          {count === 0 ? (
+            <>
+              <p className="inspector-empty">{t('inspector.nothingSelected')}</p>
+              <Hints />
+            </>
+          ) : node === null ? (
+            <p className="inspector-empty">{t('canvas.selectedCount', { count })}</p>
+          ) : SETTINGS_SECTIONS.map((section) => {
+            if (section.elements !== 'all' && !section.elements.includes(node.type)) return null;
+            // a field of an attribute the tag does not take is not drawn (A3.7: the fields follow the tag)
+            const owned = fields.filter((entry) => entry.door.kind === 'inspector-field' && entry.door.attribute !== null && settingsSectionFor(entry.door.attribute, node.type) === section.id && tagTakes(entry.door.attribute, node, MODEL_RULES.contentModel, MODEL_RULES));
+            if (owned.length === 0 && section.id !== 'attributes') return null;
+            return (
+              <section key={section.id} className="settings-section" data-settings-section={section.id} aria-label={t(section.labelKey as MessageId)}>
+                {/* the section's title, and what it is for in its tooltip and its description (jornada02 GENERALISATION 1.3:
+                    the permanent line under every title cost a row per section) */}
+                <div className="settings-section__header">
+                  <h3 title={t(section.descriptionKey as MessageId)} aria-describedby={`settings-${section.id}-about`}>
+                    {t(section.labelKey as MessageId)}
+                  </h3>
+                  <p id={`settings-${section.id}-about`} className="visually-hidden">
+                    {t(section.descriptionKey as MessageId)}
+                  </p>
                 </div>
-              ) : null}
-            </section>
-          );
-        })}
-        {node !== null ? <FormsInspector node={node} /> : null}
-        {node !== null ? <ComponentSettings node={node} /> : null}
-        {node !== null ? <ProjectSettings node={node} /> : null}
+                {owned.map((entry) => {
+                  const attribute = entry.door.kind === 'inspector-field' && entry.door.attribute !== null ? ATTRIBUTES.get(entry.door.attribute) : undefined;
+                  if (attribute === undefined) return null;
+                  const label = t(attribute.labelKey as MessageId);
+                  if (attribute.valueType === ID_REF) return <LabelTargetField key={`${entry.ref}@${node.id}`} entry={entry} node={node} label={label} />;
+                  if ('content' in entry.command.args) return <TextField key={`${entry.ref}@${node.id}`} entry={entry} node={node} label={label} />;
+                  const kept = keptTextOf(entry, attribute.id as AttributeId, attribute.valueType, node);
+                  if (kept !== null) return <KeptTextField key={`${entry.ref}@${node.id}`} entry={entry} node={node} kept={kept} label={label} attribute={attribute.id} />;
+                  if (attribute.valueType === 'boolean' && toggleArgOf(entry, attribute.id as AttributeId) !== null)
+                    return <ToggleField key={`${entry.ref}@${node.id}`} entry={entry} node={node} attribute={attribute.id as AttributeId} label={label} />;
+                  return <AttributeField key={entry.ref} entry={entry} label={label} toggle={attribute.valueType === 'boolean'} />;
+                })}
+                {section.id === 'attributes' ? <PartsEditor node={node} /> : null}
+                {section.id === 'attributes' && CUSTOM_ADD !== undefined && CUSTOM_VALUE !== undefined && CUSTOM_REMOVE !== undefined ? <CustomAttributes node={node} add={CUSTOM_ADD} /> : null}
+                {section.id === 'attributes' && inTable ? (
+                  <div className="field-row field-row--toggles">
+                    {TABLE_PART_DOORS.map((entry) => <DoorControl key={entry.ref} entry={entry} />)}
+                  </div>
+                ) : null}
+              </section>
+            );
+          })}
+          {node !== null ? <FormsInspector node={node} /> : null}
+          {node !== null ? <ComponentSettings node={node} /> : null}
+          {node !== null ? <ProjectSettings node={node} /> : null}
+        </div>
       </div>
     </div>
   );

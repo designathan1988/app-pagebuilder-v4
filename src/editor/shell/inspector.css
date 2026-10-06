@@ -375,6 +375,14 @@
 
 /* the column below the header (and the Style tab's selector bar) scrolls the tab's region, which is as tall as what
    it shows */
+/* the Settings tab: its head and its scrolled fields, one region (inspector-settings.tsx) */
+.inspector-tab--settings {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .inspector-scroll {
   flex: 1;
   min-height: 0;

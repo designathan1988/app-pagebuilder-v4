@@ -703,10 +703,7 @@ function StyleTab() {
 function SettingsWithHead() {
   const single = useSingleNode() !== null;
   return (
-    <>
-      {single ? <div className="selector-bar selector-bar--head" data-region="inspector-settings-head"><SelectedElement /></div> : null}
-      <SettingsTab />
-    </>
+    <SettingsTab head={single ? <div className="selector-bar selector-bar--head" data-region="inspector-settings-head"><SelectedElement /></div> : null} />
   );
 }
 
