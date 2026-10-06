@@ -21,8 +21,9 @@ export default defineConfig({
     setupFiles: ['tools/test/setup-language.ts', 'tools/test/setup-browser.ts', 'tools/test/setup-wiring.ts'],
     // the transformed modules are kept between runs: a run re-transforms only what changed
     fsModuleCache: true,
-    // half the cores at most: the machine stays usable while the tests run
-    maxWorkers: '50%',
+    // a quarter of the cores at most, as the browser suite (playwright.config.ts): at half, every check:fast and gate
+    // took the owner's computer to near 100 % CPU while they worked on it (2026-10-06)
+    maxWorkers: '25%',
     // What the unit tests and the fast scenario runner reach of the document core and the editor's modules, line by line
     // and branch by branch (.cache/unit-coverage/index.html; the summary in the terminal). npm run unit measures it on every
     // check:fast and fails when it falls under the floors, which are raised as tests are added, never lowered.
