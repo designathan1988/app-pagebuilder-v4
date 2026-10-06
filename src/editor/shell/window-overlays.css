@@ -579,6 +579,12 @@
   background: transparent;
 }
 
+/* and stays so under the pointer: a door's hover tint (primitives' .door:hover) painted the whole window a solid
+   colour, the editor gone behind it while the pointer rested outside the bar (the audit of 2026-10-05, AU6-04) */
+.command-bar > .command-bar__backdrop:not(.is-unavailable):hover {
+  background: transparent;
+}
+
 .command-bar__panel {
   position: relative;
   display: flex;

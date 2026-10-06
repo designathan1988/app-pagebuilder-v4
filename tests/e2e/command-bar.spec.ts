@@ -156,3 +156,16 @@ test('every palette entry\'s words start at the same place, with an icon or with
   expect(starts.length).toBeGreaterThan(5);
   expect(new Set(starts).size, `starts ${[...new Set(starts)].join(', ')}`).toBe(1);
 });
+
+// The bar opened from the top bar's Commands field leaves the pointer over its backdrop, where a person keeps it: the
+// backdrop is there for the press that closes the bar, and the editor stays in sight around it (design/final .palette)
+// whatever the pointer rests on — its hover once painted the whole window a solid colour (the audit of 2026-10-05).
+test('the editor stays in sight around the open bar wherever the pointer rests', runs('commandBar.open#toolbar-top-bar-search', BACKDROP), async ({ page }) => {
+  await runDoor(page, 'commandBar.open#toolbar-top-bar-search');
+  await expect(bar(page)).toBeVisible();
+  const backdrop = page.locator('.command-bar__backdrop');
+  for (const [x, y] of [[100, 300], [1300, 700], [720, 860]] as const) {
+    await page.mouse.move(x, y);
+    await expect.poll(() => backdrop.evaluate((el) => getComputedStyle(el).backgroundColor), { message: `the backdrop at ${x},${y}` }).toBe('rgba(0, 0, 0, 0)');
+  }
+});
