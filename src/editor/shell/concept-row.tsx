@@ -33,7 +33,9 @@ export function ConceptRowView({ row, head, details, open }: { readonly row: Con
           // a summary head: the row's label, then what its details hold in the code face
           <div className="field-row concept-row__summary">
             <span className="field-row__label">{label}</span>
-            <span className="concept-row__values">{summary === '' ? t('inspector.row.none') : summary}</span>
+            {/* a long value (a shadow's layers) ends in an ellipsis: the whole of it in its tooltip, as a field's
+                face */}
+            <span className="concept-row__values" title={summary === '' ? undefined : summary}>{summary === '' ? t('inspector.row.none') : summary}</span>
           </div>
         )}
       </div>
