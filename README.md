@@ -35,5 +35,4 @@ inside an iframe scaled with CSS `zoom`; the document JSON is the source of trut
 - `tests/`: the browser tests and their one fixture (`tests/support/`).
 - `tools/`: `gen`, `manifest`, `lint`, `runner`, `inventory`, `ui`, `perf`, `parity`, `journey`, `companion`, `modules`, `gate`
   — what the app is built, checked and driven with.
-- `design/final/`: the visual contract and the tokens. `reference/` (in the old checkout `../builder-5/`): the read-only
-  reference material; never write inside it.
+- `design/final/`: the visual contract and the tokens.

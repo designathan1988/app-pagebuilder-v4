@@ -65,7 +65,7 @@ status in `docs/FEATURES.md` (which counts them per feature).
 | REQ-U05 | Never edit, skip or loosen a test or a scenario to make it pass | brief order 4, CLAUDE.md | done | phase 6 of the audit: no assertion lost except two deliberate removals (AUD-16) |
 | REQ-U06 | Every feature of the application built and working end to end, without errors | brief order 5 | done | QA 240: the complete suite on a clean tree, every feature passing (QA 237), the 19 journeys with no incident; the closing audit of 2026-10-03 (its document removed by DEC-72) |
 | REQ-U07 | Everything in English (specs, manifest, docs, scenarios, comments, names); Brazilian Portuguese in what the user reads: chat reports and commit messages (DEC-63) | brief order 6, CLAUDE.md | done | phase 8 of the audit (translations, exceptions in section 7) |
-| REQ-U08 | The Pager (`../builder-5/reference/`) is a reference for behaviour, never for code | brief order 7 | done | — |
+| REQ-U08 | The Pager (`../builder-5/reference/`) is a reference for behaviour, never for code | brief order 7 | out | the folder no longer exists on this machine; its rule left CLAUDE.md (QA 421) |
 | REQ-U09 | Do not stop between items or ask; decide by what was decided and record it | brief order 8 | done | decisions register (section 4) |
 | REQ-U10 | Commit and push every change to `app-pagebuilder-v4` (origin since DEC-72, 2026-10-05; `app-pagebuilder-v3` from 2026-10-04, `v2` before) | the user, 2026-10-05 ("faça push e commit no …app-pagebuilder-v4.git e registre para sempre fazer lá") | done | `npm run gate` refuses any other origin (`tools/gate/gate.ts`), `CLAUDE.md` Commits |
 | REQ-U11 | Reports with every acronym and code explained | plan request 11, memory | done | glossary (section 8) |

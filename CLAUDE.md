@@ -8,8 +8,7 @@ work it concerns.
 ## One tree, one copy
 
 One working tree (this root), branch `main`, one copy of the application: no worktrees, branches, parallel trees or
-code waiting to be merged, no git hooks. An unfinished change stays in the working tree. The old application (the
-Pager, `../builder-5/reference/`) is read-only reference for behaviour, never for code.
+code waiting to be merged, no git hooks. An unfinished change stays in the working tree.
 
 ## The documents
 
