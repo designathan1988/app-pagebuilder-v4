@@ -7,7 +7,7 @@ open problems, are in `docs/PRODUCT.md`.
 
 214 features (214 built), 373 commands, 1362 doors, 1831 scenarios.
 
-Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests passed; 214 features passed every scenario test.
+Last complete browser run: commit `9e59704` (2026-10-06), 2042 of 2044 tests passed; 213 features passed every scenario test.
 
 "Required" counts the `Required:` items of the feature's section of `spec/BEHAVIOUR.md`; "none" means the feature has no section.
 
@@ -229,7 +229,7 @@ Last complete browser run: commit `701c0de` (2026-10-05), 2044 of 2044 tests pas
 | `workbench-panel` | Bottom workbench: tabs, collapse, maximise and developer tools | yes | 10 | 6 | [workbench-panel](../spec/BEHAVIOUR.md#workbench-panel) | 4 | passes 10/10 |
 | `panel-resize` | Resize docks and panels with splitters | yes | 12 | 11 | [panel-resize](../spec/BEHAVIOUR.md#panel-resize) | 7 | passes 13/13 |
 | `floating-panels` | Float a panel as a window and dock it again | yes | 5 | 5 | [floating-panels](../spec/BEHAVIOUR.md#floating-panels) | 4 | passes 5/5 |
-| `panel-combine-tabs` | Combine panels as tabs or stack them | yes | 3 | 3 | [panel-combine-tabs](../spec/BEHAVIOUR.md#panel-combine-tabs) | 2 | passes 3/3 |
+| `panel-combine-tabs` | Combine panels as tabs or stack them | yes | 3 | 3 | [panel-combine-tabs](../spec/BEHAVIOUR.md#panel-combine-tabs) | 2 | FAILS 1/3 |
 | `workspace-persist-reset` | Workspace layout persists and can be reset | yes | 2 | 3 | [workspace-persist-reset](../spec/BEHAVIOUR.md#workspace-persist-reset) | 1 | passes 3/3 |
 | `status-bar` | Status bar: messages, breadcrumb, size, context, count, zoom and save state | yes | 2 | 2 | [status-bar](../spec/BEHAVIOUR.md#status-bar) | 6 | passes 2/2 |
 

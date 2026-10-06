@@ -1,8 +1,8 @@
 {
-  "commit": "701c0de",
-  "date": "2026-10-05",
+  "commit": "9e59704",
+  "date": "2026-10-06",
   "tests": {
-    "passed": 2044,
+    "passed": 2042,
     "total": 2044
   },
   "features": {
@@ -623,7 +623,7 @@
       "total": 5
     },
     "panel-combine-tabs": {
-      "passed": 3,
+      "passed": 1,
       "total": 3
     },
     "workspace-persist-reset": {
