@@ -1,6 +1,6 @@
 // What each browser test executed of the editor (plan G6, R4): with E2E_COVERAGE=1 a test records Chrome's coverage of
 // the page — the source lines its scripts ran, read back through the e2e build's source maps, and the selectors of the
-// stylesheet rules the page used — into .cache/coverage/tests/<hash>.json. npm run e2e:affected reads them to run only
+// stylesheet rules the page used, and the message keys the editor translated — into .cache/e2e-coverage/tests/<hash>.json. npm run e2e:affected reads them to run only
 // the tests whose executed lines or selectors a change touches (tools/runner/affected-coverage.ts). Over-approximate on
 // purpose: a function or block that ran counts as a whole, so a test is never missed for a line it ran.
 import crypto from 'node:crypto';
@@ -10,7 +10,10 @@ import type { Page, TestInfo } from '@playwright/test';
 import { SourceMapConsumer, type RawSourceMap } from 'source-map-js';
 
 export const COVERAGE = process.env.E2E_COVERAGE === '1';
-export const COVERAGE_DIR = path.join('.cache', 'coverage', 'tests');
+// the browser tests' own folder, never the unit tests' report (vitest.config.ts), which Vitest empties at every run
+export const COVERAGE_ROOT = path.join('.cache', 'e2e-coverage');
+export const COVERAGE_DIR = path.join(COVERAGE_ROOT, 'tests');
+export const COVERAGE_META = path.join(COVERAGE_ROOT, 'meta.json');
 const BUILD = 'dist';
 
 interface TestCoverage {
@@ -20,6 +23,8 @@ interface TestCoverage {
   readonly lines: Readonly<Record<string, readonly (readonly [number, number])[]>>;
   // the selectors of the rules the page's stylesheets used, as written
   readonly selectors: readonly string[];
+  // the message keys the editor translated
+  readonly keys: readonly string[];
 }
 
 // a chunk's map, read once per worker
@@ -146,8 +151,9 @@ export async function stopCoverage(page: Page, info: TestInfo): Promise<void> {
       for (const one of header.split(',')) selectors.add(one.replace(/\s+/g, ' ').trim());
     }
   }
+  const keys = await page.evaluate(() => (window as unknown as { __builderTestPort?: { keys: () => string[] } }).__builderTestPort?.keys() ?? []).catch(() => [] as string[]);
   const test = [path.relative(process.cwd(), info.file).replaceAll('\\', '/'), ...info.titlePath.slice(1)].join(' › ');
-  const record: TestCoverage = { test, lines: Object.fromEntries([...lines].map(([file, held]) => [file, merged(held)])), selectors: [...selectors].filter((one) => one !== '').sort() };
+  const record: TestCoverage = { test, lines: Object.fromEntries([...lines].map(([file, held]) => [file, merged(held)])), selectors: [...selectors].filter((one) => one !== '').sort(), keys };
   fs.mkdirSync(COVERAGE_DIR, { recursive: true });
   fs.writeFileSync(path.join(COVERAGE_DIR, `${crypto.createHash('sha1').update(test).digest('hex')}.json`), JSON.stringify(record));
 }

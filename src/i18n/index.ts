@@ -1,9 +1,11 @@
 // The i18n runtime (PRODUCT.md §5): every UI text is a MessageId looked up in the catalogue of a locale.
 // English (en.json) is the source catalogue and the default UI language; Brazilian Portuguese (pt-BR.json) is the
 // other locale. The catalogues are JSON so that manifest:check can prove every key the manifest names exists in both
-// locales with the same placeholders. This module is plain TypeScript and holds no state: the UI language is a
-// preference in the store (src/editor/preferences/preferences.ts), and the editor translates with translate(locale, …)
-// for the locale the store holds (src/editor/text.ts).
+// locales with the same placeholders. This module is plain TypeScript and holds no state but one listener: the UI
+// language is a preference in the store (src/editor/preferences/preferences.ts), and the editor translates with
+// translate(locale, …) for the locale the store holds (src/editor/text.ts). The listener (listenToKeys) is set only by
+// the test port of the e2e build (src/editor/test-port.ts): the browser tests' coverage records which messages each
+// test showed, so a change to a catalogue reruns the tests that showed what it changed (tools/runner/affected.ts).
 //
 // Fallback rule: there is none. Both catalogues are typed by the keys of en.json (a key missing from pt-BR.json is a
 // type error below) and manifest:check proves they have the same keys and placeholders, so a missing text or a
@@ -42,10 +44,20 @@ export function hasText(locale: Locale, key: string): boolean {
   return Object.hasOwn(CATALOGUES[locale], key);
 }
 
+// who hears each key translated: the e2e build's test port, never the build a person uses
+let keyListener: ((key: string) => void) | null = null;
+export function listenToKeys(listener: ((key: string) => void) | null): void {
+  keyListener = listener;
+}
+
 // The text of a key in a locale, with its placeholders filled.
 export function translate(locale: Locale, key: MessageId, params: MessageParams = {}): string {
   const form = typeof params.count === 'number' ? (`${key}.${pluralForm(locale, params.count)}` as MessageId) : null;
   const text = (form === null ? undefined : CATALOGUES[locale][form]) ?? CATALOGUES[locale][key] as string | undefined;
+  if (keyListener !== null) {
+    keyListener(key);
+    if (form !== null) keyListener(form);
+  }
   if (text === undefined) {
     throw new Error(`The ${locale} catalogue has no text for "${key}".`);
   }

@@ -7,6 +7,7 @@ import { sequentialIds } from '../core/ports/ids.ts';
 import { clearIncidents, reportError } from '../core/incidents.ts';
 import { createEditorStore } from './store.ts';
 import { createTestPort } from './test-port.ts';
+import { listenToKeys, translate } from '../i18n/index.ts';
 
 const port = () => {
   const store = createEditorStore({ storage: { read: () => null, write: () => undefined }, ids: sequentialIds('n'), clock: manualClock() });
@@ -42,5 +43,19 @@ describe('the read-only test port', () => {
     expect(held.length).toBe(1);
     expect(held[0]?.what).toBe('a test threw');
     clearIncidents();
+  });
+
+  it('carries the message keys translated, plural forms with their key (the coverage of the catalogues)', () => {
+    const store = createEditorStore({ storage: { read: () => null, write: () => undefined }, ids: sequentialIds('n'), clock: manualClock() });
+    const shown = new Set<string>();
+    listenToKeys((key) => shown.add(key));
+    try {
+      const testPort = createTestPort(store, shown);
+      translate('en', 'canvas.selectedCount', { count: 3 });
+      expect(testPort.keys()).toEqual(expect.arrayContaining(['canvas.selectedCount']));
+      expect(testPort.keys().some((key) => key.startsWith('canvas.selectedCount.'))).toBe(true);
+    } finally {
+      listenToKeys(null);
+    }
   });
 });

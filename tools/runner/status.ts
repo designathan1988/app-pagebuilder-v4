@@ -5,18 +5,22 @@
 // registered feature that fails or cannot run fails the whole run. The status holds only for a clean tree, which it
 // says. Only a complete run (every scenario test of every runnable feature) on a clean tree is recorded, by the runner
 // and never by hand, in docs/feature-results.json, from which `npm run inventory` writes docs/FEATURES.md. A run the
-// browser runner left out because the fast runner passed it on this tree counts as passed (balance.ts).
+// browser runner left out because the fast runner passed it on these inputs counts as passed (balance.ts); how many
+// were left out, or why none were, is always said. The tree counts as clean when the run's inputs hold their commit's
+// contents (tools/runner/run-inputs.ts): the owner's .claude/ and the notes at the root change nothing a test runs.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { FullResult, Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import { FEATURE_RESULTS, type FeatureResults } from '../inventory/features.ts';
 import { REPO_ROOT } from '../manifest/load.ts';
-import { PROVEN_HEADLESS } from './balance.ts';
+import { PROVEN_HEADLESS, headlessRecord } from './balance.ts';
+import { changedInputs } from './run-inputs.ts';
 import { FEATURES, blockers, registered, runnable } from './scenarios.ts';
 
 export default class StatusReporter implements Reporter {
   private readonly results = new Map<string, { passed: number; failed: number }>();
+  private provenHeadless = 0;
 
   onTestEnd(test: TestCase, result: TestResult): void {
     const feature = test.annotations.find((a) => a.type === 'feature')?.description;
@@ -25,6 +29,7 @@ export default class StatusReporter implements Reporter {
     // a scenario test passes only by passing: a skipped one proves nothing, but for a run the fast runner passed on
     // this very tree, which the browser runner left out (balance.ts)
     const proven = result.status === 'skipped' && test.annotations.some((a) => a.type === PROVEN_HEADLESS);
+    if (proven) this.provenHeadless += 1;
     if (result.status === 'passed' || proven) counts.passed += 1;
     else counts.failed += 1;
     this.results.set(feature, counts);
@@ -36,8 +41,13 @@ export default class StatusReporter implements Reporter {
     const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
     const commit = git('rev-parse', '--short', 'HEAD');
     // the auditor's files under manifest/features/ may be in the middle of an edit (the brief's "clean tree")
-    const dirty = git('status', '--porcelain').split('\n').filter((l) => l !== '' && !l.slice(3).startsWith('manifest/features/'));
+    const dirty = changedInputs().filter((file) => !file.startsWith('manifest/features/'));
     console.log(`\nstatus at ${commit}, ${dirty.length === 0 ? 'clean tree' : `tree NOT clean (${dirty.length} changed files): the status below does not count`}`);
+    const tooth = (process.env.TOOTH_COMMANDS ?? '') !== '' || (process.env.TOOTH_MODULE ?? '') !== '';
+    const off = tooth ? 'the tooth proof runs every test' : process.env.E2E_BALANCE === '0' ? 'E2E_BALANCE=0 asks for every run' : null;
+    const record = headlessRecord();
+    const none = off ?? (record.proven === null ? record.why : 'no run of this selection was proven');
+    console.log(this.provenHeadless > 0 ? `fast runner: ${this.provenHeadless} scenario runs left out, proven on these inputs` : `fast runner: no scenario run left out (${none})`);
     let broken = 0;
     for (const f of FEATURES.filter((f) => f.scenarios.length > 0 || registered(f))) {
       const counts = this.results.get(f.id);
@@ -59,9 +69,7 @@ export default class StatusReporter implements Reporter {
       const counts = this.results.get(id);
       return counts !== undefined && counts.passed + counts.failed === total;
     });
-    const record = path.posix.join(...FEATURE_RESULTS.split(path.sep));
-    const changed = git('status', '--porcelain').split('\n').filter((l) => l !== '' && l.slice(3) !== record);
-    if (complete && changed.length === 0) {
+    if (complete && changedInputs().length === 0) {
       const features = Object.fromEntries(expected.map(([id, total]) => [id, { passed: this.results.get(id)?.passed ?? 0, total }]));
       const tests = Object.values(features).reduce((sum, one) => ({ passed: sum.passed + one.passed, total: sum.total + one.total }), { passed: 0, total: 0 });
       const results: FeatureResults = { commit, date: git('log', '-1', '--format=%cs'), tests, features };

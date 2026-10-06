@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { headlessProven, leftOut, readsTheBrowser, runName } from './balance.ts';
+import { headlessProven, headlessRecord, leftOut, readsTheBrowser, runName } from './balance.ts';
 
 const plain = { render: { computed: [], geometry: [] }, editor: null, persistence: null, export: null };
 const scenario = (id: string, doors: string[], expect: object = plain) => ({ id, doors, expect: { ...plain, ...expect } });
@@ -29,7 +29,7 @@ describe('the balance of the two scenario runners', () => {
     }
   });
 
-  it('trusts the fast runner only on the tree it ran on', () => {
+  it('trusts the fast runner only on the inputs it ran on, and says why it trusts none', () => {
     const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'balance-'));
     const file = path.join(folder, 'headless.json');
     try {
@@ -37,6 +37,8 @@ describe('the balance of the two scenario runners', () => {
       expect(headlessProven('this tree', file)).toBeNull();
       expect([...(headlessProven('another tree', file) ?? [])]).toEqual(['f › a › door#1']);
       expect(headlessProven('another tree', path.join(folder, 'missing.json'))).toBeNull();
+      expect(headlessRecord('this tree', file)).toMatchObject({ proven: null, why: expect.stringContaining('other contents') });
+      expect(headlessRecord('this tree', path.join(folder, 'missing.json'))).toMatchObject({ proven: null, why: expect.stringContaining('no record') });
     } finally {
       fs.rmSync(folder, { recursive: true, force: true });
     }

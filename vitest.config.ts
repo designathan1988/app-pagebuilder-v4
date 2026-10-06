@@ -24,14 +24,16 @@ export default defineConfig({
     // half the cores at most: the machine stays usable while the tests run
     maxWorkers: '50%',
     // What the unit tests and the fast scenario runner reach of the document core and the editor's modules, line by line
-    // and branch by branch (.cache/coverage/index.html; the summary in the terminal). npm run unit measures it on every
+    // and branch by branch (.cache/unit-coverage/index.html; the summary in the terminal). npm run unit measures it on every
     // check:fast and fails when it falls under the floors, which are raised as tests are added, never lowered.
     coverage: {
       provider: 'v8',
       include: ['src/core/**/*.ts', 'src/editor/**/*.ts'],
       exclude: ['**/*.test.ts', 'src/core/testing/**'],
       reporter: ['text-summary', 'html', 'json-summary'],
-      reportsDirectory: '.cache/coverage',
+      // its own folder: Vitest empties it before every run (coverage.clean), and the browser tests' coverage once
+      // shared .cache/coverage and was erased by every check:fast (the study of 2026-10-06; tools/runner/coverage-dirs.test.ts)
+      reportsDirectory: '.cache/unit-coverage',
       thresholds: { statements: 56, branches: 44, functions: 60, lines: 60 },
     },
   },

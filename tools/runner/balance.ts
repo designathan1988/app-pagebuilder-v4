@@ -4,13 +4,14 @@
 // the page draws. A browser run is left out when the fast runner passed the same run on this very tree, the scenario
 // expects nothing only a browser reads (computed values, geometry, the editor's regions, a reload, the export, a
 // hover), and its door keeps a browser run of its own: every door is still pressed, clicked or dragged in the browser
-// at least once. The fast runner writes what it passed, with the tree's fingerprint, to .cache/runner/headless.json;
-// the browser runner reads it, and leaves nothing out when the file is missing or was written on another tree. The
-// status counts a run left out as passed, since the fast runner passed it on this tree (status.ts).
-import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+// at least once. The fast runner writes what it passed, with the fingerprint of the run's inputs (run-inputs.ts), to
+// .cache/runner/headless.json; the browser runner reads it, and leaves nothing out when the file is missing or was
+// written on other inputs — and says which (headlessRecord), never silently: a record written on the HEAD's
+// fingerprint went stale at every commit and the browser runner left out nothing for months of runs (the study of
+// 2026-10-06). The status counts a run left out as passed, since the fast runner passed it on these inputs (status.ts).
 import fs from 'node:fs';
 import path from 'node:path';
+import { inputsFingerprint } from './run-inputs.ts';
 
 const HEADLESS_RESULTS = path.join('.cache', 'runner', 'headless.json');
 // the annotation a browser run left out carries
@@ -21,37 +22,28 @@ interface Results {
   readonly passed: readonly string[];
 }
 
-// What the tree holds now: the commit, the changes to its tracked files and the untracked files with their contents (a
-// run on a tree with any other change is a run on another tree). The record the browser runner writes after a complete
-// run (docs/feature-results.json) is left out: it follows the runs, never changes what they prove.
-function treeFingerprint(root: string = process.cwd()): string {
-  const git = (...args: string[]) => execFileSync('git', args, { cwd: root, encoding: 'buffer', maxBuffer: 1 << 30 });
-  const hash = createHash('sha256');
-  hash.update(git('rev-parse', 'HEAD'));
-  hash.update(git('diff', 'HEAD', '--binary', '--', '.', ':(exclude)docs/feature-results.json'));
-  const untracked = git('ls-files', '--others', '--exclude-standard', '-z').toString('utf8').split('\0').filter((file) => file !== '');
-  for (const file of untracked.sort()) {
-    hash.update(`\0${file}\0`);
-    hash.update(fs.readFileSync(path.join(root, file)));
-  }
-  return hash.digest('hex');
-}
-
 // The fast runner's record of the runs it passed (each named as the browser runner names its test).
 export function writeHeadlessResults(passed: readonly string[]): void {
-  const results: Results = { fingerprint: treeFingerprint(), passed: [...passed].sort() };
+  const results: Results = { fingerprint: inputsFingerprint(), passed: [...passed].sort() };
   fs.mkdirSync(path.dirname(HEADLESS_RESULTS), { recursive: true });
   fs.writeFileSync(HEADLESS_RESULTS, `${JSON.stringify(results, null, 2)}\n`);
 }
 
-// The runs the fast runner passed on this tree, or null when it has no record of this tree.
-export function headlessProven(fingerprint: string = treeFingerprint(), file: string = HEADLESS_RESULTS): ReadonlySet<string> | null {
+// The fast runner's record as it stands for these inputs: the runs it passed, or why there are none to trust.
+export type HeadlessRecord = { readonly proven: ReadonlySet<string> } | { readonly proven: null; readonly why: string };
+export function headlessRecord(fingerprint: string = inputsFingerprint(), file: string = HEADLESS_RESULTS): HeadlessRecord {
+  let results: Results;
   try {
-    const results = JSON.parse(fs.readFileSync(file, 'utf8')) as Results;
-    return results.fingerprint === fingerprint ? new Set(results.passed) : null;
+    results = JSON.parse(fs.readFileSync(file, 'utf8')) as Results;
   } catch {
-    return null;
+    return { proven: null, why: `no record of the fast runner (${file}): run npm run unit first` };
   }
+  return results.fingerprint === fingerprint ? { proven: new Set(results.passed) } : { proven: null, why: 'the fast runner last ran on other contents of the run inputs (tools/runner/run-inputs.ts): run npm run unit first' };
+}
+
+// The runs the fast runner passed on these inputs, or null when it has no record of them.
+export function headlessProven(fingerprint: string = inputsFingerprint(), file: string = HEADLESS_RESULTS): ReadonlySet<string> | null {
+  return headlessRecord(fingerprint, file).proven;
 }
 
 interface ScenarioShape {

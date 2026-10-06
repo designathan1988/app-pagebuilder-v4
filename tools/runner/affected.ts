@@ -13,8 +13,8 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { affectedPlan, productionSource } from './affected-plan.ts';
-import { changedLines, selectorsOn, testsReached, type Recorded } from './affected-coverage.ts';
-import { COVERAGE_DIR } from '../../tests/support/coverage.ts';
+import { changedLines, selectorsOn, testsReached, toOldLines, type Recorded } from './affected-coverage.ts';
+import { COVERAGE_DIR, COVERAGE_META, COVERAGE_ROOT } from '../../tests/support/coverage.ts';
 
 interface Inventory {
   readonly features: readonly { readonly id: string; readonly built: boolean; readonly modules: readonly string[] }[];
@@ -87,12 +87,14 @@ if (listOnly) for (const run of plan.runs) console.log(`playwright arguments: ${
 
 const cli = path.join('node_modules', '@playwright', 'test', 'cli.js');
 const playwright = (a: string[]) => spawnSync(process.execPath, [cli, 'test', ...a], { stdio: 'inherit' }).status ?? 1;
-// With the last coverage run (npm run e2e:coverage), the tests that ran a changed line or used a changed selector
-// replace a plan that would run everything for a shared module or a stylesheet (plan G6): a change it cannot place
-// keeps the plan above, and a change to what every test stands on still runs the complete suite.
+// With the last coverage run (npm run e2e:coverage), the tests that ran a changed line, used a changed rule's selector
+// or translated a changed message replace a plan that would run everything for a shared module, a stylesheet or a
+// catalogue (plan G6): a change it cannot place keeps the plan above, and a change to what every test stands on still
+// runs the complete suite. Which of the two decided is always said, with the reason (the study of 2026-10-06: the
+// precise mode was off for 170 commits and nothing said so).
 const precise = preciseRuns();
-const runs = precise ?? plan.runs;
-if (precise !== null) console.log(`from the coverage of ${coverageMeta()?.commit.slice(0, 7) ?? ''}: ${precise.length === 0 ? 'no test' : 'the tests in .cache/coverage/affected.txt'}`);
+const runs = 'runs' in precise ? precise.runs : plan.runs;
+console.log('runs' in precise ? `precise: ${precise.said}` : `precise selection off: ${precise.why}; the plan above decides`);
 if (listOnly) process.exit(0);
 let status = 0;
 for (const run of runs) status = Math.max(status, playwright(run));
@@ -101,52 +103,77 @@ process.exit(status);
 
 function coverageMeta(): { readonly commit: string } | null {
   try {
-    return JSON.parse(fs.readFileSync(path.join('.cache', 'coverage', 'meta.json'), 'utf8')) as { commit: string };
+    return JSON.parse(fs.readFileSync(COVERAGE_META, 'utf8')) as { commit: string };
   } catch {
     return null;
   }
 }
 
-function preciseRuns(): string[][] | null {
+function preciseRuns(): { readonly runs: string[][]; readonly said: string } | { readonly why: string } {
   const meta = coverageMeta();
-  if (meta === null || !fs.existsSync(COVERAGE_DIR)) return null;
-  let files: string[];
-  try {
-    files = [...new Set([...git('diff', '--name-only', meta.commit), ...git('ls-files', '--others', '--exclude-standard')])].map(posix);
-  } catch {
-    return null;
-  }
-  // what every test stands on, and the plan's own reasons other than a shared module or a stylesheet, keep the plan
-  const sharedOnly = plan.reasons.every((reason) => reason.startsWith('shared door runtime') || reason.startsWith('unmapped production source'));
-  if (!sharedOnly) return null;
-  const existedAt = (file: string) => {
+  if (meta === null || !fs.existsSync(COVERAGE_DIR)) return { why: `no coverage map (${COVERAGE_META}): npm run e2e:coverage records it` };
+  const base = since ?? 'HEAD';
+  const gitText = (...a: string[]) => execFileSync('git', ['-c', 'safe.directory=*', ...a], { encoding: 'utf8', maxBuffer: 1 << 28 });
+  const existedAt = (ref: string, file: string) => {
     try {
-      execFileSync('git', ['cat-file', '-e', `${meta.commit}:${file}`], { stdio: 'ignore' });
+      execFileSync('git', ['cat-file', '-e', `${ref}:${file}`], { stdio: 'ignore' });
       return true;
     } catch {
       return false;
     }
   };
+  try {
+    gitText('merge-base', '--is-ancestor', meta.commit, base);
+  } catch {
+    return { why: `the coverage map's commit ${meta.commit.slice(0, 7)} is not behind ${base}` };
+  }
+  // what every test stands on, and the plan's own reasons other than a shared module or an unmapped source, keep the
+  // plan
+  const global = plan.reasons.filter((reason) => !reason.startsWith('shared door runtime') && !reason.startsWith('unmapped production source'));
+  if (global.length > 0) return { why: `a change to what every browser test stands on (${global.join(', ')})` };
   const records = fs.readdirSync(COVERAGE_DIR).map((name) => JSON.parse(fs.readFileSync(path.join(COVERAGE_DIR, name), 'utf8')) as Recorded);
-  const scripts = new Map<string, readonly (readonly [number, number])[]>();
+  const scripts = new Map<string, (readonly [number, number])[]>();
   const selectors = new Set<string>();
+  const keys = new Set<string>();
   const list = new Set<string>();
-  for (const file of files) {
+  const notes: string[] = [];
+  for (const file of changed.map(posix)) {
     if (/^tests\/e2e\/.*\.spec\.ts$/.test(file) && fs.existsSync(file)) list.add(file);
     if (!productionSource(file)) continue;
-    // a data file (a catalogue, a generated list) or a file the coverage never saw: the plan decides
-    if (!/\.(tsx?|css)$/.test(file) || !existedAt(file)) return null;
-    const changed = changedLines(execFileSync('git', ['diff', '-U0', meta.commit, '--', file], { encoding: 'utf8' })).get(file) ?? [];
+    // a new module runs only through the modules that import it, whose own changed lines place it
+    if (!existedAt(base, file) || !existedAt(meta.commit, file)) {
+      if (!fs.existsSync(file)) return { why: `${file} was removed` };
+      notes.push(`${file} is new: placed through its importers`);
+      continue;
+    }
+    // the current change's lines, in the base's numbering, read back to the map's
+    const now = changedLines(gitText('diff', '-U0', base, '--', file)).get(file) ?? [];
+    const lines = toOldLines(now, gitText('diff', '-U0', meta.commit, base, '--', file));
+    if (/\/i18n\/locales\/[^/]+\.json$/.test(file)) {
+      const before = JSON.parse(gitText('show', `${base}:${file}`)) as Record<string, string>;
+      const after = JSON.parse(fs.readFileSync(file, 'utf8')) as Record<string, string>;
+      // a key added since runs only where a changed script now asks for it; a changed or removed one, where it was
+      // shown
+      for (const key of Object.keys(before)) if (before[key] !== after[key]) keys.add(key);
+      continue;
+    }
+    if (file.endsWith('.json')) return { why: `a data file it cannot place: ${file}` };
     if (file.endsWith('.css')) {
-      for (const one of selectorsOn(execFileSync('git', ['show', `${meta.commit}:${file}`], { encoding: 'utf8' }), changed)) selectors.add(one);
+      const known = new Set(selectorsOn(gitText('show', `${meta.commit}:${file}`), [[1, Number.MAX_SAFE_INTEGER]]));
+      const touched = selectorsOn(gitText('show', `${base}:${file}`), now);
+      const unknown = [...touched].filter((one) => !known.has(one));
+      if (unknown.length > 0) return { why: `rules added after the coverage map: ${file} ${unknown.slice(0, 3).join(', ')}` };
+      for (const one of touched) selectors.add(one);
       list.add('tests/e2e/visual.spec.ts');
-    } else scripts.set(file, changed);
+    } else if (/\.tsx?$/.test(file)) scripts.set(file, lines);
+    else return { why: `a file it cannot place: ${file}` };
   }
-  for (const test of testsReached(records, scripts, selectors)) list.add(test);
+  if (keys.size > 0 && records.some((record) => record.keys === undefined)) return { why: 'a catalogue changed, and the coverage map does not record the messages its tests showed' };
+  for (const test of testsReached(records, scripts, selectors, keys)) list.add(test);
   // the features whose scenarios' file changed still run their scenarios
   const featureRuns = featuresInFiles.size === 0 ? [] : [['scenarios.spec', '--grep', [...featuresInFiles].map((id) => `@feature:${id}(?![\\w-])`).join('|')]];
-  fs.mkdirSync(path.join('.cache', 'coverage'), { recursive: true });
-  fs.writeFileSync(path.join('.cache', 'coverage', 'affected.txt'), `${[...list].join('\n')}\n`);
-  console.log(`tests reached: ${list.size}`);
-  return [...(list.size > 0 ? [['--test-list', path.join('.cache', 'coverage', 'affected.txt')]] : []), ...featureRuns];
+  const listed = path.join(COVERAGE_ROOT, 'affected.txt');
+  fs.writeFileSync(listed, `${[...list].join('\n')}\n`);
+  const said = `from the coverage of ${meta.commit.slice(0, 7)}, ${list.size} of ${records.length} tests${featureRuns.length > 0 ? " and the changed features' scenarios" : ''} (${listed})${notes.length > 0 ? `; ${notes.join('; ')}` : ''}`;
+  return { runs: [...(list.size > 0 ? [['--test-list', listed]] : []), ...featureRuns], said };
 }
