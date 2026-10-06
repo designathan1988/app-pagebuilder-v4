@@ -5356,7 +5356,13 @@
         "style.set#inspector-column-rule-width",
         "style.set#inspector-column-rule-style",
         "style.set#inspector-column-rule-color"
-      ]
+      ],
+      "shortLabels": {
+        "style.set#inspector-column-fill": "inspector.row.columns.fill",
+        "style.set#inspector-column-rule-width": "inspector.row.columns.ruleWidth",
+        "style.set#inspector-column-rule-style": "inspector.row.columns.ruleStyle",
+        "style.set#inspector-column-rule-color": "inspector.row.columns.ruleColour"
+      }
     },
     {
       "id": "scroll",
