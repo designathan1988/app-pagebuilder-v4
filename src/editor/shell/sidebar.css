@@ -588,8 +588,10 @@
 /* A tree row keeps the room its actions strip takes at its end (the strip lies over the row: .row__actions), so the name
    ends before it — a long name ran under the strip's buttons, transparent until hovered, and a press on its end took
    one of them (the screen guard, the conditions sweep of 2026-10-06). The row's details (its tag, .row__meta) still
-   stand in that room, under the strip, as before. */
-.row--tree {
+   stand in that room, under the strip, as before. An Explorer file row keeps the same room for its own strip (move,
+   fill, rename, delete), its folder and size ending before it. */
+.row--tree,
+[data-region='explorer-file-rows'] .row {
   /* the actions the row draws in its strip: set by the row itself (layers.tsx), none by default */
   --row-actions: 0;
   --row-actions-room: calc(var(--row-actions) * var(--size-target-min));

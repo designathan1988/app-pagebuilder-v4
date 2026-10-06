@@ -284,8 +284,15 @@ function TreeRow({ row, doors }: { readonly row: TreeRow; readonly doors: TreeDo
       <span className="row__meta">{file === null ? '' : folderOf(row.path) === '' ? sizeLabel(file) : `${folderOf(row.path)}/ · ${sizeLabel(file)}`}</span>
     </>
   );
+  // the actions the row draws in its strip, whose room the row keeps at its end (sidebar.css, as a Layers row's)
+  const actions = [
+    (row.generated && row.page === null) || doors.move === undefined || folders.length === 0 ? null : doors.move,
+    doors.fill === undefined || file === null || !isDataFile(file) ? null : doors.fill,
+    row.generated ? null : RENAME_START,
+    doors.remove === undefined || row.generated ? null : doors.remove,
+  ].filter((one) => one !== null).length;
   return (
-    <div className={`row${row.folder ? ' row--folder' : ''}`} style={style} data-file={row.path} data-folder={row.folder ? row.path : undefined}>
+    <div className={`row${row.folder ? ' row--folder' : ''}`} style={{ ...style, '--row-actions': actions } as CSSProperties} data-file={row.path} data-folder={row.folder ? row.path : undefined}>
       {/* a row's main area is the move door: a press drags the row (dropped on a folder it moves into it), a click
           opens it in the code pane — the pointer owner runs both (input/pointer.ts, the explorer-row drag) */}
       {row.folder || dragDoor === undefined ? (
